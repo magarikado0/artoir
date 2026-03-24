@@ -20,7 +20,10 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
 
   body {
     background: var(--paper);
@@ -703,6 +706,13 @@
 
   /* responsive */
   @media (max-width: 768px) {
+    .site-header { align-items: flex-start; }
+    .header-group {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.35rem;
+      text-align: right;
+    }
     .hero { grid-template-columns: 1fr; min-height: auto; display: flex; flex-direction: column; }
     .hero-right { display: block; order: -1; height: auto; flex-shrink: 0; }
     .hero-right::after { background: linear-gradient(to top, var(--paper) 0%, transparent 30%); }
@@ -771,7 +781,7 @@
   </div>
   <div>
     <div class="about-text">
-      <p>ご来場いただけなかった方にも、この空間と作品をお届けしたい。</p>
+      <p>ご来場が難しかった方にも展覧会の雰囲気をお伝えできるよう、作品と会場の様子をまとめています。気になる作品があれば、どうぞゆっくりご覧ください。</p>
     </div>
   </div>
 </section>
