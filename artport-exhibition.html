@@ -660,6 +660,7 @@
   .share-bar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 1rem;
     padding: 1.5rem var(--gap);
     background: var(--paper-dark);
@@ -671,19 +672,6 @@
     font-size: 0.75rem;
     color: var(--mist);
     letter-spacing: 0.15em;
-  }
-
-  .share-url {
-    flex: 1;
-    min-width: 0;
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 0.85rem;
-    color: var(--ink-light);
-    background: rgba(26,22,18,0.05);
-    border: 1px solid rgba(26,22,18,0.1);
-    padding: 0.5rem 1rem;
-    letter-spacing: 0.05em;
-    overflow-wrap: anywhere;
   }
 
   .share-copy {
@@ -725,7 +713,6 @@
     .organizer { grid-template-columns: 1fr; }
     .exhibition-row { grid-template-columns: 4rem 1fr auto; }
     .share-bar { flex-wrap: wrap; }
-    .share-url { width: 100%; }
   }
 </style>
 </head>
@@ -769,7 +756,6 @@
 <!-- SHARE BAR -->
 <div class="share-bar">
   <span class="share-label">SHARE</span>
-  <div class="share-url">https://magarikado0.github.io/artport-app-demo/</div>
   <button class="share-copy" onclick="copyLink(this)">COPY LINK</button>
 </div>
 
@@ -781,7 +767,7 @@
   </div>
   <div>
     <div class="about-text">
-      <p>ご来場が難しかった方にも展覧会の雰囲気をお伝えできるよう、作品と会場の様子をまとめています。気になる作品があれば、どうぞゆっくりご覧ください。</p>
+      <p>ご来場が難しかった方にも展覧会の雰囲気をお伝えできるよう、作品をまとめています。気になる作品があれば、どうぞゆっくりご覧ください。</p>
     </div>
   </div>
 </section>
