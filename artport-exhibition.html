@@ -383,22 +383,7 @@
     object-fit: contain;
     display: block;
   }
-
-  .gallery-thumb-kanji {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Shippori Mincho', serif;
-    font-size: 5rem;
-    color: var(--paper);
-    opacity: 0;
-    transition: opacity 0.4s;
-    background: rgba(26,22,18,0);
-  }
-
+  
   .gallery-item:hover .gallery-thumb-kanji {
     opacity: 0.6;
     background: rgba(26,22,18,0.25);
@@ -415,12 +400,6 @@
     font-family: 'Shippori Mincho', serif;
     font-size: 0.95rem;
     color: var(--ink);
-  }
-
-  .gallery-artist {
-    font-size: 0.7rem;
-    color: var(--mist);
-    letter-spacing: 0.1em;
   }
 
   /* ── OTHER EXHIBITIONS ── */
@@ -668,13 +647,6 @@
     margin-bottom: 0.5rem;
   }
 
-  .modal-artist {
-    font-size: 0.8rem;
-    color: var(--mist);
-    letter-spacing: 0.1em;
-    margin-bottom: 1.5rem;
-  }
-
   .modal-desc {
     font-size: 0.85rem;
     line-height: 2;
@@ -700,6 +672,7 @@
 
   .share-url {
     flex: 1;
+    min-width: 0;
     font-family: 'Cormorant Garamond', serif;
     font-size: 0.85rem;
     color: var(--ink-light);
@@ -707,6 +680,7 @@
     border: 1px solid rgba(26,22,18,0.1);
     padding: 0.5rem 1rem;
     letter-spacing: 0.05em;
+    overflow-wrap: anywhere;
   }
 
   .share-copy {
@@ -730,8 +704,9 @@
   /* responsive */
   @media (max-width: 768px) {
     .hero { grid-template-columns: 1fr; min-height: auto; display: flex; flex-direction: column; }
-    .hero-right { display: block; order: -1; height: 55vw; flex-shrink: 0; }
+    .hero-right { display: block; order: -1; height: auto; flex-shrink: 0; }
     .hero-right::after { background: linear-gradient(to top, var(--paper) 0%, transparent 30%); }
+    .hero-main-artwork { width: 100%; height: auto; object-fit: contain; }
     .hero-left { padding-top: var(--gap); justify-content: flex-start; }
     .about { grid-template-columns: 1fr; }
     .gallery-grid { grid-template-columns: repeat(2, 1fr); }
@@ -739,6 +714,8 @@
     .gallery-item:nth-child(5) { margin-top: 0; }
     .organizer { grid-template-columns: 1fr; }
     .exhibition-row { grid-template-columns: 4rem 1fr auto; }
+    .share-bar { flex-wrap: wrap; }
+    .share-url { width: 100%; }
   }
 </style>
 </head>
@@ -768,10 +745,6 @@
         <span class="hero-meta-label">会場</span>
         <span>京都市京セラ美術館</span>
       </div>
-      <div class="hero-meta-item">
-        <span class="hero-meta-label">出品</span>
-        <span>部員12名・作品36点</span>
-      </div>
     </div>
   </div>
   <div class="hero-right">
@@ -798,8 +771,6 @@
   </div>
   <div>
     <div class="about-text">
-      <p>「冬樟」とは、冬の寒さに耐え抜く樟の木のことを指す。この展覧会では、書道部の部員たちが、冬の季節をテーマに、それぞれの感性と技術を込めて作品を制作した。</p>
-      <p>今年の作品は、古典的な技法と現代的な表現を融合させ、冬の厳しさと美しさを表現している。</p>
       <p>ご来場いただけなかった方にも、この空間と作品をお届けしたい。</p>
     </div>
   </div>
@@ -809,64 +780,52 @@
 <section>
   <div class="section-label">Works</div>
   <div class="gallery-grid">
-    <div class="gallery-item" onclick="openModal('縁','田中 蒼天','縁 / En','縦180cm×横90cmの大判に、楷書から行書へと流れるように書き上げた作品。「縁」の一字に、出会いと別れのすべてを込めた。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369218/eljkjufndewcmj04vtyb.jpg')">
+    <div class="gallery-item" onclick="openModal('空海「風信帖」','東寺の宝物館で期間限定公開されていた風信帖を見に行ったので、せっかくなら書いてみようと思いました。半切二行でよく見る作品ですが、今回は一行にして風信帖の生前とした美しさを際立てたいと思い、この構成にしました','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369218/eljkjufndewcmj04vtyb.jpg')">
       <div class="gallery-thumb">
-        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369218/eljkjufndewcmj04vtyb.jpg" alt="縁">
-        <div class="gallery-thumb-kanji">縁</div>
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369218/eljkjufndewcmj04vtyb.jpg" alt="空海「風信帖」">
       </div>
       <div class="gallery-info">
-        <div class="gallery-title">縁</div>
-        <div class="gallery-artist">田中 蒼天</div>
+        <div class="gallery-title">空海「風信帖」</div>
       </div>
     </div>
-    <div class="gallery-item" onclick="openModal('無','佐藤 柚葉','無 / Mu','禅の概念「無」を、余白と墨の濃淡だけで表現した。紙の白さそのものが意味を持つ。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1774031303/nhprzlrkekjkrbqu0uiq.jpg')">
+    <div class="gallery-item" onclick="openModal('無 / Mu','禅の概念「無」を、余白と墨の濃淡だけで表現した。紙の白さそのものが意味を持つ。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1774031303/nhprzlrkekjkrbqu0uiq.jpg')">
       <div class="gallery-thumb">
         <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1774031303/nhprzlrkekjkrbqu0uiq.jpg" alt="無">
-        <div class="gallery-thumb-kanji">無</div>
       </div>
       <div class="gallery-info">
         <div class="gallery-title">無</div>
-        <div class="gallery-artist">佐藤 柚葉</div>
       </div>
     </div>
-    <div class="gallery-item" onclick="openModal('流','山本 颯','流 / Ryu','草書の流れを極限まで速め、一筆で書き下した「流」。墨の飛沫すら計算に入れた即興的な一作。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369156/v7fekknzzynde19nvrvb.jpg')">
+    <div class="gallery-item" onclick="openModal('秋のマンテカトゥーラⅡ','二行目が一行目より高めに書き始めてしまったので、行頭山なり構成ということにしてみたら、新感覚作品となりました。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369156/v7fekknzzynde19nvrvb.jpg')">
       <div class="gallery-thumb">
-        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369156/v7fekknzzynde19nvrvb.jpg" alt="流">
-        <div class="gallery-thumb-kanji">流</div>
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369156/v7fekknzzynde19nvrvb.jpg" alt="秋のマンテカトゥーラⅡ">
       </div>
       <div class="gallery-info">
-        <div class="gallery-title">流</div>
-        <div class="gallery-artist">山本 颯</div>
+        <div class="gallery-title">秋のマンテカトゥーラⅡ</div>
       </div>
     </div>
-    <div class="gallery-item" onclick="openModal('静','伊藤 朱音','静 / Sei','隷書体で書かれた「静」。水平の横画が水面のように連なり、見る者に静寂を与える。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368908/gbb5jiknzhvs3qnhjnii.jpg')">
+    <div class="gallery-item" onclick="openModal('高適詩','遂に念願の二八縦三行に突入しました。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368908/gbb5jiknzhvs3qnhjnii.jpg')">
       <div class="gallery-thumb">
-        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368908/gbb5jiknzhvs3qnhjnii.jpg" alt="静">
-        <div class="gallery-thumb-kanji">静</div>
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368908/gbb5jiknzhvs3qnhjnii.jpg" alt="高適詩">
       </div>
       <div class="gallery-info">
-        <div class="gallery-title">静</div>
-        <div class="gallery-artist">伊藤 朱音</div>
+        <div class="gallery-title">高適詩</div>
       </div>
     </div>
-    <div class="gallery-item" onclick="openModal('光','中村 蓮','光 / Hikari','金泥を一部に用いた実験的な作品。墨の黒と金の輝きが、陰と陽を表す。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368170/xkwggddok8p6zy3grjky.jpg')">
+    <div class="gallery-item" onclick="openModal('徐貴詩','半切二聯を書きたかったのです。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368170/xkwggddok8p6zy3grjky.jpg')">
       <div class="gallery-thumb">
-        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368170/xkwggddok8p6zy3grjky.jpg" alt="光">
-        <div class="gallery-thumb-kanji">光</div>
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368170/xkwggddok8p6zy3grjky.jpg" alt="徐貴詩">
       </div>
       <div class="gallery-info">
-        <div class="gallery-title">光</div>
-        <div class="gallery-artist">中村 蓮</div>
+        <div class="gallery-title">徐貴詩</div>
       </div>
     </div>
-    <div class="gallery-item" onclick="openModal('道','渡辺 碧','道 / Michi','篆書と現代書の融合。太古の文字が持つ形の美しさと、現代的な構成感覚を共存させた。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369597/t7csexew9ucsevrrh5za.jpg')">
+    <div class="gallery-item" onclick="openModal('徽宗「穠芳詩帖」','篆書と現代書の融合。太古の文字が持つ形の美しさと、現代的な構成感覚を共存させた。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369597/t7csexew9ucsevrrh5za.jpg')">
       <div class="gallery-thumb">
-        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369597/t7csexew9ucsevrrh5za.jpg" alt="道">
-        <div class="gallery-thumb-kanji">道</div>
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369597/t7csexew9ucsevrrh5za.jpg" alt="徽宗「穠芳詩帖」">
       </div>
       <div class="gallery-info">
-        <div class="gallery-title">道</div>
-        <div class="gallery-artist">渡辺 碧</div>
+        <div class="gallery-title">徽宗「穠芳詩帖」</div>
       </div>
     </div>
   </div>
@@ -910,7 +869,7 @@
     <div class="organizer-name">京都大学書道部</div>
     <div class="organizer-name-en">Kyoto University Calligraphy Club</div>
     <div class="organizer-desc">
-      1952年創部。京都大学の学生が書の古典を学びながら、現代的な表現を探求する部活動。年に複数回の展覧会を開催し、学内外への書の普及に努めている。
+      京都大学の学生が書の古典を学びながら、現代的な表現を探求する部活動。年に複数回の展覧会を開催している。。
     </div>
     <div class="social-links">
       <a class="social-link" href="#">Instagram</a>
@@ -938,7 +897,6 @@
       <img id="modal-artwork-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:block;">
     </div>
     <div class="modal-title" id="modal-title"></div>
-    <div class="modal-artist" id="modal-artist"></div>
     <div class="modal-desc" id="modal-desc"></div>
   </div>
 </div>
@@ -954,9 +912,8 @@
   document.querySelectorAll('.gallery-item').forEach(el => observer.observe(el));
 
   // modal
-  function openModal(kanji, artist, title, desc, imgSrc) {
+  function openModal(title, desc, imgSrc) {
     document.getElementById('modal-title').textContent = title;
-    document.getElementById('modal-artist').textContent = artist;
     document.getElementById('modal-desc').textContent = desc;
     const img = document.getElementById('modal-artwork-img');
     img.src = imgSrc || '';
