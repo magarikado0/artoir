@@ -374,10 +374,11 @@
     inset: 0;
     background: rgba(26,22,18,0);
     transition: background 0.4s;
+    z-index: 1;
   }
 
   .gallery-item:hover .gallery-thumb::after {
-    background: rgba(26,22,18,0.04);
+    background: rgba(26,22,18,0.08);
   }
 
   .gallery-thumb img {
@@ -386,23 +387,34 @@
     object-fit: contain;
     display: block;
   }
-  
-  .gallery-item:hover .gallery-thumb-kanji {
-    opacity: 0.6;
-    background: rgba(26,22,18,0.25);
+
+  .gallery-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem 1rem 1rem;
+    background: linear-gradient(to top, rgba(26,22,18,0.72) 0%, transparent 100%);
+    z-index: 2;
+    transition: opacity 0.3s;
   }
 
-  .gallery-info {
-    padding: 1rem 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
+  .gallery-num {
+    display: block;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: rgba(245,240,232,0.45);
+    margin-bottom: 0.3rem;
   }
 
   .gallery-title {
     font-family: 'Shippori Mincho', serif;
-    font-size: 0.95rem;
-    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--paper);
+    letter-spacing: 0.06em;
+    line-height: 1.4;
   }
 
   /* ── OTHER EXHIBITIONS ── */
@@ -779,49 +791,55 @@
     <div class="gallery-item" onclick="openModal('空海「風信帖」','東寺の宝物館で期間限定公開されていた風信帖を見に行ったので、せっかくなら書いてみようと思いました。半切二行でよく見る作品ですが、今回は一行にして風信帖の生前とした美しさを際立てたいと思い、この構成にしました','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369218/eljkjufndewcmj04vtyb.jpg')">
       <div class="gallery-thumb">
         <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369218/eljkjufndewcmj04vtyb.jpg" alt="空海「風信帖」">
-      </div>
-      <div class="gallery-info">
-        <div class="gallery-title">空海「風信帖」</div>
+        <div class="gallery-caption">
+          <span class="gallery-num">01</span>
+          <div class="gallery-title">空海「風信帖」</div>
+        </div>
       </div>
     </div>
     <div class="gallery-item" onclick="openModal('生徒歌','5番までありますが中高生活で歌うことはありません','https://res.cloudinary.com/dtanz2zfw/image/upload/v1774031303/nhprzlrkekjkrbqu0uiq.jpg')">
       <div class="gallery-thumb">
         <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1774031303/nhprzlrkekjkrbqu0uiq.jpg" alt="生徒歌">
-      </div>
-      <div class="gallery-info">
-        <div class="gallery-title">生徒歌</div>
+        <div class="gallery-caption">
+          <span class="gallery-num">02</span>
+          <div class="gallery-title">生徒歌</div>
+        </div>
       </div>
     </div>
     <div class="gallery-item" onclick="openModal('秋のマンテカトゥーラⅡ','二行目が一行目より高めに書き始めてしまったので、行頭山なり構成ということにしてみたら、新感覚作品となりました。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369156/v7fekknzzynde19nvrvb.jpg')">
       <div class="gallery-thumb">
         <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369156/v7fekknzzynde19nvrvb.jpg" alt="秋のマンテカトゥーラⅡ">
-      </div>
-      <div class="gallery-info">
-        <div class="gallery-title">秋のマンテカトゥーラⅡ</div>
+        <div class="gallery-caption">
+          <span class="gallery-num">03</span>
+          <div class="gallery-title">秋のマンテカトゥーラⅡ</div>
+        </div>
       </div>
     </div>
     <div class="gallery-item" onclick="openModal('高適詩','遂に念願の二八縦三行に突入しました。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368908/gbb5jiknzhvs3qnhjnii.jpg')">
       <div class="gallery-thumb">
         <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368908/gbb5jiknzhvs3qnhjnii.jpg" alt="高適詩">
-      </div>
-      <div class="gallery-info">
-        <div class="gallery-title">高適詩</div>
+        <div class="gallery-caption">
+          <span class="gallery-num">04</span>
+          <div class="gallery-title">高適詩</div>
+        </div>
       </div>
     </div>
     <div class="gallery-item" onclick="openModal('徐貴詩','半切二聯を書きたかったのです。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368170/xkwggddok8p6zy3grjky.jpg')">
       <div class="gallery-thumb">
         <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368170/xkwggddok8p6zy3grjky.jpg" alt="徐貴詩">
-      </div>
-      <div class="gallery-info">
-        <div class="gallery-title">徐貴詩</div>
+        <div class="gallery-caption">
+          <span class="gallery-num">05</span>
+          <div class="gallery-title">徐貴詩</div>
+        </div>
       </div>
     </div>
     <div class="gallery-item" onclick="openModal('徽宗「穠芳詩帖」','篆書と現代書の融合。太古の文字が持つ形の美しさと、現代的な構成感覚を共存させた。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369597/t7csexew9ucsevrrh5za.jpg')">
       <div class="gallery-thumb">
         <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369597/t7csexew9ucsevrrh5za.jpg" alt="徽宗「穠芳詩帖」">
-      </div>
-      <div class="gallery-info">
-        <div class="gallery-title">徽宗「穠芳詩帖」</div>
+        <div class="gallery-caption">
+          <span class="gallery-num">06</span>
+          <div class="gallery-title">徽宗「穠芳詩帖」</div>
+        </div>
       </div>
     </div>
   </div>
