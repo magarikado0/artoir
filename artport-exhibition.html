@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>墨縁展 2025 — 京都大学書道部</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Shippori+Mincho:wght@400;600&family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1612;
+    --ink-light: #3d3530;
+    --paper: #f5f0e8;
+    --paper-dark: #ede6d6;
+    --vermillion: #c0392b;
+    --gold: #b8932a;
+    --mist: #9a9088;
+    --gap: clamp(2rem, 5vw, 5rem);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Serif JP', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem var(--gap);
+    border-bottom: 1px solid rgba(26,22,18,0.12);
+    position: sticky;
+    top: 0;
+    background: rgba(245,240,232,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+  }
+
+  .site-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .site-logo span {
+    color: var(--vermillion);
+  }
+
+  .header-group {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--mist);
+  }
+
+  .header-group a {
+    color: var(--mist);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .header-group a:hover { color: var(--ink); }
+
+  /* ── HERO ── */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 88vh;
+    position: relative;
+  }
+
+  .hero-left {
+    padding: var(--gap);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: calc(var(--gap) * 2);
+    position: relative;
+    z-index: 2;
+  }
+
+  .exhibition-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .exhibition-label::before {
+    content: '';
+    display: block;
+    width: 2rem;
+    height: 1px;
+    background: var(--vermillion);
+  }
+
+  .hero-title-jp {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(4rem, 8vw, 8rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+    writing-mode: initial;
+  }
+
+  .hero-title-en {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    color: var(--mist);
+    letter-spacing: 0.05em;
+    margin-bottom: 3rem;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--ink-light);
+    letter-spacing: 0.05em;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .hero-meta-label {
+    color: var(--mist);
+    min-width: 3rem;
+  }
+
+  .hero-right {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-right::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, var(--paper) 0%, transparent 20%);
+    z-index: 2;
+  }
+
+  .hero-main-artwork {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* placeholder artwork */
+  .artwork-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--paper-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .artwork-placeholder::before {
+    content: '墨';
+    font-family: 'Shippori Mincho', serif;
+    font-size: 40vw;
+    color: rgba(26,22,18,0.06);
+    position: absolute;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .artwork-placeholder-inner {
+    width: 60%;
+    aspect-ratio: 3/4;
+    background: rgba(26,22,18,0.07);
+    border: 1px solid rgba(26,22,18,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .artwork-placeholder-kanji {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 5rem;
+    color: var(--ink);
+    opacity: 0.5;
+  }
+
+  .artwork-placeholder-name {
+    font-size: 0.7rem;
+    color: var(--mist);
+    letter-spacing: 0.15em;
+  }
+
+  /* ── SCROLL INDICATOR ── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: var(--gap);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--mist);
+    z-index: 3;
+  }
+
+  .scroll-line {
+    width: 2rem;
+    height: 1px;
+    background: var(--mist);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--ink);
+    animation: slide 2s ease-in-out infinite;
+  }
+
+  @keyframes slide {
+    0% { left: -100%; }
+    50% { left: 0%; }
+    100% { left: 100%; }
+  }
+
+  /* ── SECTION SHARED ── */
+  section {
+    padding: calc(var(--gap) * 2) var(--gap);
+  }
+
+  .section-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(26,22,18,0.1);
+  }
+
+  /* ── ABOUT ── */
+  .about {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--gap);
+    border-top: 1px solid rgba(26,22,18,0.1);
+  }
+
+  .about-heading {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0.05em;
+  }
+
+  .about-text {
+    font-size: 0.9rem;
+    line-height: 2;
+    color: var(--ink-light);
+    max-width: 60ch;
+    padding-top: 0.5rem;
+  }
+
+  .about-text p + p {
+    margin-top: 1.5rem;
+  }
+
+  /* ── GALLERY ── */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .gallery-item {
+    cursor: pointer;
+    group: true;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .gallery-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .gallery-item:nth-child(1) { transition-delay: 0s; }
+  .gallery-item:nth-child(2) { transition-delay: 0.1s; }
+  .gallery-item:nth-child(3) { transition-delay: 0.2s; }
+  .gallery-item:nth-child(4) { transition-delay: 0.3s; }
+  .gallery-item:nth-child(5) { transition-delay: 0.4s; }
+  .gallery-item:nth-child(6) { transition-delay: 0.5s; }
+
+  .gallery-item:nth-child(2) {
+    margin-top: 3rem;
+  }
+
+  .gallery-item:nth-child(5) {
+    margin-top: -2rem;
+  }
+
+  .gallery-thumb {
+    aspect-ratio: 3/4;
+    background: var(--paper-dark);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(26,22,18,0.08);
+  }
+
+  .gallery-thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(26,22,18,0);
+    transition: background 0.4s;
+  }
+
+  .gallery-item:hover .gallery-thumb::after {
+    background: rgba(26,22,18,0.04);
+  }
+
+  .gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .gallery-thumb-kanji {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 5rem;
+    color: var(--paper);
+    opacity: 0;
+    transition: opacity 0.4s;
+    background: rgba(26,22,18,0);
+  }
+
+  .gallery-item:hover .gallery-thumb-kanji {
+    opacity: 0.6;
+    background: rgba(26,22,18,0.25);
+  }
+
+  .gallery-info {
+    padding: 1rem 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .gallery-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+
+  .gallery-artist {
+    font-size: 0.7rem;
+    color: var(--mist);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── OTHER EXHIBITIONS ── */
+  .other-exhibitions {
+    background: var(--ink);
+    color: var(--paper);
+    margin: 0 calc(-1 * var(--gap));
+    padding: calc(var(--gap) * 2) var(--gap);
+  }
+
+  .other-exhibitions .section-label {
+    color: var(--gold);
+  }
+
+  .other-exhibitions .section-label::after {
+    background: rgba(245,240,232,0.1);
+  }
+
+  .exhibitions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .exhibition-row {
+    display: grid;
+    grid-template-columns: 6rem 1fr auto;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(245,240,232,0.08);
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .exhibition-row:hover {
+    background: rgba(245,240,232,0.03);
+  }
+
+  .exhibition-row:first-child {
+    border-top: 1px solid rgba(245,240,232,0.08);
+  }
+
+  .exhibition-year {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: rgba(245,240,232,0.2);
+  }
+
+  .exhibition-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+  }
+
+  .exhibition-name-sub {
+    font-size: 0.7rem;
+    color: rgba(245,240,232,0.4);
+    letter-spacing: 0.1em;
+    margin-top: 0.25rem;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .exhibition-arrow {
+    font-size: 1rem;
+    color: rgba(245,240,232,0.3);
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  .exhibition-row:hover .exhibition-arrow {
+    transform: translateX(4px);
+    color: var(--gold);
+  }
+
+  .current-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--vermillion);
+    color: var(--vermillion);
+    margin-left: 0.75rem;
+    vertical-align: middle;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  /* ── ORGANIZER ── */
+  .organizer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+    align-items: start;
+    border-top: 1px solid rgba(26,22,18,0.1);
+  }
+
+  .organizer-name {
+    font-family: 'Shippori Mincho', serif;
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
+
+  .organizer-name-en {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--mist);
+    letter-spacing: 0.1em;
+  }
+
+  .organizer-desc {
+    font-size: 0.85rem;
+    line-height: 1.9;
+    color: var(--ink-light);
+    margin-top: 2rem;
+  }
+
+  .social-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .social-link {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--mist);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s, color 0.2s;
+    padding-bottom: 0.1rem;
+  }
+
+  .social-link:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .artport-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--mist);
+    border: 1px solid rgba(26,22,18,0.15);
+    padding: 0.5rem 1rem;
+    margin-top: 3rem;
+  }
+
+  .artport-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--vermillion);
+  }
+
+  /* ── FOOTER ── */
+  .site-footer {
+    padding: 2rem var(--gap);
+    border-top: 1px solid rgba(26,22,18,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    color: var(--mist);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,22,18,0.85);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--paper);
+    max-width: 700px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 3rem;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+  }
+
+  .modal-overlay.open .modal {
+    transform: translateY(0);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--mist);
+    line-height: 1;
+  }
+
+  .modal-artwork {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: var(--paper-dark);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 8rem;
+    color: var(--ink);
+    opacity: 0.2;
+    max-height: 50vh;
+  }
+
+  .modal-artwork-kanji {
+    opacity: 0.3;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 6rem;
+  }
+
+  .modal-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-artist {
+    font-size: 0.8rem;
+    color: var(--mist);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-desc {
+    font-size: 0.85rem;
+    line-height: 2;
+    color: var(--ink-light);
+  }
+
+  /* ── SHARE BUTTON ── */
+  .share-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem var(--gap);
+    background: var(--paper-dark);
+    border-top: 1px solid rgba(26,22,18,0.08);
+    border-bottom: 1px solid rgba(26,22,18,0.08);
+  }
+
+  .share-label {
+    font-size: 0.75rem;
+    color: var(--mist);
+    letter-spacing: 0.15em;
+  }
+
+  .share-url {
+    flex: 1;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    background: rgba(26,22,18,0.05);
+    border: 1px solid rgba(26,22,18,0.1);
+    padding: 0.5rem 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .share-copy {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--paper);
+    background: var(--ink);
+    border: none;
+    padding: 0.5rem 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .share-copy:hover { background: var(--ink-light); }
+
+  .share-copy.copied {
+    background: var(--vermillion);
+  }
+
+  /* responsive */
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding-top: calc(var(--gap) * 2); justify-content: flex-start; }
+    .about { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .gallery-item:nth-child(2) { margin-top: 0; }
+    .gallery-item:nth-child(5) { margin-top: 0; }
+    .organizer { grid-template-columns: 1fr; }
+    .exhibition-row { grid-template-columns: 4rem 1fr auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <a class="site-logo" href="#">art<span>port</span></a>
+  <div class="header-group">
+    <a href="#">京都大学書道部</a>
+    <a href="#">すべての展覧会</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="exhibition-label">Exhibition 2026</div>
+    <h1 class="hero-title-jp">冬樟展</h1>
+    <div class="hero-title-en">Boku-en — Bonds of Ink</div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">会期</span>
+        <span>2026年3月7日（金）— 3月8日（月）</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">会場</span>
+        <span>京都市京セラ美術館</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-label">出品</span>
+        <span>部員12名・作品36点</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img class="hero-main-artwork" src="https://res.cloudinary.com/dtanz2zfw/image/upload/c_limit,w_1200,h_1200,q_85,f_auto/v1772371666/uconnbxozemhsmg12epg.jpg" alt="代表作品">
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    SCROLL
+  </div>
+</div>
+
+<!-- SHARE BAR -->
+<div class="share-bar">
+  <span class="share-label">SHARE</span>
+  <div class="share-url">artport.jp/kyodai-shodo/bokuenten-2026</div>
+  <button class="share-copy" onclick="copyLink(this)">COPY LINK</button>
+</div>
+
+<!-- ABOUT -->
+<section class="about">
+  <div>
+    <div class="section-label">About</div>
+    <h2 class="about-heading">展覧会について</h2>
+  </div>
+  <div>
+    <div class="about-text">
+      <p>「冬樟」とは、冬の寒さに耐え抜く樟の木のことを指す。この展覧会では、書道部の部員たちが、冬の季節をテーマに、それぞれの感性と技術を込めて作品を制作した。</p>
+      <p>今年の作品は、古典的な技法と現代的な表現を融合させ、冬の厳しさと美しさを表現している。</p>
+      <p>ご来場いただけなかった方にも、この空間と作品をお届けしたい。</p>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section>
+  <div class="section-label">Works</div>
+  <div class="gallery-grid">
+    <div class="gallery-item" onclick="openModal('縁','田中 蒼天','縁 / En','縦180cm×横90cmの大判に、楷書から行書へと流れるように書き上げた作品。「縁」の一字に、出会いと別れのすべてを込めた。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369218/eljkjufndewcmj04vtyb.jpg')">
+      <div class="gallery-thumb">
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369218/eljkjufndewcmj04vtyb.jpg" alt="縁">
+        <div class="gallery-thumb-kanji">縁</div>
+      </div>
+      <div class="gallery-info">
+        <div class="gallery-title">縁</div>
+        <div class="gallery-artist">田中 蒼天</div>
+      </div>
+    </div>
+    <div class="gallery-item" onclick="openModal('無','佐藤 柚葉','無 / Mu','禅の概念「無」を、余白と墨の濃淡だけで表現した。紙の白さそのものが意味を持つ。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1774031303/nhprzlrkekjkrbqu0uiq.jpg')">
+      <div class="gallery-thumb">
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1774031303/nhprzlrkekjkrbqu0uiq.jpg" alt="無">
+        <div class="gallery-thumb-kanji">無</div>
+      </div>
+      <div class="gallery-info">
+        <div class="gallery-title">無</div>
+        <div class="gallery-artist">佐藤 柚葉</div>
+      </div>
+    </div>
+    <div class="gallery-item" onclick="openModal('流','山本 颯','流 / Ryu','草書の流れを極限まで速め、一筆で書き下した「流」。墨の飛沫すら計算に入れた即興的な一作。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369156/v7fekknzzynde19nvrvb.jpg')">
+      <div class="gallery-thumb">
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369156/v7fekknzzynde19nvrvb.jpg" alt="流">
+        <div class="gallery-thumb-kanji">流</div>
+      </div>
+      <div class="gallery-info">
+        <div class="gallery-title">流</div>
+        <div class="gallery-artist">山本 颯</div>
+      </div>
+    </div>
+    <div class="gallery-item" onclick="openModal('静','伊藤 朱音','静 / Sei','隷書体で書かれた「静」。水平の横画が水面のように連なり、見る者に静寂を与える。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368908/gbb5jiknzhvs3qnhjnii.jpg')">
+      <div class="gallery-thumb">
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368908/gbb5jiknzhvs3qnhjnii.jpg" alt="静">
+        <div class="gallery-thumb-kanji">静</div>
+      </div>
+      <div class="gallery-info">
+        <div class="gallery-title">静</div>
+        <div class="gallery-artist">伊藤 朱音</div>
+      </div>
+    </div>
+    <div class="gallery-item" onclick="openModal('光','中村 蓮','光 / Hikari','金泥を一部に用いた実験的な作品。墨の黒と金の輝きが、陰と陽を表す。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368170/xkwggddok8p6zy3grjky.jpg')">
+      <div class="gallery-thumb">
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772368170/xkwggddok8p6zy3grjky.jpg" alt="光">
+        <div class="gallery-thumb-kanji">光</div>
+      </div>
+      <div class="gallery-info">
+        <div class="gallery-title">光</div>
+        <div class="gallery-artist">中村 蓮</div>
+      </div>
+    </div>
+    <div class="gallery-item" onclick="openModal('道','渡辺 碧','道 / Michi','篆書と現代書の融合。太古の文字が持つ形の美しさと、現代的な構成感覚を共存させた。','https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369597/t7csexew9ucsevrrh5za.jpg')">
+      <div class="gallery-thumb">
+        <img src="https://res.cloudinary.com/dtanz2zfw/image/upload/v1772369597/t7csexew9ucsevrrh5za.jpg" alt="道">
+        <div class="gallery-thumb-kanji">道</div>
+      </div>
+      <div class="gallery-info">
+        <div class="gallery-title">道</div>
+        <div class="gallery-artist">渡辺 碧</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OTHER EXHIBITIONS -->
+<section class="other-exhibitions">
+  <div class="section-label">All Exhibitions</div>
+  <div class="exhibitions-list">
+    <a class="exhibition-row" href="#">
+      <div class="exhibition-year">2025</div>
+      <div>
+        <div class="exhibition-name">墨縁展 <span class="current-badge">NOW</span></div>
+        <div class="exhibition-name-sub">Boku-en — Bonds of Ink · 36 works</div>
+      </div>
+      <div class="exhibition-arrow">→</div>
+    </a>
+    <a class="exhibition-row" href="#">
+      <div class="exhibition-year">2024</div>
+      <div>
+        <div class="exhibition-name">余白展</div>
+        <div class="exhibition-name-sub">Yohaku — The Space Between · 28 works</div>
+      </div>
+      <div class="exhibition-arrow">→</div>
+    </a>
+    <a class="exhibition-row" href="#">
+      <div class="exhibition-year">2024</div>
+      <div>
+        <div class="exhibition-name">春の書展</div>
+        <div class="exhibition-name-sub">Haru no Sho · 22 works</div>
+      </div>
+      <div class="exhibition-arrow">→</div>
+    </a>
+    <a class="exhibition-row" href="#">
+      <div class="exhibition-year">2023</div>
+      <div>
+        <div class="exhibition-name">筆跡展</div>
+        <div class="exhibition-name-sub">Hisseki — Traces of the Brush · 31 works</div>
+      </div>
+      <div class="exhibition-arrow">→</div>
+    </a>
+    <a class="exhibition-row" href="#">
+      <div class="exhibition-year">2023</div>
+      <div>
+        <div class="exhibition-name">一字一会</div>
+        <div class="exhibition-name-sub">Ichiji Ichie — One Character, One Meeting · 18 works</div>
+      </div>
+      <div class="exhibition-arrow">→</div>
+    </a>
+  </div>
+</section>
+
+<!-- ORGANIZER -->
+<section class="organizer">
+  <div>
+    <div class="section-label">Organizer</div>
+    <div class="organizer-name">京都大学書道部</div>
+    <div class="organizer-name-en">Kyoto University Calligraphy Club</div>
+    <div class="organizer-desc">
+      1952年創部。京都大学の学生が書の古典を学びながら、現代的な表現を探求する部活動。年に複数回の展覧会を開催し、学内外への書の普及に努めている。
+    </div>
+    <div class="social-links">
+      <a class="social-link" href="#">Instagram</a>
+      <a class="social-link" href="#">X (Twitter)</a>
+      <a class="social-link" href="#">公式サイト</a>
+    </div>
+    <div class="artport-badge">
+      <div class="artport-badge-dot"></div>
+      artport にて公開中
+    </div>
+  </div>
+  <div style="padding-top: 4rem;">
+    <div style="aspect-ratio: 4/3; background: var(--paper-dark); border: 1px solid rgba(26,22,18,0.08); display: flex; align-items: center; justify-content: center; font-family: 'Shippori Mincho', serif; font-size: 6rem; color: var(--ink); opacity: 0.08; user-select: none;">書</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div>© 2025 Artport</div>
+  <div>展覧会のポータル</div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-artwork" id="modal-artwork">
+      <img id="modal-artwork-img" src="" alt="" style="width:100%;height:100%;object-fit:contain;display:block;">
+    </div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-artist" id="modal-artist"></div>
+    <div class="modal-desc" id="modal-desc"></div>
+  </div>
+</div>
+
+<script>
+  // gallery reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.gallery-item').forEach(el => observer.observe(el));
+
+  // modal
+  function openModal(kanji, artist, title, desc, imgSrc) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-artist').textContent = artist;
+    document.getElementById('modal-desc').textContent = desc;
+    const img = document.getElementById('modal-artwork-img');
+    img.src = imgSrc || '';
+    img.alt = title;
+    document.getElementById('modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeModalOnOverlay(e) {
+    if (e.target === document.getElementById('modal')) closeModal();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // copy link
+  function copyLink(btn) {
+    navigator.clipboard.writeText('https://artport.jp/kyodai-shodo/bokuenten-2025').catch(() => {});
+    btn.textContent = 'COPIED';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'COPY LINK';
+      btn.classList.remove('copied');
+    }, 2000);
+  }
+</script>
+</body>
+</html>
