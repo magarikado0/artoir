@@ -45,7 +45,6 @@ artport.jp/{org-slug}/exhibition/{exhibition-slug}
 
 ## 後回し
 
-- ログイン・認証
 - 有料プラン
 - 閲覧数アナリティクス
 - Artportロゴ非表示オプション
