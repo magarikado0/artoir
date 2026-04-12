@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { IS_DEV, demoOrg, demoExhibitions, demoArtworks } from '../lib/demoData'
 import Header from '../components/Header'
 import ArtworkModal from '../components/ArtworkModal'
 
@@ -31,6 +32,15 @@ export default function ExhibitionPage() {
 
   useEffect(() => {
     async function load() {
+      if (IS_DEV) {
+        const exh = demoExhibitions.find((e) => e.slug === exhibitionSlug) ?? demoExhibitions[0]
+        setOrg(demoOrg)
+        setExhibition(exh)
+        setArtworks(demoArtworks.filter((a) => a.exhibition_id === exh.id))
+        setAllExhibitions(demoExhibitions)
+        setLoading(false)
+        return
+      }
       if (!supabase) return setLoading(false)
       try {
         const { data: orgData } = await supabase

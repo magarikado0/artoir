@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
+import HomePage from './pages/HomePage'
+import AllExhibitionsPage from './pages/AllExhibitionsPage'
 import OrgPage from './pages/OrgPage'
 import ExhibitionPage from './pages/ExhibitionPage'
 import LoginPage from './pages/LoginPage'
@@ -27,7 +29,9 @@ export default function App() {
     <AuthContext.Provider value={{ session }}>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/exhibitions" element={<AllExhibitionsPage />} />
           <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
           <Route path="/:orgSlug" element={<OrgPage />} />
         </Routes>

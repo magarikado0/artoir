@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { IS_DEV, demoOrg, demoExhibitions } from '../lib/demoData'
 import Header from '../components/Header'
 
 const GAP = 'clamp(2rem, 5vw, 5rem)'
@@ -134,6 +135,12 @@ export default function OrgPage() {
 
   useEffect(() => {
     async function load() {
+      if (IS_DEV) {
+        setOrg(demoOrg)
+        setExhibitions(demoExhibitions)
+        setLoading(false)
+        return
+      }
       if (!supabase) return setLoading(false)
       try {
         const { data: orgData } = await supabase
