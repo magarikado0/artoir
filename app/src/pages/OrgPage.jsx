@@ -134,23 +134,29 @@ export default function OrgPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: orgData } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('slug', orgSlug)
-        .single()
+      if (!supabase) return setLoading(false)
+      try {
+        const { data: orgData } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('slug', orgSlug)
+          .single()
 
-      if (!orgData) return setLoading(false)
-      setOrg(orgData)
+        if (!orgData) return setLoading(false)
+        setOrg(orgData)
 
-      const { data: exhData } = await supabase
-        .from('exhibitions')
-        .select('*')
-        .eq('org_id', orgData.id)
-        .order('start_date', { ascending: false })
+        const { data: exhData } = await supabase
+          .from('exhibitions')
+          .select('*')
+          .eq('org_id', orgData.id)
+          .order('start_date', { ascending: false })
 
-      setExhibitions(exhData || [])
-      setLoading(false)
+        setExhibitions(exhData || [])
+      } catch {
+        // Supabase unavailable — show empty state
+      } finally {
+        setLoading(false)
+      }
     }
     load()
   }, [orgSlug])

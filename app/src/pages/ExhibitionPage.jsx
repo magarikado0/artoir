@@ -31,31 +31,37 @@ export default function ExhibitionPage() {
 
   useEffect(() => {
     async function load() {
-      const { data: orgData } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('slug', orgSlug)
-        .single()
-      if (!orgData) return setLoading(false)
-      setOrg(orgData)
+      if (!supabase) return setLoading(false)
+      try {
+        const { data: orgData } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('slug', orgSlug)
+          .single()
+        if (!orgData) return setLoading(false)
+        setOrg(orgData)
 
-      const { data: exhData } = await supabase
-        .from('exhibitions')
-        .select('*')
-        .eq('slug', exhibitionSlug)
-        .eq('org_id', orgData.id)
-        .single()
-      if (!exhData) return setLoading(false)
-      setExhibition(exhData)
+        const { data: exhData } = await supabase
+          .from('exhibitions')
+          .select('*')
+          .eq('slug', exhibitionSlug)
+          .eq('org_id', orgData.id)
+          .single()
+        if (!exhData) return setLoading(false)
+        setExhibition(exhData)
 
-      const [{ data: awData }, { data: allExhData }] = await Promise.all([
-        supabase.from('artworks').select('*').eq('exhibition_id', exhData.id).order('order'),
-        supabase.from('exhibitions').select('*').eq('org_id', orgData.id).order('start_date', { ascending: false }),
-      ])
+        const [{ data: awData }, { data: allExhData }] = await Promise.all([
+          supabase.from('artworks').select('*').eq('exhibition_id', exhData.id).order('order'),
+          supabase.from('exhibitions').select('*').eq('org_id', orgData.id).order('start_date', { ascending: false }),
+        ])
 
-      setArtworks(awData || [])
-      setAllExhibitions(allExhData || [])
-      setLoading(false)
+        setArtworks(awData || [])
+        setAllExhibitions(allExhData || [])
+      } catch {
+        // Supabase unavailable — show empty state
+      } finally {
+        setLoading(false)
+      }
     }
     load()
   }, [orgSlug, exhibitionSlug])
