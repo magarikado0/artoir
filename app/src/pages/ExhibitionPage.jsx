@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { IS_DEV, demoOrg, demoExhibitions, demoArtworks } from '../lib/demoData'
+import { IS_DEV, demoOrgs, demoExhibitions, demoArtworks } from '../lib/demoData'
 import Header from '../components/Header'
 import ArtworkModal from '../components/ArtworkModal'
 
@@ -34,10 +34,11 @@ export default function ExhibitionPage() {
     async function load() {
       if (IS_DEV) {
         const exh = demoExhibitions.find((e) => e.slug === exhibitionSlug) ?? demoExhibitions[0]
-        setOrg(demoOrg)
+        const org = demoOrgs.find((o) => o.id === exh.org_id) ?? demoOrgs[0]
+        setOrg(org)
         setExhibition(exh)
         setArtworks(demoArtworks.filter((a) => a.exhibition_id === exh.id))
-        setAllExhibitions(demoExhibitions)
+        setAllExhibitions(demoExhibitions.filter((e) => e.org_id === org.id))
         setLoading(false)
         return
       }
@@ -440,9 +441,11 @@ export default function ExhibitionPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GAP, alignItems: 'start' }} className="organizer-grid-responsive">
             <div>
-              <div style={{ fontFamily: 'Shippori Mincho, serif', fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: 400, marginBottom: '0.5rem', color: '#1a1612' }}>
-                {org.name}
-              </div>
+              <Link to={`/${orgSlug}`} style={{ textDecoration: 'none' }}>
+                <div style={{ fontFamily: 'Shippori Mincho, serif', fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: 400, marginBottom: '0.5rem', color: '#1a1612' }}>
+                  {org.name}
+                </div>
+              </Link>
               {org.description && (
                 <div style={{ fontSize: '0.85rem', lineHeight: 1.9, color: '#3d3530', marginTop: '1.5rem' }}>
                   {org.description}
@@ -465,20 +468,34 @@ export default function ExhibitionPage() {
                   </a>
                 )}
               </div>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontFamily: 'Cormorant Garamond, serif',
-                fontSize: '0.7rem',
-                letterSpacing: '0.2em',
-                color: '#9a9088',
-                border: '1px solid rgba(26,22,18,0.15)',
-                padding: '0.5rem 1rem',
-                marginTop: '3rem',
-              }}>
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#c0392b', display: 'block' }} />
-                artport にて公開中
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '3rem', flexWrap: 'wrap' }}>
+                <Link to={`/${orgSlug}`} style={{
+                  fontFamily: 'Cormorant Garamond, serif',
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                  color: '#1a1612',
+                  border: '1px solid rgba(26,22,18,0.3)',
+                  padding: '0.5rem 1.2rem',
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                }}>
+                  団体ページへ →
+                </Link>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontFamily: 'Cormorant Garamond, serif',
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.2em',
+                  color: '#9a9088',
+                  border: '1px solid rgba(26,22,18,0.15)',
+                  padding: '0.5rem 1rem',
+                }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#c0392b', display: 'block' }} />
+                  artport にて公開中
+                </div>
               </div>
             </div>
           </div>

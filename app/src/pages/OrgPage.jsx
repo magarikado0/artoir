@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { IS_DEV, demoOrg, demoExhibitions } from '../lib/demoData'
+import { IS_DEV, demoOrgs, demoExhibitions } from '../lib/demoData'
 import Header from '../components/Header'
 
 const GAP = 'clamp(2rem, 5vw, 5rem)'
@@ -39,10 +39,10 @@ const S = {
   },
   orgName: {
     fontFamily: 'Shippori Mincho, serif',
-    fontSize: 'clamp(2.5rem, 6vw, 5rem)',
+    fontSize: 'clamp(3.5rem, 10vw, 9rem)',
     fontWeight: 400,
-    lineHeight: 1.1,
-    letterSpacing: '-0.01em',
+    lineHeight: 1.0,
+    letterSpacing: '-0.02em',
     color: '#1a1612',
     marginBottom: '1.5rem',
   },
@@ -136,8 +136,9 @@ export default function OrgPage() {
   useEffect(() => {
     async function load() {
       if (IS_DEV) {
-        setOrg(demoOrg)
-        setExhibitions(demoExhibitions)
+        const org = demoOrgs.find((o) => o.slug === orgSlug) ?? demoOrgs[0]
+        setOrg(org)
+        setExhibitions(demoExhibitions.filter((e) => e.org_id === org.id))
         setLoading(false)
         return
       }

@@ -38,13 +38,13 @@ const S = {
 export default function Header({ orgName, orgSlug }) {
   return (
     <header style={S.header}>
-      <Link to={orgSlug ? `/${orgSlug}` : '/'} style={S.logo}>
+      <Link to="/" style={S.logo}>
         art<span style={{ color: '#c0392b' }}>port</span>
       </Link>
       {orgSlug && (
         <div style={S.nav}>
           <Link to={`/${orgSlug}`} style={S.navLink}>{orgName}</Link>
-          <Link to={`/${orgSlug}`} style={S.navLink}>すべての展覧会</Link>
+          <Link to="/exhibitions" style={S.navLink}>すべての展覧会</Link>
         </div>
       )}
     </header>

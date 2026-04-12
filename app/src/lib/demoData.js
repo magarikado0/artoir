@@ -2,16 +2,25 @@ export const IS_DEV = import.meta.env.VITE_IS_DEV === 'true'
 
 export const demoOrg = {
   id: 'demo-org-1',
-  slug: 'demo',
+  slug: 'aozora-art',
   name: '青空アート部',
   description:
     '大学の有志で集まったアート集団です。絵画・写真・立体など様々なジャンルの作品を年に数回展示しています。',
-  sns_links: {
-    instagram: 'https://instagram.com',
-    x: 'https://x.com',
-  },
+  sns_links: { instagram: 'https://instagram.com', x: 'https://x.com' },
   homepage_url: 'https://example.com',
 }
+
+export const demoOrgs = [
+  demoOrg,
+  {
+    id: 'demo-org-2',
+    slug: 'mono-lab',
+    name: 'mono lab.',
+    description: '写真と映像を軸に活動するクリエイター集団。',
+    sns_links: { instagram: 'https://instagram.com' },
+    homepage_url: '',
+  },
+]
 
 export const demoExhibitions = [
   {
@@ -23,7 +32,7 @@ export const demoExhibitions = [
     start_date: '2025-04-01',
     end_date: '2025-04-20',
     location: '東京都渋谷区 ギャラリー白',
-    bg_color: '#f0ede4',
+    bg_color: '#f5f0e8',
   },
   {
     id: 'demo-exh-2',
@@ -34,7 +43,51 @@ export const demoExhibitions = [
     start_date: '2024-12-10',
     end_date: '2024-12-22',
     location: '東京都新宿区 ギャラリー銀',
-    bg_color: '#e8e8e6',
+    bg_color: '#f5f0e8',
+  },
+  {
+    id: 'demo-exh-3',
+    org_id: 'demo-org-1',
+    slug: 'summer-2024',
+    title: '熱量と影',
+    description: '夏の強い光と影のコントラストをテーマにした作品展。',
+    start_date: '2024-07-15',
+    end_date: '2024-07-28',
+    location: '東京都港区 スペースAO',
+    bg_color: '#f5f0e8',
+  },
+  {
+    id: 'demo-exh-4',
+    org_id: 'demo-org-1',
+    slug: 'autumn-2023',
+    title: '重なりと透明',
+    description: '素材の重なりと透明感を追求した、インスタレーション中心の展覧会。',
+    start_date: '2023-11-03',
+    end_date: '2023-11-12',
+    location: '東京都台東区 3331 Arts Chiyoda',
+    bg_color: '#f5f0e8',
+  },
+  {
+    id: 'demo-exh-5',
+    org_id: 'demo-org-2',
+    slug: 'distance-2025',
+    title: '距離と眼差し',
+    description: '日常の中にある「遠さ」を写真で切り取った作品展。',
+    start_date: '2025-03-08',
+    end_date: '2025-03-16',
+    location: '東京都中央区 VOID+',
+    bg_color: '#f5f0e8',
+  },
+  {
+    id: 'demo-exh-6',
+    org_id: 'demo-org-2',
+    slug: 'loop-2024',
+    title: 'LOOP',
+    description: '映像と音が循環するインスタレーション。',
+    start_date: '2024-09-20',
+    end_date: '2024-09-29',
+    location: '東京都渋谷区 WWW',
+    bg_color: '#f5f0e8',
   },
 ]
 
@@ -62,5 +115,21 @@ export const demoArtworks = [
     description: '雨上がりの石畳を水彩で表現。',
     image_url: '',
     order: 3,
+  },
+  {
+    id: 'demo-aw-4',
+    exhibition_id: 'demo-exh-2',
+    title: '白と沈黙',
+    description: '白い空間に置かれた小さな石。余白が語る静けさ。',
+    image_url: '',
+    order: 1,
+  },
+  {
+    id: 'demo-aw-5',
+    exhibition_id: 'demo-exh-2',
+    title: '夜の輪郭',
+    description: '鉛筆のみで描いた夜景シリーズ。',
+    image_url: '',
+    order: 2,
   },
 ]
