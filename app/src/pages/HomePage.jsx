@@ -52,21 +52,19 @@ export default function HomePage() {
         </p>
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          {IS_DEV && (
-            <Link to="/exhibitions" style={{
-              fontFamily: 'Cormorant Garamond, serif',
-              fontSize: '0.8rem',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              color: '#f5f0e8',
-              background: '#1a1612',
-              padding: '0.75rem 1.8rem',
-              textDecoration: 'none',
-              display: 'inline-block',
-            }}>
-              展覧会一覧を見る
-            </Link>
-          )}
+          <Link to="/exhibitions" style={{
+            fontFamily: 'Cormorant Garamond, serif',
+            fontSize: '0.8rem',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: '#f5f0e8',
+            background: '#1a1612',
+            padding: '0.75rem 1.8rem',
+            textDecoration: 'none',
+            display: 'inline-block',
+          }}>
+            展覧会一覧を見る
+          </Link>
           <Link to="/login" style={{
             fontFamily: 'Cormorant Garamond, serif',
             fontSize: '0.8rem',
