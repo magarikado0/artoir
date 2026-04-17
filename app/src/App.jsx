@@ -6,6 +6,7 @@ import AllExhibitionsPage from './pages/AllExhibitionsPage'
 import OrgPage from './pages/OrgPage'
 import ExhibitionPage from './pages/ExhibitionPage'
 import LoginPage from './pages/LoginPage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 export const AuthContext = createContext(null)
 export const useAuth = () => useContext(AuthContext)
@@ -31,6 +32,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          {/* 管理画面は認証必須 — 例: /admin */}
+          {/* <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} /> */}
           <Route path="/exhibitions" element={<AllExhibitionsPage />} />
           <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
           <Route path="/:orgSlug" element={<OrgPage />} />

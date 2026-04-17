@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../App'
+import { supabase } from '../lib/supabase'
 
 const S = {
   header: {
@@ -36,17 +38,42 @@ const S = {
 }
 
 export default function Header({ orgName, orgSlug }) {
+  const { session } = useAuth()
+  const navigate = useNavigate()
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    navigate('/')
+  }
+
   return (
     <header style={S.header}>
       <Link to="/" style={S.logo}>
         art<span style={{ color: '#c0392b' }}>port</span>
       </Link>
-      {orgSlug && (
-        <div style={S.nav}>
-          <Link to={`/${orgSlug}`} style={S.navLink}>{orgName}</Link>
-          <Link to="/exhibitions" style={S.navLink}>すべての展覧会</Link>
-        </div>
-      )}
+      <div style={S.nav}>
+        {orgSlug && (
+          <>
+            <Link to={`/${orgSlug}`} style={S.navLink}>{orgName}</Link>
+            <Link to="/exhibitions" style={S.navLink}>すべての展覧会</Link>
+          </>
+        )}
+        {session ? (
+          <button onClick={handleLogout} style={{
+            ...S.navLink,
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '0.75rem',
+            letterSpacing: '0.1em',
+            padding: 0,
+          }}>
+            ログアウト
+          </button>
+        ) : (
+          <Link to="/login" style={S.navLink}>ログイン</Link>
+        )}
+      </div>
     </header>
   )
 }
