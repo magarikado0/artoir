@@ -67,18 +67,6 @@ export default function HomePage() {
               展覧会一覧を見る
             </Link>
           )}
-          <Link to="/login" style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: '0.8rem',
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-            color: '#9a9088',
-            textDecoration: 'none',
-            borderBottom: '1px solid rgba(154,144,136,0.4)',
-            paddingBottom: '0.1rem',
-          }}>
-            ログイン →
-          </Link>
         </div>
       </section>
 
