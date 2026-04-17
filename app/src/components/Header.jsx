@@ -44,7 +44,7 @@ export default function Header({ orgName, orgSlug }) {
       {orgSlug && (
         <div style={S.nav}>
           <Link to={`/${orgSlug}`} style={S.navLink}>{orgName}</Link>
-          <Link to="/exhibitions" style={S.navLink}>すべての展覧会</Link>
+          <Link to="/" style={S.navLink}>すべての展覧会</Link>
         </div>
       )}
     </header>
