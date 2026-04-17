@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import AllExhibitionsPage from './pages/AllExhibitionsPage'
@@ -30,7 +30,6 @@ export default function App() {
         <Routes>
           <Route path="/" element={<AllExhibitionsPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/exhibitions" element={<Navigate to="/" replace />} />
           <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
           <Route path="/:orgSlug" element={<OrgPage />} />
         </Routes>
