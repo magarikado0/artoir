@@ -14,76 +14,197 @@ export default function AdminPage() {
   const [artworks, setArtworks] = useState([])
   const [form, setForm] = useState({ title: '', description: '', image_url: '' })
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
+    let isCancelled = false
     async function load() {
-      const { data: orgData } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('slug', orgSlug)
-        .single()
-      if (!orgData) return
-      setOrg(orgData)
+      setLoading(true)
+      setLoadError('')
+      if (!supabase) {
+        if (isCancelled) return
+        setOrg(null)
+        setExhibitions([])
+        setSelectedExhId('')
+        setArtworks([])
+        setLoadError('Supabase が未設定です')
+        setLoading(false)
+        return
+      }
 
-      const { data: exhData } = await supabase
-        .from('exhibitions')
-        .select('*')
-        .eq('org_id', orgData.id)
-        .order('start_date', { ascending: false })
-      setExhibitions(exhData || [])
-      if (exhData?.length > 0) setSelectedExhId(exhData[0].id)
+      try {
+        const { data: orgData, error: orgError } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('slug', orgSlug)
+          .single()
+        if (orgError) throw orgError
+
+        if (!orgData) {
+          if (isCancelled) return
+          setOrg(null)
+          setExhibitions([])
+          setSelectedExhId('')
+          setArtworks([])
+          return
+        }
+
+        if (isCancelled) return
+        setOrg(orgData)
+
+        const { data: exhData, error: exhError } = await supabase
+          .from('exhibitions')
+          .select('*')
+          .eq('org_id', orgData.id)
+          .order('start_date', { ascending: false })
+        if (exhError) throw exhError
+        if (isCancelled) return
+        setExhibitions(exhData || [])
+        if (exhData?.length > 0) {
+          setSelectedExhId(exhData[0].id)
+        } else {
+          setSelectedExhId('')
+          setArtworks([])
+        }
+      } catch (error) {
+        if (isCancelled) return
+        setOrg(null)
+        setExhibitions([])
+        setSelectedExhId('')
+        setArtworks([])
+        setLoadError(error?.message || 'データの取得に失敗しました')
+      } finally {
+        if (!isCancelled) setLoading(false)
+      }
     }
     load()
+    return () => {
+      isCancelled = true
+    }
   }, [orgSlug])
 
   useEffect(() => {
-    if (!selectedExhId) return
-    supabase
-      .from('artworks')
-      .select('*')
-      .eq('exhibition_id', selectedExhId)
-      .order('order')
-      .then(({ data }) => setArtworks(data || []))
+    if (!selectedExhId) {
+      setArtworks([])
+      return
+    }
+
+    let isCancelled = false
+    async function loadArtworks() {
+      if (!supabase) {
+        if (!isCancelled) {
+          setArtworks([])
+          setLoadError('Supabase が未設定です')
+        }
+        return
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('artworks')
+          .select('*')
+          .eq('exhibition_id', selectedExhId)
+          .order('order')
+
+        if (error) throw error
+        if (isCancelled) return
+        setArtworks(data || [])
+        setLoadError('')
+        setMessage('')
+      } catch (error) {
+        if (isCancelled) return
+        setArtworks([])
+        setMessage('作品一覧の取得に失敗しました: ' + (error?.message || '不明なエラー'))
+      }
+    }
+
+    loadArtworks()
+    return () => {
+      isCancelled = true
+    }
   }, [selectedExhId])
 
   async function handleSubmit(e) {
     e.preventDefault()
     if (!selectedExhId) return
+    if (!supabase) {
+      setMessage('Supabase が未設定です')
+      return
+    }
+
     setSaving(true)
     setMessage('')
-    const { error } = await supabase.from('artworks').insert({
-      exhibition_id: selectedExhId,
-      title: form.title,
-      description: form.description,
-      image_url: form.image_url,
-      order: artworks.length,
-    })
-    if (error) {
-      setMessage('保存に失敗しました: ' + error.message)
-    } else {
-      setMessage('保存しました')
-      setForm({ title: '', description: '', image_url: '' })
-      const { data } = await supabase
-        .from('artworks')
-        .select('*')
-        .eq('exhibition_id', selectedExhId)
-        .order('order')
-      setArtworks(data || [])
+    try {
+      const maxOrder = artworks.reduce((max, artwork) => {
+        const current = Number(artwork.order)
+        return Number.isFinite(current) ? Math.max(max, current) : max
+      }, -1)
+
+      const { error } = await supabase.from('artworks').insert({
+        exhibition_id: selectedExhId,
+        title: form.title,
+        description: form.description,
+        image_url: form.image_url,
+        order: maxOrder + 1,
+      })
+      if (error) {
+        setMessage('保存に失敗しました: ' + error.message)
+      } else {
+        setMessage('保存しました')
+        setForm({ title: '', description: '', image_url: '' })
+        const { data, error: fetchError } = await supabase
+          .from('artworks')
+          .select('*')
+          .eq('exhibition_id', selectedExhId)
+          .order('order')
+
+        if (fetchError) {
+          setMessage('保存後の再取得に失敗しました: ' + fetchError.message)
+        } else {
+          setArtworks(data || [])
+        }
+      }
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   async function handleDelete(id) {
-    await supabase.from('artworks').delete().eq('id', id)
+    if (!supabase) {
+      setMessage('Supabase が未設定です')
+      return
+    }
+
+    setMessage('')
+    const { error } = await supabase.from('artworks').delete().eq('id', id)
+    if (error) {
+      setMessage('削除に失敗しました: ' + error.message)
+      return
+    }
+
     setArtworks((prev) => prev.filter((a) => a.id !== id))
+    setMessage('削除しました')
   }
+
+  if (loading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f0e8' }}>
+      <span style={{ fontFamily: 'Cormorant Garamond, serif', color: '#9a9088', letterSpacing: '0.2em', fontSize: '0.8rem' }}>...</span>
+    </div>
+  )
 
   return (
     <div style={{ background: '#f5f0e8', minHeight: '100vh' }}>
       <Header orgName={org?.name} orgSlug={orgSlug} />
 
       <div style={{ padding: `calc(${GAP} * 1.5) ${GAP}`, maxWidth: '800px' }}>
+        {loadError && (
+          <p style={{ fontSize: '0.85rem', color: '#c0392b', marginBottom: '1rem' }}>{loadError}</p>
+        )}
+        {!org && !loadError && (
+          <p style={{ fontSize: '0.85rem', color: '#9a9088', marginBottom: '1rem' }}>団体が見つかりません</p>
+        )}
         <div style={{
           fontFamily: 'Cormorant Garamond, serif',
           fontSize: '0.65rem',
@@ -151,7 +272,7 @@ export default function AdminPage() {
               rows={3}
               style={{ padding: '0.75rem 1rem', border: '1px solid rgba(26,22,18,0.2)', background: 'transparent', fontFamily: 'Noto Serif JP, serif', fontSize: '0.9rem', outline: 'none', color: '#1a1612', resize: 'vertical' }}
             />
-            <ImageUploader onUploaded={(url) => setForm({ ...form, image_url: url })} />
+            <ImageUploader onUploaded={(url) => setForm((prev) => ({ ...prev, image_url: url }))} />
             {form.image_url && (
               <img src={form.image_url} alt="preview" style={{ maxHeight: '200px', objectFit: 'contain', border: '1px solid rgba(26,22,18,0.1)' }} />
             )}

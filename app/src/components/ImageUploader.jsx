@@ -2,15 +2,23 @@ import { useRef, useState } from 'react'
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const MAX_FILE_SIZE = 10 * 1024 * 1024
 
 export default function ImageUploader({ onUploaded }) {
   const [dragging, setDragging] = useState(false)
   const [progress, setProgress] = useState(null) // 0-100 or null
   const [error, setError] = useState('')
   const inputRef = useRef(null)
+  const hasUploadConfig = Boolean(CLOUD_NAME && UPLOAD_PRESET)
 
   async function upload(file) {
     if (!file) return
+    if (!hasUploadConfig) {
+      const configError = 'Cloudinary の設定が不足しています（VITE_CLOUDINARY_CLOUD_NAME / VITE_CLOUDINARY_UPLOAD_PRESET）'
+      setError(configError)
+      return Promise.reject(new Error(configError))
+    }
     setError('')
     setProgress(0)
 
@@ -35,49 +43,77 @@ export default function ImageUploader({ onUploaded }) {
         } else {
           setProgress(null)
           setError('アップロードに失敗しました')
-          reject()
+          reject(new Error('Upload failed'))
         }
       }
 
       xhr.onerror = () => {
         setProgress(null)
         setError('ネットワークエラーが発生しました')
-        reject()
+        reject(new Error('Network error'))
       }
 
       xhr.send(formData)
     })
   }
 
-  function handleFiles(files) {
+  async function handleFiles(files) {
     const file = files[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) {
+    if (!ALLOWED_TYPES.includes(file.type)) {
       setError('画像ファイルを選択してください')
       return
     }
-    upload(file)
+    if (file.size > MAX_FILE_SIZE) {
+      setError('画像サイズは10MB以下にしてください')
+      return
+    }
+    try {
+      await upload(file)
+    } catch {
+      // upload() updates error state. catch here to avoid unhandled rejection.
+    }
   }
 
   return (
     <div>
       <div
-        onClick={() => inputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        aria-disabled={!hasUploadConfig}
+        onClick={() => {
+          if (!hasUploadConfig) {
+            setError('Cloudinary の設定が不足しています')
+            return
+          }
+          inputRef.current?.click()
+        }}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && hasUploadConfig) {
+            e.preventDefault()
+            inputRef.current?.click()
+          }
+        }}
         onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
         onDragLeave={() => setDragging(false)}
         onDrop={(e) => {
           e.preventDefault()
           setDragging(false)
-          handleFiles(e.dataTransfer.files)
+          if (!hasUploadConfig) {
+            setError('Cloudinary の設定が不足しています')
+            return
+          }
+          void handleFiles(e.dataTransfer.files)
         }}
         style={{
           border: `2px dashed ${dragging ? '#1a1612' : 'rgba(26,22,18,0.2)'}`,
           borderRadius: '2px',
           padding: '2rem',
           textAlign: 'center',
-          cursor: 'pointer',
+          cursor: hasUploadConfig ? 'pointer' : 'not-allowed',
           background: dragging ? 'rgba(26,22,18,0.04)' : 'transparent',
           transition: 'all 0.2s',
+          opacity: hasUploadConfig ? 1 : 0.65,
         }}
       >
         {progress !== null ? (
@@ -112,12 +148,17 @@ export default function ImageUploader({ onUploaded }) {
       {error && (
         <p style={{ fontSize: '0.75rem', color: '#c0392b', marginTop: '0.5rem' }}>{error}</p>
       )}
+      {!hasUploadConfig && (
+        <p style={{ fontSize: '0.75rem', color: '#9a9088', marginTop: '0.5rem' }}>
+          Cloudinary 側の unsigned preset はアップロード先フォルダ・形式・サイズ制限を必ず設定してください。
+        </p>
+      )}
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
         style={{ display: 'none' }}
-        onChange={(e) => handleFiles(e.target.files)}
+        onChange={(e) => { void handleFiles(e.target.files) }}
       />
     </div>
   )

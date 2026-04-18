@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const S = {
@@ -64,16 +64,24 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from
+    ? `${location.state.from.pathname || ''}${location.state.from.search || ''}${location.state.from.hash || ''}`
+    : '/'
 
   async function handleSubmit(e) {
     e.preventDefault()
+    if (!supabase) {
+      setError('Supabase が未設定です')
+      return
+    }
     setLoading(true)
     setError('')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(error.message)
     } else {
-      navigate('/')
+      navigate(from, { replace: true })
     }
     setLoading(false)
   }
