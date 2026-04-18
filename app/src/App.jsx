@@ -6,7 +6,6 @@ import AllExhibitionsPage from './pages/AllExhibitionsPage'
 import OrgPage from './pages/OrgPage'
 import ExhibitionPage from './pages/ExhibitionPage'
 import LoginPage from './pages/LoginPage'
-import ProtectedRoute from './components/ProtectedRoute'
 
 export const AuthContext = createContext(null)
 export const useAuth = () => useContext(AuthContext)
