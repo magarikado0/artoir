@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import Header from '../components/Header'
-import { IS_DEV } from '../lib/demoData'
 
 const GAP = 'clamp(2rem, 5vw, 5rem)'
 
