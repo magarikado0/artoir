@@ -97,21 +97,20 @@ export default function AllExhibitionsPage() {
           {rows.length} 件
         </p>
         <div style={{ marginTop: '1.5rem' }}>
-          <Link
-            to="/login"
+          <span
             style={{
               fontFamily: 'Cormorant Garamond, serif',
               fontSize: '0.8rem',
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
-              color: '#1a1612',
-              textDecoration: 'none',
-              borderBottom: '1px solid rgba(26,22,18,0.3)',
+              color: 'rgba(26,22,18,0.3)',
+              borderBottom: '1px solid rgba(26,22,18,0.15)',
               paddingBottom: '0.1rem',
+              cursor: 'default',
             }}
           >
             自分の展覧会を作る →
-          </Link>
+          </span>
         </div>
       </section>
 

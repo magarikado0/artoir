@@ -58,16 +58,51 @@ const S = {
   },
 }
 
+const S_extra = {
+  tabs: {
+    display: 'flex',
+    marginBottom: '1.5rem',
+    borderBottom: '1px solid rgba(26,22,18,0.15)',
+  },
+  tab: (active) => ({
+    flex: 1,
+    padding: '0.6rem',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: active ? '2px solid #1a1612' : '2px solid transparent',
+    cursor: 'pointer',
+    fontFamily: 'Cormorant Garamond, serif',
+    fontSize: '0.85rem',
+    letterSpacing: '0.15em',
+    color: active ? '#1a1612' : 'rgba(26,22,18,0.45)',
+    marginBottom: '-1px',
+  }),
+  success: {
+    color: '#27ae60',
+    fontSize: '0.85rem',
+    textAlign: 'center',
+    padding: '0.5rem 0',
+  },
+}
+
 export default function LoginPage() {
+  const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from
     ? `${location.state.from.pathname || ''}${location.state.from.search || ''}${location.state.from.hash || ''}`
     : '/'
+
+  function switchMode(next) {
+    setMode(next)
+    setError('')
+    setSuccess('')
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -77,12 +112,26 @@ export default function LoginPage() {
     }
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
+    setSuccess('')
+
+    if (mode === 'login') {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        setError(error.message)
+      } else {
+        navigate(from, { replace: true })
+      }
     } else {
-      navigate(from, { replace: true })
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) {
+        setError(error.message)
+      } else {
+        setSuccess('確認メールを送信しました。メールをご確認ください。')
+        setEmail('')
+        setPassword('')
+      }
     }
+
     setLoading(false)
   }
 
@@ -93,6 +142,14 @@ export default function LoginPage() {
           <span style={S.logo}>
             art<span style={{ color: '#c0392b' }}>port</span>
           </span>
+        </div>
+        <div style={S_extra.tabs}>
+          <button style={S_extra.tab(mode === 'login')} onClick={() => switchMode('login')} type="button">
+            ログイン
+          </button>
+          <button style={S_extra.tab(mode === 'signup')} onClick={() => switchMode('signup')} type="button">
+            アカウント作成
+          </button>
         </div>
         <form onSubmit={handleSubmit} style={S.form}>
           <input
@@ -107,13 +164,14 @@ export default function LoginPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="パスワード"
+            placeholder={mode === 'signup' ? 'パスワード（6文字以上）' : 'パスワード'}
             required
             style={S.input}
           />
           {error && <p style={S.error}>{error}</p>}
+          {success && <p style={S_extra.success}>{success}</p>}
           <button type="submit" disabled={loading} style={S.button}>
-            {loading ? '...' : 'ログイン'}
+            {loading ? '...' : mode === 'login' ? 'ログイン' : 'アカウントを作成'}
           </button>
         </form>
       </div>
