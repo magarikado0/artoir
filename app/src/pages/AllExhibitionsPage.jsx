@@ -96,6 +96,23 @@ export default function AllExhibitionsPage() {
         <p style={{ fontSize: '0.85rem', color: '#9a9088', letterSpacing: '0.05em' }}>
           {rows.length} 件
         </p>
+        <div style={{ marginTop: '1.5rem' }}>
+          <Link
+            to="/login"
+            style={{
+              fontFamily: 'Cormorant Garamond, serif',
+              fontSize: '0.8rem',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: '#1a1612',
+              textDecoration: 'none',
+              borderBottom: '1px solid rgba(26,22,18,0.3)',
+              paddingBottom: '0.1rem',
+            }}
+          >
+            自分の展覧会を作る →
+          </Link>
+        </div>
       </section>
 
       {/* List */}
