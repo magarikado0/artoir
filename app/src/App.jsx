@@ -1,25 +1,30 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
+import { AuthContext } from './lib/auth'
 import AllExhibitionsPage from './pages/AllExhibitionsPage'
 import OrgPage from './pages/OrgPage'
 import ExhibitionPage from './pages/ExhibitionPage'
 import LoginPage from './pages/LoginPage'
-
-export const AuthContext = createContext(null)
-export const useAuth = () => useContext(AuthContext)
+import AdminPage from './pages/AdminPage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 export default function App() {
-  const [session, setSession] = useState(undefined)
+  const [session, setSession] = useState(() => (supabase ? undefined : null))
 
   useEffect(() => {
-    if (!supabase) {
-      setSession(null)
-      return
-    }
-    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    if (!supabase) return undefined
+    let isMounted = true
+    supabase.auth.getSession().then(({ data }) => {
+      if (isMounted) setSession(data.session)
+    }).catch(() => {
+      if (isMounted) setSession(null)
+    })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setSession(s))
-    return () => subscription.unsubscribe()
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   if (session === undefined) return null
@@ -31,6 +36,7 @@ export default function App() {
           <Route path="/" element={<AllExhibitionsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
+          <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
           <Route path="/:orgSlug" element={<OrgPage />} />
         </Routes>
       </BrowserRouter>
