@@ -6,6 +6,8 @@ import AllExhibitionsPage from './pages/AllExhibitionsPage'
 import OrgPage from './pages/OrgPage'
 import ExhibitionPage from './pages/ExhibitionPage'
 import LoginPage from './pages/LoginPage'
+import AdminPage from './pages/AdminPage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 export const AuthContext = createContext(null)
 export const useAuth = () => useContext(AuthContext)
@@ -33,6 +35,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/exhibitions" element={<AllExhibitionsPage />} />
           <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
+          <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
           <Route path="/:orgSlug" element={<OrgPage />} />
         </Routes>
       </BrowserRouter>
