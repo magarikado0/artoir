@@ -53,7 +53,18 @@ export default function Header({ orgName, orgSlug }) {
   const navigate = useNavigate()
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    if (!supabase) {
+      window.alert('現在ログアウト機能を利用できません。')
+      return
+    }
+
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      window.alert('ログアウトに失敗しました。時間をおいて再度お試しください。')
+      return
+    }
+
     navigate('/')
   }
 
