@@ -70,7 +70,7 @@ export default function LoginPage() {
   const location = useLocation()
   const from = location.state?.from
     ? `${location.state.from.pathname || ''}${location.state.from.search || ''}${location.state.from.hash || ''}`
-    : '/'
+    : '/account'
 
   async function handleSubmit(e) {
     e.preventDefault()

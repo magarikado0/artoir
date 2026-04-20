@@ -15,6 +15,7 @@ import DashExhibitions from './pages/dashboard/DashExhibitions'
 import DashExhibitionEdit from './pages/dashboard/DashExhibitionEdit'
 import DashArtworks from './pages/dashboard/DashArtworks'
 import AccountPage from './pages/AccountPage'
+import AccountSetup from './pages/AccountSetup'
 
 export default function App() {
   const [session, setSession] = useState(() => (supabase ? undefined : null))
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/orgs" element={<OrgsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/account/setup" element={<AccountSetup />} />
           <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
           <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
           <Route path="/:orgSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
