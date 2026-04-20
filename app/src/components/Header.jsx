@@ -1,91 +1,101 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
+import { T } from '../lib/tokens'
+import { useIsDesktop } from '../lib/useIsDesktop'
 
-const S = {
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '1.5rem clamp(2rem, 5vw, 5rem)',
-    borderBottom: '1px solid rgba(26,22,18,0.12)',
-    position: 'sticky',
-    top: 0,
-    background: 'rgba(245,240,232,0.92)',
-    backdropFilter: 'blur(8px)',
-    zIndex: 100,
-  },
-  logo: {
-    fontFamily: 'Cormorant Garamond, serif',
-    fontSize: '1.5rem',
-    fontWeight: 300,
-    letterSpacing: '0.15em',
-    color: '#1a1612',
-    textDecoration: 'none',
-  },
-  nav: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2rem',
-    fontSize: '0.75rem',
-    letterSpacing: '0.1em',
-    color: '#9a9088',
-  },
-  navLink: {
-    color: '#9a9088',
-    textDecoration: 'none',
-  },
-  loginBtn: {
-    fontFamily: 'Cormorant Garamond, serif',
-    fontSize: '0.75rem',
-    letterSpacing: '0.15em',
-    color: '#1a1612',
-    background: 'transparent',
-    border: '1px solid rgba(26,22,18,0.3)',
-    padding: '0.4rem 1rem',
-    cursor: 'pointer',
-    textDecoration: 'none',
-  },
-}
+const TABS = [
+  { key: 'top',  label: '展覧会一覧', path: '/' },
+  { key: 'orgs', label: '団体一覧',   path: '/orgs' },
+]
 
-export default function Header({ orgName, orgSlug }) {
+export default function Header({ activeTab }) {
+  const isDesktop = useIsDesktop()
   const { session } = useAuth()
   const navigate = useNavigate()
 
   async function handleLogout() {
-    if (!supabase) {
-      window.alert('現在ログアウト機能を利用できません。')
-      return
-    }
-
-    const { error } = await supabase.auth.signOut()
-
-    if (error) {
-      window.alert('ログアウトに失敗しました。時間をおいて再度お試しください。')
-      return
-    }
-
+    if (!supabase) return
+    await supabase.auth.signOut()
     navigate('/')
   }
 
-  return (
-    <header style={S.header}>
-      <Link to="/" style={S.logo}>
-        art<span style={{ color: '#c0392b' }}>port</span>
-      </Link>
-      <div style={S.nav}>
-        {orgSlug && (
-          <>
-            <Link to={`/${orgSlug}`} style={S.navLink}>{orgName}</Link>
-            <Link to="/" style={S.navLink}>すべての展覧会</Link>
-          </>
-        )}
-        {session ? (
-          <button onClick={handleLogout} style={S.loginBtn}>ログアウト</button>
-        ) : (
-          <Link to="/login" style={S.loginBtn}>ログイン / 登録</Link>
-        )}
+  if (isDesktop) {
+    return (
+      <div style={{
+        borderBottom: `1px solid ${T.ink}`,
+        background: T.paper, position: 'sticky', top: 0, zIndex: 50,
+      }}>
+        <div style={{
+          maxWidth: 1200, margin: '0 auto',
+          display: 'flex', alignItems: 'center',
+          padding: '0 32px', height: 56, gap: 0,
+        }}>
+          <Link to="/" style={{
+            fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500,
+            color: T.ink, textDecoration: 'none', marginRight: 40, flexShrink: 0,
+          }}>
+            artport<span style={{ color: T.accent }}>.</span>
+          </Link>
+
+          <div style={{ display: 'flex', flex: 1, gap: 0 }}>
+            {TABS.map((t) => {
+              const on = activeTab === t.key
+              return (
+                <Link key={t.key} to={t.path} style={{
+                  padding: '0 18px', height: 56, display: 'flex', alignItems: 'center',
+                  textDecoration: 'none', position: 'relative',
+                  fontFamily: T.sans, fontSize: 13, letterSpacing: '0.04em',
+                  color: on ? T.ink : T.inkSoft,
+                  borderBottom: on ? `2px solid ${T.accent}` : '2px solid transparent',
+                  boxSizing: 'border-box',
+                }}>{t.label}</Link>
+              )
+            })}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {session ? (
+              <>
+                <Link to="/account" style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.inkSoft, textDecoration: 'none' }}>
+                  DASHBOARD
+                </Link>
+                <div style={{ width: 1, height: 16, background: T.line }} />
+                <button onClick={handleLogout} style={{
+                  fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em',
+                  color: T.inkMuted, background: 'none', border: 'none', cursor: 'pointer',
+                }}>SIGN OUT</button>
+              </>
+            ) : (
+              <Link to="/login" style={{
+                padding: '8px 16px', background: T.ink, color: T.paper,
+                fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em',
+                textDecoration: 'none', display: 'inline-block',
+              }}>LOG IN</Link>
+            )}
+          </div>
+        </div>
       </div>
-    </header>
+    )
+  }
+
+  // mobile header
+  return (
+    <div style={{
+      padding: '14px 16px 12px',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      borderBottom: `1px solid ${T.ink}`,
+      background: T.paper, position: 'sticky', top: 0, zIndex: 50,
+    }}>
+      <Link to="/" style={{
+        fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500,
+        color: T.ink, textDecoration: 'none',
+      }}>
+        artport<span style={{ color: T.accent }}>.</span>
+      </Link>
+      <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
+        INDEX · {new Date().getFullYear()}
+      </div>
+    </div>
   )
 }

@@ -3,128 +3,19 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { IS_DEV, demoOrgs, demoExhibitions } from '../lib/demoData'
 import Header from '../components/Header'
+import BottomNav from '../components/BottomNav'
+import { T, fmtDateDot, pad2 } from '../lib/tokens'
+import { useIsDesktop } from '../lib/useIsDesktop'
 
-const GAP = 'clamp(2rem, 5vw, 5rem)'
-
-function formatYear(dateStr) {
-  if (!dateStr) return ''
-  return new Date(dateStr).getFullYear()
-}
-
-function formatDateRange(start, end) {
-  if (!start) return ''
-  const fmt = (d) => {
-    const date = new Date(d)
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
-  }
-  return end ? `${fmt(start)} — ${fmt(end)}` : fmt(start)
-}
-
-const S = {
-  page: { background: '#f5f0e8', minHeight: '100vh' },
-  hero: {
-    padding: `calc(${GAP} * 2) ${GAP} ${GAP}`,
-    borderBottom: '1px solid rgba(26,22,18,0.1)',
-  },
-  label: {
-    fontFamily: 'Cormorant Garamond, serif',
-    fontSize: '0.65rem',
-    letterSpacing: '0.35em',
-    textTransform: 'uppercase',
-    color: '#c0392b',
-    marginBottom: '1.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-  },
-  orgName: {
-    fontFamily: 'Shippori Mincho, serif',
-    fontSize: 'clamp(3.5rem, 10vw, 9rem)',
-    fontWeight: 400,
-    lineHeight: 1.0,
-    letterSpacing: '-0.02em',
-    color: '#1a1612',
-    marginBottom: '1.5rem',
-  },
-  desc: {
-    fontSize: '0.9rem',
-    lineHeight: 2,
-    color: '#3d3530',
-    maxWidth: '60ch',
-    marginBottom: '2rem',
-  },
-  socialLinks: {
-    display: 'flex',
-    gap: '1.5rem',
-    flexWrap: 'wrap',
-  },
-  socialLink: {
-    fontSize: '0.75rem',
-    letterSpacing: '0.15em',
-    color: '#9a9088',
-    textDecoration: 'none',
-    borderBottom: '1px solid transparent',
-    paddingBottom: '0.1rem',
-    transition: 'color 0.2s, border-color 0.2s',
-  },
-  exhibitions: {
-    background: '#1a1612',
-    padding: `calc(${GAP} * 1.5) ${GAP}`,
-  },
-  exhLabel: {
-    fontFamily: 'Cormorant Garamond, serif',
-    fontSize: '0.65rem',
-    letterSpacing: '0.35em',
-    textTransform: 'uppercase',
-    color: '#b8932a',
-    marginBottom: '2.5rem',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-  },
-  exhRow: {
-    display: 'grid',
-    gridTemplateColumns: '6rem 1fr auto',
-    alignItems: 'center',
-    gap: '2rem',
-    padding: '1.5rem 0',
-    borderBottom: '1px solid rgba(245,240,232,0.08)',
-    textDecoration: 'none',
-    color: 'inherit',
-    transition: 'background 0.2s',
-  },
-  exhYear: {
-    fontFamily: 'Cormorant Garamond, serif',
-    fontSize: '2rem',
-    fontWeight: 300,
-    color: 'rgba(245,240,232,0.2)',
-  },
-  exhTitle: {
-    fontFamily: 'Shippori Mincho, serif',
-    fontSize: '1.1rem',
-    color: '#f5f0e8',
-  },
-  exhSub: {
-    fontSize: '0.7rem',
-    color: 'rgba(245,240,232,0.4)',
-    letterSpacing: '0.1em',
-    marginTop: '0.25rem',
-    fontFamily: 'Cormorant Garamond, serif',
-  },
-  exhArrow: {
-    fontSize: '1rem',
-    color: 'rgba(245,240,232,0.3)',
-  },
-  footer: {
-    padding: `2rem ${GAP}`,
-    borderTop: '1px solid rgba(26,22,18,0.1)',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    fontSize: '0.7rem',
-    color: '#9a9088',
-    letterSpacing: '0.1em',
-  },
+function DesktopFooter() {
+  return (
+    <div style={{ borderTop: `1px solid ${T.ink}`, marginTop: 80 }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
+        <span>© ARTPORT {new Date().getFullYear()}</span>
+        <span>展覧会プラットフォーム</span>
+      </div>
+    </div>
+  )
 }
 
 export default function OrgPage() {
@@ -132,6 +23,7 @@ export default function OrgPage() {
   const [org, setOrg] = useState(null)
   const [exhibitions, setExhibitions] = useState([])
   const [loading, setLoading] = useState(true)
+  const isDesktop = useIsDesktop()
 
   useEffect(() => {
     async function load() {
@@ -139,103 +31,129 @@ export default function OrgPage() {
         const org = demoOrgs.find((o) => o.slug === orgSlug) ?? demoOrgs[0]
         setOrg(org)
         setExhibitions(demoExhibitions.filter((e) => e.org_id === org.id))
-        setLoading(false)
-        return
+        setLoading(false); return
       }
       if (!supabase) return setLoading(false)
       try {
-        const { data: orgData } = await supabase
-          .from('organizations')
-          .select('*')
-          .eq('slug', orgSlug)
-          .single()
-
+        const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
         if (!orgData) return setLoading(false)
         setOrg(orgData)
-
-        const { data: exhData } = await supabase
-          .from('exhibitions')
-          .select('*')
-          .eq('org_id', orgData.id)
-          .order('start_date', { ascending: false })
-
+        const { data: exhData } = await supabase.from('exhibitions').select('*').eq('org_id', orgData.id).order('start_date', { ascending: false })
         setExhibitions(exhData || [])
-      } catch {
-        // Supabase unavailable — show empty state
-      } finally {
-        setLoading(false)
-      }
+      } catch { /* unavailable */ } finally { setLoading(false) }
     }
     load()
   }, [orgSlug])
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f0e8' }}>
-      <span style={{ fontFamily: 'Cormorant Garamond, serif', color: '#9a9088', letterSpacing: '0.2em', fontSize: '0.8rem' }}>...</span>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
+      <span style={{ fontFamily: T.mono, color: T.inkMuted, letterSpacing: '0.2em', fontSize: 11 }}>...</span>
     </div>
   )
-
   if (!org) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f0e8' }}>
-      <p style={{ color: '#9a9088', fontSize: '0.9rem' }}>団体が見つかりません</p>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
+      <p style={{ color: T.inkMuted, fontSize: 13 }}>団体が見つかりません</p>
     </div>
   )
 
   const sns = org.sns_links || {}
 
+  if (isDesktop) return (
+    <div style={{ background: T.paper, minHeight: '100vh' }}>
+      <Header activeTab="orgs" />
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
+        <div style={{ padding: '16px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
+          <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← INDEX</Link>
+          <span>/</span>
+          <span style={{ color: T.ink }}>ORGANIZATION</span>
+        </div>
+
+        <div style={{ padding: '24px 0 40px', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 64, borderBottom: `1px solid ${T.ink}` }}>
+          <div>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 12 }}>ORGANIZATION</div>
+            <div style={{ fontFamily: T.serif, fontSize: 36, lineHeight: 1.3, letterSpacing: '0.01em', color: T.ink }}>{org.name}</div>
+            {org.description && (
+              <div style={{ marginTop: 24, fontSize: 14, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody, maxWidth: 600 }}>{org.description}</div>
+            )}
+          </div>
+          <div style={{ paddingTop: 42 }}>
+            {[
+              sns.instagram && ['INSTAGRAM', sns.instagram],
+              sns.x && ['X (TWITTER)', sns.x],
+              org.homepage_url && ['WEBSITE', org.homepage_url],
+            ].filter(Boolean).map(([k, href]) => (
+              <a key={k} href={href} target="_blank" rel="noreferrer" style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 0', borderBottom: `0.5px solid ${T.line}`, fontSize: 12, textDecoration: 'none', color: T.ink }}>
+                <span style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>{k}</span>
+                <span style={{ fontFamily: T.serifBody, color: T.ink }}>{href} ↗</span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ padding: '32px 0 60px' }}>
+          <div style={{ fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', marginBottom: 24, color: T.ink }}>展覧会</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+            {exhibitions.map((exh) => (
+              <Link key={exh.id} to={`/${orgSlug}/exhibition/${exh.slug}`} style={{ textDecoration: 'none', color: T.ink }}>
+                <div style={{ width: '100%', aspectRatio: '4 / 3', background: '#D9D6CE' }} />
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ fontFamily: T.serif, fontSize: 17, letterSpacing: '0.02em' }}>{exh.title}</div>
+                  <div style={{ marginTop: 4, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.1em', color: T.inkMuted }}>{fmtDateDot(exh.start_date)} — {fmtDateDot(exh.end_date)}</div>
+                  {exh.location && <div style={{ marginTop: 4, fontSize: 11, color: T.inkSoft }}>{exh.location}</div>}
+                </div>
+              </Link>
+            ))}
+            {exhibitions.length === 0 && (
+              <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>NO EXHIBITIONS YET</div>
+            )}
+          </div>
+        </div>
+      </div>
+      <DesktopFooter />
+    </div>
+  )
+
+  // mobile
   return (
-    <div style={S.page}>
-      <Header orgName={org.name} orgSlug={orgSlug} />
+    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
+      <Header activeTab="orgs" />
+      <div style={{ padding: '12px 16px', borderBottom: `0.5px solid ${T.line}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>
+        <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← INDEX</Link>
+        {' '}/ ORGANIZATION
+      </div>
+      <div style={{ padding: '28px 16px 16px' }}>
+        <div style={{ fontFamily: T.serif, fontSize: 24, lineHeight: 1.35, letterSpacing: '0.02em', color: T.ink }}>{org.name}</div>
+        {org.description && <div style={{ marginTop: 20, fontSize: 13, lineHeight: 1.95, color: T.inkSoft, fontFamily: T.serifBody }}>{org.description}</div>}
+      </div>
 
-      {/* Org Hero */}
-      <section style={S.hero}>
-        <div style={S.label}>Organization</div>
-        <h1 style={S.orgName}>{org.name}</h1>
-        {org.description && <p style={S.desc}>{org.description}</p>}
-        <div style={S.socialLinks}>
-          {sns.instagram && (
-            <a href={sns.instagram} target="_blank" rel="noreferrer" style={S.socialLink}>Instagram</a>
-          )}
-          {sns.x && (
-            <a href={sns.x} target="_blank" rel="noreferrer" style={S.socialLink}>X</a>
-          )}
-          {org.homepage_url && (
-            <a href={org.homepage_url} target="_blank" rel="noreferrer" style={S.socialLink}>公式サイト</a>
-          )}
+      {(sns.instagram || sns.x || org.homepage_url) && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: T.line, margin: '8px 16px 28px' }}>
+          {sns.instagram && <a href={sns.instagram} target="_blank" rel="noreferrer" style={{ background: T.paper, padding: '14px 12px', textAlign: 'center', textDecoration: 'none' }}><div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: T.inkMuted }}>IG</div><div style={{ marginTop: 6, fontFamily: T.mono, fontSize: 11, color: T.ink }}>↗</div></a>}
+          {sns.x && <a href={sns.x} target="_blank" rel="noreferrer" style={{ background: T.paper, padding: '14px 12px', textAlign: 'center', textDecoration: 'none' }}><div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: T.inkMuted }}>X</div><div style={{ marginTop: 6, fontFamily: T.mono, fontSize: 11, color: T.ink }}>↗</div></a>}
+          {org.homepage_url && <a href={org.homepage_url} target="_blank" rel="noreferrer" style={{ background: T.paper, padding: '14px 12px', textAlign: 'center', textDecoration: 'none' }}><div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: T.inkMuted }}>WEB</div><div style={{ marginTop: 6, fontFamily: T.mono, fontSize: 11, color: T.ink }}>↗</div></a>}
         </div>
-      </section>
+      )}
 
-      {/* Exhibitions List */}
-      <section style={S.exhibitions}>
-        <div style={S.exhLabel}>All Exhibitions</div>
-        <div>
-          {exhibitions.map((exh, i) => (
-            <Link
-              key={exh.id}
-              to={`/${orgSlug}/exhibition/${exh.slug}`}
-              style={{
-                ...S.exhRow,
-                ...(i === 0 ? { borderTop: '1px solid rgba(245,240,232,0.08)' } : {}),
-              }}
-            >
-              <div style={S.exhYear}>{formatYear(exh.start_date)}</div>
-              <div>
-                <div style={S.exhTitle}>{exh.title}</div>
-                <div style={S.exhSub}>{exh.location} · {formatDateRange(exh.start_date, exh.end_date)}</div>
-              </div>
-              <div style={S.exhArrow}>→</div>
-            </Link>
-          ))}
-          {exhibitions.length === 0 && (
-            <p style={{ color: 'rgba(245,240,232,0.3)', fontSize: '0.85rem', padding: '2rem 0' }}>展覧会はまだありません</p>
-          )}
+      <div style={{ borderTop: `1px solid ${T.ink}` }}>
+        <div style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
+          <span>EXHIBITIONS</span><span>{pad2(exhibitions.length)} · ALL</span>
         </div>
-      </section>
+        {exhibitions.map((exh, i) => (
+          <Link key={exh.id} to={`/${orgSlug}/exhibition/${exh.slug}`} style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', gap: 12, textDecoration: 'none', color: T.ink }}>
+            <div style={{ width: 36, fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2, flexShrink: 0 }}>{pad2(i + 1)}</div>
+            <div style={{ width: 54, flexShrink: 0, aspectRatio: '1 / 1', alignSelf: 'flex-start', background: '#D9D6CE' }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
+              <div style={{ marginTop: 3, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>{fmtDateDot(exh.start_date)} — {fmtDateDot(exh.end_date)}</div>
+              {exh.location && <div style={{ marginTop: 3, fontSize: 10.5, color: T.inkSoft, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.location}</div>}
+            </div>
+          </Link>
+        ))}
+        {exhibitions.length === 0 && <div style={{ padding: '32px 16px', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>NO EXHIBITIONS YET</div>}
+      </div>
 
-      <footer style={S.footer}>
-        <div>© {new Date().getFullYear()} Artport</div>
-        <div>展覧会のポータル</div>
-      </footer>
+      <div style={{ height: 40 }} />
+      <BottomNav active="orgs" />
     </div>
   )
 }
