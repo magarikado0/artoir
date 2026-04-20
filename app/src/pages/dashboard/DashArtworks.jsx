@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell from '../../components/DashShell'
+import ImageUploader from '../../components/ImageUploader'
 import { T, pad2 } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 
@@ -21,19 +22,17 @@ function DragHandle() {
 export default function DashArtworks() {
   const { orgSlug, exhibitionId } = useParams()
   const isDesktop = useIsDesktop()
-  const fileInputRef = useRef(null)
 
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
   const [loading, setLoading] = useState(true)
-  const [uploading, setUploading] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')
   const [editDesc, setEditDesc] = useState('')
 
   useEffect(() => {
-    if (!supabase) return setLoading(false)
+    if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
     async function load() {
       try {
         const { data: exh } = await supabase.from('exhibitions').select('*').eq('id', exhibitionId).single()
@@ -45,21 +44,15 @@ export default function DashArtworks() {
     load()
   }, [exhibitionId])
 
-  async function handleFileChange(e) {
-    const file = e.target.files?.[0]
-    if (!file || !supabase) return
-    setUploading(true)
-    try {
-      const ext = file.name.split('.').pop()
-      const path = `${exhibitionId}/${Date.now()}.${ext}`
-      const { error: uploadErr } = await supabase.storage.from('artworks').upload(path, file)
-      if (uploadErr) throw uploadErr
-      const { data: { publicUrl } } = supabase.storage.from('artworks').getPublicUrl(path)
-      const maxOrder = artworks.length > 0 ? Math.max(...artworks.map((a) => a.order ?? 0)) : 0
-      const { data: newWork } = await supabase.from('artworks').insert({ exhibition_id: exhibitionId, image_url: publicUrl, title: '', order: maxOrder + 1 }).select().single()
-      if (newWork) setArtworks((prev) => [...prev, newWork])
-    } catch { /* upload failed */ } finally { setUploading(false) }
-    e.target.value = ''
+  async function handleUploaded(cloudinaryUrl) {
+    if (!supabase || !exhibitionId) return
+    const maxOrder = artworks.length > 0 ? Math.max(...artworks.map((a) => a.order ?? 0)) : 0
+    const { data: newWork } = await supabase
+      .from('artworks')
+      .insert({ exhibition_id: exhibitionId, image_url: cloudinaryUrl, title: '', order: maxOrder + 1 })
+      .select()
+      .single()
+    if (newWork) setArtworks((prev) => [...prev, newWork])
   }
 
   async function handleDelete() {
@@ -86,20 +79,11 @@ export default function DashArtworks() {
 
   const uploadArea = (
     <div style={{ padding: isDesktop ? '20px 0' : '0 16px 16px' }}>
-      <div
-        onClick={() => fileInputRef.current?.click()}
-        style={{ padding: '20px', border: `1px dashed ${T.ink}`, background: T.card, textAlign: 'center', cursor: 'pointer' }}
-      >
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>＋ UPLOAD</div>
-        <div style={{ fontFamily: T.serif, fontSize: 16, letterSpacing: '0.02em', color: T.ink }}>作品を追加</div>
-        <div style={{ marginTop: 6, fontSize: 11, color: T.inkSoft, lineHeight: 1.6 }}>JPG / PNG / WebP · 最大 10MB</div>
-        <button
-          onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
-          disabled={uploading}
-          style={{ marginTop: 14, padding: '10px 18px', background: T.ink, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: uploading ? 0.6 : 1 }}
-        >{uploading ? 'UPLOADING...' : 'ファイルを選択'}</button>
+      <div style={{ padding: '20px', border: `1px dashed ${T.ink}`, background: T.card }}>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8, textAlign: 'center' }}>＋ UPLOAD</div>
+        <div style={{ fontFamily: T.serif, fontSize: 16, letterSpacing: '0.02em', color: T.ink, textAlign: 'center', marginBottom: 14 }}>作品を追加</div>
+        <ImageUploader onUploaded={handleUploaded} />
       </div>
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
     </div>
   )
 
@@ -176,7 +160,7 @@ export default function DashArtworks() {
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>{exhibition?.title || '...'}</div>
             <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>作品管理</div>
           </div>
-          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted }}>{pad2(artworks.length)} WORKS · ドラッグで並び替え</div>
+          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted }}>{pad2(artworks.length)} WORKS</div>
         </div>
         {uploadArea}
         {worksList}
@@ -194,7 +178,7 @@ export default function DashArtworks() {
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>{exhibition?.title || '...'}</div>
             <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 22, letterSpacing: '0.02em', color: T.ink }}>作品管理</div>
-            <div style={{ marginTop: 4, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted }}>{pad2(artworks.length)} WORKS · ドラッグで並び替え</div>
+            <div style={{ marginTop: 4, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted }}>{pad2(artworks.length)} WORKS</div>
           </div>
         </div>
         {uploadArea}

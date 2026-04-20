@@ -11,7 +11,7 @@ export default function DashExhibitionEdit() {
   const { orgSlug, exhibitionId } = useParams()
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
-  const isNew = exhibitionId === 'new'
+  const isNew = !exhibitionId
 
   const [org, setOrg] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -32,7 +32,7 @@ export default function DashExhibitionEdit() {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
         if (!orgData) return
         setOrg(orgData)
-        if (!isNew) {
+        if (!isNew && exhibitionId && exhibitionId !== 'undefined') {
           const { data: exh } = await supabase.from('exhibitions').select('*').eq('id', exhibitionId).single()
           if (exh) {
             setTitle(exh.title || '')
@@ -51,6 +51,7 @@ export default function DashExhibitionEdit() {
 
   async function handleSave() {
     if (!supabase || !org) return
+    if (!isNew && !exhibitionId) return
     setSaving(true)
     const payload = { title, slug, start_date: startDate || null, end_date: endDate || null, location, description, bg_color: bgColor, org_id: org.id }
     if (isNew) {
@@ -121,7 +122,7 @@ export default function DashExhibitionEdit() {
 
       <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
         {!isNew && (
-          <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+          <button onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
             作品を管理 →
           </button>
         )}

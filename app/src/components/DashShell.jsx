@@ -1,40 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
-
-// Mobile bottom nav for dashboard screens
-function DashBottomNav({ orgSlug, active }) {
-  const navigate = useNavigate()
-  const items = [
-    { key: 'dash',    label: 'ホーム',     en: 'HOME',     path: `/${orgSlug}/dashboard` },
-    { key: 'exs',     label: '展覧会',     en: 'EXHIBITS', path: `/${orgSlug}/dashboard/exhibitions` },
-    { key: 'set',     label: '団体設定',   en: 'SETTINGS', path: `/${orgSlug}/dashboard/settings` },
-    { key: 'public',  label: '公開ページ', en: 'PUBLIC',   path: `/${orgSlug}` },
-  ]
-  return (
-    <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
-      background: T.paper, borderTop: `1px solid ${T.ink}`,
-      display: 'flex', gap: 6, padding: '10px 12px 24px',
-    }}>
-      {items.map((it) => {
-        const on = active === it.key
-        return (
-          <div key={it.key} onClick={() => navigate(it.path)} style={{
-            flex: 1, display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: 4, padding: '8px 2px', cursor: 'pointer',
-            background: on ? T.ink : 'transparent',
-            color: on ? T.paper : T.inkSoft,
-            transition: 'background 180ms',
-          }}>
-            <div style={{ fontFamily: T.serifBody, fontSize: 11, letterSpacing: '0.04em' }}>{it.label}</div>
-            <div style={{ fontFamily: T.mono, fontSize: 8, letterSpacing: '0.16em', opacity: 0.7 }}>{it.en}</div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
+import BottomNav from './BottomNav'
 
 // Desktop top nav for dashboard (same as public but with DASHBOARD indicator)
 function DashDesktopNav({ orgSlug }) {
@@ -107,7 +74,7 @@ export default function DashShell({ children, orgSlug, active, crumbs = [] }) {
         </div>
       )}
       {children}
-      <DashBottomNav orgSlug={orgSlug} active={active} />
+      <BottomNav active="account" />
     </div>
   )
 }
