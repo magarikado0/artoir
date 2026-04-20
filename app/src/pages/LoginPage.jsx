@@ -159,7 +159,7 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="メールアドレス"
             required
-            autoComplete={mode === 'login' ? 'username' : 'new-password'}
+            autoComplete="email"
             style={S.input}
           />
           <div style={{ position: 'relative' }}>
