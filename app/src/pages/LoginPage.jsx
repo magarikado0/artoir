@@ -115,6 +115,7 @@ export default function LoginPage() {
     setError('')
     setSuccess('')
 
+    try {
     if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
@@ -132,8 +133,11 @@ export default function LoginPage() {
         setPassword('')
       }
     }
-
-    setLoading(false)
+    } catch {
+      setError('通信に失敗しました。時間をおいて再度お試しください。')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
