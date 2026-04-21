@@ -25,12 +25,16 @@ export default function DashSettings() {
 
   function normalizeSnsValue(value, host) {
     if (!value) return ''
-    return value
+    let normalized = value
       .replace(/^https?:\/\//i, '')
       .replace(/^www\./i, '')
-      .replace(new RegExp(`^${host}/?`, 'i'), '')
       .replace(/^@/, '')
       .replace(/^\/+|\/+$/g, '')
+    const hostPrefix = `${host.toLowerCase()}/`
+    const lower = normalized.toLowerCase()
+    if (lower.startsWith(hostPrefix)) normalized = normalized.slice(host.length + 1)
+    else if (lower === host.toLowerCase()) normalized = ''
+    return normalized
   }
 
   function buildSnsUrl(value, host) {
@@ -78,7 +82,7 @@ export default function DashSettings() {
     try {
       const { error } = await supabase.from('organizations').update(updates).eq('id', org.id)
       if (error) {
-        window.alert(error.message || '保存に失敗しました。')
+        window.alert(error.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
         return
       }
       setSaved(true)
@@ -89,7 +93,7 @@ export default function DashSettings() {
       if (savedResetTimerRef.current) clearTimeout(savedResetTimerRef.current)
       savedResetTimerRef.current = setTimeout(() => setSaved(false), 2000)
     } catch (error) {
-      window.alert(error?.message || '保存に失敗しました。')
+      window.alert(error?.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
     } finally {
       setSaving(false)
     }

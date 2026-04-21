@@ -59,20 +59,20 @@ export default function DashExhibitionEdit() {
       if (isNew) {
         const { data, error } = await supabase.from('exhibitions').insert(payload).select().single()
         if (error) {
-          window.alert(error.message || '保存に失敗しました。')
+          window.alert(error.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
           return
         }
         if (data) nextPath = `/${orgSlug}/dashboard/exhibitions/${data.id}/edit`
       } else {
         const { error } = await supabase.from('exhibitions').update(payload).eq('id', exhibitionId)
         if (error) {
-          window.alert(error.message || '保存に失敗しました。')
+          window.alert(error.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
           return
         }
         nextPath = `/${orgSlug}/dashboard/exhibitions`
       }
     } catch (error) {
-      window.alert(error?.message || '保存に失敗しました。')
+      window.alert(error?.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
     } finally {
       setSaving(false)
     }
