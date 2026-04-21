@@ -11,7 +11,7 @@ export default function DashExhibitionEdit() {
   const { orgSlug, exhibitionId } = useParams()
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
-  const isNew = !exhibitionId
+  const isNew = !exhibitionId || exhibitionId === 'undefined'
 
   const [org, setOrg] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -51,17 +51,33 @@ export default function DashExhibitionEdit() {
 
   async function handleSave() {
     if (!supabase || !org) return
-    if (!isNew && !exhibitionId) return
+    if (!isNew && (!exhibitionId || exhibitionId === 'undefined')) return
     setSaving(true)
     const payload = { title, slug, start_date: startDate || null, end_date: endDate || null, location, description, bg_color: bgColor, org_id: org.id }
-    if (isNew) {
-      const { data } = await supabase.from('exhibitions').insert(payload).select().single()
-      if (data) navigate(`/${orgSlug}/dashboard/exhibitions/${data.id}/edit`)
-    } else {
-      await supabase.from('exhibitions').update(payload).eq('id', exhibitionId)
-      navigate(`/${orgSlug}/dashboard/exhibitions`)
+    let nextPath = null
+    try {
+      if (isNew) {
+        const { data, error } = await supabase.from('exhibitions').insert(payload).select().single()
+        if (error) {
+          window.alert(error.message || '保存に失敗しました。')
+          return
+        }
+        if (data) nextPath = `/${orgSlug}/dashboard/exhibitions/${data.id}/edit`
+      } else {
+        const { error } = await supabase.from('exhibitions').update(payload).eq('id', exhibitionId)
+        if (error) {
+          window.alert(error.message || '保存に失敗しました。')
+          return
+        }
+        nextPath = `/${orgSlug}/dashboard/exhibitions`
+      }
+    } catch (error) {
+      window.alert(error?.message || '保存に失敗しました。')
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
+
+    if (nextPath) navigate(nextPath)
   }
 
   if (loading) return (

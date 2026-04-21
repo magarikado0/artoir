@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
@@ -21,17 +21,36 @@ export default function DashSettings() {
   const [homepageUrl, setHomepageUrl] = useState('')
   const [slug, setSlug] = useState('')
   const [slugChanged, setSlugChanged] = useState(false)
+  const savedResetTimerRef = useRef(null)
+
+  function normalizeSnsValue(value, host) {
+    if (!value) return ''
+    return value
+      .replace(/^https?:\/\//i, '')
+      .replace(/^www\./i, '')
+      .replace(new RegExp(`^${host}/?`, 'i'), '')
+      .replace(/^@/, '')
+      .replace(/^\/+|\/+$/g, '')
+  }
+
+  function buildSnsUrl(value, host) {
+    const normalized = normalizeSnsValue(value, host)
+    return normalized ? `https://${host}/${normalized}` : ''
+  }
 
   useEffect(() => {
-    if (!supabase) return setLoading(false)
+    if (!supabase) {
+      Promise.resolve().then(() => setLoading(false))
+      return
+    }
     supabase.from('organizations').select('*').eq('slug', orgSlug).single()
       .then(({ data }) => {
         if (data) {
           setOrg(data)
           setName(data.name || '')
           setDescription(data.description || '')
-          setInstagram(data.sns_links?.instagram || '')
-          setTwitter(data.sns_links?.x || '')
+          setInstagram(normalizeSnsValue(data.sns_links?.instagram || '', 'instagram.com'))
+          setTwitter(normalizeSnsValue(data.sns_links?.x || '', 'x.com'))
           setHomepageUrl(data.homepage_url || '')
           setSlug(data.slug || '')
         }
@@ -39,21 +58,41 @@ export default function DashSettings() {
       }).catch(() => setLoading(false))
   }, [orgSlug])
 
+  useEffect(() => () => {
+    if (savedResetTimerRef.current) clearTimeout(savedResetTimerRef.current)
+  }, [])
+
   async function handleSave() {
     if (!supabase || !org) return
     setSaving(true)
     const updates = {
       name,
       description,
-      sns_links: { instagram, x: twitter },
+      sns_links: {
+        instagram: buildSnsUrl(instagram, 'instagram.com'),
+        x: buildSnsUrl(twitter, 'x.com'),
+      },
       homepage_url: homepageUrl,
       slug,
     }
-    await supabase.from('organizations').update(updates).eq('id', org.id)
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-    if (slug !== orgSlug) navigate(`/${slug}/dashboard/settings`)
+    try {
+      const { error } = await supabase.from('organizations').update(updates).eq('id', org.id)
+      if (error) {
+        window.alert(error.message || '保存に失敗しました。')
+        return
+      }
+      setSaved(true)
+      if (slug !== orgSlug) {
+        navigate(`/${slug}/dashboard/settings`)
+        return
+      }
+      if (savedResetTimerRef.current) clearTimeout(savedResetTimerRef.current)
+      savedResetTimerRef.current = setTimeout(() => setSaved(false), 2000)
+    } catch (error) {
+      window.alert(error?.message || '保存に失敗しました。')
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (loading) return (

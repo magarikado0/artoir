@@ -1,11 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import BottomNav from './BottomNav'
 
 // Desktop top nav for dashboard (same as public but with DASHBOARD indicator)
 function DashDesktopNav({ orgSlug }) {
-  const navigate = useNavigate()
   return (
     <div style={{ borderBottom: `1px solid ${T.ink}`, background: T.paper, position: 'sticky', top: 0, zIndex: 50 }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', padding: '0 32px', height: 56, gap: 0 }}>
@@ -26,7 +25,7 @@ function DashDesktopNav({ orgSlug }) {
   )
 }
 
-export default function DashShell({ children, orgSlug, active, crumbs = [] }) {
+export default function DashShell({ children, orgSlug, crumbs = [] }) {
   const isDesktop = useIsDesktop()
 
   if (isDesktop) return (
@@ -141,12 +140,4 @@ export function StatusBadge({ kind }) {
       {m.label}
     </span>
   )
-}
-
-export function exhStatus(exh) {
-  const today = new Date().toISOString().slice(0, 10)
-  if (!exh.start_date) return 'ended'
-  if (exh.start_date > today) return 'upcoming'
-  if (!exh.end_date || exh.end_date >= today) return 'live'
-  return 'ended'
 }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import DashShell, { StatusBadge, exhStatus } from '../../components/DashShell'
+import DashShell, { StatusBadge } from '../../components/DashShell'
 import { T, fmtDateDot, pad2 } from '../../lib/tokens'
+import { exhStatus } from '../../lib/exhibitionStatus'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 
 const FILTERS = ['ALL', 'LIVE', 'UPCOMING', 'ENDED']
@@ -11,7 +12,6 @@ export default function DashExhibitions() {
   const { orgSlug } = useParams()
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
-  const [org, setOrg] = useState(null)
   const [exhibitions, setExhibitions] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('ALL')
@@ -22,7 +22,6 @@ export default function DashExhibitions() {
       try {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
         if (!orgData) return
-        setOrg(orgData)
         const { data: exhData } = await supabase.from('exhibitions').select('*').eq('org_id', orgData.id).order('start_date', { ascending: false })
         setExhibitions(exhData || [])
       } catch { /* unavailable */ } finally { setLoading(false) }

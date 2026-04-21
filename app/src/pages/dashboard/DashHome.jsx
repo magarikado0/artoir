@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import DashShell, { StatusBadge, exhStatus } from '../../components/DashShell'
+import DashShell, { StatusBadge } from '../../components/DashShell'
+import { exhStatus } from '../../lib/exhibitionStatus'
 import { T, fmtDateDot, pad2 } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 
@@ -33,7 +34,6 @@ export default function DashHome() {
     </div>
   )
 
-  const worksCount = 0 // would need another query; placeholder
   const liveCount = exhibitions.filter((e) => exhStatus(e) === 'live').length
 
   if (isDesktop) return (

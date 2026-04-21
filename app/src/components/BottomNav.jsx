@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../lib/auth'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 
@@ -31,7 +30,6 @@ function NavIcon({ name, color }) {
 export default function BottomNav({ active }) {
   const isDesktop = useIsDesktop()
   const navigate = useNavigate()
-  const { session } = useAuth()
 
   if (isDesktop) return null
 

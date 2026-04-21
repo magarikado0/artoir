@@ -74,13 +74,13 @@ function DesktopView({ rows, navigate }) {
 
         {/* filter row */}
         <div style={{ padding: '16px 0', display: 'flex', gap: 6, borderBottom: `0.5px solid ${T.line}`, flexWrap: 'wrap' }}>
-          {['ALL', 'OPEN NOW', 'UPCOMING'].map((f, i) => (
+          {['ALL', 'OPEN NOW', 'UPCOMING'].map((f) => (
             <span key={f} style={{
               padding: '6px 12px',
-              background: i === 0 ? T.ink : 'transparent',
-              color: i === 0 ? T.paper : T.inkSoft,
-              border: i === 0 ? 'none' : `0.5px solid ${T.line}`,
-              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', cursor: 'pointer',
+              background: 'transparent',
+              color: T.inkSoft,
+              border: `0.5px solid ${T.line}`,
+              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em',
             }}>{f}</span>
           ))}
         </div>
