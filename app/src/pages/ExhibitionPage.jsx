@@ -3,20 +3,29 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { IS_DEV, demoOrgs, demoExhibitions, demoArtworks } from '../lib/demoData'
 import Header from '../components/Header'
+import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
+import { T, fmtDateDot, pad2 } from '../lib/tokens'
+import { useIsDesktop } from '../lib/useIsDesktop'
 
-const GAP = 'clamp(2rem, 5vw, 5rem)'
-
-const DAYS = ['日', '月', '火', '水', '木', '金', '土']
-
-function fmtDate(str) {
-  if (!str) return ''
-  const d = new Date(str)
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日（${DAYS[d.getDay()]}）`
+function MetaCell({ label, value, span = 1, mono }) {
+  return (
+    <div style={{ gridColumn: `span ${span}` }}>
+      <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, marginBottom: 4 }}>{label}</div>
+      <div style={{ fontFamily: mono ? T.mono : T.sans, fontSize: mono ? 12 : 13, lineHeight: 1.5, whiteSpace: 'pre-line', color: T.ink }}>{value}</div>
+    </div>
+  )
 }
 
-function zeroPad(n) {
-  return String(n).padStart(2, '0')
+function DesktopFooter() {
+  return (
+    <div style={{ borderTop: `1px solid ${T.ink}` }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
+        <span>© ARTPORT {new Date().getFullYear()}</span>
+        <span>展覧会プラットフォーム</span>
+      </div>
+    </div>
+  )
 }
 
 export default function ExhibitionPage() {
@@ -24,60 +33,36 @@ export default function ExhibitionPage() {
   const [org, setOrg] = useState(null)
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
-  const [allExhibitions, setAllExhibitions] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
   const galleryRef = useRef(null)
+  const isDesktop = useIsDesktop()
 
   useEffect(() => {
     async function load() {
       if (IS_DEV) {
         const exh = demoExhibitions.find((e) => e.slug === exhibitionSlug) ?? demoExhibitions[0]
         const org = demoOrgs.find((o) => o.id === exh.org_id) ?? demoOrgs[0]
-        setOrg(org)
-        setExhibition(exh)
+        setOrg(org); setExhibition(exh)
         setArtworks(demoArtworks.filter((a) => a.exhibition_id === exh.id))
-        setAllExhibitions(demoExhibitions.filter((e) => e.org_id === org.id))
-        setLoading(false)
-        return
+        setLoading(false); return
       }
       if (!supabase) return setLoading(false)
       try {
-        const { data: orgData } = await supabase
-          .from('organizations')
-          .select('*')
-          .eq('slug', orgSlug)
-          .single()
+        const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
         if (!orgData) return setLoading(false)
         setOrg(orgData)
-
-        const { data: exhData } = await supabase
-          .from('exhibitions')
-          .select('*')
-          .eq('slug', exhibitionSlug)
-          .eq('org_id', orgData.id)
-          .single()
+        const { data: exhData } = await supabase.from('exhibitions').select('*').eq('slug', exhibitionSlug).eq('org_id', orgData.id).single()
         if (!exhData) return setLoading(false)
         setExhibition(exhData)
-
-        const [{ data: awData }, { data: allExhData }] = await Promise.all([
-          supabase.from('artworks').select('*').eq('exhibition_id', exhData.id).order('order'),
-          supabase.from('exhibitions').select('*').eq('org_id', orgData.id).order('start_date', { ascending: false }),
-        ])
-
+        const { data: awData } = await supabase.from('artworks').select('*').eq('exhibition_id', exhData.id).order('order')
         setArtworks(awData || [])
-        setAllExhibitions(allExhData || [])
-      } catch {
-        // Supabase unavailable — show empty state
-      } finally {
-        setLoading(false)
-      }
+      } catch { /* unavailable */ } finally { setLoading(false) }
     }
     load()
   }, [orgSlug, exhibitionSlug])
 
-  // IntersectionObserver for gallery fade-in
   useEffect(() => {
     if (!galleryRef.current) return
     const items = galleryRef.current.querySelectorAll('.gallery-item')
@@ -96,437 +81,200 @@ export default function ExhibitionPage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f0e8' }}>
-      <span style={{ fontFamily: 'Cormorant Garamond, serif', color: '#9a9088', letterSpacing: '0.2em', fontSize: '0.8rem' }}>...</span>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
+      <span style={{ fontFamily: T.mono, color: T.inkMuted, letterSpacing: '0.2em', fontSize: 11 }}>...</span>
     </div>
   )
-
   if (!exhibition) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f0e8' }}>
-      <p style={{ color: '#9a9088', fontSize: '0.9rem' }}>展覧会が見つかりません</p>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
+      <p style={{ color: T.inkMuted, fontSize: 13 }}>展覧会が見つかりません</p>
     </div>
   )
 
-  const bgColor = exhibition.bg_color || '#f5f0e8'
   const featured = artworks[0]
   const sns = org?.sns_links || {}
 
-  return (
-    <div style={{ background: bgColor, minHeight: '100vh' }}>
-      <Header orgName={org?.name} orgSlug={orgSlug} />
+  if (isDesktop) return (
+    <div style={{ background: T.paper, minHeight: '100vh' }}>
+      <Header activeTab="top" />
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
 
-      {/* Hero */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        minHeight: '88vh',
-        position: 'relative',
-      }} className="hero-grid">
-        {/* Left */}
-        <div style={{
-          padding: GAP,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          paddingBottom: `calc(${GAP} * 2)`,
-          position: 'relative',
-          zIndex: 2,
-        }}>
-          <div style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: '0.7rem',
-            letterSpacing: '0.3em',
-            textTransform: 'uppercase',
-            color: '#c0392b',
-            marginBottom: '2rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-          }}>
-            <span style={{ display: 'block', width: '2rem', height: '1px', background: '#c0392b' }} />
-            Exhibition
-          </div>
-          <h1 style={{
-            fontFamily: 'Shippori Mincho, serif',
-            fontSize: 'clamp(4rem, 8vw, 8rem)',
-            fontWeight: 400,
-            lineHeight: 1,
-            letterSpacing: '-0.02em',
-            color: '#1a1612',
-            marginBottom: '0.5rem',
-          }}>
-            {exhibition.title}
-          </h1>
-          {exhibition.description && (
-            <div style={{
-              fontFamily: 'Cormorant Garamond, serif',
-              fontStyle: 'italic',
-              fontSize: 'clamp(1rem, 2vw, 1.4rem)',
-              color: '#9a9088',
-              letterSpacing: '0.05em',
-              marginBottom: '3rem',
-            }}>
-              {exhibition.description}
-            </div>
-          )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem', color: '#3d3530', letterSpacing: '0.05em' }}>
-            <div style={{ display: 'flex', gap: '1.5rem' }}>
-              <span style={{ color: '#9a9088', minWidth: '3rem' }}>会期</span>
-              <span>{fmtDate(exhibition.start_date)}{exhibition.end_date ? ` — ${fmtDate(exhibition.end_date)}` : ''}</span>
-            </div>
-            {exhibition.location && (
-              <div style={{ display: 'flex', gap: '1.5rem' }}>
-                <span style={{ color: '#9a9088', minWidth: '3rem' }}>会場</span>
-                <span>{exhibition.location}</span>
+        <div style={{ padding: '16px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
+          <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← 展覧会一覧</Link>
+          <span>/</span>
+          <Link to={`/${orgSlug}`} style={{ color: T.inkMuted, textDecoration: 'none' }}>{org?.name}</Link>
+          <span>/</span>
+          <span style={{ color: T.ink }}>{exhibition.title}</span>
+        </div>
+
+        {/* two-col hero */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 48, paddingBottom: 48, borderBottom: `1px solid ${T.ink}` }}>
+          <div>
+            {featured?.image_url ? (
+              <img src={featured.image_url} alt={featured.title} style={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'contain', display: 'block', background: '#D9D6CE' }} />
+            ) : (
+              <div style={{ width: '100%', aspectRatio: '4 / 3', background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontFamily: T.mono, fontSize: 10, color: 'rgba(0,0,0,0.4)', background: 'rgba(255,255,255,0.75)', padding: '3px 7px' }}>{exhibition.title}</span>
               </div>
             )}
           </div>
-        </div>
-
-        {/* Right: featured artwork */}
-        <div style={{ position: 'relative', overflow: 'hidden' }}>
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: `linear-gradient(to right, ${bgColor} 0%, transparent 20%)`,
-            zIndex: 2,
-            pointerEvents: 'none',
-          }} />
-          {featured?.image_url ? (
-            <img
-              src={featured.image_url}
-              alt={featured.title}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-            />
-          ) : (
-            <div style={{ width: '100%', height: '100%', background: '#ede6d6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontFamily: 'Shippori Mincho, serif', fontSize: '8rem', color: 'rgba(26,22,18,0.1)' }}>墨</span>
+          <div style={{ paddingTop: 8 }}>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.accent, marginBottom: 16 }}>EXHIBITION</div>
+            <div style={{ fontFamily: T.serif, fontSize: 40, lineHeight: 1.2, letterSpacing: '0.01em', color: T.ink }}>{exhibition.title}</div>
+            <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '90px 1fr', rowGap: 14, fontSize: 13, lineHeight: 1.6, paddingTop: 24, borderTop: `0.5px solid ${T.line}` }}>
+              {exhibition.start_date && <>
+                <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>会期</div>
+                <div style={{ fontFamily: T.mono, fontSize: 12 }}>{fmtDateDot(exhibition.start_date)} — {fmtDateDot(exhibition.end_date)}</div>
+              </>}
+              {exhibition.location && <>
+                <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>会場</div>
+                <div>{exhibition.location}</div>
+              </>}
+              {org?.name && <>
+                <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>団体</div>
+                <div>{org.name}</div>
+              </>}
+              <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>作品数</div>
+              <div style={{ fontFamily: T.mono, fontSize: 12 }}>{pad2(artworks.length)} works</div>
             </div>
-          )}
+            {exhibition.description && (
+              <div style={{ marginTop: 28, fontSize: 13, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
+            )}
+            <button onClick={copyLink} style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: 'transparent', border: `1px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: T.ink }}>
+              <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artport.jp/…/{exhibition.slug}</span>
+              <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'URLをコピー'}</span>
+            </button>
+          </div>
         </div>
 
-        {/* Scroll hint */}
-        <div style={{
-          position: 'absolute',
-          bottom: '2rem',
-          left: GAP,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.75rem',
-          fontSize: '0.65rem',
-          letterSpacing: '0.2em',
-          color: '#9a9088',
-          zIndex: 3,
-        }}>
-          <div style={{ width: '2rem', height: '1px', background: '#9a9088', position: 'relative', overflow: 'hidden' }}>
-            <span style={{
-              position: 'absolute',
-              top: 0,
-              left: '-100%',
-              width: '100%',
-              height: '100%',
-              background: '#1a1612',
-              animation: 'slide 2s ease-in-out infinite',
-            }} />
+        {/* works grid — 4 col */}
+        {artworks.length > 0 && (
+          <div style={{ padding: '40px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24 }}>
+              <div style={{ fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.ink }}>Works</div>
+              <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · クリックで詳細</div>
+            </div>
+            <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+              {artworks.map((w, i) => (
+                <div key={w.id} className="gallery-item" onClick={() => setSelectedArtwork(w)} style={{ cursor: 'pointer' }}>
+                  {w.image_url ? (
+                    <img src={w.image_url} alt={w.title} style={{ width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    <div style={{ width: '100%', aspectRatio: '4 / 5', background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontFamily: T.mono, fontSize: 9, color: 'rgba(0,0,0,0.35)', background: 'rgba(255,255,255,0.7)', padding: '2px 5px' }}>#{pad2(i + 1)}</span>
+                    </div>
+                  )}
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontFamily: T.serif, fontSize: 14, letterSpacing: '0.02em', color: T.ink }}>{w.title}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          SCROLL
-        </div>
+        )}
+
+        {/* org strip */}
+        {org && (
+          <div style={{ padding: '28px 32px', background: T.paperAlt, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 60 }}>
+            <div>
+              <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 6 }}>ORGANIZER</div>
+              <Link to={`/${orgSlug}`} style={{ fontFamily: T.serif, fontSize: 18, textDecoration: 'none', color: T.ink }}>{org.name}</Link>
+            </div>
+            <div style={{ display: 'flex', gap: 20, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkSoft }}>
+              {sns.instagram && <a href={sns.instagram} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>Instagram ↗</a>}
+              {sns.x && <a href={sns.x} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>X ↗</a>}
+              {org.homepage_url && <a href={org.homepage_url} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>Website ↗</a>}
+              <Link to={`/${orgSlug}`} style={{ color: T.ink, textDecoration: 'none' }}>団体ページ →</Link>
+            </div>
+          </div>
+        )}
+      </div>
+      <DesktopFooter />
+      <ArtworkModal artwork={selectedArtwork} onClose={() => setSelectedArtwork(null)} />
+    </div>
+  )
+
+  // mobile
+  return (
+    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
+      <Header activeTab="top" />
+
+      <div style={{ padding: '12px 16px', borderBottom: `0.5px solid ${T.line}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 6, alignItems: 'center' }}>
+        <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← INDEX</Link>
+        <span>/</span>
+        <span style={{ color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{org?.name}</span>
       </div>
 
-      {/* Share bar */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem',
-        padding: `1.5rem ${GAP}`,
-        background: '#ede6d6',
-        borderTop: '1px solid rgba(26,22,18,0.08)',
-        borderBottom: '1px solid rgba(26,22,18,0.08)',
-      }}>
-        <span style={{ fontSize: '0.75rem', color: '#9a9088', letterSpacing: '0.15em' }}>SHARE</span>
-        <button
-          onClick={copyLink}
-          style={{
-            fontSize: '0.7rem',
-            letterSpacing: '0.15em',
-            color: '#f5f0e8',
-            background: copied ? '#c0392b' : '#1a1612',
-            border: 'none',
-            padding: '0.5rem 1.2rem',
-            cursor: 'pointer',
-            transition: 'background 0.2s',
-            fontFamily: 'Cormorant Garamond, serif',
-          }}
-        >
-          {copied ? 'COPIED' : 'COPY LINK'}
+      {featured?.image_url ? (
+        <img src={featured.image_url} alt={featured.title} style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'contain', display: 'block', background: '#D9D6CE' }} />
+      ) : (
+        <div style={{ width: '100%', aspectRatio: '1 / 1', background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontFamily: T.mono, fontSize: 10, color: 'rgba(0,0,0,0.4)', background: 'rgba(255,255,255,0.75)', padding: '3px 7px' }}>{exhibition.title}</span>
+        </div>
+      )}
+
+      <div style={{ padding: '22px 16px 10px' }}>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, marginBottom: 12 }}>EXHIBITION</div>
+        <div style={{ fontFamily: T.serif, fontSize: 34, lineHeight: 1.25, letterSpacing: '0.02em', color: T.ink }}>{exhibition.title}</div>
+        <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 16px', paddingTop: 16, borderTop: `0.5px solid ${T.line}` }}>
+          {(exhibition.start_date || exhibition.end_date) && (
+            <MetaCell label="DATES" value={`${fmtDateDot(exhibition.start_date)}\n— ${fmtDateDot(exhibition.end_date)}`} mono />
+          )}
+          <MetaCell label="WORKS" value={pad2(artworks.length)} mono />
+          {exhibition.location && <MetaCell label="VENUE" value={exhibition.location} span={2} />}
+          {org?.name && <MetaCell label="ORGANIZATION" value={org.name} span={2} />}
+        </div>
+        {exhibition.description && (
+          <div style={{ marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${T.line}`, fontSize: 13, lineHeight: 1.9, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
+        )}
+        <button onClick={copyLink} style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'transparent', border: `1px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: T.ink }}>
+          <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artport.jp/…/{exhibition.slug}</span>
+          <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'COPY'}</span>
         </button>
       </div>
 
-      {/* Gallery */}
-      <section style={{ padding: `calc(${GAP} * 2) ${GAP}` }}>
-        <div style={{
-          fontFamily: 'Cormorant Garamond, serif',
-          fontSize: '0.65rem',
-          letterSpacing: '0.35em',
-          textTransform: 'uppercase',
-          color: '#c0392b',
-          marginBottom: '3rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-        }}>
-          Works
-          <span style={{ flex: 1, height: '1px', background: 'rgba(26,22,18,0.1)' }} />
-        </div>
-        <div
-          ref={galleryRef}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '1.5rem',
-            alignItems: 'start',
-          }}
-          className="gallery-grid-responsive"
-        >
-          {artworks.map((artwork, i) => (
-            <div
-              key={artwork.id}
-              className="gallery-item"
-              onClick={() => setSelectedArtwork(artwork)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div style={{
-                aspectRatio: '3/4',
-                background: '#ede6d6',
-                overflow: 'hidden',
-                position: 'relative',
-                border: '1px solid rgba(26,22,18,0.08)',
-              }}>
-                {artwork.image_url && (
-                  <img
-                    src={artwork.image_url}
-                    alt={artwork.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-                  />
+      {artworks.length > 0 && (
+        <div style={{ marginTop: 36, borderTop: `1px solid ${T.ink}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '16px 16px 12px' }}>
+            <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.04em', color: T.ink }}>Works</div>
+            <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · TAP FOR DETAILS</div>
+          </div>
+          <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: T.line }}>
+            {artworks.map((w, i) => (
+              <div key={w.id} className="gallery-item" onClick={() => setSelectedArtwork(w)} style={{ background: T.paper, cursor: 'pointer', position: 'relative' }}>
+                {w.image_url ? (
+                  <img src={w.image_url} alt={w.title} style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block' }} />
+                ) : (
+                  <div style={{ width: '100%', aspectRatio: '1 / 1', background: '#D9D6CE' }} />
                 )}
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  padding: '2rem 1rem 1rem',
-                  background: 'linear-gradient(to top, rgba(26,22,18,0.72) 0%, transparent 100%)',
-                  zIndex: 2,
-                }}>
-                  <span style={{
-                    display: 'block',
-                    fontFamily: 'Cormorant Garamond, serif',
-                    fontSize: '0.6rem',
-                    letterSpacing: '0.3em',
-                    color: 'rgba(245,240,232,0.45)',
-                    marginBottom: '0.3rem',
-                  }}>
-                    {zeroPad(i + 1)}
-                  </span>
-                  <div style={{
-                    fontFamily: 'Shippori Mincho, serif',
-                    fontSize: '1rem',
-                    fontWeight: 400,
-                    color: '#f5f0e8',
-                    letterSpacing: '0.06em',
-                    lineHeight: 1.4,
-                  }}>
-                    {artwork.title}
-                  </div>
-                </div>
+                <div style={{ position: 'absolute', top: 4, left: 4, fontFamily: T.mono, fontSize: 8.5, letterSpacing: '0.1em', background: T.paper, padding: '2px 4px', color: T.inkMuted }}>{pad2(i + 1)}</div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </section>
-
-      {/* All exhibitions (dark section) */}
-      {allExhibitions.length > 1 && (
-        <section style={{
-          background: '#1a1612',
-          padding: `calc(${GAP} * 2) ${GAP}`,
-        }}>
-          <div style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: '0.65rem',
-            letterSpacing: '0.35em',
-            textTransform: 'uppercase',
-            color: '#b8932a',
-            marginBottom: '2.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-          }}>
-            All Exhibitions
-            <span style={{ flex: 1, height: '1px', background: 'rgba(245,240,232,0.1)' }} />
-          </div>
-          <div>
-            {allExhibitions.map((exh, i) => {
-              const isCurrent = exh.id === exhibition.id
-              return (
-                <Link
-                  key={exh.id}
-                  to={`/${orgSlug}/exhibition/${exh.slug}`}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '6rem 1fr auto',
-                    alignItems: 'center',
-                    gap: '2rem',
-                    padding: '1.5rem 0',
-                    borderBottom: '1px solid rgba(245,240,232,0.08)',
-                    ...(i === 0 ? { borderTop: '1px solid rgba(245,240,232,0.08)' } : {}),
-                    textDecoration: 'none',
-                    color: 'inherit',
-                  }}
-                >
-                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2rem', fontWeight: 300, color: 'rgba(245,240,232,0.2)' }}>
-                    {new Date(exh.start_date).getFullYear()}
-                  </div>
-                  <div>
-                    <div style={{ fontFamily: 'Shippori Mincho, serif', fontSize: '1.1rem', color: '#f5f0e8' }}>
-                      {exh.title}
-                      {isCurrent && (
-                        <span style={{
-                          display: 'inline-block',
-                          fontSize: '0.6rem',
-                          letterSpacing: '0.15em',
-                          padding: '0.2rem 0.6rem',
-                          border: '1px solid #c0392b',
-                          color: '#c0392b',
-                          marginLeft: '0.75rem',
-                          verticalAlign: 'middle',
-                          fontFamily: 'Cormorant Garamond, serif',
-                        }}>
-                          NOW
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ fontSize: '0.7rem', color: 'rgba(245,240,232,0.4)', letterSpacing: '0.1em', marginTop: '0.25rem', fontFamily: 'Cormorant Garamond, serif' }}>
-                      {exh.location}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: '1rem', color: 'rgba(245,240,232,0.3)' }}>→</div>
-                </Link>
-              )
-            })}
-          </div>
-        </section>
       )}
 
-      {/* Organizer */}
       {org && (
-        <section style={{
-          padding: `calc(${GAP} * 2) ${GAP}`,
-          borderTop: '1px solid rgba(26,22,18,0.1)',
-        }}>
-          <div style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: '0.65rem',
-            letterSpacing: '0.35em',
-            textTransform: 'uppercase',
-            color: '#c0392b',
-            marginBottom: '2rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-          }}>
-            Organizer
-            <span style={{ flex: 1, height: '1px', background: 'rgba(26,22,18,0.1)' }} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: GAP, alignItems: 'start' }} className="organizer-grid-responsive">
-            <div>
+        <div style={{ padding: '28px 16px 48px' }}>
+          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 10 }}>ORGANIZER</div>
+          <div style={{ display: 'flex', gap: 12, padding: '14px 0', borderTop: `0.5px solid ${T.ink}`, borderBottom: `0.5px solid ${T.ink}` }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <Link to={`/${orgSlug}`} style={{ textDecoration: 'none' }}>
-                <div style={{ fontFamily: 'Shippori Mincho, serif', fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: 400, marginBottom: '0.5rem', color: '#1a1612' }}>
-                  {org.name}
-                </div>
+                <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', color: T.ink }}>{org.name}</div>
               </Link>
-              {org.description && (
-                <div style={{ fontSize: '0.85rem', lineHeight: 1.9, color: '#3d3530', marginTop: '1.5rem' }}>
-                  {org.description}
-                </div>
-              )}
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', flexWrap: 'wrap' }}>
-                {sns.instagram && (
-                  <a href={sns.instagram} target="_blank" rel="noreferrer" style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: '#9a9088', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '0.1rem' }}>
-                    Instagram
-                  </a>
-                )}
-                {sns.x && (
-                  <a href={sns.x} target="_blank" rel="noreferrer" style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: '#9a9088', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '0.1rem' }}>
-                    X (Twitter)
-                  </a>
-                )}
-                {org.homepage_url && (
-                  <a href={org.homepage_url} target="_blank" rel="noreferrer" style={{ fontSize: '0.7rem', letterSpacing: '0.15em', color: '#9a9088', textDecoration: 'none', borderBottom: '1px solid transparent', paddingBottom: '0.1rem' }}>
-                    公式サイト
-                  </a>
-                )}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '3rem', flexWrap: 'wrap' }}>
-                <Link to={`/${orgSlug}`} style={{
-                  fontFamily: 'Cormorant Garamond, serif',
-                  fontSize: '0.75rem',
-                  letterSpacing: '0.2em',
-                  textTransform: 'uppercase',
-                  color: '#1a1612',
-                  border: '1px solid rgba(26,22,18,0.3)',
-                  padding: '0.5rem 1.2rem',
-                  textDecoration: 'none',
-                  display: 'inline-block',
-                }}>
-                  団体ページへ →
-                </Link>
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontFamily: 'Cormorant Garamond, serif',
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.2em',
-                  color: '#9a9088',
-                  border: '1px solid rgba(26,22,18,0.15)',
-                  padding: '0.5rem 1rem',
-                }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#c0392b', display: 'block' }} />
-                  artport にて公開中
-                </div>
+              <div style={{ marginTop: 6, display: 'flex', gap: 14, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.1em', color: T.inkSoft }}>
+                {sns.instagram && <a href={sns.instagram} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>IG ↗</a>}
+                {sns.x && <a href={sns.x} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>X ↗</a>}
+                {org.homepage_url && <a href={org.homepage_url} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>WEB ↗</a>}
               </div>
             </div>
+            <Link to={`/${orgSlug}`} style={{ width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 14, color: T.ink, textDecoration: 'none' }}>→</Link>
           </div>
-        </section>
+        </div>
       )}
-
-      {/* Footer */}
-      <footer style={{
-        padding: `2rem ${GAP}`,
-        borderTop: '1px solid rgba(26,22,18,0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        fontSize: '0.7rem',
-        color: '#9a9088',
-        letterSpacing: '0.1em',
-      }}>
-        <div>© {new Date().getFullYear()} Artport</div>
-        <div>展覧会のポータル</div>
-      </footer>
 
       <ArtworkModal artwork={selectedArtwork} onClose={() => setSelectedArtwork(null)} />
-
-      {/* Responsive styles */}
-      <style>{`
-        @media (max-width: 768px) {
-          .hero-grid { grid-template-columns: 1fr !important; min-height: auto !important; }
-          .gallery-grid-responsive { grid-template-columns: repeat(2, 1fr) !important; }
-          .organizer-grid-responsive { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
+      <BottomNav active="top" />
     </div>
   )
 }
