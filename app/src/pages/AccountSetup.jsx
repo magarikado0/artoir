@@ -79,7 +79,7 @@ export default function AccountSetup() {
       />
       <DashField
         label="SLUG"
-        prefix="Artoir.jp/"
+        prefix="artoir.net/"
         value={slug}
         onChange={setSlug}
         placeholder="tamabi-nihonga"

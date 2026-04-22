@@ -53,7 +53,7 @@ organizations
 ## URL Design
 
 ```
-Artoir.jp/{org-slug}/exhibition/{exhibition-slug}
+artoir.net/{org-slug}/exhibition/{exhibition-slug}
 ```
 
 ---

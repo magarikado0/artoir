@@ -118,7 +118,7 @@ export default function DashSettings() {
       <DashSectionLabel>URL · SLUG</DashSectionLabel>
       <DashField
         label="SLUG"
-        prefix="Artoir.jp/"
+        prefix="artoir.net/"
         value={slug}
         onChange={(v) => { setSlug(v); setSlugChanged(v !== orgSlug) }}
         placeholder="org-slug"

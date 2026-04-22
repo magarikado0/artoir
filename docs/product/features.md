@@ -34,10 +34,10 @@
 ### URL設計
 
 ```
-Artoir.jp/{org-slug}/exhibition/{exhibition-slug}
+artoir.net/{org-slug}/exhibition/{exhibition-slug}
 ```
 
-例：`Artoir.jp/kyodai-shodo/exhibition/2026-spring`
+例：`artoir.net/kyodai-shodo/exhibition/2026-spring`
 
 ### シェアリンク
 
