@@ -29,10 +29,10 @@ export default function Header({ activeTab }) {
         <div style={{
           maxWidth: 1200, margin: '0 auto',
           display: 'flex', alignItems: 'center',
-          padding: '0 32px', height: 56, gap: 0,
+          padding: '0 32px', height: 68, gap: 0,
         }}>
           <Link to="/" style={{
-            fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500,
+            fontFamily: T.serif, fontSize: 22, letterSpacing: '-0.01em', fontWeight: 500,
             color: T.ink, textDecoration: 'none', marginRight: 40, flexShrink: 0,
           }}>
             Artoir<span style={{ color: T.accent }}>.</span>
@@ -43,7 +43,7 @@ export default function Header({ activeTab }) {
               const on = activeTab === t.key
               return (
                 <Link key={t.key} to={t.path} style={{
-                  padding: '0 18px', height: 56, display: 'flex', alignItems: 'center',
+                  padding: '0 18px', height: 68, display: 'flex', alignItems: 'center',
                   textDecoration: 'none', position: 'relative',
                   fontFamily: T.sans, fontSize: 13, letterSpacing: '0.04em',
                   color: on ? T.ink : T.inkSoft,
@@ -82,13 +82,13 @@ export default function Header({ activeTab }) {
   // mobile header
   return (
     <div style={{
-      padding: '14px 16px 12px',
+      padding: '18px 16px 16px',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       borderBottom: `1px solid ${T.ink}`,
       background: T.paper, position: 'sticky', top: 0, zIndex: 50,
     }}>
       <Link to="/" style={{
-        fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500,
+        fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500,
         color: T.ink, textDecoration: 'none',
       }}>
         Artoir<span style={{ color: T.accent }}>.</span>
