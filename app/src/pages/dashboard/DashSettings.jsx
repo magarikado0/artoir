@@ -143,13 +143,13 @@ export default function DashSettings() {
 
   if (isDesktop) return (
     <DashShell orgSlug={orgSlug} active="set" crumbs={['DASHBOARD', 'SETTINGS']}>
-      <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
-        <div>
-          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>ORGANIZATION / SETTINGS</div>
-          <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>団体設定</div>
+      <div style={{ maxWidth: '80%', margin: '0 auto' }}>
+        <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
+          <div>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>ORGANIZATION / SETTINGS</div>
+            <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>団体設定</div>
+          </div>
         </div>
-      </div>
-      <div style={{ maxWidth: 640 }}>
         {formContent}
       </div>
     </DashShell>

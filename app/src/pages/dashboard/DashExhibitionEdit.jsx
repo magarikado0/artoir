@@ -156,13 +156,13 @@ export default function DashExhibitionEdit() {
 
   if (isDesktop) return (
     <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
-      <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
-        <div>
-          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
-          <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
+      <div style={{ maxWidth: '80%', margin: '0 auto' }}>
+        <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
+          <div>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
+            <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
+          </div>
         </div>
-      </div>
-      <div style={{ maxWidth: 640 }}>
         {formContent}
       </div>
     </DashShell>
