@@ -167,7 +167,7 @@ export default function LoginPage() {
         fontFamily: T.mono, letterSpacing: '0.08em',
       }}>
         アカウントは招待制です。<br/>
-        利用希望は info@Artoir.jp まで。
+        利用希望は info@artoir.net まで。
       </div>
     </>
   )
