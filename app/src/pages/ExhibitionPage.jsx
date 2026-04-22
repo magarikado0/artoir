@@ -21,7 +21,7 @@ function DesktopFooter() {
   return (
     <div style={{ borderTop: `1px solid ${T.ink}` }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
-        <span>© ARTPORT {new Date().getFullYear()}</span>
+        <span>© Artoir {new Date().getFullYear()}</span>
         <span>展覧会プラットフォーム</span>
       </div>
     </div>
@@ -141,7 +141,7 @@ export default function ExhibitionPage() {
               <div style={{ marginTop: 28, fontSize: 13, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
             )}
             <button onClick={copyLink} style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: 'transparent', border: `1px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: T.ink }}>
-              <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artport.jp/…/{exhibition.slug}</span>
+              <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>Artoir.jp/…/{exhibition.slug}</span>
               <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'URLをコピー'}</span>
             </button>
           </div>
@@ -228,7 +228,7 @@ export default function ExhibitionPage() {
           <div style={{ marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${T.line}`, fontSize: 13, lineHeight: 1.9, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
         )}
         <button onClick={copyLink} style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'transparent', border: `1px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: T.ink }}>
-          <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artport.jp/…/{exhibition.slug}</span>
+          <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>Artoir.jp/…/{exhibition.slug}</span>
           <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'COPY'}</span>
         </button>
       </div>

@@ -79,7 +79,7 @@ export default function AccountSetup() {
       />
       <DashField
         label="SLUG"
-        prefix="artport.jp/"
+        prefix="Artoir.jp/"
         value={slug}
         onChange={setSlug}
         placeholder="tamabi-nihonga"
@@ -117,7 +117,7 @@ export default function AccountSetup() {
       <div style={{ borderBottom: `1px solid ${T.ink}`, background: T.paper }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none' }}>
-            artport<span style={{ color: T.accent }}>.</span>
+            Artoir<span style={{ color: T.accent }}>.</span>
           </Link>
           <Link to="/account" style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkMuted, textDecoration: 'none' }}>← BACK</Link>
         </div>
@@ -129,7 +129,7 @@ export default function AccountSetup() {
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 10 }}>SETUP / 01</div>
           <div style={{ fontFamily: T.serif, fontSize: 36, letterSpacing: '0.02em', color: T.ink, marginBottom: 8 }}>団体を作成する</div>
           <div style={{ fontSize: 13, color: T.inkSoft, lineHeight: 1.9, fontFamily: T.serifBody, marginBottom: 32 }}>
-            artport に公開される団体ページを作成します。
+            Artoir に公開される団体ページを作成します。
           </div>
           {form}
         </div>
@@ -143,7 +143,7 @@ export default function AccountSetup() {
       {/* header */}
       <div style={{ padding: '14px 16px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${T.ink}`, background: T.paper }}>
         <Link to="/" style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none' }}>
-          artport<span style={{ color: T.accent }}>.</span>
+          Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
         <Link to="/account" style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, textDecoration: 'none' }}>← BACK</Link>
       </div>
@@ -151,7 +151,7 @@ export default function AccountSetup() {
       <div style={{ flex: 1, padding: '32px 16px' }}>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 10 }}>SETUP / 01</div>
         <div style={{ fontFamily: T.serif, fontSize: 28, letterSpacing: '0.02em', color: T.ink, lineHeight: 1.35, marginBottom: 8 }}>団体を作成する</div>
-        <div style={{ fontSize: 13, color: T.inkSoft, lineHeight: 1.9, marginBottom: 28 }}>artport に公開される団体ページを作成します。</div>
+        <div style={{ fontSize: 13, color: T.inkSoft, lineHeight: 1.9, marginBottom: 28 }}>Artoir に公開される団体ページを作成します。</div>
         {form}
       </div>
     </div>

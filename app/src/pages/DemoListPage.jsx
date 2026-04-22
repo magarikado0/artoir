@@ -126,7 +126,7 @@ export default function DemoListPage() {
         color: '#9a9088',
         letterSpacing: '0.1em',
       }}>
-        <div>© {new Date().getFullYear()} Artport</div>
+        <div>© {new Date().getFullYear()} Artoir</div>
         <div>展覧会のポータル</div>
       </footer>
 

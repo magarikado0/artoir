@@ -1,11 +1,11 @@
-# Artport
+# Artoir
 
 展覧会ごとに作品をまとめて公開できるポータルサイト。
 
 ## ディレクトリ構造
 
 ```
-artport/
+Artoir/
 ├── app/        # アプリ本体（React + Vite）
 ├── docs/       # プロダクト・設計・運用ドキュメント
 └── CLAUDE.md   # Claude Code 用プロジェクト文脈

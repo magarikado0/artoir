@@ -108,7 +108,7 @@ export default function LoginPage() {
           fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500,
           color: T.ink, textDecoration: 'none',
         }}>
-          artport<span style={{ color: T.accent }}>.</span>
+          Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
           INDEX · {new Date().getFullYear()}
@@ -186,7 +186,7 @@ export default function LoginPage() {
           fontFamily: T.mono, letterSpacing: '0.08em',
         }}>
           アカウントは招待制です。<br/>
-          利用希望は info@artport.jp まで。
+          利用希望は info@Artoir.jp まで。
         </div>
 
         <div style={{ flex: 1, minHeight: 28 }} />
@@ -196,7 +196,7 @@ export default function LoginPage() {
           display: 'flex', justifyContent: 'space-between',
           paddingTop: 16, borderTop: `0.5px solid ${T.line}`,
         }}>
-          <span>ARTPORT</span>
+          <span>Artoir</span>
           <span>{new Date().getFullYear()}</span>
         </div>
       </div>

@@ -1,4 +1,4 @@
-# Artport — Development Context
+# Artoir — Development Context
 
 展覧会ごとに作品をまとめて公開できるポータルサイト。
 
@@ -17,7 +17,7 @@
 ## Directory Structure
 
 ```
-artport/
+Artoir/
 ├── app/                    # アプリ本体（Vercelのビルド対象）
 │   ├── src/
 │   ├── public/
@@ -53,7 +53,7 @@ organizations
 ## URL Design
 
 ```
-artport.jp/{org-slug}/exhibition/{exhibition-slug}
+Artoir.jp/{org-slug}/exhibition/{exhibition-slug}
 ```
 
 ---

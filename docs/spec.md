@@ -1,4 +1,4 @@
-# Artport — MVP 実装仕様
+# Artoir — MVP 実装仕様
 
 > 最終更新: 2026-04-10
 
@@ -114,4 +114,4 @@ organizations
 | 見出しフォント | Noto Serif JP / Cormorant Garamond |
 
 - モバイルファースト・レスポンシブ
-- インタラクティブモックアップ: `docs/design/mockups/artport-exhibition.html`
+- インタラクティブモックアップ: `docs/design/mockups/Artoir-exhibition.html`

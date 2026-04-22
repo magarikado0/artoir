@@ -35,7 +35,7 @@ export default function Header({ activeTab }) {
             fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500,
             color: T.ink, textDecoration: 'none', marginRight: 40, flexShrink: 0,
           }}>
-            artport<span style={{ color: T.accent }}>.</span>
+            Artoir<span style={{ color: T.accent }}>.</span>
           </Link>
 
           <div style={{ display: 'flex', flex: 1, gap: 0 }}>
@@ -91,7 +91,7 @@ export default function Header({ activeTab }) {
         fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500,
         color: T.ink, textDecoration: 'none',
       }}>
-        artport<span style={{ color: T.accent }}>.</span>
+        Artoir<span style={{ color: T.accent }}>.</span>
       </Link>
       <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
         INDEX · {new Date().getFullYear()}

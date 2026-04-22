@@ -17,10 +17,10 @@ organizations
 ## URL設計
 
 ```
-artport.jp/{org-slug}/exhibition/{exhibition-slug}
+Artoir.jp/{org-slug}/exhibition/{exhibition-slug}
 ```
 
-例：`artport.jp/kyodai-shodo/exhibition/2026-spring`
+例：`Artoir.jp/kyodai-shodo/exhibition/2026-spring`
 
 ## Vercel設定
 

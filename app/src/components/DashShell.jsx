@@ -9,7 +9,7 @@ function DashDesktopNav({ orgSlug }) {
     <div style={{ borderBottom: `1px solid ${T.ink}`, background: T.paper, position: 'sticky', top: 0, zIndex: 50 }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', padding: '0 32px', height: 56, gap: 0 }}>
         <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none', marginRight: 40, flexShrink: 0 }}>
-          artport<span style={{ color: T.accent }}>.</span>
+          Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, display: 'inline-block' }} />
@@ -54,7 +54,7 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
       {/* mobile header */}
       <div style={{ padding: '14px 16px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${T.ink}`, background: T.paper, position: 'sticky', top: 0, zIndex: 50 }}>
         <Link to="/" style={{ fontFamily: T.serif, fontSize: 17, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none' }}>
-          artport<span style={{ color: T.accent }}>.</span>
+          Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.ink, display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, display: 'inline-block' }} />

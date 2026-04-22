@@ -34,10 +34,10 @@
 ### URL設計
 
 ```
-artport.jp/{org-slug}/exhibition/{exhibition-slug}
+Artoir.jp/{org-slug}/exhibition/{exhibition-slug}
 ```
 
-例：`artport.jp/kyodai-shodo/exhibition/2026-spring`
+例：`Artoir.jp/kyodai-shodo/exhibition/2026-spring`
 
 ### シェアリンク
 
@@ -47,4 +47,4 @@ artport.jp/{org-slug}/exhibition/{exhibition-slug}
 
 - 有料プラン
 - 閲覧数アナリティクス
-- Artportロゴ非表示オプション
+- Artoirロゴ非表示オプション

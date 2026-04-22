@@ -94,7 +94,7 @@ export default function DashExhibitionEdit() {
       <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
       <DashField
         label="SLUG"
-        prefix={`artport.jp/${orgSlug}/exhibition/`}
+        prefix={`Artoir.jp/${orgSlug}/exhibition/`}
         value={slug}
         onChange={setSlug}
         placeholder="shizukana-kehai"

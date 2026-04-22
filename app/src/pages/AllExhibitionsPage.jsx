@@ -226,7 +226,7 @@ function MobileView({ rows, navigate }) {
       </div>
 
       <div style={{ padding: '24px 16px 28px', borderTop: `1px solid ${T.ink}`, display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted }}>
-        <span>© ARTPORT {new Date().getFullYear()}</span>
+        <span>© Artoir {new Date().getFullYear()}</span>
         <Link to="/login" style={{ color: T.inkMuted, textDecoration: 'none' }}>LOGIN ↗</Link>
       </div>
 
@@ -243,7 +243,7 @@ function DesktopFooter() {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted,
       }}>
-        <span>© ARTPORT {new Date().getFullYear()}</span>
+        <span>© Artoir {new Date().getFullYear()}</span>
         <span>展覧会プラットフォーム</span>
       </div>
     </div>

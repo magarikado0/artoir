@@ -11,7 +11,7 @@ function DesktopFooter() {
   return (
     <div style={{ borderTop: `1px solid ${T.ink}`, marginTop: 80 }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
-        <span>© ARTPORT {new Date().getFullYear()}</span>
+        <span>© Artoir {new Date().getFullYear()}</span>
         <span>展覧会プラットフォーム</span>
       </div>
     </div>
@@ -105,7 +105,7 @@ export default function OrgsPage() {
       <div style={{ padding: '22px 16px 12px' }}>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>INDEX · ORGS</div>
         <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 28, letterSpacing: '0.02em', color: T.ink }}>団体一覧</div>
-        <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.8 }}>artport に登録されている美術大学・研究室・コレクティブ。</div>
+        <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.8 }}>Artoir に登録されている美術大学・研究室・コレクティブ。</div>
       </div>
 
       <div style={{ borderTop: `1px solid ${T.ink}` }}>
