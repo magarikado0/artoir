@@ -6,12 +6,18 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { T, fmtDateDot, pad2 } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
+import { useAuth } from '../lib/auth'
 
 export default function AllExhibitionsPage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
+  const { session } = useAuth()
+
+  function handleCreate() {
+    navigate(session ? '/account' : '/login')
+  }
 
   useEffect(() => {
     async function load() {
@@ -42,11 +48,11 @@ export default function AllExhibitionsPage() {
     </div>
   )
 
-  if (isDesktop) return <DesktopView rows={rows} navigate={navigate} />
-  return <MobileView rows={rows} navigate={navigate} />
+  if (isDesktop) return <DesktopView rows={rows} navigate={navigate} handleCreate={handleCreate} />
+  return <MobileView rows={rows} navigate={navigate} handleCreate={handleCreate} />
 }
 
-function DesktopView({ rows, navigate }) {
+function DesktopView({ rows, navigate, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="top" />
@@ -150,7 +156,7 @@ function DesktopView({ rows, navigate }) {
             </div>
           </div>
           <button
-            onClick={() => navigate('/login')}
+            onClick={handleCreate}
             style={{
               flexShrink: 0, background: T.accent, color: T.paper, border: 'none',
               padding: '14px 24px', fontFamily: T.sans, fontWeight: 500,
@@ -167,7 +173,7 @@ function DesktopView({ rows, navigate }) {
   )
 }
 
-function MobileView({ rows, navigate }) {
+function MobileView({ rows, navigate, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
       <Header activeTab="top" />
@@ -220,7 +226,7 @@ function MobileView({ rows, navigate }) {
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>FOR ORGANIZATIONS</div>
         <div style={{ marginTop: 10, fontFamily: T.serif, fontSize: 22, lineHeight: 1.4 }}>展覧会を、<br/>そのまま記録に。</div>
         <div style={{ marginTop: 10, fontSize: 12, lineHeight: 1.8, color: 'rgba(255,255,255,0.7)' }}>作品・会期・会場を登録するだけで、共有可能な展覧会ページが公開されます。</div>
-        <button onClick={() => navigate('/login')} style={{ marginTop: 20, background: T.accent, color: T.paper, border: 'none', padding: '12px 18px', fontFamily: T.sans, fontWeight: 500, fontSize: 12, letterSpacing: '0.1em', cursor: 'pointer' }}>
+        <button onClick={handleCreate} style={{ marginTop: 20, background: T.accent, color: T.paper, border: 'none', padding: '12px 18px', fontFamily: T.sans, fontWeight: 500, fontSize: 12, letterSpacing: '0.1em', cursor: 'pointer' }}>
           自分の展覧会を作る  →
         </button>
       </div>
