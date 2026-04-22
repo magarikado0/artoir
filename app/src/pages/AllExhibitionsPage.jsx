@@ -48,11 +48,11 @@ export default function AllExhibitionsPage() {
     </div>
   )
 
-  if (isDesktop) return <DesktopView rows={rows} navigate={navigate} handleCreate={handleCreate} />
-  return <MobileView rows={rows} navigate={navigate} handleCreate={handleCreate} />
+  if (isDesktop) return <DesktopView rows={rows} handleCreate={handleCreate} />
+  return <MobileView rows={rows} handleCreate={handleCreate} />
 }
 
-function DesktopView({ rows, navigate, handleCreate }) {
+function DesktopView({ rows, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="top" />
@@ -60,106 +60,106 @@ function DesktopView({ rows, navigate, handleCreate }) {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
         {/* page header */}
         <div style={{
-          padding: '40px 0 28px',
+          padding: '56px 0 32px',
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
           borderBottom: `1px solid ${T.ink}`,
         }}>
           <div>
-            <div style={{
-              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
-              color: T.inkMuted, marginBottom: 8,
-            }}>CURRENT / UPCOMING · {new Date().getFullYear()}</div>
-            <div style={{ fontFamily: T.serif, fontSize: 42, letterSpacing: '0.01em', lineHeight: 1.2 }}>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 12 }}>
+              CURRENT / UPCOMING · {new Date().getFullYear()}
+            </div>
+            <div style={{ fontFamily: T.serif, fontSize: 52, letterSpacing: '0.01em', lineHeight: 1.15, color: T.ink }}>
               展覧会一覧
             </div>
           </div>
-          <div style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.18em', color: T.inkMuted }}>
+          <div style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.18em', color: T.inkMuted, paddingBottom: 6 }}>
             {pad2(rows.length)} EXHIBITIONS
           </div>
         </div>
 
         {/* filter row */}
-        <div style={{ padding: '16px 0', display: 'flex', gap: 6, borderBottom: `0.5px solid ${T.line}`, flexWrap: 'wrap' }}>
-          {['ALL', 'OPEN NOW', 'UPCOMING'].map((f) => (
+        <div style={{ padding: '14px 0', display: 'flex', gap: 6, borderBottom: `0.5px solid ${T.line}` }}>
+          {['ALL', 'OPEN NOW', 'UPCOMING'].map((f, i) => (
             <span key={f} style={{
-              padding: '6px 12px',
-              background: 'transparent',
-              color: T.inkSoft,
-              border: `0.5px solid ${T.line}`,
+              padding: '7px 14px',
+              background: i === 0 ? T.ink : 'transparent',
+              color: i === 0 ? T.paper : T.inkMuted,
+              border: i === 0 ? `1px solid ${T.ink}` : `0.5px solid ${T.line}`,
               fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em',
+              cursor: 'pointer', userSelect: 'none',
             }}>{f}</span>
           ))}
         </div>
 
         {/* table header */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '48px 1fr 260px 200px 80px',
+          display: 'grid', gridTemplateColumns: '44px 68px 1fr 220px 180px',
           padding: '10px 0', gap: 20, borderBottom: `0.5px solid ${T.ink}`,
           fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted,
         }}>
           <span>NO.</span>
+          <span />
           <span>展覧会 · 団体</span>
           <span>会場</span>
           <span>会期</span>
-          <span style={{ textAlign: 'right' }}>作品数</span>
         </div>
 
         {rows.map(({ exhibition: exh, org }, i) => (
           <Link
             key={exh.id}
             to={`/${org?.slug}/exhibition/${exh.slug}`}
+            className="list-row"
             style={{
-              display: 'grid', gridTemplateColumns: '48px 1fr 260px 200px 80px',
-              padding: '18px 0', gap: 20, alignItems: 'center',
-              borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer',
+              display: 'grid', gridTemplateColumns: '44px 68px 1fr 220px 180px',
+              padding: '16px 0', gap: 20, alignItems: 'center',
+              borderBottom: `0.5px solid ${T.line}`,
               textDecoration: 'none', color: T.ink,
             }}
           >
             <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2(i + 1)}</div>
+            <div style={{ width: 68, height: 51, background: '#D9D6CE', flexShrink: 0 }} />
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.02em' }}>{exh.title}</div>
               <div style={{ marginTop: 3, fontSize: 12, color: T.inkSoft }}>{org?.name}</div>
             </div>
             <div style={{ fontSize: 12, color: T.inkSoft, lineHeight: 1.5 }}>{exh.location}</div>
             <div style={{ fontFamily: T.mono, fontSize: 11, color: T.ink, lineHeight: 1.6 }}>
-              {fmtDateDot(exh.start_date)}<br/>
+              {fmtDateDot(exh.start_date)}<br />
               <span style={{ color: T.inkMuted }}>— {fmtDateDot(exh.end_date)}</span>
-            </div>
-            <div style={{ fontFamily: T.mono, fontSize: 12, textAlign: 'right', color: T.inkMuted }}>
-              —
             </div>
           </Link>
         ))}
 
         {rows.length === 0 && (
-          <div style={{ padding: '60px 0', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>
+          <div style={{ padding: '80px 0', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>
             NO EXHIBITIONS YET
           </div>
         )}
       </div>
 
       {/* CTA */}
-      <div style={{ maxWidth: 1200, margin: '60px auto 0', padding: '0 32px' }}>
+      <div style={{ maxWidth: 1200, margin: '80px auto 0', padding: '0 32px' }}>
         <div style={{
-          padding: '40px 48px', background: T.ink, color: T.paper,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '52px 56px', background: T.ink, color: T.paper,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 48,
         }}>
           <div>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.5)' }}>
               FOR ORGANIZATIONS
             </div>
-            <div style={{ marginTop: 10, fontFamily: T.serif, fontSize: 28, lineHeight: 1.4 }}>
+            <div style={{ marginTop: 14, fontFamily: T.serif, fontSize: 34, lineHeight: 1.35 }}>
               展覧会を、そのまま記録に。
             </div>
-            <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.8, color: 'rgba(255,255,255,0.7)', maxWidth: 480 }}>
+            <div style={{ marginTop: 10, fontSize: 13, lineHeight: 1.85, color: 'rgba(255,255,255,0.65)', maxWidth: 480 }}>
               作品・会期・会場を登録するだけで、共有可能な展覧会ページが公開されます。
             </div>
           </div>
           <button
             onClick={handleCreate}
+            className="btn-accent"
             style={{
               flexShrink: 0, background: T.accent, color: T.paper, border: 'none',
-              padding: '14px 24px', fontFamily: T.sans, fontWeight: 500,
+              padding: '16px 28px', fontFamily: T.sans, fontWeight: 500,
               fontSize: 13, letterSpacing: '0.1em', cursor: 'pointer',
             }}
           >
@@ -173,7 +173,7 @@ function DesktopView({ rows, navigate, handleCreate }) {
   )
 }
 
-function MobileView({ rows, navigate, handleCreate }) {
+function MobileView({ rows, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
       <Header activeTab="top" />
@@ -187,27 +187,30 @@ function MobileView({ rows, navigate, handleCreate }) {
         <span>{pad2(rows.length)} EXH.</span>
       </div>
 
+      {/* table header */}
       <div style={{
-        display: 'grid', gridTemplateColumns: '32px 1fr 100px',
+        display: 'grid', gridTemplateColumns: '28px 52px 1fr 84px',
         padding: '10px 16px', borderBottom: `0.5px solid ${T.ink}`,
         fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, gap: 10,
       }}>
-        <span>NO.</span><span>展覧会 · 団体</span><span style={{ textAlign: 'right' }}>会期</span>
+        <span>NO.</span><span /><span>展覧会 · 団体</span><span style={{ textAlign: 'right' }}>会期</span>
       </div>
 
       {rows.map(({ exhibition: exh, org }, i) => (
         <Link
           key={exh.id}
           to={`/${org?.slug}/exhibition/${exh.slug}`}
+          className="list-row"
           style={{
-            display: 'grid', gridTemplateColumns: '32px 1fr 100px', gap: 10,
-            padding: '16px 16px', borderBottom: `0.5px solid ${T.line}`,
-            alignItems: 'start', textDecoration: 'none', color: T.ink,
+            display: 'grid', gridTemplateColumns: '28px 52px 1fr 84px', gap: 10,
+            padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`,
+            alignItems: 'center', textDecoration: 'none', color: T.ink,
           }}
         >
-          <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2 }}>{pad2(i + 1)}</div>
+          <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</div>
+          <div style={{ width: 52, height: 52, background: '#D9D6CE', flexShrink: 0 }} />
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: T.serif, fontSize: 16, lineHeight: 1.3, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
+            <div style={{ fontFamily: T.serif, fontSize: 15, lineHeight: 1.3, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
             <div style={{ marginTop: 2, fontSize: 11, color: T.inkSoft, lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{org?.name}</div>
             {exh.location && <div style={{ marginTop: 2, fontSize: 10.5, color: T.inkMuted, lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.location}</div>}
           </div>
@@ -222,11 +225,11 @@ function MobileView({ rows, navigate, handleCreate }) {
         <div style={{ padding: '48px 16px', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>NO EXHIBITIONS YET</div>
       )}
 
-      <div style={{ margin: '32px 16px', padding: '28px 22px', background: T.ink, color: T.paper }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>FOR ORGANIZATIONS</div>
-        <div style={{ marginTop: 10, fontFamily: T.serif, fontSize: 22, lineHeight: 1.4 }}>展覧会を、<br/>そのまま記録に。</div>
-        <div style={{ marginTop: 10, fontSize: 12, lineHeight: 1.8, color: 'rgba(255,255,255,0.7)' }}>作品・会期・会場を登録するだけで、共有可能な展覧会ページが公開されます。</div>
-        <button onClick={handleCreate} style={{ marginTop: 20, background: T.accent, color: T.paper, border: 'none', padding: '12px 18px', fontFamily: T.sans, fontWeight: 500, fontSize: 12, letterSpacing: '0.1em', cursor: 'pointer' }}>
+      <div style={{ margin: '36px 16px', padding: '32px 24px', background: T.ink, color: T.paper }}>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.5)' }}>FOR ORGANIZATIONS</div>
+        <div style={{ marginTop: 14, fontFamily: T.serif, fontSize: 26, lineHeight: 1.4 }}>展覧会を、<br />そのまま記録に。</div>
+        <div style={{ marginTop: 12, fontSize: 12, lineHeight: 1.85, color: 'rgba(255,255,255,0.65)' }}>作品・会期・会場を登録するだけで、共有可能な展覧会ページが公開されます。</div>
+        <button onClick={handleCreate} className="btn-accent" style={{ marginTop: 22, background: T.accent, color: T.paper, border: 'none', padding: '13px 20px', fontFamily: T.sans, fontWeight: 500, fontSize: 12, letterSpacing: '0.1em', cursor: 'pointer' }}>
           自分の展覧会を作る  →
         </button>
       </div>

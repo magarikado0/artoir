@@ -62,21 +62,21 @@ export default function OrgPage() {
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="orgs" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-        <div style={{ padding: '16px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
+        <div style={{ padding: '20px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
           <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← INDEX</Link>
           <span>/</span>
           <span style={{ color: T.ink }}>ORGANIZATION</span>
         </div>
 
-        <div style={{ padding: '24px 0 40px', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 64, borderBottom: `1px solid ${T.ink}` }}>
+        <div style={{ padding: '24px 0 48px', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 64, borderBottom: `1px solid ${T.ink}` }}>
           <div>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 12 }}>ORGANIZATION</div>
-            <div style={{ fontFamily: T.serif, fontSize: 36, lineHeight: 1.3, letterSpacing: '0.01em', color: T.ink }}>{org.name}</div>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 16 }}>ORGANIZATION</div>
+            <div style={{ fontFamily: T.serif, fontSize: 42, lineHeight: 1.25, letterSpacing: '0.01em', color: T.ink }}>{org.name}</div>
             {org.description && (
-              <div style={{ marginTop: 24, fontSize: 14, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody, maxWidth: 600 }}>{org.description}</div>
+              <div style={{ marginTop: 28, fontSize: 14, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody, maxWidth: 600 }}>{org.description}</div>
             )}
           </div>
-          <div style={{ paddingTop: 42 }}>
+          <div style={{ paddingTop: 44 }}>
             {[
               sns.instagram && ['INSTAGRAM', sns.instagram],
               sns.x && ['X (TWITTER)', sns.x],
@@ -90,15 +90,17 @@ export default function OrgPage() {
           </div>
         </div>
 
-        <div style={{ padding: '32px 0 60px' }}>
-          <div style={{ fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', marginBottom: 24, color: T.ink }}>展覧会</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+        <div style={{ padding: '40px 0 60px' }}>
+          <div style={{ fontFamily: T.serif, fontSize: 28, letterSpacing: '0.02em', marginBottom: 32, color: T.ink }}>展覧会</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 36 }}>
             {exhibitions.map((exh) => (
-              <Link key={exh.id} to={`/${orgSlug}/exhibition/${exh.slug}`} style={{ textDecoration: 'none', color: T.ink }}>
-                <div style={{ width: '100%', aspectRatio: '4 / 3', background: '#D9D6CE' }} />
-                <div style={{ marginTop: 14 }}>
-                  <div style={{ fontFamily: T.serif, fontSize: 17, letterSpacing: '0.02em' }}>{exh.title}</div>
-                  <div style={{ marginTop: 4, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.1em', color: T.inkMuted }}>{fmtDateDot(exh.start_date)} — {fmtDateDot(exh.end_date)}</div>
+              <Link key={exh.id} to={`/${orgSlug}/exhibition/${exh.slug}`} className="exh-card" style={{ textDecoration: 'none', color: T.ink, display: 'block' }}>
+                <div className="thumb-hover">
+                  <div className="thumb-scale" style={{ width: '100%', aspectRatio: '4 / 3', background: '#D9D6CE' }} />
+                </div>
+                <div style={{ marginTop: 16 }}>
+                  <div className="exh-card-title" style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.02em' }}>{exh.title}</div>
+                  <div style={{ marginTop: 5, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.1em', color: T.inkMuted }}>{fmtDateDot(exh.start_date)} — {fmtDateDot(exh.end_date)}</div>
                   {exh.location && <div style={{ marginTop: 4, fontSize: 11, color: T.inkSoft }}>{exh.location}</div>}
                 </div>
               </Link>
@@ -121,8 +123,8 @@ export default function OrgPage() {
         <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← INDEX</Link>
         {' '}/ ORGANIZATION
       </div>
-      <div style={{ padding: '28px 16px 16px' }}>
-        <div style={{ fontFamily: T.serif, fontSize: 24, lineHeight: 1.35, letterSpacing: '0.02em', color: T.ink }}>{org.name}</div>
+      <div style={{ padding: '32px 16px 18px' }}>
+        <div style={{ fontFamily: T.serif, fontSize: 28, lineHeight: 1.3, letterSpacing: '0.02em', color: T.ink }}>{org.name}</div>
         {org.description && <div style={{ marginTop: 20, fontSize: 13, lineHeight: 1.95, color: T.inkSoft, fontFamily: T.serifBody }}>{org.description}</div>}
       </div>
 
@@ -139,7 +141,7 @@ export default function OrgPage() {
           <span>EXHIBITIONS</span><span>{pad2(exhibitions.length)} · ALL</span>
         </div>
         {exhibitions.map((exh, i) => (
-          <Link key={exh.id} to={`/${orgSlug}/exhibition/${exh.slug}`} style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', gap: 12, textDecoration: 'none', color: T.ink }}>
+          <Link key={exh.id} to={`/${orgSlug}/exhibition/${exh.slug}`} className="list-row" style={{ padding: '16px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', gap: 12, textDecoration: 'none', color: T.ink }}>
             <div style={{ width: 36, fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2, flexShrink: 0 }}>{pad2(i + 1)}</div>
             <div style={{ width: 54, flexShrink: 0, aspectRatio: '1 / 1', alignSelf: 'flex-start', background: '#D9D6CE' }} />
             <div style={{ flex: 1, minWidth: 0 }}>

@@ -99,7 +99,7 @@ export default function ExhibitionPage() {
       <Header activeTab="top" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
 
-        <div style={{ padding: '16px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
+        <div style={{ padding: '20px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
           <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← 展覧会一覧</Link>
           <span>/</span>
           <Link to={`/${orgSlug}`} style={{ color: T.inkMuted, textDecoration: 'none' }}>{org?.name}</Link>
@@ -108,7 +108,7 @@ export default function ExhibitionPage() {
         </div>
 
         {/* two-col hero */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 48, paddingBottom: 48, borderBottom: `1px solid ${T.ink}` }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 56, paddingBottom: 56, borderBottom: `1px solid ${T.ink}` }}>
           <div>
             {featured?.image_url ? (
               <img src={featured.image_url} alt={featured.title} style={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'contain', display: 'block', background: '#D9D6CE' }} />
@@ -119,9 +119,9 @@ export default function ExhibitionPage() {
             )}
           </div>
           <div style={{ paddingTop: 8 }}>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.accent, marginBottom: 16 }}>EXHIBITION</div>
-            <div style={{ fontFamily: T.serif, fontSize: 40, lineHeight: 1.2, letterSpacing: '0.01em', color: T.ink }}>{exhibition.title}</div>
-            <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '90px 1fr', rowGap: 14, fontSize: 13, lineHeight: 1.6, paddingTop: 24, borderTop: `0.5px solid ${T.line}` }}>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.accent, marginBottom: 20 }}>EXHIBITION</div>
+            <div style={{ fontFamily: T.serif, fontSize: 48, lineHeight: 1.15, letterSpacing: '0.01em', color: T.ink }}>{exhibition.title}</div>
+            <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: '90px 1fr', rowGap: 14, fontSize: 13, lineHeight: 1.6, paddingTop: 24, borderTop: `0.5px solid ${T.line}` }}>
               {exhibition.start_date && <>
                 <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>会期</div>
                 <div style={{ fontFamily: T.mono, fontSize: 12 }}>{fmtDateDot(exhibition.start_date)} — {fmtDateDot(exhibition.end_date)}</div>
@@ -149,22 +149,24 @@ export default function ExhibitionPage() {
 
         {/* works grid — 4 col */}
         {artworks.length > 0 && (
-          <div style={{ padding: '40px 0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24 }}>
-              <div style={{ fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.ink }}>Works</div>
+          <div style={{ padding: '48px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 32 }}>
+              <div style={{ fontFamily: T.serif, fontSize: 28, letterSpacing: '0.02em', color: T.ink }}>Works</div>
               <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · クリックで詳細</div>
             </div>
-            <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+            <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
               {artworks.map((w, i) => (
                 <div key={w.id} className="gallery-item" onClick={() => setSelectedArtwork(w)} style={{ cursor: 'pointer' }}>
-                  {w.image_url ? (
-                    <img src={w.image_url} alt={w.title} style={{ width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', display: 'block' }} />
-                  ) : (
-                    <div style={{ width: '100%', aspectRatio: '4 / 5', background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontFamily: T.mono, fontSize: 9, color: 'rgba(0,0,0,0.35)', background: 'rgba(255,255,255,0.7)', padding: '2px 5px' }}>#{pad2(i + 1)}</span>
-                    </div>
-                  )}
-                  <div style={{ marginTop: 10 }}>
+                  <div className="thumb-hover">
+                    {w.image_url ? (
+                      <img src={w.image_url} alt={w.title} className="thumb-scale" style={{ width: '100%', aspectRatio: '4 / 5', objectFit: 'cover' }} />
+                    ) : (
+                      <div className="thumb-scale" style={{ width: '100%', aspectRatio: '4 / 5', background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontFamily: T.mono, fontSize: 9, color: 'rgba(0,0,0,0.35)', background: 'rgba(255,255,255,0.7)', padding: '2px 5px' }}>#{pad2(i + 1)}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ marginTop: 12 }}>
                     <div style={{ fontFamily: T.serif, fontSize: 14, letterSpacing: '0.02em', color: T.ink }}>{w.title}</div>
                   </div>
                 </div>
@@ -175,10 +177,10 @@ export default function ExhibitionPage() {
 
         {/* org strip */}
         {org && (
-          <div style={{ padding: '28px 32px', background: T.paperAlt, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 60 }}>
+          <div style={{ padding: '32px 40px', background: T.sand, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 60 }}>
             <div>
               <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 6 }}>ORGANIZER</div>
-              <Link to={`/${orgSlug}`} style={{ fontFamily: T.serif, fontSize: 18, textDecoration: 'none', color: T.ink }}>{org.name}</Link>
+              <Link to={`/${orgSlug}`} style={{ fontFamily: T.serif, fontSize: 20, textDecoration: 'none', color: T.ink }}>{org.name}</Link>
             </div>
             <div style={{ display: 'flex', gap: 20, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkSoft }}>
               {sns.instagram && <a href={sns.instagram} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>Instagram ↗</a>}
@@ -213,10 +215,10 @@ export default function ExhibitionPage() {
         </div>
       )}
 
-      <div style={{ padding: '22px 16px 10px' }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, marginBottom: 12 }}>EXHIBITION</div>
-        <div style={{ fontFamily: T.serif, fontSize: 34, lineHeight: 1.25, letterSpacing: '0.02em', color: T.ink }}>{exhibition.title}</div>
-        <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 16px', paddingTop: 16, borderTop: `0.5px solid ${T.line}` }}>
+      <div style={{ padding: '24px 16px 10px' }}>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, marginBottom: 16 }}>EXHIBITION</div>
+        <div style={{ fontFamily: T.serif, fontSize: 38, lineHeight: 1.2, letterSpacing: '0.02em', color: T.ink }}>{exhibition.title}</div>
+        <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 16px', paddingTop: 18, borderTop: `0.5px solid ${T.line}` }}>
           {(exhibition.start_date || exhibition.end_date) && (
             <MetaCell label="DATES" value={`${fmtDateDot(exhibition.start_date)}\n— ${fmtDateDot(exhibition.end_date)}`} mono />
           )}
@@ -235,17 +237,17 @@ export default function ExhibitionPage() {
 
       {artworks.length > 0 && (
         <div style={{ marginTop: 36, borderTop: `1px solid ${T.ink}` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '16px 16px 12px' }}>
-            <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.04em', color: T.ink }}>Works</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '18px 16px 14px' }}>
+            <div style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '0.04em', color: T.ink }}>Works</div>
             <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · TAP FOR DETAILS</div>
           </div>
           <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: T.line }}>
             {artworks.map((w, i) => (
-              <div key={w.id} className="gallery-item" onClick={() => setSelectedArtwork(w)} style={{ background: T.paper, cursor: 'pointer', position: 'relative' }}>
+              <div key={w.id} className="gallery-item thumb-hover" onClick={() => setSelectedArtwork(w)} style={{ background: T.paper, cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
                 {w.image_url ? (
-                  <img src={w.image_url} alt={w.title} style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block' }} />
+                  <img src={w.image_url} alt={w.title} className="thumb-scale" style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block' }} />
                 ) : (
-                  <div style={{ width: '100%', aspectRatio: '1 / 1', background: '#D9D6CE' }} />
+                  <div className="thumb-scale" style={{ width: '100%', aspectRatio: '1 / 1', background: '#D9D6CE' }} />
                 )}
                 <div style={{ position: 'absolute', top: 4, left: 4, fontFamily: T.mono, fontSize: 8.5, letterSpacing: '0.1em', background: T.paper, padding: '2px 4px', color: T.inkMuted }}>{pad2(i + 1)}</div>
               </div>

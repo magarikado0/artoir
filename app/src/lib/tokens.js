@@ -1,6 +1,7 @@
 export const T = {
   paper:     '#FAF8F3',
   paperAlt:  '#F3F0E8',
+  sand:      '#E8E4D9',
   card:      '#FFFFFF',
   ink:       '#111110',
   inkSoft:   '#3A3935',
