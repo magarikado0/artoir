@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { T } from '../lib/tokens'
+import { useIsDesktop } from '../lib/useIsDesktop'
 
 function Field({ label, value, onChange, type = 'text', placeholder, required, autoComplete }) {
   const [showPw, setShowPw] = useState(false)
@@ -61,6 +62,7 @@ function Field({ label, value, onChange, type = 'text', placeholder, required, a
 }
 
 export default function LoginPage() {
+  const isDesktop = useIsDesktop()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -92,12 +94,141 @@ export default function LoginPage() {
     }
   }
 
+  const year = new Date().getFullYear()
+
+  const formBody = (
+    <>
+      <div style={{
+        fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
+        color: T.inkMuted, marginBottom: 10,
+      }}>AUTH / 01</div>
+      <div style={{
+        fontFamily: T.serif, fontSize: 32, letterSpacing: '0.03em', lineHeight: 1.2, color: T.ink,
+      }}>Sign in.</div>
+      <div style={{
+        marginTop: 8, fontSize: 13, color: T.inkSoft,
+        fontFamily: T.serifBody, lineHeight: 1.7,
+      }}>
+        団体アカウントへログインします。
+      </div>
+
+      <form onSubmit={handleSubmit} style={{ marginTop: 36 }}>
+        <Field
+          label="MAIL"
+          type="email"
+          value={email}
+          onChange={setEmail}
+          placeholder="example@mail.com"
+          required
+          autoComplete="email"
+        />
+        <Field
+          label="PASSWORD"
+          type="password"
+          value={password}
+          onChange={setPassword}
+          placeholder="••••••••••"
+          required
+          autoComplete="current-password"
+        />
+
+        {error && (
+          <div style={{
+            marginBottom: 12, padding: '10px 14px',
+            background: 'rgba(180,69,44,0.06)', border: `0.5px solid ${T.accent}`,
+            fontFamily: T.mono, fontSize: 11, color: T.accent, letterSpacing: '0.06em',
+          }}>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div style={{
+            marginBottom: 12, padding: '10px 14px',
+            background: 'rgba(0,128,0,0.05)', border: '0.5px solid #2d8a4e',
+            fontFamily: T.mono, fontSize: 11, color: '#2d8a4e', letterSpacing: '0.06em',
+          }}>
+            {success}
+          </div>
+        )}
+
+        <button type="submit" disabled={loading} style={{
+          width: '100%', marginTop: 4,
+          background: loading ? T.inkMuted : T.accent, color: T.paper, border: 'none',
+          padding: '16px', fontFamily: T.sans, fontSize: 13,
+          fontWeight: 500, letterSpacing: '0.16em', cursor: loading ? 'wait' : 'pointer',
+        }}>
+          {loading ? '...' : 'ログイン  →'}
+        </button>
+      </form>
+
+      <div style={{
+        marginTop: 32, paddingTop: 20, borderTop: `0.5px solid ${T.line}`,
+        fontSize: 11, color: T.inkMuted, lineHeight: 1.7,
+        fontFamily: T.mono, letterSpacing: '0.08em',
+      }}>
+        アカウントは招待制です。<br/>
+        利用希望は info@Artoir.jp まで。
+      </div>
+    </>
+  )
+
+  if (isDesktop) {
+    return (
+      <div style={{
+        minHeight: '100vh', background: T.paper,
+        display: 'flex', flexDirection: 'column',
+      }}>
+        {/* desktop header */}
+        <div style={{ borderBottom: `1px solid ${T.ink}`, background: T.paper }}>
+          <div style={{
+            maxWidth: 1200, margin: '0 auto',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '0 32px', height: 56,
+          }}>
+            <Link to="/" style={{
+              fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500,
+              color: T.ink, textDecoration: 'none',
+            }}>
+              Artoir<span style={{ color: T.accent }}>.</span>
+            </Link>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
+              INDEX · {year}
+            </div>
+          </div>
+        </div>
+
+        {/* centered form area */}
+        <div style={{
+          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '48px 24px',
+        }}>
+          <div style={{ width: '100%', maxWidth: 440 }}>
+            {formBody}
+          </div>
+        </div>
+
+        {/* desktop footer */}
+        <div style={{ borderTop: `0.5px solid ${T.line}` }}>
+          <div style={{
+            maxWidth: 1200, margin: '0 auto', padding: '16px 32px',
+            display: 'flex', justifyContent: 'space-between',
+            fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted,
+          }}>
+            <span>Artoir</span>
+            <span>{year}</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // mobile layout
   return (
     <div style={{
       minHeight: '100vh', background: T.paper,
       display: 'flex', flexDirection: 'column',
     }}>
-      {/* header */}
+      {/* mobile header */}
       <div style={{
         padding: '14px 16px 12px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -111,84 +242,13 @@ export default function LoginPage() {
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
-          INDEX · {new Date().getFullYear()}
+          INDEX · {year}
         </div>
       </div>
 
-      {/* form content */}
+      {/* mobile form content */}
       <div style={{ flex: 1, padding: '32px 16px', display: 'flex', flexDirection: 'column', maxWidth: 480 }}>
-        <div style={{
-          fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
-          color: T.inkMuted, marginBottom: 10,
-        }}>AUTH / 01</div>
-        <div style={{
-          fontFamily: T.serif, fontSize: 32, letterSpacing: '0.03em', lineHeight: 1.2, color: T.ink,
-        }}>Sign in.</div>
-        <div style={{
-          marginTop: 8, fontSize: 13, color: T.inkSoft,
-          fontFamily: T.serifBody, lineHeight: 1.7,
-        }}>
-          団体アカウントへログインします。
-        </div>
-
-        <form onSubmit={handleSubmit} style={{ marginTop: 36 }}>
-          <Field
-            label="MAIL"
-            type="email"
-            value={email}
-            onChange={setEmail}
-            placeholder="example@mail.com"
-            required
-            autoComplete="email"
-          />
-          <Field
-            label="PASSWORD"
-            type="password"
-            value={password}
-            onChange={setPassword}
-            placeholder="••••••••••"
-            required
-            autoComplete="current-password"
-          />
-
-          {error && (
-            <div style={{
-              marginBottom: 12, padding: '10px 14px',
-              background: 'rgba(180,69,44,0.06)', border: `0.5px solid ${T.accent}`,
-              fontFamily: T.mono, fontSize: 11, color: T.accent, letterSpacing: '0.06em',
-            }}>
-              {error}
-            </div>
-          )}
-          {success && (
-            <div style={{
-              marginBottom: 12, padding: '10px 14px',
-              background: 'rgba(0,128,0,0.05)', border: '0.5px solid #2d8a4e',
-              fontFamily: T.mono, fontSize: 11, color: '#2d8a4e', letterSpacing: '0.06em',
-            }}>
-              {success}
-            </div>
-          )}
-
-          <button type="submit" disabled={loading} style={{
-            width: '100%', marginTop: 4,
-            background: loading ? T.inkMuted : T.accent, color: T.paper, border: 'none',
-            padding: '16px', fontFamily: T.sans, fontSize: 13,
-            fontWeight: 500, letterSpacing: '0.16em', cursor: loading ? 'wait' : 'pointer',
-          }}>
-            {loading ? '...' : 'ログイン  →'}
-          </button>
-        </form>
-
-        <div style={{
-          marginTop: 32, paddingTop: 20, borderTop: `0.5px solid ${T.line}`,
-          fontSize: 11, color: T.inkMuted, lineHeight: 1.7,
-          fontFamily: T.mono, letterSpacing: '0.08em',
-        }}>
-          アカウントは招待制です。<br/>
-          利用希望は info@Artoir.jp まで。
-        </div>
-
+        {formBody}
         <div style={{ flex: 1, minHeight: 28 }} />
         <div style={{
           fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
@@ -197,7 +257,7 @@ export default function LoginPage() {
           paddingTop: 16, borderTop: `0.5px solid ${T.line}`,
         }}>
           <span>Artoir</span>
-          <span>{new Date().getFullYear()}</span>
+          <span>{year}</span>
         </div>
       </div>
     </div>
