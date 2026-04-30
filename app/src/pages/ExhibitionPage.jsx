@@ -128,7 +128,7 @@ export default function ExhibitionPage() {
                 <div>{org.name}</div>
               </>}
               <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>作品数</div>
-              <div style={{ fontFamily: T.mono, fontSize: 12 }}>{pad2(artworks.length)} works</div>
+              <div style={{ fontFamily: T.mono, fontSize: 12 }}>{pad2(artworks.length)}</div>
             </div>
             {exhibition.description && (
               <div style={{ marginTop: 28, fontSize: 13, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
