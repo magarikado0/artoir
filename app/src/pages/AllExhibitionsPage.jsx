@@ -8,9 +8,43 @@ import { T, fmtDateDot, pad2 } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { useAuth } from '../lib/auth'
 
+const FILTERS = ['ALL', 'OPEN NOW', 'UPCOMING']
+
+function startOfToday() {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function parseLocalDate(s) {
+  if (!s) return null
+  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (!m) return new Date(s)
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+}
+
+function filterRows(rows, filter) {
+  if (filter === 'ALL') return rows
+  const today = startOfToday()
+  return rows.filter(({ exhibition: exh }) => {
+    const start = parseLocalDate(exh.start_date)
+    const end = parseLocalDate(exh.end_date)
+    if (filter === 'OPEN NOW') {
+      if (!start || !end) return false
+      return start <= today && today <= end
+    }
+    if (filter === 'UPCOMING') {
+      if (!start) return false
+      return start > today
+    }
+    return true
+  })
+}
+
 export default function AllExhibitionsPage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('ALL')
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
   const { session } = useAuth()
@@ -48,11 +82,13 @@ export default function AllExhibitionsPage() {
     </div>
   )
 
-  if (isDesktop) return <DesktopView rows={rows} navigate={navigate} handleCreate={handleCreate} />
-  return <MobileView rows={rows} navigate={navigate} handleCreate={handleCreate} />
+  const filteredRows = filterRows(rows, filter)
+
+  if (isDesktop) return <DesktopView rows={filteredRows} filter={filter} setFilter={setFilter} navigate={navigate} handleCreate={handleCreate} />
+  return <MobileView rows={filteredRows} filter={filter} setFilter={setFilter} navigate={navigate} handleCreate={handleCreate} />
 }
 
-function DesktopView({ rows, navigate, handleCreate }) {
+function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="top" />
@@ -80,15 +116,19 @@ function DesktopView({ rows, navigate, handleCreate }) {
 
         {/* filter row */}
         <div style={{ padding: '16px 0', display: 'flex', gap: 6, borderBottom: `0.5px solid ${T.line}`, flexWrap: 'wrap' }}>
-          {['ALL', 'OPEN NOW', 'UPCOMING'].map((f) => (
-            <span key={f} style={{
-              padding: '6px 12px',
-              background: 'transparent',
-              color: T.inkSoft,
-              border: `0.5px solid ${T.line}`,
-              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em',
-            }}>{f}</span>
-          ))}
+          {FILTERS.map((f) => {
+            const active = filter === f
+            return (
+              <button key={f} type="button" onClick={() => setFilter(f)} style={{
+                padding: '6px 12px',
+                background: active ? T.ink : 'transparent',
+                color: active ? T.paper : T.inkSoft,
+                border: `0.5px solid ${active ? T.ink : T.line}`,
+                fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em',
+                cursor: 'pointer',
+              }}>{f}</button>
+            )
+          })}
         </div>
 
         {/* table header */}
@@ -173,7 +213,7 @@ function DesktopView({ rows, navigate, handleCreate }) {
   )
 }
 
-function MobileView({ rows, navigate, handleCreate }) {
+function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
       <Header activeTab="top" />
@@ -185,6 +225,22 @@ function MobileView({ rows, navigate, handleCreate }) {
       }}>
         <span>CURRENT / UPCOMING</span>
         <span>{pad2(rows.length)} EXH.</span>
+      </div>
+
+      <div style={{ padding: '12px 16px', display: 'flex', gap: 6, borderBottom: `0.5px solid ${T.line}`, flexWrap: 'wrap' }}>
+        {FILTERS.map((f) => {
+          const active = filter === f
+          return (
+            <button key={f} type="button" onClick={() => setFilter(f)} style={{
+              padding: '6px 12px',
+              background: active ? T.ink : 'transparent',
+              color: active ? T.paper : T.inkSoft,
+              border: `0.5px solid ${active ? T.ink : T.line}`,
+              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em',
+              cursor: 'pointer',
+            }}>{f}</button>
+          )
+        })}
       </div>
 
       <div style={{
