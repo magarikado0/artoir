@@ -3,6 +3,11 @@ import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import BottomNav from './BottomNav'
 
+const PUBLIC_TABS = [
+  { key: 'top',  label: '展覧会一覧', path: '/' },
+  { key: 'orgs', label: '団体一覧',   path: '/orgs' },
+]
+
 // Desktop top nav for dashboard (same as public but with DASHBOARD indicator)
 function DashDesktopNav({ orgSlug }) {
   return (
@@ -11,9 +16,20 @@ function DashDesktopNav({ orgSlug }) {
         <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none', marginRight: 40, flexShrink: 0 }}>
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 32 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, display: 'inline-block' }} />
           <span style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.ink }}>DASHBOARD</span>
+        </div>
+        <div style={{ display: 'flex', flex: 1, gap: 0 }}>
+          {PUBLIC_TABS.map((t) => (
+            <Link key={t.key} to={t.path} style={{
+              padding: '0 18px', height: 68, display: 'flex', alignItems: 'center',
+              textDecoration: 'none',
+              fontFamily: T.sans, fontSize: 13, letterSpacing: '0.04em',
+              color: T.inkSoft,
+              borderBottom: '2px solid transparent', boxSizing: 'border-box',
+            }}>{t.label}</Link>
+          ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <Link to={`/${orgSlug}`} style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkMuted, textDecoration: 'none' }}>PUBLIC ↗</Link>
