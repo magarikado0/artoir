@@ -63,7 +63,6 @@ export default function OrgsPage() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
         <div style={{ padding: '40px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
           <div>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>INDEX · ORGANIZATIONS</div>
             <div style={{ fontFamily: T.serif, fontSize: 42, letterSpacing: '0.01em', color: T.ink }}>団体一覧</div>
           </div>
           <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.16em' }}>{pad2(orgs.length)} ORGS</div>
