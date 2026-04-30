@@ -17,8 +17,6 @@ function DashDesktopNav({ orgSlug }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <Link to={`/${orgSlug}`} style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkMuted, textDecoration: 'none' }}>PUBLIC ↗</Link>
-          <Link to={`/${orgSlug}/dashboard/settings`} style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkSoft, textDecoration: 'none' }}>SETTINGS</Link>
-          <Link to={`/${orgSlug}/dashboard/exhibitions/new`} style={{ padding: '8px 16px', background: T.ink, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none' }}>＋ 新規展覧会</Link>
         </div>
       </div>
     </div>
