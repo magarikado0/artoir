@@ -37,7 +37,7 @@ export default function DashHome() {
   const liveCount = exhibitions.filter((e) => exhStatus(e) === 'live').length
 
   if (isDesktop) return (
-    <DashShell orgSlug={orgSlug} active="dash" crumbs={['DASHBOARD']}>
+    <DashShell orgSlug={orgSlug} active="dash">
       <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
         <div>
           <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>{org?.name || orgSlug}</div>
@@ -54,25 +54,27 @@ export default function DashHome() {
             <div style={{ fontFamily: T.serif, fontSize: 22, letterSpacing: '0.02em', color: T.ink }}>展覧会</div>
           </div>
           <div style={{ borderTop: `1px solid ${T.ink}` }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 100px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
-              <span></span><span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span style={{ textAlign: 'right' }}>操作</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px 100px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
+              <span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span style={{ textAlign: 'right' }}>操作</span>
             </div>
-            {exhibitions.map((exh, i) => (
-              <div key={exh.id} style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 100px', gap: 14, padding: '16px 0', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
-                <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</div>
-                <div style={{ width: 48, height: 48, background: '#D9D6CE' }} />
-                <div>
-                  <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', color: T.ink }}>{exh.title}</div>
+            {exhibitions.map((exh) => {
+              const worksHref = `/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`
+              return (
+                <div key={exh.id} style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px 100px', gap: 14, padding: '16px 0', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
+                  <Link to={worksHref} style={{ display: 'block', width: 48, height: 48, background: '#D9D6CE' }} />
+                  <Link to={worksHref} style={{ textDecoration: 'none' }}>
+                    <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', color: T.ink }}>{exh.title}</div>
+                  </Link>
+                  <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, lineHeight: 1.5 }}>
+                    {fmtDateDot(exh.start_date)}<br/>— {fmtDateDot(exh.end_date)}
+                  </div>
+                  <div><StatusBadge kind={exhStatus(exh)} /></div>
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                    <Link to={worksHref} style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>WORKS</Link>
+                  </div>
                 </div>
-                <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, lineHeight: 1.5 }}>
-                  {fmtDateDot(exh.start_date)}<br/>— {fmtDateDot(exh.end_date)}
-                </div>
-                <div><StatusBadge kind={exhStatus(exh)} /></div>
-                <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                  <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>WORKS</Link>
-                </div>
-              </div>
-            ))}
+              )
+            })}
             {exhibitions.length === 0 && <div style={{ padding: '24px 0', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>展覧会がまだありません</div>}
           </div>
         </div>
@@ -105,7 +107,7 @@ export default function DashHome() {
 
   // mobile
   return (
-    <DashShell orgSlug={orgSlug} active="dash" crumbs={['DASHBOARD']}>
+    <DashShell orgSlug={orgSlug} active="dash">
       <div style={{ padding: '24px 16px 16px' }}>
         <div style={{ fontFamily: T.serif, fontSize: 22, lineHeight: 1.35, letterSpacing: '0.02em', color: T.ink }}>{org?.name || orgSlug}</div>
         {org?.description && <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{org.description.split('。')[0]}。</div>}
@@ -131,16 +133,15 @@ export default function DashHome() {
         <div style={{ padding: '10px 16px', fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
           <span>YOUR EXHIBITIONS</span>
         </div>
-        {exhibitions.map((exh, i) => (
-          <Link key={exh.id} to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', gap: 12, cursor: 'pointer', textDecoration: 'none', color: T.ink }}>
-            <div style={{ width: 32, fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2 }}>{pad2(i + 1)}</div>
+        {exhibitions.map((exh) => (
+          <Link key={exh.id} to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', gap: 12, cursor: 'pointer', textDecoration: 'none', color: T.ink }}>
             <div style={{ width: 52, height: 52, background: '#D9D6CE', flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
               <div style={{ marginTop: 3, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>{fmtDateDot(exh.start_date)} — {fmtDateDot(exh.end_date)}</div>
               <div style={{ marginTop: 4 }}><StatusBadge kind={exhStatus(exh)} /></div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', fontFamily: T.mono, fontSize: 10, color: T.inkSoft }}>EDIT →</div>
+            <div style={{ display: 'flex', alignItems: 'center', fontFamily: T.mono, fontSize: 10, color: T.inkSoft }}>WORKS →</div>
           </Link>
         ))}
         {exhibitions.length === 0 && <div style={{ padding: '24px 16px', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>展覧会がまだありません</div>}
