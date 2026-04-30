@@ -5,7 +5,7 @@ const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
-export default function ImageUploader({ onUploaded }) {
+export default function ImageUploader({ onUploaded, onBeforeUpload, children }) {
   const [dragging, setDragging] = useState(false)
   const [progress, setProgress] = useState(null) // 0-100 or null
   const [error, setError] = useState('')
@@ -38,7 +38,7 @@ export default function ImageUploader({ onUploaded }) {
         if (xhr.status === 200) {
           const data = JSON.parse(xhr.responseText)
           setProgress(null)
-          onUploaded(data.secure_url)
+          onUploaded(data.secure_url, { fileName: file.name, fileSize: file.size })
           resolve(data.secure_url)
         } else {
           setProgress(null)
@@ -67,6 +67,10 @@ export default function ImageUploader({ onUploaded }) {
     if (file.size > MAX_FILE_SIZE) {
       setError('画像サイズは10MB以下にしてください')
       return
+    }
+    if (onBeforeUpload) {
+      const ok = await onBeforeUpload(file)
+      if (!ok) return
     }
     try {
       await upload(file)
@@ -116,6 +120,7 @@ export default function ImageUploader({ onUploaded }) {
           opacity: hasUploadConfig ? 1 : 0.65,
         }}
       >
+        {children}
         {progress !== null ? (
           <div>
             <div style={{

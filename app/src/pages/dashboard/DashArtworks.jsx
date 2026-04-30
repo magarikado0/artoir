@@ -44,12 +44,27 @@ export default function DashArtworks() {
     load()
   }, [exhibitionId])
 
-  async function handleUploaded(cloudinaryUrl) {
+  function handleBeforeUpload(file) {
+    const dup = artworks.find((a) => a.file_name === file.name && Number(a.file_size) === file.size)
+    if (dup) {
+      return window.confirm(`同じファイル「${file.name}」がこの展覧会に既に登録されています。続行しますか？`)
+    }
+    return true
+  }
+
+  async function handleUploaded(cloudinaryUrl, meta = {}) {
     if (!supabase || !exhibitionId) return
     const maxOrder = artworks.length > 0 ? Math.max(...artworks.map((a) => a.order ?? 0)) : 0
     const { data: newWork } = await supabase
       .from('artworks')
-      .insert({ exhibition_id: exhibitionId, image_url: cloudinaryUrl, title: '', order: maxOrder + 1 })
+      .insert({
+        exhibition_id: exhibitionId,
+        image_url: cloudinaryUrl,
+        title: '',
+        order: maxOrder + 1,
+        file_name: meta.fileName || null,
+        file_size: meta.fileSize || null,
+      })
       .select()
       .single()
     if (newWork) setArtworks((prev) => [...prev, newWork])
@@ -79,11 +94,10 @@ export default function DashArtworks() {
 
   const uploadArea = (
     <div style={{ padding: isDesktop ? '20px 0' : '0 16px 16px' }}>
-      <div style={{ padding: '20px', border: `1px dashed ${T.ink}`, background: T.card }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8, textAlign: 'center' }}>＋ UPLOAD</div>
-        <div style={{ fontFamily: T.serif, fontSize: 16, letterSpacing: '0.02em', color: T.ink, textAlign: 'center', marginBottom: 14 }}>作品を追加</div>
-        <ImageUploader onUploaded={handleUploaded} />
-      </div>
+      <ImageUploader onUploaded={handleUploaded} onBeforeUpload={handleBeforeUpload}>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>＋ UPLOAD</div>
+        <div style={{ fontFamily: T.serif, fontSize: 16, letterSpacing: '0.02em', color: T.ink, marginBottom: 14 }}>作品を追加</div>
+      </ImageUploader>
     </div>
   )
 

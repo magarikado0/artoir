@@ -56,7 +56,7 @@ export default function DashHome() {
           <div style={{ borderTop: `1px solid ${T.ink}` }}>
             <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px 100px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
               <span></span><span>タイトル</span><span>会期</span><span>STATUS</span>
-            </div>操作
+            </div>
             {exhibitions.map((exh) => {
               const worksHref = `/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`
               return (
