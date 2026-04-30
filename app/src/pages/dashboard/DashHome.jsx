@@ -91,8 +91,8 @@ export default function DashHome() {
             </div>
           </div>
           {[
-            [`/${orgSlug}/dashboard/settings`, '団体設定', 'SETTINGS'],
-            [`/${orgSlug}`, '公開ページを確認', 'VIEW ↗'],
+            [`/${orgSlug}/dashboard/settings`, '団体設定'],
+            [`/${orgSlug}`, '公開ページを確認'],
           ].map(([to, label, en]) => (
             <Link key={to} to={to} style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 12px', border: `0.5px solid ${T.line}`, marginBottom: 6, textDecoration: 'none', background: T.card, color: T.ink }}>
               <span style={{ fontFamily: T.serif, fontSize: 14 }}>{label}</span>
