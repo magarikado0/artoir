@@ -50,15 +50,14 @@ export default function DashHome() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 48, padding: '32px 0 60px' }}>
         {/* exhibitions list */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 }}>
+          <div style={{ marginBottom: 16 }}>
             <div style={{ fontFamily: T.serif, fontSize: 22, letterSpacing: '0.02em', color: T.ink }}>展覧会</div>
-            <Link to={`/${orgSlug}/dashboard/exhibitions`} style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, letterSpacing: '0.14em', textDecoration: 'none' }}>MANAGE ALL →</Link>
           </div>
           <div style={{ borderTop: `1px solid ${T.ink}` }}>
             <div style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 100px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
               <span></span><span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span style={{ textAlign: 'right' }}>操作</span>
             </div>
-            {exhibitions.slice(0, 5).map((exh, i) => (
+            {exhibitions.map((exh, i) => (
               <div key={exh.id} style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 100px', gap: 14, padding: '16px 0', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
                 <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</div>
                 <div style={{ width: 48, height: 48, background: '#D9D6CE' }} />
@@ -129,11 +128,10 @@ export default function DashHome() {
       </div>
 
       <div style={{ borderTop: `1px solid ${T.ink}` }}>
-        <div style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
+        <div style={{ padding: '10px 16px', fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
           <span>YOUR EXHIBITIONS</span>
-          <Link to={`/${orgSlug}/dashboard/exhibitions`} style={{ cursor: 'pointer', color: T.ink, textDecoration: 'none' }}>VIEW ALL →</Link>
         </div>
-        {exhibitions.slice(0, 4).map((exh, i) => (
+        {exhibitions.map((exh, i) => (
           <Link key={exh.id} to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', gap: 12, cursor: 'pointer', textDecoration: 'none', color: T.ink }}>
             <div style={{ width: 32, fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2 }}>{pad2(i + 1)}</div>
             <div style={{ width: 52, height: 52, background: '#D9D6CE', flexShrink: 0 }} />

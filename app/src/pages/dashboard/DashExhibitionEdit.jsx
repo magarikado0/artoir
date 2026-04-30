@@ -69,7 +69,7 @@ export default function DashExhibitionEdit() {
           window.alert(error.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
           return
         }
-        nextPath = `/${orgSlug}/dashboard/exhibitions`
+        nextPath = `/${orgSlug}/dashboard`
       }
     } catch (error) {
       window.alert(error?.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
