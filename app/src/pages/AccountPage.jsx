@@ -79,8 +79,6 @@ function OrgView({ org, exhibitions, isDesktop, onBack }) {
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
       <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
         <div>
-          {onBack && <div onClick={onBack} style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, marginBottom: 10, cursor: 'pointer' }}>← BACK</div>}
-          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>SIGNED IN AS</div>
           <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>{org.name}</div>
         </div>
         <Link to={`/${org.slug}/dashboard`} style={{ background: T.ink, color: T.paper, padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none' }}>
@@ -208,7 +206,6 @@ function OrgView({ org, exhibitions, isDesktop, onBack }) {
 function OrgSelector({ orgs, onSelect, isDesktop }) {
   const content = (
     <div style={{ padding: isDesktop ? '36px 0 60px' : '24px 16px' }}>
-      <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>YOUR ORGANIZATIONS</div>
       <div style={{ fontFamily: T.serif, fontSize: isDesktop ? 32 : 24, letterSpacing: '0.02em', color: T.ink, marginBottom: 24 }}>団体を選択</div>
       <div style={{ borderTop: `1px solid ${T.ink}` }}>
         {orgs.map((org, i) => (
