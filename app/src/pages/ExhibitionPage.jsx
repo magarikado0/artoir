@@ -99,15 +99,7 @@ export default function ExhibitionPage() {
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="top" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-
-        <div style={{ padding: '16px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
-          <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← 展覧会一覧</Link>
-          <span>/</span>
-          <Link to={`/${orgSlug}`} style={{ color: T.inkMuted, textDecoration: 'none' }}>{org?.name}</Link>
-          <span>/</span>
-          <span style={{ color: T.ink }}>{exhibition.title}</span>
-        </div>
-
+        <div style={{ padding: '16px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}></div>
         {/* two-col hero */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 48, paddingBottom: 48, borderBottom: `1px solid ${T.ink}` }}>
           <div>

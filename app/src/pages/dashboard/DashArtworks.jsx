@@ -67,7 +67,12 @@ export default function DashArtworks() {
       })
       .select()
       .single()
-    if (newWork) setArtworks((prev) => [...prev, newWork])
+    if (newWork) {
+      setArtworks((prev) => [...prev, newWork])
+      setEditTarget(newWork)
+      setEditTitle('')
+      setEditDesc('')
+    }
   }
 
   async function handleDelete() {
