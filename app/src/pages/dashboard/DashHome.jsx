@@ -40,7 +40,6 @@ export default function DashHome() {
     <DashShell orgSlug={orgSlug} active="dash" crumbs={['DASHBOARD']}>
       <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
         <div>
-          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>SIGNED IN AS · DASHBOARD</div>
           <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>{org?.name || orgSlug}</div>
         </div>
         <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} style={{ background: T.ink, color: T.paper, border: 'none', padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
@@ -83,7 +82,6 @@ export default function DashHome() {
         {/* sidebar */}
         <div>
           <div style={{ marginBottom: 28 }}>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 12 }}>OVERVIEW</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: T.line }}>
               {[['EXHIBITS', pad2(exhibitions.length)], ['LIVE', pad2(liveCount)]].map(([k, v]) => (
                 <div key={k} style={{ background: T.paper, padding: '14px 12px' }}>
@@ -93,7 +91,6 @@ export default function DashHome() {
               ))}
             </div>
           </div>
-          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 12 }}>QUICK LINKS</div>
           {[
             [`/${orgSlug}/dashboard/settings`, '団体設定', 'SETTINGS'],
             [`/${orgSlug}`, '公開ページを確認', 'VIEW ↗'],
@@ -112,7 +109,6 @@ export default function DashHome() {
   return (
     <DashShell orgSlug={orgSlug} active="dash" crumbs={['DASHBOARD']}>
       <div style={{ padding: '24px 16px 16px' }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 10 }}>SIGNED IN AS</div>
         <div style={{ fontFamily: T.serif, fontSize: 22, lineHeight: 1.35, letterSpacing: '0.02em', color: T.ink }}>{org?.name || orgSlug}</div>
         {org?.description && <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{org.description.split('。')[0]}。</div>}
       </div>
