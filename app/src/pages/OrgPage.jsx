@@ -63,15 +63,8 @@ export default function OrgPage() {
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="orgs" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-        <div style={{ padding: '16px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
-          <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← INDEX</Link>
-          <span>/</span>
-          <span style={{ color: T.ink }}>ORGANIZATION</span>
-        </div>
-
         <div style={{ padding: '24px 0 40px', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 64, borderBottom: `1px solid ${T.ink}` }}>
           <div>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 12 }}>ORGANIZATION</div>
             <div style={{ fontFamily: T.serif, fontSize: 36, lineHeight: 1.3, letterSpacing: '0.01em', color: T.ink }}>{org.name}</div>
             {org.description && (
               <div style={{ marginTop: 24, fontSize: 14, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody, maxWidth: 600 }}>{org.description}</div>
