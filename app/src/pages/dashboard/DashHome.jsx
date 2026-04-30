@@ -55,8 +55,8 @@ export default function DashHome() {
           </div>
           <div style={{ borderTop: `1px solid ${T.ink}` }}>
             <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px 100px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
-              <span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span style={{ textAlign: 'right' }}>操作</span>
-            </div>
+              <span></span><span>タイトル</span><span>会期</span><span>STATUS</span>
+            </div>操作
             {exhibitions.map((exh) => {
               const worksHref = `/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`
               return (
@@ -69,9 +69,6 @@ export default function DashHome() {
                     {fmtDateDot(exh.start_date)}<br/>— {fmtDateDot(exh.end_date)}
                   </div>
                   <div><StatusBadge kind={exhStatus(exh)} /></div>
-                  <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                    <Link to={worksHref} style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>WORKS</Link>
-                  </div>
                 </div>
               )
             })}
