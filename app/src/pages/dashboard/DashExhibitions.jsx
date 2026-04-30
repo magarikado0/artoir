@@ -82,7 +82,6 @@ export default function DashExhibitions() {
             </div>
             <div><StatusBadge kind={exhStatus(exh)} /></div>
             <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-              <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.ink}`, textDecoration: 'none', color: T.ink }}>EDIT</Link>
               <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>WORKS</Link>
               <a href={`/${orgSlug}/exhibition/${exh.slug}`} target="_blank" rel="noreferrer" style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>↗</a>
             </div>
