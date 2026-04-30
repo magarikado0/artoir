@@ -145,7 +145,6 @@ export default function ExhibitionPage() {
           <div style={{ padding: '40px 0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24 }}>
               <div style={{ fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.ink }}>Works</div>
-              <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · クリックで詳細</div>
             </div>
             <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
               {artworks.map((w, i) => (
