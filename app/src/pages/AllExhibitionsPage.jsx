@@ -101,10 +101,6 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
           borderBottom: `1px solid ${T.ink}`,
         }}>
           <div>
-            <div style={{
-              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
-              color: T.inkMuted, marginBottom: 8,
-            }}>CURRENT / UPCOMING · {new Date().getFullYear()}</div>
             <div style={{ fontFamily: T.serif, fontSize: 42, letterSpacing: '0.01em', lineHeight: 1.2 }}>
               展覧会一覧
             </div>
