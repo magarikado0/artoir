@@ -135,7 +135,7 @@ export default function ExhibitionPage() {
             )}
             <button onClick={copyLink} style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: 'transparent', border: `1px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: T.ink }}>
               <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artoir.net/…/{exhibition.slug}</span>
-              <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'URLをコピー'}</span>
+              <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : '🔗'}</span>
             </button>
           </div>
         </div>
