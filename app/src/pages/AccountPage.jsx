@@ -184,7 +184,6 @@ export default function AccountPage() {
           <span>© Artoir {new Date().getFullYear()}</span>
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             {session && <Link to="/account/setup" style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, textDecoration: 'none' }}>＋ 別の団体を追加</Link>}
-            {session && signOutButton}
           </div>
         </div>
       </div>
