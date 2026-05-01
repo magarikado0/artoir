@@ -6,15 +6,25 @@ import ImageUploader from '../../components/ImageUploader'
 import { T, pad2 } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 
-function DragHandle() {
+function ListIcon({ active }) {
+  const c = active ? T.ink : T.inkMuted
   return (
-    <svg width="10" height="14" viewBox="0 0 10 14" style={{ flexShrink: 0, cursor: 'grab' }}>
-      <circle cx="2.5" cy="2.5"  r="1" fill={T.inkMuted} />
-      <circle cx="7.5" cy="2.5"  r="1" fill={T.inkMuted} />
-      <circle cx="2.5" cy="7"    r="1" fill={T.inkMuted} />
-      <circle cx="7.5" cy="7"    r="1" fill={T.inkMuted} />
-      <circle cx="2.5" cy="11.5" r="1" fill={T.inkMuted} />
-      <circle cx="7.5" cy="11.5" r="1" fill={T.inkMuted} />
+    <svg width="14" height="14" viewBox="0 0 14 14">
+      <rect x="1" y="2"  width="12" height="1.5" fill={c} />
+      <rect x="1" y="6.25" width="12" height="1.5" fill={c} />
+      <rect x="1" y="10.5" width="12" height="1.5" fill={c} />
+    </svg>
+  )
+}
+
+function GridIcon({ active }) {
+  const c = active ? T.ink : T.inkMuted
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14">
+      <rect x="1" y="1" width="5" height="5" fill={c} />
+      <rect x="8" y="1" width="5" height="5" fill={c} />
+      <rect x="1" y="8" width="5" height="5" fill={c} />
+      <rect x="8" y="8" width="5" height="5" fill={c} />
     </svg>
   )
 }
@@ -30,6 +40,7 @@ export default function DashArtworks() {
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')
   const [editDesc, setEditDesc] = useState('')
+  const [viewMode, setViewMode] = useState('list')
 
   useEffect(() => {
     if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
@@ -134,6 +145,50 @@ export default function DashArtworks() {
     </div>
   )
 
+  const worksGrid = (
+    <div style={{ borderTop: `1px solid ${T.ink}`, padding: isDesktop ? '16px 0' : '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isDesktop ? 'repeat(auto-fill, minmax(180px, 1fr))' : 'repeat(2, 1fr)', gap: isDesktop ? 16 : 10 }}>
+        {artworks.map((w) => (
+          <div key={w.id} style={{ background: T.card, border: `0.5px solid ${T.line}` }}>
+            <div
+              onClick={() => { setEditTarget(w); setEditTitle(w.title || ''); setEditDesc(w.description || '') }}
+              style={{ width: '100%', aspectRatio: '1 / 1', background: '#D9D6CE', overflow: 'hidden', cursor: 'pointer' }}
+            >
+              {w.image_url && <img src={w.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />}
+            </div>
+            <div style={{ padding: '8px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontFamily: T.serif, fontSize: 13, color: T.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title || '（タイトルなし）'}</div>
+              </div>
+              <button
+                onClick={() => setDeleteTarget(w)}
+                style={{ background: 'none', border: 'none', fontFamily: T.mono, fontSize: 13, color: T.inkMuted, cursor: 'pointer', padding: '2px 4px', flexShrink: 0 }}
+              >⋯</button>
+            </div>
+          </div>
+        ))}
+      </div>
+      {artworks.length === 0 && <div style={{ padding: '24px 0', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>作品がまだありません</div>}
+    </div>
+  )
+
+  const viewToggle = (
+    <div style={{ display: 'flex', gap: 4, padding: isDesktop ? '12px 0 0' : '12px 16px 0', justifyContent: 'flex-end' }}>
+      <button
+        onClick={() => setViewMode('list')}
+        aria-label="リスト表示"
+        style={{ background: viewMode === 'list' ? T.lineSoft : 'transparent', border: `0.5px solid ${viewMode === 'list' ? T.ink : T.line}`, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+      ><ListIcon active={viewMode === 'list'} /></button>
+      <button
+        onClick={() => setViewMode('grid')}
+        aria-label="グリッド表示"
+        style={{ background: viewMode === 'grid' ? T.lineSoft : 'transparent', border: `0.5px solid ${viewMode === 'grid' ? T.ink : T.line}`, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+      ><GridIcon active={viewMode === 'grid'} /></button>
+    </div>
+  )
+
+  const worksView = viewMode === 'grid' ? worksGrid : worksList
+
   const deleteConfirm = deleteTarget && (
     <div style={{ margin: isDesktop ? '24px 0' : '24px 16px', padding: 14, background: 'rgba(180,69,44,0.05)', border: `0.5px solid ${T.accent}` }}>
       <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.accent, marginBottom: 6 }}>CONFIRM · DELETE</div>
@@ -181,7 +236,8 @@ export default function DashArtworks() {
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted }}>{pad2(artworks.length)} WORKS</div>
         </div>
         {uploadArea}
-        {worksList}
+        {viewToggle}
+        {worksView}
         {deleteConfirm}
         <div style={{ height: 60 }} />
       </DashShell>
@@ -200,7 +256,8 @@ export default function DashArtworks() {
           </div>
         </div>
         {uploadArea}
-        {worksList}
+        {viewToggle}
+        {worksView}
         {deleteConfirm}
         <div style={{ height: 40 }} />
       </DashShell>
