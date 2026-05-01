@@ -95,8 +95,6 @@ export default function DashArtworks() {
     </div>
   )
 
-  const crumbs = ['DASHBOARD', 'EXHIBITIONS', exhibition?.title || '...', 'WORKS']
-
   const uploadArea = (
     <div style={{ padding: isDesktop ? '20px 0' : '0 16px 16px' }}>
       <ImageUploader onUploaded={handleUploaded} onBeforeUpload={handleBeforeUpload}>
@@ -108,15 +106,11 @@ export default function DashArtworks() {
 
   const worksList = (
     <div style={{ borderTop: `1px solid ${T.ink}` }}>
-      <div style={{ padding: '10px 16px', display: 'grid', gridTemplateColumns: '24px 48px 1fr 40px', gap: 10, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
-        <span>#</span><span></span><span>TITLE</span><span style={{ textAlign: 'right' }}>···</span>
+      <div style={{ padding: '10px 16px', display: 'grid', gridTemplateColumns: '48px 1fr 40px', gap: 10, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
+        <span></span><span>TITLE</span><span style={{ textAlign: 'right' }}>···</span>
       </div>
-      {artworks.map((w, i) => (
-        <div key={w.id} style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: '24px 48px 1fr 40px', gap: 10, borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>
-            <DragHandle />
-            {pad2(i + 1)}
-          </div>
+      {artworks.map((w) => (
+        <div key={w.id} style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: '48px 1fr 40px', gap: 10, borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
           <div style={{ width: 48, height: 48, background: '#D9D6CE', overflow: 'hidden', flexShrink: 0 }}>
             {w.image_url && <img src={w.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
           </div>
@@ -178,7 +172,7 @@ export default function DashArtworks() {
 
   if (isDesktop) return (
     <>
-      <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
+      <DashShell orgSlug={orgSlug} active="exs">
         <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>{exhibition?.title || '...'}</div>
@@ -197,7 +191,7 @@ export default function DashArtworks() {
 
   return (
     <>
-      <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
+      <DashShell orgSlug={orgSlug} active="exs">
         <div style={{ padding: '20px 16px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>{exhibition?.title || '...'}</div>
