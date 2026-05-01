@@ -33,7 +33,6 @@ export default function ArtworkModal({ artwork, onClose }) {
         <div style={{
           fontFamily: T.mono, fontSize: 10, letterSpacing: '0.16em', color: T.inkMuted,
         }}>
-          WORK · NO. {artwork.order ? pad2(artwork.order) : '—'}
         </div>
         <div
           onClick={onClose}
