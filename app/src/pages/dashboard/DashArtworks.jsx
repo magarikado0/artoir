@@ -153,8 +153,13 @@ export default function DashArtworks() {
 
   const editModal = editTarget && (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(17,17,16,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ background: T.paper, width: '100%', maxWidth: 480, padding: 24 }}>
+      <div style={{ background: T.paper, width: '100%', maxWidth: 480, padding: 24, maxHeight: 'calc(100vh - 40px)', overflowY: 'auto' }}>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 16 }}>EDIT WORK · {pad2(artworks.findIndex((a) => a.id === editTarget.id) + 1)}</div>
+        {editTarget.image_url && (
+          <div style={{ marginBottom: 16, background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 280, overflow: 'hidden' }}>
+            <img src={editTarget.image_url} alt="" style={{ width: '100%', maxHeight: 280, objectFit: 'contain', display: 'block' }} />
+          </div>
+        )}
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 6 }}>TITLE</div>
           <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${T.ink}`, fontFamily: T.sans, fontSize: 13, color: T.ink, background: T.card, boxSizing: 'border-box' }} />

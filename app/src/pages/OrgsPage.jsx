@@ -69,7 +69,7 @@ export default function OrgsPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '48px 1fr 80px', padding: '10px 0', gap: 20, borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted }}>
-          <span>NO.</span><span>団体名</span><span style={{ textAlign: 'right' }}>展覧会数</span>
+          <span>団体名</span><span style={{ textAlign: 'right' }}>展覧会数</span>
         </div>
 
         {orgs.map((o, i) => (
@@ -110,7 +110,7 @@ export default function OrgsPage() {
 
       <div style={{ borderTop: `1px solid ${T.ink}` }}>
         <div style={{ padding: '8px 16px', display: 'grid', gridTemplateColumns: '32px 1fr 48px', gap: 10, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
-          <span>NO.</span><span>団体名</span><span style={{ textAlign: 'right' }}>展覧会</span>
+          <span>団体名</span><span style={{ textAlign: 'right' }}>展覧会数</span>
         </div>
         {orgs.map((o, i) => (
           <Link key={o.id} to={`/${o.slug}`} style={{ padding: '16px 16px', display: 'grid', gridTemplateColumns: '32px 1fr 48px', gap: 10, borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, alignItems: 'center' }}>
