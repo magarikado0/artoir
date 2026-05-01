@@ -68,13 +68,12 @@ export default function OrgsPage() {
           <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.16em' }}>{pad2(orgs.length)} グループ</div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '48px 1fr 80px', padding: '10px 0', gap: 20, borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', padding: '10px 0', gap: 20, borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted }}>
           <span>団体名</span><span style={{ textAlign: 'right' }}>展覧会数</span>
         </div>
 
-        {orgs.map((o, i) => (
-          <Link key={o.id} to={`/${o.slug}`} style={{ display: 'grid', gridTemplateColumns: '48px 1fr 80px', padding: '22px 0', gap: 20, alignItems: 'center', borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer', textDecoration: 'none', color: T.ink }}>
-            <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2(i + 1)}</div>
+        {orgs.map((o) => (
+          <Link key={o.id} to={`/${o.slug}`} style={{ display: 'grid', gridTemplateColumns: '1fr 80px', padding: '22px 0', gap: 20, alignItems: 'center', borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer', textDecoration: 'none', color: T.ink }}>
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.02em' }}>{o.name}</div>
               {o.description && <div style={{ marginTop: 3, fontSize: 12, color: T.inkSoft }}>{o.description.slice(0, 60)}{o.description.length > 60 ? '…' : ''}</div>}
@@ -109,12 +108,11 @@ export default function OrgsPage() {
       </div>
 
       <div style={{ borderTop: `1px solid ${T.ink}` }}>
-        <div style={{ padding: '8px 16px', display: 'grid', gridTemplateColumns: '32px 1fr 48px', gap: 10, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
+        <div style={{ padding: '8px 16px', display: 'grid', gridTemplateColumns: '1fr 48px', gap: 10, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
           <span>団体名</span><span style={{ textAlign: 'right' }}>展覧会数</span>
         </div>
-        {orgs.map((o, i) => (
-          <Link key={o.id} to={`/${o.slug}`} style={{ padding: '16px 16px', display: 'grid', gridTemplateColumns: '32px 1fr 48px', gap: 10, borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, alignItems: 'center' }}>
-            <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2(i + 1)}</div>
+        {orgs.map((o) => (
+          <Link key={o.id} to={`/${o.slug}`} style={{ padding: '16px 16px', display: 'grid', gridTemplateColumns: '1fr 48px', gap: 10, borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, alignItems: 'center' }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', lineHeight: 1.4 }}>{o.name}</div>
             </div>

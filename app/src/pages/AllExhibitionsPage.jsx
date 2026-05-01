@@ -129,29 +129,27 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
 
         {/* table header */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '48px 1fr 260px 200px 80px',
+          display: 'grid', gridTemplateColumns: '1fr 260px 200px 80px',
           padding: '10px 0', gap: 20, borderBottom: `0.5px solid ${T.ink}`,
           fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted,
         }}>
-          <span>NO.</span>
           <span>展覧会 · 団体</span>
           <span>会場</span>
           <span>会期</span>
           <span style={{ textAlign: 'right' }}>作品数</span>
         </div>
 
-        {rows.map(({ exhibition: exh, org }, i) => (
+        {rows.map(({ exhibition: exh, org }) => (
           <Link
             key={exh.id}
             to={`/${org?.slug}/exhibition/${exh.slug}`}
             style={{
-              display: 'grid', gridTemplateColumns: '48px 1fr 260px 200px 80px',
+              display: 'grid', gridTemplateColumns: '1fr 260px 200px 80px',
               padding: '18px 0', gap: 20, alignItems: 'center',
               borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer',
               textDecoration: 'none', color: T.ink,
             }}
           >
-            <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2(i + 1)}</div>
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.02em' }}>{exh.title}</div>
               <div style={{ marginTop: 3, fontSize: 12, color: T.inkSoft }}>{org?.name}</div>
@@ -240,24 +238,23 @@ function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
       </div>
 
       <div style={{
-        display: 'grid', gridTemplateColumns: '32px 1fr 100px',
+        display: 'grid', gridTemplateColumns: '1fr 100px',
         padding: '10px 16px', borderBottom: `0.5px solid ${T.ink}`,
         fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, gap: 10,
       }}>
-        <span>NO.</span><span>展覧会 · 団体</span><span style={{ textAlign: 'right' }}>会期</span>
+        <span>展覧会 · 団体</span><span style={{ textAlign: 'right' }}>会期</span>
       </div>
 
-      {rows.map(({ exhibition: exh, org }, i) => (
+      {rows.map(({ exhibition: exh, org }) => (
         <Link
           key={exh.id}
           to={`/${org?.slug}/exhibition/${exh.slug}`}
           style={{
-            display: 'grid', gridTemplateColumns: '32px 1fr 100px', gap: 10,
+            display: 'grid', gridTemplateColumns: '1fr 100px', gap: 10,
             padding: '16px 16px', borderBottom: `0.5px solid ${T.line}`,
             alignItems: 'start', textDecoration: 'none', color: T.ink,
           }}
         >
-          <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2 }}>{pad2(i + 1)}</div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: T.serif, fontSize: 16, lineHeight: 1.3, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
             <div style={{ marginTop: 2, fontSize: 11, color: T.inkSoft, lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{org?.name}</div>
