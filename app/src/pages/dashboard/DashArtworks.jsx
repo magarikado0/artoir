@@ -235,7 +235,7 @@ export default function DashArtworks() {
         <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>{exhibition?.title || '...'}</div>
-            <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>作品管理</div>
+            <div style={{ fontFamily: T.serif, fontSize: 44, letterSpacing: '0.01em', lineHeight: 1.05, color: T.ink }}>作品管理</div>
           </div>
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted }}>{pad2(artworks.length)} WORKS</div>
         </div>

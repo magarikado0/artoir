@@ -49,8 +49,9 @@ export default function Header({ activeTab }) {
   if (isDesktop) {
     return (
       <div style={{
-        borderBottom: `1px solid ${T.ink}`,
-        background: T.paper, position: 'sticky', top: 0, zIndex: 50,
+        borderBottom: `3px solid ${T.ink}`,
+        background: T.ink, position: 'sticky', top: 0, zIndex: 50,
+        boxShadow: `0 6px 0 ${T.gold}`,
       }}>
         <div style={{
           maxWidth: 1200, margin: '0 auto',
@@ -59,7 +60,7 @@ export default function Header({ activeTab }) {
         }}>
           <Link to="/" style={{
             fontFamily: T.serif, fontSize: 22, letterSpacing: '-0.01em', fontWeight: 500,
-            color: T.ink, textDecoration: 'none', marginRight: 40, flexShrink: 0,
+            color: T.paper, textDecoration: 'none', marginRight: 40, flexShrink: 0,
           }}>
             Artoir<span style={{ color: T.accent }}>.</span>
           </Link>
@@ -72,9 +73,11 @@ export default function Header({ activeTab }) {
                   padding: '0 16px', height: 68, display: 'flex', alignItems: 'center', gap: 8,
                   textDecoration: 'none', position: 'relative',
                   fontFamily: T.sans, fontSize: 13, letterSpacing: '0.04em',
-                  color: on ? T.paper : T.inkSoft,
-                  background: on ? T.ink : 'transparent',
-                  borderBottom: on ? `2px solid ${T.accent}` : '2px solid transparent',
+                  color: on ? T.ink : T.paper,
+                  background: on ? T.gold : 'transparent',
+                  borderLeft: on ? `2px solid ${T.paper}` : '2px solid transparent',
+                  borderRight: on ? `2px solid ${T.paper}` : '2px solid transparent',
+                  borderBottom: 'none',
                   boxSizing: 'border-box',
                 }}>
                   <Icon name={t.icon} size={17} />
@@ -87,14 +90,14 @@ export default function Header({ activeTab }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {session ? (
               <>
-                <Link to="/account" className="ui-icon-button" style={{ height: 36, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 7, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.inkSoft, textDecoration: 'none', border: `0.5px solid ${T.line}` }}>
+                <Link to="/account" className="ui-icon-button" style={{ height: 38, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 7, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.paper, textDecoration: 'none', border: `1px solid ${T.paper}`, background: 'rgba(255,249,233,0.08)' }}>
                   <Icon name="user" size={15} />
                   DASHBOARD
                 </Link>
-                <div style={{ width: 1, height: 16, background: T.line }} />
+                <div style={{ width: 1, height: 16, background: 'rgba(255,249,233,0.28)' }} />
                 <button onClick={handleLogout} style={{
                   fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em',
-                  color: T.inkMuted, background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'rgba(255,249,233,0.72)', background: 'none', border: 'none', cursor: 'pointer',
                 }}>SIGN OUT</button>
               </>
             ) : (
@@ -102,6 +105,7 @@ export default function Header({ activeTab }) {
                 padding: '9px 14px', background: T.accent, color: T.paper,
                 fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em',
                 textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8,
+                border: `1px solid ${T.paper}`,
               }}><Icon name="login" size={15} />LOG IN</Link>
             )}
           </div>
@@ -115,20 +119,20 @@ export default function Header({ activeTab }) {
     <div style={{
       padding: '18px 16px 16px',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      borderBottom: `1px solid ${T.ink}`,
-      background: T.paper, position: 'sticky', top: 0, zIndex: 50,
+      borderBottom: `3px solid ${T.gold}`,
+      background: T.ink, position: 'sticky', top: 0, zIndex: 50,
     }}>
       <Link to="/" style={{
         fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500,
-        color: T.ink, textDecoration: 'none',
+        color: T.paper, textDecoration: 'none',
       }}>
         Artoir<span style={{ color: T.accent }}>.</span>
       </Link>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Link to="/account" className="ui-icon-button" aria-label="アカウント" style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', color: activeTab === 'account' ? T.paper : T.ink, background: activeTab === 'account' ? T.ink : T.paperAlt, border: `0.5px solid ${T.line}`, textDecoration: 'none' }}>
+        <Link to="/account" className="ui-icon-button" aria-label="アカウント" style={{ width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', color: activeTab === 'account' ? T.ink : T.paper, background: activeTab === 'account' ? T.gold : 'rgba(255,249,233,0.08)', border: `1px solid ${T.paper}`, textDecoration: 'none' }}>
           <Icon name="user" size={18} />
         </Link>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: 'rgba(255,249,233,0.74)' }}>
           {new Date().getFullYear()}
         </div>
       </div>

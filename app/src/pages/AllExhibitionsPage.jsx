@@ -90,22 +90,29 @@ export default function AllExhibitionsPage() {
 
 function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
   return (
-    <div style={{ background: T.paper, minHeight: '100vh' }}>
+    <div className="ui-page-shell" style={{ minHeight: '100vh' }}>
       <Header activeTab="top" />
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
         {/* page header */}
-        <div style={{
-          padding: '40px 0 28px',
+        <div className="ui-strong-panel" style={{
+          marginTop: 28,
+          padding: '36px 36px 32px',
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-          borderBottom: `1px solid ${T.ink}`,
+          background: T.card,
+          border: `2px solid ${T.ink}`,
+          boxShadow: `14px 14px 0 ${T.gold}`,
         }}>
           <div>
-            <div style={{ fontFamily: T.serif, fontSize: 42, letterSpacing: '0.01em', lineHeight: 1.2 }}>
+            <div style={{
+              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
+              color: T.accent, marginBottom: 8,
+            }}>CURRENT / UPCOMING · {new Date().getFullYear()}</div>
+            <div style={{ fontFamily: T.serif, fontSize: 54, letterSpacing: '0.01em', lineHeight: 1.05 }}>
               展覧会一覧
             </div>
           </div>
-          <div style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.18em', color: T.inkMuted }}>
+          <div style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.18em', color: T.paper, background: T.ink, padding: '10px 12px' }}>
             {pad2(rows.length)} EXHIBITIONS
           </div>
         </div>
@@ -139,7 +146,7 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
           <span style={{ textAlign: 'right' }}>作品数</span>
         </div>
 
-        {rows.map(({ exhibition: exh, org }) => (
+        {rows.map(({ exhibition: exh, org }, i) => (
           <Link
             key={exh.id}
             to={`/${org?.slug}/exhibition/${exh.slug}`}
@@ -149,6 +156,7 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
               padding: '18px 0', gap: 20, alignItems: 'center',
               borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer',
               textDecoration: 'none', color: T.ink,
+              background: i % 3 === 0 ? T.blueSoft : i % 3 === 1 ? T.card : T.mint,
             }}
           >
             <div>
@@ -176,9 +184,10 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
       {/* CTA */}
       <div style={{ maxWidth: 1200, margin: '60px auto 0', padding: '0 32px' }}>
         <div className="ui-strong-panel" style={{
-          padding: '40px 48px', background: T.slate, color: T.paper,
+          padding: '42px 48px', background: T.violet, color: T.paper,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          borderLeft: `12px solid ${T.accent}`,
+          border: `2px solid ${T.ink}`,
+          boxShadow: `14px 14px 0 ${T.accent}`,
         }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>
@@ -194,7 +203,7 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
           <button
             onClick={handleCreate}
             style={{
-              flexShrink: 0, background: T.paper, color: T.ink, border: 'none',
+              flexShrink: 0, background: T.gold, color: T.ink, border: `2px solid ${T.ink}`,
               padding: '14px 24px', fontFamily: T.sans, fontWeight: 500,
               fontSize: 13, letterSpacing: '0.1em', cursor: 'pointer',
             }}
@@ -211,11 +220,12 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
 
 function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
   return (
-    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
+    <div className="ui-page-shell" style={{ minHeight: '100vh', paddingBottom: 80 }}>
       <Header activeTab="top" />
 
       <div style={{
-        padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`,
+        padding: '14px 16px', borderBottom: `2px solid ${T.ink}`,
+        background: T.card,
         display: 'flex', justifyContent: 'space-between',
         fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted,
       }}>
@@ -247,7 +257,7 @@ function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
         <span>展覧会 · 団体</span><span style={{ textAlign: 'right' }}>会期</span>
       </div>
 
-      {rows.map(({ exhibition: exh, org }) => (
+      {rows.map(({ exhibition: exh, org }, i) => (
         <Link
           key={exh.id}
           to={`/${org?.slug}/exhibition/${exh.slug}`}
@@ -256,6 +266,7 @@ function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
             display: 'grid', gridTemplateColumns: '1fr 100px', gap: 10,
             padding: '16px 16px', borderBottom: `0.5px solid ${T.line}`,
             alignItems: 'start', textDecoration: 'none', color: T.ink,
+            background: i % 3 === 0 ? T.blueSoft : i % 3 === 1 ? T.card : T.mint,
           }}
         >
           <div style={{ minWidth: 0 }}>
@@ -274,11 +285,11 @@ function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
         <div style={{ padding: '48px 16px', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>NO EXHIBITIONS YET</div>
       )}
 
-      <div className="ui-strong-panel" style={{ margin: '32px 16px', padding: '28px 22px', background: T.slate, color: T.paper, borderLeft: `8px solid ${T.accent}` }}>
+      <div className="ui-strong-panel" style={{ margin: '32px 16px', padding: '28px 22px', background: T.violet, color: T.paper, border: `2px solid ${T.ink}`, boxShadow: `10px 10px 0 ${T.accent}` }}>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>FOR ORGANIZATIONS</div>
         <div style={{ marginTop: 10, fontFamily: T.serif, fontSize: 22, lineHeight: 1.4 }}>展覧会を、<br/>そのまま記録に。</div>
         <div style={{ marginTop: 10, fontSize: 12, lineHeight: 1.8, color: 'rgba(255,255,255,0.7)' }}>作品・会期・会場を登録するだけで、共有可能な展覧会ページが公開されます。</div>
-        <button onClick={handleCreate} className="ui-action" style={{ marginTop: 20, background: T.paper, color: T.ink, border: 'none', padding: '12px 18px', fontFamily: T.sans, fontWeight: 500, fontSize: 12, letterSpacing: '0.1em', cursor: 'pointer' }}>
+        <button onClick={handleCreate} className="ui-action" style={{ marginTop: 20, background: T.gold, color: T.ink, border: `2px solid ${T.ink}`, padding: '12px 18px', fontFamily: T.sans, fontWeight: 500, fontSize: 12, letterSpacing: '0.1em', cursor: 'pointer' }}>
           自分の展覧会を作る  →
         </button>
       </div>

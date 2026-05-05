@@ -53,26 +53,26 @@ export default function DashExhibitions() {
 
   if (isDesktop) return (
     <DashShell orgSlug={orgSlug} active="exs" crumbs={['DASHBOARD', 'EXHIBITIONS']}>
-      <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
+      <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `14px 14px 0 ${T.gold}` }}>
         <div>
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>ALL / {pad2(exhibitions.length)}</div>
-          <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>展覧会</div>
+          <div style={{ fontFamily: T.serif, fontSize: 44, letterSpacing: '0.01em', color: T.ink, lineHeight: 1.05 }}>展覧会</div>
         </div>
-        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-action" style={{ background: T.accent, color: T.paper, border: 'none', padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-action" style={{ background: T.accent, color: T.paper, border: `2px solid ${T.ink}`, padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
           ＋ 新規展覧会
         </button>
       </div>
 
-      <div style={{ padding: '16px 0', borderBottom: `0.5px solid ${T.line}` }}>{filterChips}</div>
+      <div style={{ padding: '24px 0 14px' }}>{filterChips}</div>
 
       <div style={{ borderTop: 'none' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 140px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 140px', gap: 14, padding: '10px 10px', background: T.ink, border: `2px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.paper }}>
           <span></span><span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span style={{ textAlign: 'right' }}>操作</span>
         </div>
         {filtered.map((exh, i) => (
-          <div key={exh.id} className="ui-row" style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 140px', gap: 14, padding: '18px 10px', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
+          <div key={exh.id} className="ui-row" style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 140px', gap: 14, padding: '18px 10px', borderLeft: `2px solid ${T.ink}`, borderRight: `2px solid ${T.ink}`, borderBottom: `2px solid ${T.ink}`, alignItems: 'center', background: i % 2 === 0 ? T.card : T.blueSoft }}>
             <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</div>
-            <div style={{ width: 48, height: 48, background: '#D9D6CE' }} />
+            <div style={{ width: 48, height: 48, background: T.mint, border: `1px solid ${T.ink}` }} />
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', color: T.ink }}>{exh.title}</div>
               {exh.location && <div style={{ marginTop: 2, fontSize: 11, color: T.inkSoft }}>{exh.location}</div>}

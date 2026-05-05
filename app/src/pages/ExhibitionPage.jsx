@@ -114,63 +114,73 @@ export default function ExhibitionPage() {
   const sns = org?.sns_links || {}
 
   if (isDesktop) return (
-    <div style={{ background: T.paper, minHeight: '100vh' }}>
+    <div className="ui-page-shell" style={{ minHeight: '100vh' }}>
       <Header activeTab="top" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
+
+        <div style={{ padding: '24px 0 16px', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
+          <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← 展覧会一覧</Link>
+          <span>/</span>
+          <Link to={`/${orgSlug}`} style={{ color: T.inkMuted, textDecoration: 'none' }}>{org?.name}</Link>
+          <span>/</span>
+          <span style={{ color: T.ink }}>{exhibition.title}</span>
+        </div>
+
         {/* two-col hero */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 48, paddingBottom: 48, borderBottom: `1px solid ${T.ink}` }}>
+        <div className="ui-strong-panel" style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 38, padding: 28, marginBottom: 40, background: T.ink, color: T.paper, border: `2px solid ${T.ink}`, boxShadow: `16px 16px 0 ${T.gold}` }}>
           <div>
             {featured?.image_url ? (
-              <img src={featured.image_url} alt={featured.title} style={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'contain', display: 'block', background: '#D9D6CE' }} />
+              <img className="ui-photo-frame" src={featured.image_url} alt={featured.title} style={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'contain', display: 'block', background: T.card }} />
             ) : (
-              <div style={{ width: '100%', aspectRatio: '4 / 3', background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontFamily: T.mono, fontSize: 10, color: 'rgba(0,0,0,0.4)', background: 'rgba(255,255,255,0.75)', padding: '3px 7px' }}>{exhibition.title}</span>
+              <div className="ui-photo-frame" style={{ width: '100%', aspectRatio: '4 / 3', background: T.blueSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontFamily: T.mono, fontSize: 10, color: T.ink, background: T.gold, border: `1px solid ${T.ink}`, padding: '5px 9px' }}>{exhibition.title}</span>
               </div>
             )}
           </div>
           <div style={{ paddingTop: 8 }}>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.accent, marginBottom: 16 }}>EXHIBITION</div>
-            <div style={{ fontFamily: T.serif, fontSize: 40, lineHeight: 1.2, letterSpacing: '0.01em', color: T.ink }}>{exhibition.title}</div>
-            <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '90px 1fr', rowGap: 14, fontSize: 13, lineHeight: 1.6, paddingTop: 24, borderTop: `0.5px solid ${T.line}` }}>
+            <div style={{ fontFamily: T.serif, fontSize: 48, lineHeight: 1.08, letterSpacing: '0.01em', color: T.paper }}>{exhibition.title}</div>
+            <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '90px 1fr', rowGap: 14, fontSize: 13, lineHeight: 1.6, paddingTop: 24, borderTop: `1px solid rgba(255,249,233,0.34)` }}>
               {exhibition.start_date && <>
-                <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>会期</div>
+                <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: 'rgba(255,249,233,0.6)', paddingTop: 2 }}>会期</div>
                 <div style={{ fontFamily: T.mono, fontSize: 12 }}>{fmtDateDot(exhibition.start_date)} — {fmtDateDot(exhibition.end_date)}</div>
               </>}
               {exhibition.location && <>
-                <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>会場</div>
+                <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: 'rgba(255,249,233,0.6)', paddingTop: 2 }}>会場</div>
                 <div>{exhibition.location}</div>
               </>}
               {org?.name && <>
-                <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>団体</div>
+                <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: 'rgba(255,249,233,0.6)', paddingTop: 2 }}>団体</div>
                 <div>{org.name}</div>
               </>}
-              <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>作品数</div>
-              <div style={{ fontFamily: T.mono, fontSize: 12 }}>{pad2(artworks.length)}</div>
+              <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: 'rgba(255,249,233,0.6)', paddingTop: 2 }}>作品数</div>
+              <div style={{ fontFamily: T.mono, fontSize: 12 }}>{pad2(artworks.length)} works</div>
             </div>
             {exhibition.description && (
-              <div style={{ marginTop: 28, fontSize: 13, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
+              <div style={{ marginTop: 28, fontSize: 13, lineHeight: 2, color: 'rgba(255,249,233,0.78)', fontFamily: T.serifBody }}>{exhibition.description}</div>
             )}
-            <button onClick={copyLink} aria-label="URLをコピー" className="ui-action" style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: copied ? T.accent : 'transparent', border: `1px solid ${copied ? T.accent : T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: copied ? T.paper : T.ink }}>
-              <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artoir.net/…/{exhibition.slug}</span>
-              <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'COPY 🔗'}</span>
+            <button onClick={copyLink} className="ui-action" style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: copied ? T.accent : T.gold, border: `2px solid ${T.paper}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: copied ? T.paper : T.ink }}>
+              <span style={{ color: copied ? T.paper : T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artoir.net/.../{exhibition.slug}</span>
+              <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'URLをコピー'}</span>
             </button>
           </div>
         </div>
 
         {/* works grid — 4 col */}
         {artworks.length > 0 && (
-          <div style={{ padding: '40px 0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24 }}>
-              <div style={{ fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.ink }}>Works</div>
+          <div style={{ padding: '20px 0 48px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, padding: '12px 16px', background: T.gold, border: `2px solid ${T.ink}` }}>
+              <div style={{ fontFamily: T.serif, fontSize: 26, letterSpacing: '0.02em', color: T.ink }}>Works</div>
+              <div style={{ fontFamily: T.mono, fontSize: 10, color: T.ink, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · クリックで詳細</div>
             </div>
             <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
               {artworks.map((w, i) => (
-                <div key={w.id} className="gallery-item" onClick={() => setSelectedArtwork(w)} style={{ cursor: 'pointer' }}>
+                <div key={w.id} className="gallery-item ui-row" onClick={() => setSelectedArtwork(w)} style={{ cursor: 'pointer', padding: 10, background: i % 2 === 0 ? T.card : T.blueSoft, border: `2px solid ${T.ink}` }}>
                   {w.image_url ? (
-                    <img src={w.image_url} alt={w.title} style={{ width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', display: 'block' }} />
+                    <img src={w.image_url} alt={w.title} style={{ width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', display: 'block', border: `1px solid ${T.ink}` }} />
                   ) : (
-                    <div style={{ width: '100%', aspectRatio: '4 / 5', background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontFamily: T.mono, fontSize: 9, color: 'rgba(0,0,0,0.35)', background: 'rgba(255,255,255,0.7)', padding: '2px 5px' }}>#{pad2(i + 1)}</span>
+                    <div style={{ width: '100%', aspectRatio: '4 / 5', background: T.mint, border: `1px solid ${T.ink}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontFamily: T.mono, fontSize: 9, color: T.ink, background: T.gold, border: `1px solid ${T.ink}`, padding: '3px 6px' }}>#{pad2(i + 1)}</span>
                     </div>
                   )}
                   <div style={{ marginTop: 10 }}>
@@ -205,7 +215,7 @@ export default function ExhibitionPage() {
 
   // mobile
   return (
-    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
+    <div className="ui-page-shell" style={{ minHeight: '100vh', paddingBottom: 80 }}>
       <Header activeTab="top" />
 
       <div style={{ padding: '12px 16px', borderBottom: `0.5px solid ${T.line}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -215,15 +225,15 @@ export default function ExhibitionPage() {
       </div>
 
       {featured?.image_url ? (
-        <img src={featured.image_url} alt={featured.title} style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'contain', display: 'block', background: '#D9D6CE' }} />
+        <img src={featured.image_url} alt={featured.title} style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'contain', display: 'block', background: T.ink, borderBottom: `3px solid ${T.ink}` }} />
       ) : (
-        <div style={{ width: '100%', aspectRatio: '1 / 1', background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontFamily: T.mono, fontSize: 10, color: 'rgba(0,0,0,0.4)', background: 'rgba(255,255,255,0.75)', padding: '3px 7px' }}>{exhibition.title}</span>
+        <div style={{ width: '100%', aspectRatio: '1 / 1', background: T.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: `3px solid ${T.gold}` }}>
+          <span style={{ fontFamily: T.mono, fontSize: 10, color: T.ink, background: T.gold, border: `1px solid ${T.paper}`, padding: '5px 9px' }}>{exhibition.title}</span>
         </div>
       )}
 
-      <div style={{ padding: '22px 16px 10px' }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, marginBottom: 12 }}>EXHIBITION</div>
+      <div style={{ margin: '16px', padding: '20px 16px', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.accent, marginBottom: 12 }}>EXHIBITION</div>
         <div style={{ fontFamily: T.serif, fontSize: 34, lineHeight: 1.25, letterSpacing: '0.02em', color: T.ink }}>{exhibition.title}</div>
         <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 16px', paddingTop: 16, borderTop: `0.5px solid ${T.line}` }}>
           {(exhibition.start_date || exhibition.end_date) && (
@@ -236,15 +246,15 @@ export default function ExhibitionPage() {
         {exhibition.description && (
           <div style={{ marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${T.line}`, fontSize: 13, lineHeight: 1.9, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
         )}
-        <button onClick={copyLink} className="ui-action" style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: copied ? T.accent : 'transparent', border: `1px solid ${copied ? T.accent : T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: copied ? T.paper : T.ink }}>
-          <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artoir.net/…/{exhibition.slug}</span>
+        <button onClick={copyLink} className="ui-action" style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: copied ? T.accent : T.gold, border: `2px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: copied ? T.paper : T.ink }}>
+          <span style={{ color: copied ? T.paper : T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artoir.net/.../{exhibition.slug}</span>
           <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'COPY'}</span>
         </button>
       </div>
 
       {artworks.length > 0 && (
-        <div style={{ marginTop: 36, borderTop: `1px solid ${T.ink}` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '16px 16px 12px' }}>
+        <div style={{ marginTop: 36, borderTop: `3px solid ${T.ink}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 16px', background: T.gold, borderBottom: `2px solid ${T.ink}` }}>
             <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.04em', color: T.ink }}>Works</div>
             <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · TAP FOR DETAILS</div>
           </div>
