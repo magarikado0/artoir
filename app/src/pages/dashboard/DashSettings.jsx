@@ -129,12 +129,14 @@ export default function DashSettings() {
       <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <button
           onClick={() => navigate(`/${orgSlug}/dashboard`)}
+          className="ui-icon-button"
           style={{ padding: '14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}
         >CANCEL</button>
         <button
           onClick={handleSave}
           disabled={saving}
-          style={{ padding: '14px', background: T.ink, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+          className="ui-action"
+          style={{ padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
         >{saved ? 'SAVED ✓' : saving ? 'SAVING...' : 'SAVE ↩'}</button>
       </div>
       <div style={{ height: 40 }} />

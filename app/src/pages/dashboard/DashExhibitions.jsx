@@ -40,7 +40,7 @@ export default function DashExhibitions() {
   const filterChips = (
     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
       {FILTERS.map((f) => (
-        <span key={f} onClick={() => setFilter(f)} style={{
+            <span key={f} onClick={() => setFilter(f)} className="ui-chip" style={{
           padding: '6px 10px',
           background: filter === f ? T.ink : 'transparent',
           color: filter === f ? T.paper : T.inkSoft,
@@ -58,7 +58,7 @@ export default function DashExhibitions() {
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>ALL / {pad2(exhibitions.length)}</div>
           <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>展覧会</div>
         </div>
-        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} style={{ background: T.ink, color: T.paper, border: 'none', padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-action" style={{ background: T.accent, color: T.paper, border: 'none', padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
           ＋ 新規展覧会
         </button>
       </div>
@@ -70,7 +70,7 @@ export default function DashExhibitions() {
           <span></span><span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span style={{ textAlign: 'right' }}>操作</span>
         </div>
         {filtered.map((exh, i) => (
-          <div key={exh.id} style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 140px', gap: 14, padding: '18px 0', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
+          <div key={exh.id} className="ui-row" style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 140px', gap: 14, padding: '18px 10px', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
             <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</div>
             <div style={{ width: 48, height: 48, background: '#D9D6CE' }} />
             <div>
@@ -82,9 +82,9 @@ export default function DashExhibitions() {
             </div>
             <div><StatusBadge kind={exhStatus(exh)} /></div>
             <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-              <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.ink}`, textDecoration: 'none', color: T.ink }}>EDIT</Link>
-              <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>WORKS</Link>
-              <a href={`/${orgSlug}/exhibition/${exh.slug}`} target="_blank" rel="noreferrer" style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>↗</a>
+              <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} className="ui-icon-button" style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.ink}`, textDecoration: 'none', color: T.ink }}>EDIT</Link>
+              <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} className="ui-icon-button" style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>WORKS</Link>
+              <a href={`/${orgSlug}/exhibition/${exh.slug}`} target="_blank" rel="noreferrer" className="ui-icon-button" style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>↗</a>
             </div>
           </div>
         ))}
@@ -102,13 +102,13 @@ export default function DashExhibitions() {
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>ALL / {pad2(exhibitions.length)}</div>
           <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.ink }}>展覧会</div>
         </div>
-        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} style={{ background: T.ink, color: T.paper, border: 'none', padding: '10px 14px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer' }}>＋ 新規</button>
+        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-action" style={{ background: T.accent, color: T.paper, border: 'none', padding: '10px 14px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer' }}>＋ 新規</button>
       </div>
 
       <div style={{ padding: '0 16px 12px', borderBottom: `1px solid ${T.ink}` }}>{filterChips}</div>
 
       {filtered.map((exh, i) => (
-        <div key={exh.id} style={{ padding: '16px 16px', borderBottom: `0.5px solid ${T.line}` }}>
+        <div key={exh.id} className="ui-row" style={{ padding: '16px 16px', borderBottom: `0.5px solid ${T.line}` }}>
           <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ width: 32, fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2 }}>{pad2(i + 1)}</div>
             <div style={{ width: 64, height: 64, background: '#D9D6CE', flexShrink: 0 }} />
@@ -121,9 +121,9 @@ export default function DashExhibitions() {
             </div>
           </div>
           <div style={{ marginTop: 10, display: 'flex', gap: 6, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em' }}>
-            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} style={{ padding: '5px 10px', border: `0.5px solid ${T.ink}`, color: T.ink, textDecoration: 'none' }}>EDIT</Link>
-            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} style={{ padding: '5px 10px', border: `0.5px solid ${T.line}`, color: T.inkSoft, textDecoration: 'none' }}>WORKS</Link>
-            <a href={`/${orgSlug}/exhibition/${exh.slug}`} target="_blank" rel="noreferrer" style={{ padding: '5px 10px', border: `0.5px solid ${T.line}`, color: T.inkSoft, textDecoration: 'none', marginLeft: 'auto' }}>PREVIEW ↗</a>
+            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} className="ui-icon-button" style={{ padding: '5px 10px', border: `0.5px solid ${T.ink}`, color: T.ink, textDecoration: 'none' }}>EDIT</Link>
+            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} className="ui-icon-button" style={{ padding: '5px 10px', border: `0.5px solid ${T.line}`, color: T.inkSoft, textDecoration: 'none' }}>WORKS</Link>
+            <a href={`/${orgSlug}/exhibition/${exh.slug}`} target="_blank" rel="noreferrer" className="ui-icon-button" style={{ padding: '5px 10px', border: `0.5px solid ${T.line}`, color: T.inkSoft, textDecoration: 'none', marginLeft: 'auto' }}>PREVIEW ↗</a>
           </div>
         </div>
       ))}

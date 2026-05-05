@@ -43,7 +43,7 @@ export default function DashHome() {
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>SIGNED IN AS · DASHBOARD</div>
           <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>{org?.name || orgSlug}</div>
         </div>
-        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} style={{ background: T.ink, color: T.paper, border: 'none', padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-action" style={{ background: T.accent, color: T.paper, border: 'none', padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
           ＋ 新しい展覧会を作成
         </button>
       </div>
@@ -60,7 +60,7 @@ export default function DashHome() {
               <span></span><span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span style={{ textAlign: 'right' }}>操作</span>
             </div>
             {exhibitions.slice(0, 5).map((exh, i) => (
-              <div key={exh.id} style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 100px', gap: 14, padding: '16px 0', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
+              <div key={exh.id} className="ui-row" style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 100px', gap: 14, padding: '16px 10px', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
                 <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</div>
                 <div style={{ width: 48, height: 48, background: '#D9D6CE' }} />
                 <div>
@@ -71,8 +71,8 @@ export default function DashHome() {
                 </div>
                 <div><StatusBadge kind={exhStatus(exh)} /></div>
                 <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                  <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.ink}`, textDecoration: 'none', color: T.ink }}>EDIT</Link>
-                  <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>WORKS</Link>
+                  <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} className="ui-icon-button" style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.ink}`, textDecoration: 'none', color: T.ink }}>EDIT</Link>
+                  <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} className="ui-icon-button" style={{ fontFamily: T.mono, fontSize: 10, padding: '4px 8px', border: `0.5px solid ${T.line}`, textDecoration: 'none', color: T.inkSoft }}>WORKS</Link>
                 </div>
               </div>
             ))}
@@ -85,10 +85,10 @@ export default function DashHome() {
           <div style={{ marginBottom: 28 }}>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 12 }}>OVERVIEW</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: T.line }}>
-              {[['EXHIBITS', pad2(exhibitions.length)], ['LIVE', pad2(liveCount)]].map(([k, v]) => (
-                <div key={k} style={{ background: T.paper, padding: '14px 12px' }}>
-                  <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>{k}</div>
-                  <div style={{ marginTop: 4, fontFamily: T.serif, fontSize: 22, color: T.ink }}>{v}</div>
+              {[['EXHIBITS', pad2(exhibitions.length), T.slate], ['LIVE', pad2(liveCount), T.accent]].map(([k, v, bg]) => (
+                <div key={k} style={{ background: bg, color: T.paper, padding: '14px 12px' }}>
+                  <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: 'rgba(255,255,255,0.58)' }}>{k}</div>
+                  <div style={{ marginTop: 4, fontFamily: T.serif, fontSize: 22, color: T.paper }}>{v}</div>
                 </div>
               ))}
             </div>
@@ -127,7 +127,7 @@ export default function DashHome() {
       </div>
 
       <div style={{ padding: '0 16px 20px' }}>
-        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} style={{ width: '100%', background: T.ink, color: T.paper, border: 'none', padding: '16px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-action" style={{ width: '100%', background: T.accent, color: T.paper, border: 'none', padding: '16px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span>＋  新しい展覧会を作成</span>
           <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
         </button>
@@ -139,7 +139,7 @@ export default function DashHome() {
           <Link to={`/${orgSlug}/dashboard/exhibitions`} style={{ cursor: 'pointer', color: T.ink, textDecoration: 'none' }}>VIEW ALL →</Link>
         </div>
         {exhibitions.slice(0, 4).map((exh, i) => (
-          <Link key={exh.id} to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', gap: 12, cursor: 'pointer', textDecoration: 'none', color: T.ink }}>
+          <Link key={exh.id} to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} className="ui-row" style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', gap: 12, cursor: 'pointer', textDecoration: 'none', color: T.ink }}>
             <div style={{ width: 32, fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2 }}>{pad2(i + 1)}</div>
             <div style={{ width: 52, height: 52, background: '#D9D6CE', flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>

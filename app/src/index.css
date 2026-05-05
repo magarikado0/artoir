@@ -53,3 +53,63 @@ body {
 .gallery-item:nth-child(5) { transition-delay: 0.24s; }
 .gallery-item:nth-child(6) { transition-delay: 0.30s; }
 .gallery-item:nth-child(n+7) { transition-delay: 0.36s; }
+
+.ui-invert,
+.ui-row,
+.ui-icon-button,
+.ui-bottom-item,
+.ui-chip,
+.ui-action {
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+.ui-row:hover {
+  background: #111110 !important;
+  color: #FAF8F3 !important;
+  transform: translateX(4px);
+}
+
+.ui-row:hover * {
+  color: inherit !important;
+}
+
+.ui-row:hover img,
+.ui-row:hover .ui-thumb {
+  filter: saturate(0.75) contrast(1.08);
+}
+
+.ui-action:hover,
+.ui-icon-button:hover,
+.ui-chip:hover {
+  background: #111110 !important;
+  color: #FAF8F3 !important;
+  border-color: #111110 !important;
+  transform: translateY(-1px);
+}
+
+.ui-action:hover svg,
+.ui-icon-button:hover svg,
+.ui-bottom-item:hover svg {
+  stroke: currentColor;
+}
+
+.ui-bottom-item:active,
+.ui-action:active,
+.ui-icon-button:active {
+  transform: scale(0.97);
+}
+
+.ui-strong-panel {
+  box-shadow: 0 18px 40px rgba(17, 17, 16, 0.14);
+}
+
+.ui-modal-close:hover {
+  transform: rotate(6deg) scale(1.04);
+  box-shadow: 0 12px 28px rgba(180, 69, 44, 0.34);
+}

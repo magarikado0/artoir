@@ -11,14 +11,14 @@ function DashDesktopNav({ orgSlug }) {
         <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none', marginRight: 40, flexShrink: 0 }}>
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, display: 'inline-block' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+          <span style={{ width: 28, height: 28, background: T.ink, color: T.paper, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 13 }}>◆</span>
           <span style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.ink }}>DASHBOARD</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <Link to={`/${orgSlug}`} style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkMuted, textDecoration: 'none' }}>PUBLIC ↗</Link>
-          <Link to={`/${orgSlug}/dashboard/settings`} style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkSoft, textDecoration: 'none' }}>SETTINGS</Link>
-          <Link to={`/${orgSlug}/dashboard/exhibitions/new`} style={{ padding: '8px 16px', background: T.ink, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none' }}>＋ 新規展覧会</Link>
+          <Link to={`/${orgSlug}`} className="ui-icon-button" style={{ height: 34, padding: '0 11px', display: 'inline-flex', alignItems: 'center', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkMuted, textDecoration: 'none', border: `0.5px solid ${T.line}` }}>PUBLIC ↗</Link>
+          <Link to={`/${orgSlug}/dashboard/settings`} className="ui-icon-button" style={{ height: 34, padding: '0 11px', display: 'inline-flex', alignItems: 'center', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkSoft, textDecoration: 'none', border: `0.5px solid ${T.line}` }}>⚙ SETTINGS</Link>
+          <Link to={`/${orgSlug}/dashboard/exhibitions/new`} className="ui-action" style={{ padding: '9px 16px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none' }}>＋ 新規展覧会</Link>
         </div>
       </div>
     </div>
@@ -56,8 +56,8 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
         <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none' }}>
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.ink, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, display: 'inline-block' }} />
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.paper, background: T.ink, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px' }}>
+          <span style={{ color: T.accent }}>◆</span>
           DASHBOARD
         </div>
       </div>
@@ -130,9 +130,9 @@ export function DashSectionLabel({ children }) {
 
 export function StatusBadge({ kind }) {
   const map = {
-    live:      { label: 'LIVE',      color: T.accent,   bg: 'rgba(180,69,44,0.08)' },
-    upcoming:  { label: 'UPCOMING',  color: T.ink,      bg: T.lineSoft },
-    ended:     { label: 'ENDED',     color: T.inkMuted, bg: 'transparent', border: true },
+    live:      { label: 'LIVE',      color: T.paper,    bg: T.accent },
+    upcoming:  { label: 'UPCOMING',  color: T.paper,    bg: T.moss },
+    ended:     { label: 'ENDED',     color: T.inkMuted, bg: T.paper, border: true },
   }
   const m = map[kind] || map.ended
   return (

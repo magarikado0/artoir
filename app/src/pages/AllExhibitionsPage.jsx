@@ -48,11 +48,11 @@ export default function AllExhibitionsPage() {
     </div>
   )
 
-  if (isDesktop) return <DesktopView rows={rows} navigate={navigate} handleCreate={handleCreate} />
-  return <MobileView rows={rows} navigate={navigate} handleCreate={handleCreate} />
+  if (isDesktop) return <DesktopView rows={rows} handleCreate={handleCreate} />
+  return <MobileView rows={rows} handleCreate={handleCreate} />
 }
 
-function DesktopView({ rows, navigate, handleCreate }) {
+function DesktopView({ rows, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="top" />
@@ -80,12 +80,12 @@ function DesktopView({ rows, navigate, handleCreate }) {
 
         {/* filter row */}
         <div style={{ padding: '16px 0', display: 'flex', gap: 6, borderBottom: `0.5px solid ${T.line}`, flexWrap: 'wrap' }}>
-          {['ALL', 'OPEN NOW', 'UPCOMING'].map((f) => (
-            <span key={f} style={{
+          {['ALL', 'OPEN NOW', 'UPCOMING'].map((f, i) => (
+            <span key={f} className="ui-chip" style={{
               padding: '6px 12px',
-              background: 'transparent',
-              color: T.inkSoft,
-              border: `0.5px solid ${T.line}`,
+              background: i === 0 ? T.ink : 'transparent',
+              color: i === 0 ? T.paper : T.inkSoft,
+              border: i === 0 ? `0.5px solid ${T.ink}` : `0.5px solid ${T.line}`,
               fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em',
             }}>{f}</span>
           ))}
@@ -108,9 +108,10 @@ function DesktopView({ rows, navigate, handleCreate }) {
           <Link
             key={exh.id}
             to={`/${org?.slug}/exhibition/${exh.slug}`}
+            className="ui-row"
             style={{
               display: 'grid', gridTemplateColumns: '48px 1fr 260px 200px 80px',
-              padding: '18px 0', gap: 20, alignItems: 'center',
+              padding: '18px 14px', gap: 20, alignItems: 'center',
               borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer',
               textDecoration: 'none', color: T.ink,
             }}
@@ -140,9 +141,10 @@ function DesktopView({ rows, navigate, handleCreate }) {
 
       {/* CTA */}
       <div style={{ maxWidth: 1200, margin: '60px auto 0', padding: '0 32px' }}>
-        <div style={{
-          padding: '40px 48px', background: T.ink, color: T.paper,
+        <div className="ui-strong-panel" style={{
+          padding: '40px 48px', background: T.slate, color: T.paper,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          borderLeft: `12px solid ${T.accent}`,
         }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>
@@ -158,7 +160,7 @@ function DesktopView({ rows, navigate, handleCreate }) {
           <button
             onClick={handleCreate}
             style={{
-              flexShrink: 0, background: T.accent, color: T.paper, border: 'none',
+              flexShrink: 0, background: T.paper, color: T.ink, border: 'none',
               padding: '14px 24px', fontFamily: T.sans, fontWeight: 500,
               fontSize: 13, letterSpacing: '0.1em', cursor: 'pointer',
             }}
@@ -173,7 +175,7 @@ function DesktopView({ rows, navigate, handleCreate }) {
   )
 }
 
-function MobileView({ rows, navigate, handleCreate }) {
+function MobileView({ rows, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
       <Header activeTab="top" />
@@ -199,13 +201,14 @@ function MobileView({ rows, navigate, handleCreate }) {
         <Link
           key={exh.id}
           to={`/${org?.slug}/exhibition/${exh.slug}`}
+          className="ui-row"
           style={{
             display: 'grid', gridTemplateColumns: '32px 1fr 100px', gap: 10,
             padding: '16px 16px', borderBottom: `0.5px solid ${T.line}`,
             alignItems: 'start', textDecoration: 'none', color: T.ink,
           }}
         >
-          <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2 }}>{pad2(i + 1)}</div>
+          <div style={{ width: 26, height: 26, background: i === 0 ? T.accent : T.paperAlt, color: i === 0 ? T.paper : T.inkMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 10, paddingTop: 1 }}>{pad2(i + 1)}</div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: T.serif, fontSize: 16, lineHeight: 1.3, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
             <div style={{ marginTop: 2, fontSize: 11, color: T.inkSoft, lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{org?.name}</div>
@@ -222,11 +225,11 @@ function MobileView({ rows, navigate, handleCreate }) {
         <div style={{ padding: '48px 16px', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>NO EXHIBITIONS YET</div>
       )}
 
-      <div style={{ margin: '32px 16px', padding: '28px 22px', background: T.ink, color: T.paper }}>
+      <div className="ui-strong-panel" style={{ margin: '32px 16px', padding: '28px 22px', background: T.slate, color: T.paper, borderLeft: `8px solid ${T.accent}` }}>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>FOR ORGANIZATIONS</div>
         <div style={{ marginTop: 10, fontFamily: T.serif, fontSize: 22, lineHeight: 1.4 }}>展覧会を、<br/>そのまま記録に。</div>
         <div style={{ marginTop: 10, fontSize: 12, lineHeight: 1.8, color: 'rgba(255,255,255,0.7)' }}>作品・会期・会場を登録するだけで、共有可能な展覧会ページが公開されます。</div>
-        <button onClick={handleCreate} style={{ marginTop: 20, background: T.accent, color: T.paper, border: 'none', padding: '12px 18px', fontFamily: T.sans, fontWeight: 500, fontSize: 12, letterSpacing: '0.1em', cursor: 'pointer' }}>
+        <button onClick={handleCreate} className="ui-action" style={{ marginTop: 20, background: T.paper, color: T.ink, border: 'none', padding: '12px 18px', fontFamily: T.sans, fontWeight: 500, fontSize: 12, letterSpacing: '0.1em', cursor: 'pointer' }}>
           自分の展覧会を作る  →
         </button>
       </div>

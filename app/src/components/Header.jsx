@@ -5,9 +5,35 @@ import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 
 const TABS = [
-  { key: 'top',  label: '展覧会一覧', path: '/' },
-  { key: 'orgs', label: '団体一覧',   path: '/orgs' },
+  { key: 'top',  label: '展覧会一覧', path: '/', icon: 'list' },
+  { key: 'orgs', label: '団体一覧',   path: '/orgs', icon: 'org' },
 ]
+
+function Icon({ name, size = 18 }) {
+  const s = { stroke: 'currentColor', strokeWidth: 1.7, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' }
+  if (name === 'org') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 21V8l8-4 8 4v13" {...s} />
+      <path d="M9 21v-7h6v7M8 10h.01M12 10h.01M16 10h.01" {...s} />
+    </svg>
+  )
+  if (name === 'user') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="8" r="4" {...s} />
+      <path d="M4 21c1.8-4 4.5-6 8-6s6.2 2 8 6" {...s} />
+    </svg>
+  )
+  if (name === 'login') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 18l6-6-6-6M15 12H3M21 4v16" {...s} />
+    </svg>
+  )
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 7h14M5 12h14M5 17h9" {...s} />
+    </svg>
+  )
+}
 
 export default function Header({ activeTab }) {
   const isDesktop = useIsDesktop()
@@ -42,14 +68,18 @@ export default function Header({ activeTab }) {
             {TABS.map((t) => {
               const on = activeTab === t.key
               return (
-                <Link key={t.key} to={t.path} style={{
-                  padding: '0 18px', height: 68, display: 'flex', alignItems: 'center',
+                <Link key={t.key} to={t.path} className="ui-icon-button" style={{
+                  padding: '0 16px', height: 68, display: 'flex', alignItems: 'center', gap: 8,
                   textDecoration: 'none', position: 'relative',
                   fontFamily: T.sans, fontSize: 13, letterSpacing: '0.04em',
-                  color: on ? T.ink : T.inkSoft,
+                  color: on ? T.paper : T.inkSoft,
+                  background: on ? T.ink : 'transparent',
                   borderBottom: on ? `2px solid ${T.accent}` : '2px solid transparent',
                   boxSizing: 'border-box',
-                }}>{t.label}</Link>
+                }}>
+                  <Icon name={t.icon} size={17} />
+                  <span>{t.label}</span>
+                </Link>
               )
             })}
           </div>
@@ -57,7 +87,8 @@ export default function Header({ activeTab }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             {session ? (
               <>
-                <Link to="/account" style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.inkSoft, textDecoration: 'none' }}>
+                <Link to="/account" className="ui-icon-button" style={{ height: 36, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 7, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.inkSoft, textDecoration: 'none', border: `0.5px solid ${T.line}` }}>
+                  <Icon name="user" size={15} />
                   DASHBOARD
                 </Link>
                 <div style={{ width: 1, height: 16, background: T.line }} />
@@ -67,11 +98,11 @@ export default function Header({ activeTab }) {
                 }}>SIGN OUT</button>
               </>
             ) : (
-              <Link to="/login" style={{
-                padding: '8px 16px', background: T.ink, color: T.paper,
+              <Link to="/login" className="ui-action" style={{
+                padding: '9px 14px', background: T.accent, color: T.paper,
                 fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em',
-                textDecoration: 'none', display: 'inline-block',
-              }}>LOG IN</Link>
+                textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 8,
+              }}><Icon name="login" size={15} />LOG IN</Link>
             )}
           </div>
         </div>
@@ -93,8 +124,13 @@ export default function Header({ activeTab }) {
       }}>
         Artoir<span style={{ color: T.accent }}>.</span>
       </Link>
-      <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
-        INDEX · {new Date().getFullYear()}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Link to="/account" className="ui-icon-button" aria-label="アカウント" style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', color: activeTab === 'account' ? T.paper : T.ink, background: activeTab === 'account' ? T.ink : T.paperAlt, border: `0.5px solid ${T.line}`, textDecoration: 'none' }}>
+          <Icon name="user" size={18} />
+        </Link>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
+          {new Date().getFullYear()}
+        </div>
       </div>
     </div>
   )

@@ -7,6 +7,16 @@ import { useIsDesktop } from '../../lib/useIsDesktop'
 
 const SWATCHES = ['#FAF8F3', '#F3F0E8', '#E7E2D6', '#111110', '#2A2825', '#B4452C']
 
+function toSlug(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+}
+
 export default function DashExhibitionEdit() {
   const { orgSlug, exhibitionId } = useParams()
   const navigate = useNavigate()
@@ -19,6 +29,7 @@ export default function DashExhibitionEdit() {
 
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
+  const [slugTouched, setSlugTouched] = useState(false)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [location, setLocation] = useState('')
@@ -49,9 +60,26 @@ export default function DashExhibitionEdit() {
     load()
   }, [orgSlug, exhibitionId, isNew])
 
+  function handleTitleChange(v) {
+    setTitle(v)
+    if (isNew && !slugTouched) {
+      const auto = toSlug(v)
+      if (auto) setSlug(auto)
+    }
+  }
+
+  function handleSlugChange(v) {
+    setSlug(v)
+    setSlugTouched(true)
+  }
+
   async function handleSave() {
     if (!supabase || !org) return
     if (!isNew && (!exhibitionId || exhibitionId === 'undefined')) return
+    if (!slug.trim()) {
+      window.alert('URLを入力してください。\n例: spring-exhibition-2025\n\n半角英数字とハイフンで入力してください。')
+      return
+    }
     setSaving(true)
     const payload = { title, slug, start_date: startDate || null, end_date: endDate || null, location, description, bg_color: bgColor, org_id: org.id }
     let nextPath = null
@@ -91,15 +119,15 @@ export default function DashExhibitionEdit() {
   const formContent = (
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
       <DashSectionLabel>基本情報</DashSectionLabel>
-      <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
+      <DashField label="タイトル" value={title} onChange={handleTitleChange} placeholder="例: 静かな気配" />
       <DashField
-        label="SLUG"
+        label="SLUG（公開URL）"
         prefix={`artoir.net/${orgSlug}/exhibition/`}
         value={slug}
-        onChange={setSlug}
+        onChange={handleSlugChange}
         placeholder="shizukana-kehai"
         mono
-        rightHint="公開URL"
+        rightHint="半角英数字・ハイフンのみ"
       />
 
       <DashSectionLabel>会期・会場</DashSectionLabel>
@@ -128,7 +156,7 @@ export default function DashExhibitionEdit() {
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {SWATCHES.map((c) => (
-            <div key={c} onClick={() => setBgColor(c)} style={{ width: 30, height: 30, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
+            <div key={c} onClick={() => setBgColor(c)} className="ui-chip" style={{ width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
               {bgColor === c && <div style={{ position: 'absolute', inset: 2, border: `1px solid ${c === '#111110' || c === '#2A2825' ? T.paper : T.ink}` }} />}
             </div>
           ))}
@@ -138,14 +166,15 @@ export default function DashExhibitionEdit() {
 
       <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
         {!isNew && (
-          <button onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+          <button onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} className="ui-icon-button" style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
             作品を管理 →
           </button>
         )}
         <button
           onClick={handleSave}
           disabled={saving}
-          style={{ flex: 1, padding: '14px', background: T.ink, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+          className="ui-action"
+          style={{ flex: 1, padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
         >{saving ? 'SAVING...' : 'SAVE ↩'}</button>
       </div>
       <div style={{ height: 40 }} />

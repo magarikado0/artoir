@@ -46,12 +46,12 @@ export default function BottomNav({ active }) {
       {ITEMS.map((it) => {
         const on = active === it.key
         return (
-          <div key={it.key} onClick={() => handleNav(it)} style={{
+          <div key={it.key} onClick={() => handleNav(it)} className="ui-bottom-item" style={{
             flex: 1, display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: 5, padding: '8px 2px', cursor: 'pointer',
-            background: on ? T.ink : 'transparent',
+            alignItems: 'center', gap: 5, padding: '9px 2px', cursor: 'pointer',
+            background: on ? T.ink : T.paperAlt,
             color: on ? T.paper : T.inkSoft,
-            transition: 'background 180ms',
+            border: on ? `1px solid ${T.ink}` : `0.5px solid ${T.line}`,
           }}>
             <NavIcon name={it.icon} color={on ? T.paper : T.inkSoft} />
             <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em' }}>{it.en}</div>

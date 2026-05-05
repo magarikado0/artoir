@@ -35,15 +35,20 @@ export default function ArtworkModal({ artwork, onClose }) {
         }}>
           WORK · NO. {artwork.order ? pad2(artwork.order) : '—'}
         </div>
-        <div
+        <button
           onClick={onClose}
+          className="ui-modal-close"
+          aria-label="作品写真を閉じる"
           style={{
-            fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', cursor: 'pointer',
-            padding: 6, marginRight: -6, color: T.ink,
+            width: 42, height: 42, borderRadius: '50%', border: 'none',
+            background: T.warning, color: T.paper, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: T.mono, fontSize: 22, lineHeight: 1, fontWeight: 700,
+            boxShadow: '0 8px 18px rgba(180,69,44,0.24)',
           }}
         >
-          CLOSE ✕
-        </div>
+          ×
+        </button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>

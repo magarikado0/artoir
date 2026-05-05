@@ -74,10 +74,28 @@ export default function ExhibitionPage() {
     return () => observer.disconnect()
   }, [artworks])
 
-  function copyLink() {
-    navigator.clipboard.writeText(window.location.href).catch(() => {})
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  async function copyLink() {
+    const url = window.location.href
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback for mobile browsers without clipboard API support
+      const el = document.createElement('textarea')
+      el.value = url
+      el.style.cssText = 'position:fixed;opacity:0;top:0;left:0'
+      document.body.appendChild(el)
+      el.focus()
+      el.select()
+      try {
+        document.execCommand('copy')
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      } finally {
+        document.body.removeChild(el)
+      }
+    }
   }
 
   if (loading) return (
@@ -140,7 +158,7 @@ export default function ExhibitionPage() {
             {exhibition.description && (
               <div style={{ marginTop: 28, fontSize: 13, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
             )}
-            <button onClick={copyLink} style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: 'transparent', border: `1px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: T.ink }}>
+            <button onClick={copyLink} className="ui-action" style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: copied ? T.accent : 'transparent', border: `1px solid ${copied ? T.accent : T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: copied ? T.paper : T.ink }}>
               <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artoir.net/…/{exhibition.slug}</span>
               <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'URLをコピー'}</span>
             </button>
@@ -175,16 +193,16 @@ export default function ExhibitionPage() {
 
         {/* org strip */}
         {org && (
-          <div style={{ padding: '28px 32px', background: T.paperAlt, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 60 }}>
+          <div className="ui-strong-panel" style={{ padding: '28px 32px', background: T.ink, color: T.paper, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 60, borderLeft: `10px solid ${T.accent}` }}>
             <div>
-              <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 6 }}>ORGANIZER</div>
-              <Link to={`/${orgSlug}`} style={{ fontFamily: T.serif, fontSize: 18, textDecoration: 'none', color: T.ink }}>{org.name}</Link>
+              <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>ORGANIZER</div>
+              <Link to={`/${orgSlug}`} style={{ fontFamily: T.serif, fontSize: 18, textDecoration: 'none', color: T.paper }}>{org.name}</Link>
             </div>
             <div style={{ display: 'flex', gap: 20, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkSoft }}>
-              {sns.instagram && <a href={sns.instagram} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>Instagram ↗</a>}
-              {sns.x && <a href={sns.x} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>X ↗</a>}
-              {org.homepage_url && <a href={org.homepage_url} target="_blank" rel="noreferrer" style={{ color: T.inkSoft, textDecoration: 'none' }}>Website ↗</a>}
-              <Link to={`/${orgSlug}`} style={{ color: T.ink, textDecoration: 'none' }}>団体ページ →</Link>
+              {sns.instagram && <a href={sns.instagram} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.72)', textDecoration: 'none' }}>Instagram ↗</a>}
+              {sns.x && <a href={sns.x} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.72)', textDecoration: 'none' }}>X ↗</a>}
+              {org.homepage_url && <a href={org.homepage_url} target="_blank" rel="noreferrer" style={{ color: 'rgba(255,255,255,0.72)', textDecoration: 'none' }}>Website ↗</a>}
+              <Link to={`/${orgSlug}`} style={{ color: T.paper, textDecoration: 'none' }}>団体ページ →</Link>
             </div>
           </div>
         )}
@@ -227,7 +245,7 @@ export default function ExhibitionPage() {
         {exhibition.description && (
           <div style={{ marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${T.line}`, fontSize: 13, lineHeight: 1.9, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
         )}
-        <button onClick={copyLink} style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'transparent', border: `1px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: T.ink }}>
+        <button onClick={copyLink} className="ui-action" style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: copied ? T.accent : 'transparent', border: `1px solid ${copied ? T.accent : T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: copied ? T.paper : T.ink }}>
           <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artoir.net/…/{exhibition.slug}</span>
           <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'COPY'}</span>
         </button>
@@ -241,13 +259,13 @@ export default function ExhibitionPage() {
           </div>
           <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: T.line }}>
             {artworks.map((w, i) => (
-              <div key={w.id} className="gallery-item" onClick={() => setSelectedArtwork(w)} style={{ background: T.paper, cursor: 'pointer', position: 'relative' }}>
+              <div key={w.id} className="gallery-item ui-invert" onClick={() => setSelectedArtwork(w)} style={{ background: T.paper, cursor: 'pointer', position: 'relative' }}>
                 {w.image_url ? (
                   <img src={w.image_url} alt={w.title} style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block' }} />
                 ) : (
                   <div style={{ width: '100%', aspectRatio: '1 / 1', background: '#D9D6CE' }} />
                 )}
-                <div style={{ position: 'absolute', top: 4, left: 4, fontFamily: T.mono, fontSize: 8.5, letterSpacing: '0.1em', background: T.paper, padding: '2px 4px', color: T.inkMuted }}>{pad2(i + 1)}</div>
+                <div style={{ position: 'absolute', top: 4, left: 4, fontFamily: T.mono, fontSize: 8.5, letterSpacing: '0.1em', background: i === 0 ? T.accent : T.ink, padding: '3px 5px', color: T.paper }}>{pad2(i + 1)}</div>
               </div>
             ))}
           </div>

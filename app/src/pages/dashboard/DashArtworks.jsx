@@ -52,7 +52,12 @@ export default function DashArtworks() {
       .insert({ exhibition_id: exhibitionId, image_url: cloudinaryUrl, title: '', order: maxOrder + 1 })
       .select()
       .single()
-    if (newWork) setArtworks((prev) => [...prev, newWork])
+    if (newWork) {
+      setArtworks((prev) => [...prev, newWork])
+      setEditTarget(newWork)
+      setEditTitle('')
+      setEditDesc('')
+    }
   }
 
   async function handleDelete() {
@@ -79,9 +84,9 @@ export default function DashArtworks() {
 
   const uploadArea = (
     <div style={{ padding: isDesktop ? '20px 0' : '0 16px 16px' }}>
-      <div style={{ padding: '20px', border: `1px dashed ${T.ink}`, background: T.card }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8, textAlign: 'center' }}>＋ UPLOAD</div>
-        <div style={{ fontFamily: T.serif, fontSize: 16, letterSpacing: '0.02em', color: T.ink, textAlign: 'center', marginBottom: 14 }}>作品を追加</div>
+      <div className="ui-strong-panel" style={{ padding: '20px', border: `1px dashed ${T.ink}`, background: T.slate, color: T.paper }}>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.58)', marginBottom: 8, textAlign: 'center' }}>＋ UPLOAD</div>
+        <div style={{ fontFamily: T.serif, fontSize: 16, letterSpacing: '0.02em', color: T.paper, textAlign: 'center', marginBottom: 14 }}>作品を追加</div>
         <ImageUploader onUploaded={handleUploaded} />
       </div>
     </div>
@@ -93,7 +98,7 @@ export default function DashArtworks() {
         <span>#</span><span></span><span>TITLE</span><span style={{ textAlign: 'right' }}>···</span>
       </div>
       {artworks.map((w, i) => (
-        <div key={w.id} style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: '24px 48px 1fr 40px', gap: 10, borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
+        <div key={w.id} className="ui-row" style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: '24px 48px 1fr 72px', gap: 10, borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>
             <DragHandle />
             {pad2(i + 1)}
@@ -105,14 +110,18 @@ export default function DashArtworks() {
             <div style={{ fontFamily: T.serif, fontSize: 14, letterSpacing: '0.02em', color: T.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title || '（タイトルなし）'}</div>
             {w.description && <div style={{ marginTop: 2, fontSize: 10.5, color: T.inkMuted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.description}</div>}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 0 }}>
             <button
               onClick={() => { setEditTarget(w); setEditTitle(w.title || ''); setEditDesc(w.description || '') }}
-              style={{ background: 'none', border: 'none', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, cursor: 'pointer', padding: '4px' }}
+              className="ui-icon-button"
+              aria-label="作品を編集"
+              style={{ background: T.paperAlt, border: `0.5px solid ${T.line}`, fontFamily: T.mono, fontSize: 13, color: T.inkMuted, cursor: 'pointer', padding: '10px 8px', minWidth: 36, minHeight: 36 }}
             >✎</button>
             <button
               onClick={() => setDeleteTarget(w)}
-              style={{ background: 'none', border: 'none', fontFamily: T.mono, fontSize: 13, color: T.inkMuted, cursor: 'pointer', padding: '4px' }}
+              className="ui-icon-button"
+              aria-label="作品を削除"
+              style={{ background: T.blush, border: `0.5px solid ${T.line}`, fontFamily: T.mono, fontSize: 15, color: T.accent, cursor: 'pointer', padding: '10px 8px', minWidth: 36, minHeight: 36 }}
             >⋯</button>
           </div>
         </div>
@@ -126,8 +135,8 @@ export default function DashArtworks() {
       <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.accent, marginBottom: 6 }}>CONFIRM · DELETE</div>
       <div style={{ fontSize: 12, color: T.ink, lineHeight: 1.6 }}>「{deleteTarget.title || '（タイトルなし）'}」を削除します。この操作は取り消せません。</div>
       <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
-        <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '8px', background: 'transparent', border: `0.5px solid ${T.inkMuted}`, color: T.inkSoft, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', cursor: 'pointer' }}>CANCEL</button>
-        <button onClick={handleDelete} style={{ flex: 1, padding: '8px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', cursor: 'pointer' }}>DELETE ✕</button>
+          <button onClick={() => setDeleteTarget(null)} className="ui-icon-button" style={{ flex: 1, padding: '8px', background: 'transparent', border: `0.5px solid ${T.inkMuted}`, color: T.inkSoft, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', cursor: 'pointer' }}>CANCEL</button>
+        <button onClick={handleDelete} className="ui-action" style={{ flex: 1, padding: '8px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', cursor: 'pointer' }}>DELETE ✕</button>
       </div>
     </div>
   )
@@ -145,8 +154,8 @@ export default function DashArtworks() {
           <textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${T.ink}`, fontFamily: T.sans, fontSize: 13, color: T.ink, background: T.card, resize: 'vertical', boxSizing: 'border-box' }} />
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setEditTarget(null)} style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', color: T.ink }}>CANCEL</button>
-          <button onClick={handleEditSave} style={{ flex: 1, padding: '12px', background: T.ink, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>SAVE ↩</button>
+          <button onClick={() => setEditTarget(null)} className="ui-icon-button" style={{ flex: 1, padding: '12px', background: 'transparent', border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', color: T.ink }}>CANCEL</button>
+          <button onClick={handleEditSave} className="ui-action" style={{ flex: 1, padding: '12px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>SAVE ↩</button>
         </div>
       </div>
     </div>
