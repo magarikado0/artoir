@@ -38,7 +38,7 @@ export default function DashHome() {
 
   if (isDesktop) return (
     <DashShell orgSlug={orgSlug} active="dash" crumbs={['DASHBOARD']}>
-      <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `14px 14px 0 ${T.moss}` }}>
+      <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.moss}` }}>
         <div>
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.accent, marginBottom: 8 }}>SIGNED IN AS · DASHBOARD</div>
           <div style={{ fontFamily: T.serif, fontSize: 44, lineHeight: 1.05, letterSpacing: '0.01em', color: T.ink }}>{org?.name || orgSlug}</div>
@@ -84,7 +84,7 @@ export default function DashHome() {
           <div style={{ marginBottom: 28 }}>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 12 }}>OVERVIEW</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, background: T.line, border: `2px solid ${T.ink}` }}>
-              {[['EXHIBITS', pad2(exhibitions.length), T.slate], ['LIVE', pad2(liveCount), T.accent]].map(([k, v, bg]) => (
+              {[['EXHIBITS', pad2(exhibitions.length), T.ink], ['LIVE', pad2(liveCount), T.slate]].map(([k, v, bg]) => (
                 <div key={k} style={{ background: bg, color: T.paper, padding: '14px 12px' }}>
                   <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: 'rgba(255,255,255,0.58)' }}>{k}</div>
                   <div style={{ marginTop: 4, fontFamily: T.serif, fontSize: 22, color: T.paper }}>{v}</div>
@@ -96,7 +96,7 @@ export default function DashHome() {
             [`/${orgSlug}/dashboard/settings`, '団体設定'],
             [`/${orgSlug}`, '公開ページを確認'],
           ].map(([to, label, en]) => (
-            <Link key={to} to={to} className="ui-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 12px', border: `2px solid ${T.ink}`, marginBottom: 8, textDecoration: 'none', background: T.card, color: T.ink }}>
+          <Link key={to} to={to} className="ui-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 12px', border: `2px solid ${T.ink}`, marginBottom: 8, textDecoration: 'none', background: T.card, color: T.ink }}>
               <span style={{ fontFamily: T.serif, fontSize: 14 }}>{label}</span>
               <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{en}</span>
             </Link>
@@ -116,7 +116,7 @@ export default function DashHome() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, background: T.line, margin: '4px 16px 24px', border: `2px solid ${T.ink}` }}>
-        {[['EXHIBITS', pad2(exhibitions.length), T.slate], ['LIVE', pad2(liveCount), T.accent]].map(([k, v, bg]) => (
+        {[['EXHIBITS', pad2(exhibitions.length), T.ink], ['LIVE', pad2(liveCount), T.slate]].map(([k, v, bg]) => (
           <div key={k} style={{ background: bg, color: T.paper, padding: '14px 10px' }}>
             <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: 'rgba(255,249,233,0.68)' }}>{k}</div>
             <div style={{ marginTop: 4, fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.paper }}>{v}</div>
@@ -136,7 +136,7 @@ export default function DashHome() {
           <span>YOUR EXHIBITIONS</span>
         </div>
         {exhibitions.slice(0, 4).map((exh, i) => (
-          <Link key={exh.id} to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} className="ui-row" style={{ padding: '14px 16px', borderBottom: `2px solid ${T.ink}`, display: 'flex', gap: 12, cursor: 'pointer', textDecoration: 'none', color: T.ink, background: i % 2 === 0 ? T.card : T.blueSoft }}>
+          <Link key={exh.id} to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} className="ui-row" style={{ padding: '14px 16px', borderBottom: `2px solid ${T.ink}`, display: 'flex', gap: 12, cursor: 'pointer', textDecoration: 'none', color: T.ink, background: i % 2 === 0 ? T.card : T.paperAlt }}>
             <div style={{ width: 32, fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2 }}>{pad2(i + 1)}</div>
             <div style={{ width: 52, height: 52, background: '#D9D6CE', flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>

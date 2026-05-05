@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper:      #F7F0DC;
-  --color-paper-alt:  #D8E7C1;
-  --color-card:       #FFF9E9;
-  --color-ink:        #17110B;
-  --color-ink-soft:   #312419;
-  --color-ink-muted:  #786B5B;
-  --color-line:       #2E2117;
-  --color-line-soft:  #D8CBB0;
-  --color-accent:     #E94B2E;
-  --color-accent-ink: #8F1F13;
+  --color-paper:      #F6F0E4;
+  --color-paper-alt:  #E7E0D0;
+  --color-card:       #FFFDF7;
+  --color-ink:        #1E1A16;
+  --color-ink-soft:   #3E3730;
+  --color-ink-muted:  #7E7569;
+  --color-line:       #3A332C;
+  --color-line-soft:  #DCD3C2;
+  --color-accent:     #B65A45;
+  --color-accent-ink: #7A2F24;
 }
 
 * {
@@ -26,11 +26,11 @@ html {
 
 body {
   background:
-    linear-gradient(90deg, rgba(23,17,11,0.05) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(23,17,11,0.04) 1px, transparent 1px),
-    #F7F0DC;
-  background-size: 28px 28px, 28px 28px, auto;
-  color: #17110B;
+    linear-gradient(90deg, rgba(30,26,22,0.025) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(30,26,22,0.02) 1px, transparent 1px),
+    #F6F0E4;
+  background-size: 36px 36px, 36px 36px, auto;
+  color: #1E1A16;
   font-family: 'Noto Sans JP', -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
@@ -74,15 +74,15 @@ body {
 }
 
 ::selection {
-  background: #E94B2E;
-  color: #FFF9E9;
+  background: #B65A45;
+  color: #FFFDF7;
 }
 
 .ui-row:hover {
-  background: #17110B !important;
-  color: #FFF9E9 !important;
-  transform: translateX(6px);
-  box-shadow: 12px 12px 0 #F2B849;
+  background: #1E1A16 !important;
+  color: #FFFDF7 !important;
+  transform: translateX(4px);
+  box-shadow: 8px 8px 0 #D4B15F;
 }
 
 .ui-row:hover * {
@@ -98,10 +98,10 @@ body {
 .ui-icon-button:hover,
 .ui-chip:hover {
   background: #F2B849 !important;
-  color: #17110B !important;
-  border-color: #17110B !important;
+  color: #1E1A16 !important;
+  border-color: #1E1A16 !important;
   transform: translateY(-2px);
-  box-shadow: 5px 5px 0 #17110B;
+  box-shadow: 4px 4px 0 #1E1A16;
 }
 
 .ui-action:hover svg,
@@ -117,7 +117,7 @@ body {
 }
 
 .ui-strong-panel {
-  box-shadow: 12px 12px 0 #17110B;
+  box-shadow: 8px 8px 0 #1E1A16;
 }
 
 .ui-ticket {
@@ -127,15 +127,15 @@ body {
 }
 
 .ui-photo-frame {
-  border: 2px solid #17110B;
-  box-shadow: 10px 10px 0 #E94B2E;
+  border: 2px solid #1E1A16;
+  box-shadow: 7px 7px 0 #B65A45;
 }
 
 .ui-page-shell {
   background:
-    linear-gradient(135deg, rgba(242,184,73,0.22) 0 25%, transparent 25% 100%),
-    linear-gradient(315deg, rgba(29,109,92,0.14) 0 18%, transparent 18% 100%),
-    #F7F0DC;
+    linear-gradient(135deg, rgba(212,177,95,0.12) 0 24%, transparent 24% 100%),
+    linear-gradient(315deg, rgba(96,118,104,0.09) 0 18%, transparent 18% 100%),
+    #F6F0E4;
 }
 
 .ui-modal-close:hover {

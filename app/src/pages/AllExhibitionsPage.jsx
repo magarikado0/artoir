@@ -101,7 +101,7 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
           background: T.card,
           border: `2px solid ${T.ink}`,
-          boxShadow: `14px 14px 0 ${T.gold}`,
+          boxShadow: `8px 8px 0 ${T.gold}`,
         }}>
           <div>
             <div style={{
@@ -156,7 +156,7 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
               padding: '18px 0', gap: 20, alignItems: 'center',
               borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer',
               textDecoration: 'none', color: T.ink,
-              background: i % 3 === 0 ? T.blueSoft : i % 3 === 1 ? T.card : T.mint,
+              background: i % 2 === 0 ? T.card : T.paperAlt,
             }}
           >
             <div>
@@ -184,10 +184,10 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
       {/* CTA */}
       <div style={{ maxWidth: 1200, margin: '60px auto 0', padding: '0 32px' }}>
         <div className="ui-strong-panel" style={{
-          padding: '42px 48px', background: T.violet, color: T.paper,
+          padding: '42px 48px', background: T.ink, color: T.paper,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           border: `2px solid ${T.ink}`,
-          boxShadow: `14px 14px 0 ${T.accent}`,
+          boxShadow: `8px 8px 0 ${T.accent}`,
         }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>
@@ -266,7 +266,7 @@ function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
             display: 'grid', gridTemplateColumns: '1fr 100px', gap: 10,
             padding: '16px 16px', borderBottom: `0.5px solid ${T.line}`,
             alignItems: 'start', textDecoration: 'none', color: T.ink,
-            background: i % 3 === 0 ? T.blueSoft : i % 3 === 1 ? T.card : T.mint,
+            background: i % 2 === 0 ? T.card : T.paperAlt,
           }}
         >
           <div style={{ minWidth: 0 }}>
@@ -285,7 +285,7 @@ function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
         <div style={{ padding: '48px 16px', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>NO EXHIBITIONS YET</div>
       )}
 
-      <div className="ui-strong-panel" style={{ margin: '32px 16px', padding: '28px 22px', background: T.violet, color: T.paper, border: `2px solid ${T.ink}`, boxShadow: `10px 10px 0 ${T.accent}` }}>
+      <div className="ui-strong-panel" style={{ margin: '32px 16px', padding: '28px 22px', background: T.ink, color: T.paper, border: `2px solid ${T.ink}`, boxShadow: `7px 7px 0 ${T.accent}` }}>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>FOR ORGANIZATIONS</div>
         <div style={{ marginTop: 10, fontFamily: T.serif, fontSize: 22, lineHeight: 1.4 }}>展覧会を、<br/>そのまま記録に。</div>
         <div style={{ marginTop: 10, fontSize: 12, lineHeight: 1.8, color: 'rgba(255,255,255,0.7)' }}>作品・会期・会場を登録するだけで、共有可能な展覧会ページが公開されます。</div>

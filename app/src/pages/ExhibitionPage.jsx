@@ -127,7 +127,7 @@ export default function ExhibitionPage() {
         </div>
 
         {/* two-col hero */}
-        <div className="ui-strong-panel" style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 38, padding: 28, marginBottom: 40, background: T.ink, color: T.paper, border: `2px solid ${T.ink}`, boxShadow: `16px 16px 0 ${T.gold}` }}>
+        <div className="ui-strong-panel" style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 38, padding: 28, marginBottom: 40, background: T.ink, color: T.paper, border: `2px solid ${T.ink}`, boxShadow: `9px 9px 0 ${T.gold}` }}>
           <div>
             {featured?.image_url ? (
               <img className="ui-photo-frame" src={featured.image_url} alt={featured.title} style={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'contain', display: 'block', background: T.card }} />
@@ -169,17 +169,17 @@ export default function ExhibitionPage() {
         {/* works grid — 4 col */}
         {artworks.length > 0 && (
           <div style={{ padding: '20px 0 48px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, padding: '12px 16px', background: T.gold, border: `2px solid ${T.ink}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, padding: '12px 16px', background: T.card, border: `2px solid ${T.ink}` }}>
               <div style={{ fontFamily: T.serif, fontSize: 26, letterSpacing: '0.02em', color: T.ink }}>Works</div>
               <div style={{ fontFamily: T.mono, fontSize: 10, color: T.ink, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · クリックで詳細</div>
             </div>
             <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
               {artworks.map((w, i) => (
-                <div key={w.id} className="gallery-item ui-row" onClick={() => setSelectedArtwork(w)} style={{ cursor: 'pointer', padding: 10, background: i % 2 === 0 ? T.card : T.blueSoft, border: `2px solid ${T.ink}` }}>
+                <div key={w.id} className="gallery-item ui-row" onClick={() => setSelectedArtwork(w)} style={{ cursor: 'pointer', padding: 10, background: i % 2 === 0 ? T.card : T.paperAlt, border: `2px solid ${T.ink}` }}>
                   {w.image_url ? (
                     <img src={w.image_url} alt={w.title} style={{ width: '100%', aspectRatio: '4 / 5', objectFit: 'cover', display: 'block', border: `1px solid ${T.ink}` }} />
                   ) : (
-                    <div style={{ width: '100%', aspectRatio: '4 / 5', background: T.mint, border: `1px solid ${T.ink}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', aspectRatio: '4 / 5', background: T.paperAlt, border: `1px solid ${T.ink}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <span style={{ fontFamily: T.mono, fontSize: 9, color: T.ink, background: T.gold, border: `1px solid ${T.ink}`, padding: '3px 6px' }}>#{pad2(i + 1)}</span>
                     </div>
                   )}
@@ -254,7 +254,7 @@ export default function ExhibitionPage() {
 
       {artworks.length > 0 && (
         <div style={{ marginTop: 36, borderTop: `3px solid ${T.ink}` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 16px', background: T.gold, borderBottom: `2px solid ${T.ink}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '14px 16px', background: T.card, borderBottom: `2px solid ${T.ink}` }}>
             <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.04em', color: T.ink }}>Works</div>
             <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · TAP FOR DETAILS</div>
           </div>

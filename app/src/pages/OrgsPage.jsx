@@ -61,7 +61,7 @@ export default function OrgsPage() {
     <div className="ui-page-shell" style={{ minHeight: '100vh' }}>
       <Header activeTab="orgs" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-        <div className="ui-strong-panel" style={{ marginTop: 28, padding: '36px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `14px 14px 0 ${T.moss}` }}>
+        <div className="ui-strong-panel" style={{ marginTop: 28, padding: '36px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.moss}` }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>INDEX · ORGANIZATIONS</div>
             <div style={{ fontFamily: T.serif, fontSize: 54, letterSpacing: '0.01em', color: T.ink, lineHeight: 1.05 }}>団体一覧</div>
@@ -74,7 +74,7 @@ export default function OrgsPage() {
         </div>
 
         {orgs.map((o, i) => (
-          <Link key={o.id} to={`/${o.slug}`} className="ui-row" style={{ display: 'grid', gridTemplateColumns: '48px 1fr 80px', padding: '22px 14px', gap: 20, alignItems: 'center', borderLeft: `2px solid ${T.ink}`, borderRight: `2px solid ${T.ink}`, borderBottom: `2px solid ${T.ink}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, background: i % 2 === 0 ? T.mint : T.card }}>
+          <Link key={o.id} to={`/${o.slug}`} className="ui-row" style={{ display: 'grid', gridTemplateColumns: '48px 1fr 80px', padding: '22px 14px', gap: 20, alignItems: 'center', borderLeft: `2px solid ${T.ink}`, borderRight: `2px solid ${T.ink}`, borderBottom: `2px solid ${T.ink}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, background: i % 2 === 0 ? T.card : T.paperAlt }}>
             <div style={{ width: 28, height: 28, background: i === 0 ? T.moss : T.paperAlt, color: i === 0 ? T.paper : T.inkMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 10 }}>{pad2(i + 1)}</div>
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.02em' }}>{o.name}</div>
@@ -114,7 +114,7 @@ export default function OrgsPage() {
           <span>NO.</span><span>団体名</span><span style={{ textAlign: 'right' }}>展覧会</span>
         </div>
         {orgs.map((o, i) => (
-          <Link key={o.id} to={`/${o.slug}`} className="ui-row" style={{ padding: '16px 16px', display: 'grid', gridTemplateColumns: '32px 1fr 48px', gap: 10, borderBottom: `2px solid ${T.ink}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, alignItems: 'center', background: i % 2 === 0 ? T.mint : T.card }}>
+          <Link key={o.id} to={`/${o.slug}`} className="ui-row" style={{ padding: '16px 16px', display: 'grid', gridTemplateColumns: '32px 1fr 48px', gap: 10, borderBottom: `2px solid ${T.ink}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, alignItems: 'center', background: i % 2 === 0 ? T.card : T.paperAlt }}>
             <div style={{ width: 26, height: 26, background: i === 0 ? T.moss : T.paperAlt, color: i === 0 ? T.paper : T.inkMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 10 }}>{pad2(i + 1)}</div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', lineHeight: 1.4 }}>{o.name}</div>

@@ -53,7 +53,7 @@ export default function DashExhibitions() {
 
   if (isDesktop) return (
     <DashShell orgSlug={orgSlug} active="exs" crumbs={['DASHBOARD', 'EXHIBITIONS']}>
-      <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `14px 14px 0 ${T.gold}` }}>
+      <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
         <div>
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>ALL / {pad2(exhibitions.length)}</div>
           <div style={{ fontFamily: T.serif, fontSize: 44, letterSpacing: '0.01em', color: T.ink, lineHeight: 1.05 }}>展覧会</div>
@@ -70,7 +70,7 @@ export default function DashExhibitions() {
           <span></span><span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span style={{ textAlign: 'right' }}>操作</span>
         </div>
         {filtered.map((exh, i) => (
-          <div key={exh.id} className="ui-row" style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 140px', gap: 14, padding: '18px 10px', borderLeft: `2px solid ${T.ink}`, borderRight: `2px solid ${T.ink}`, borderBottom: `2px solid ${T.ink}`, alignItems: 'center', background: i % 2 === 0 ? T.card : T.blueSoft }}>
+          <div key={exh.id} className="ui-row" style={{ display: 'grid', gridTemplateColumns: '32px 56px 1fr 140px 120px 140px', gap: 14, padding: '18px 10px', borderLeft: `2px solid ${T.ink}`, borderRight: `2px solid ${T.ink}`, borderBottom: `2px solid ${T.ink}`, alignItems: 'center', background: i % 2 === 0 ? T.card : T.paperAlt }}>
             <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</div>
             <div style={{ width: 48, height: 48, background: T.mint, border: `1px solid ${T.ink}` }} />
             <div>
