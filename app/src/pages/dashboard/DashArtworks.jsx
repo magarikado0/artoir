@@ -231,13 +231,8 @@ export default function DashArtworks() {
 
   if (isDesktop) return (
     <>
-<<<<<<< HEAD
       <DashShell orgSlug={orgSlug} active="exs">
         <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
-=======
-      <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
-        <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.violet}` }}>
->>>>>>> e932bec (UI-change-kageyama2)
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>{exhibition?.title || '...'}</div>
             <div style={{ fontFamily: T.serif, fontSize: 44, letterSpacing: '0.01em', lineHeight: 1.05, color: T.ink }}>作品管理</div>

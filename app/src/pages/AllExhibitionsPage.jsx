@@ -137,7 +137,7 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
         {/* table header */}
         <div style={{
           display: 'grid', gridTemplateColumns: '1fr 260px 200px 80px',
-          padding: '10px 0', gap: 20, borderBottom: `0.5px solid ${T.ink}`,
+          padding: '10px 12px', gap: 20, borderBottom: `0.5px solid ${T.ink}`,
           fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted,
         }}>
           <span>展覧会 · 団体</span>
@@ -153,7 +153,7 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
             className="ui-row"
             style={{
               display: 'grid', gridTemplateColumns: '1fr 260px 200px 80px',
-              padding: '18px 0', gap: 20, alignItems: 'center',
+              padding: '18px 12px', gap: 20, alignItems: 'center',
               borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer',
               textDecoration: 'none', color: T.ink,
               background: i % 2 === 0 ? T.card : T.paperAlt,
