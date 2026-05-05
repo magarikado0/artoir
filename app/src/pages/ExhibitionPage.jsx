@@ -99,7 +99,6 @@ export default function ExhibitionPage() {
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="top" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-        <div style={{ padding: '16px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}></div>
         {/* two-col hero */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 48, paddingBottom: 48, borderBottom: `1px solid ${T.ink}` }}>
           <div>
@@ -133,9 +132,9 @@ export default function ExhibitionPage() {
             {exhibition.description && (
               <div style={{ marginTop: 28, fontSize: 13, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
             )}
-            <button onClick={copyLink} style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: 'transparent', border: `1px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: T.ink }}>
+            <button onClick={copyLink} aria-label="URLをコピー" style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: 'transparent', border: `1px solid ${T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: T.ink }}>
               <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artoir.net/…/{exhibition.slug}</span>
-              <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : '🔗'}</span>
+              <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'COPY 🔗'}</span>
             </button>
           </div>
         </div>

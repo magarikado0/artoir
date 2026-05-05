@@ -55,13 +55,14 @@ export default function DashHome() {
           </div>
           <div style={{ borderTop: `1px solid ${T.ink}` }}>
             <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px 100px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
-              <span></span><span>タイトル</span><span>会期</span><span>STATUS</span>
+              <span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span>EDIT</span>
             </div>
             {exhibitions.map((exh) => {
               const worksHref = `/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`
+              const editHref = `/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`
               return (
                 <div key={exh.id} style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px 100px', gap: 14, padding: '16px 0', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
-                  <Link to={worksHref} style={{ display: 'block', width: 48, height: 48, background: '#D9D6CE' }} />
+                  <Link to={worksHref} aria-label={`${exh.title}の作品一覧へ`} style={{ display: 'block', width: 48, height: 48, background: '#D9D6CE' }} />
                   <Link to={worksHref} style={{ textDecoration: 'none' }}>
                     <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', color: T.ink }}>{exh.title}</div>
                   </Link>
@@ -69,6 +70,7 @@ export default function DashHome() {
                     {fmtDateDot(exh.start_date)}<br/>— {fmtDateDot(exh.end_date)}
                   </div>
                   <div><StatusBadge kind={exhStatus(exh)} /></div>
+                  <Link to={editHref} style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.1em', color: T.ink, textDecoration: 'none' }}>編集 →</Link>
                 </div>
               )
             })}
