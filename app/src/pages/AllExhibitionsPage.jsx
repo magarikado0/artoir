@@ -8,9 +8,43 @@ import { T, fmtDateDot, pad2 } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { useAuth } from '../lib/auth'
 
+const FILTERS = ['ALL', 'OPEN NOW', 'UPCOMING']
+
+function startOfToday() {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function parseLocalDate(s) {
+  if (!s) return null
+  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (!m) return new Date(s)
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+}
+
+function filterRows(rows, filter) {
+  if (filter === 'ALL') return rows
+  const today = startOfToday()
+  return rows.filter(({ exhibition: exh }) => {
+    const start = parseLocalDate(exh.start_date)
+    const end = parseLocalDate(exh.end_date)
+    if (filter === 'OPEN NOW') {
+      if (!start || !end) return false
+      return start <= today && today <= end
+    }
+    if (filter === 'UPCOMING') {
+      if (!start) return false
+      return start > today
+    }
+    return true
+  })
+}
+
 export default function AllExhibitionsPage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('ALL')
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
   const { session } = useAuth()
@@ -48,11 +82,13 @@ export default function AllExhibitionsPage() {
     </div>
   )
 
-  if (isDesktop) return <DesktopView rows={rows} handleCreate={handleCreate} />
-  return <MobileView rows={rows} handleCreate={handleCreate} />
+  const filteredRows = filterRows(rows, filter)
+
+  if (isDesktop) return <DesktopView rows={filteredRows} filter={filter} setFilter={setFilter} navigate={navigate} handleCreate={handleCreate} />
+  return <MobileView rows={filteredRows} filter={filter} setFilter={setFilter} navigate={navigate} handleCreate={handleCreate} />
 }
 
-function DesktopView({ rows, handleCreate }) {
+function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="top" />
@@ -65,10 +101,6 @@ function DesktopView({ rows, handleCreate }) {
           borderBottom: `1px solid ${T.ink}`,
         }}>
           <div>
-            <div style={{
-              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
-              color: T.inkMuted, marginBottom: 8,
-            }}>CURRENT / UPCOMING · {new Date().getFullYear()}</div>
             <div style={{ fontFamily: T.serif, fontSize: 42, letterSpacing: '0.01em', lineHeight: 1.2 }}>
               展覧会一覧
             </div>
@@ -80,43 +112,45 @@ function DesktopView({ rows, handleCreate }) {
 
         {/* filter row */}
         <div style={{ padding: '16px 0', display: 'flex', gap: 6, borderBottom: `0.5px solid ${T.line}`, flexWrap: 'wrap' }}>
-          {['ALL', 'OPEN NOW', 'UPCOMING'].map((f, i) => (
-            <span key={f} className="ui-chip" style={{
-              padding: '6px 12px',
-              background: i === 0 ? T.ink : 'transparent',
-              color: i === 0 ? T.paper : T.inkSoft,
-              border: i === 0 ? `0.5px solid ${T.ink}` : `0.5px solid ${T.line}`,
-              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em',
-            }}>{f}</span>
-          ))}
+          {FILTERS.map((f) => {
+            const active = filter === f
+            return (
+              <button key={f} type="button" onClick={() => setFilter(f)} style={{
+                padding: '6px 12px',
+                background: active ? T.ink : 'transparent',
+                color: active ? T.paper : T.inkSoft,
+                border: `0.5px solid ${active ? T.ink : T.line}`,
+                fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em',
+                cursor: 'pointer',
+              }}>{f}</button>
+            )
+          })}
         </div>
 
         {/* table header */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '48px 1fr 260px 200px 80px',
+          display: 'grid', gridTemplateColumns: '1fr 260px 200px 80px',
           padding: '10px 0', gap: 20, borderBottom: `0.5px solid ${T.ink}`,
           fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted,
         }}>
-          <span>NO.</span>
           <span>展覧会 · 団体</span>
           <span>会場</span>
           <span>会期</span>
           <span style={{ textAlign: 'right' }}>作品数</span>
         </div>
 
-        {rows.map(({ exhibition: exh, org }, i) => (
+        {rows.map(({ exhibition: exh, org }) => (
           <Link
             key={exh.id}
             to={`/${org?.slug}/exhibition/${exh.slug}`}
             className="ui-row"
             style={{
-              display: 'grid', gridTemplateColumns: '48px 1fr 260px 200px 80px',
-              padding: '18px 14px', gap: 20, alignItems: 'center',
+              display: 'grid', gridTemplateColumns: '1fr 260px 200px 80px',
+              padding: '18px 0', gap: 20, alignItems: 'center',
               borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer',
               textDecoration: 'none', color: T.ink,
             }}
           >
-            <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2(i + 1)}</div>
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.02em' }}>{exh.title}</div>
               <div style={{ marginTop: 3, fontSize: 12, color: T.inkSoft }}>{org?.name}</div>
@@ -175,7 +209,7 @@ function DesktopView({ rows, handleCreate }) {
   )
 }
 
-function MobileView({ rows, handleCreate }) {
+function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
       <Header activeTab="top" />
@@ -189,26 +223,41 @@ function MobileView({ rows, handleCreate }) {
         <span>{pad2(rows.length)} EXH.</span>
       </div>
 
+      <div style={{ padding: '12px 16px', display: 'flex', gap: 6, borderBottom: `0.5px solid ${T.line}`, flexWrap: 'wrap' }}>
+        {FILTERS.map((f) => {
+          const active = filter === f
+          return (
+            <button key={f} type="button" onClick={() => setFilter(f)} style={{
+              padding: '6px 12px',
+              background: active ? T.ink : 'transparent',
+              color: active ? T.paper : T.inkSoft,
+              border: `0.5px solid ${active ? T.ink : T.line}`,
+              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em',
+              cursor: 'pointer',
+            }}>{f}</button>
+          )
+        })}
+      </div>
+
       <div style={{
-        display: 'grid', gridTemplateColumns: '32px 1fr 100px',
+        display: 'grid', gridTemplateColumns: '1fr 100px',
         padding: '10px 16px', borderBottom: `0.5px solid ${T.ink}`,
         fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, gap: 10,
       }}>
-        <span>NO.</span><span>展覧会 · 団体</span><span style={{ textAlign: 'right' }}>会期</span>
+        <span>展覧会 · 団体</span><span style={{ textAlign: 'right' }}>会期</span>
       </div>
 
-      {rows.map(({ exhibition: exh, org }, i) => (
+      {rows.map(({ exhibition: exh, org }) => (
         <Link
           key={exh.id}
           to={`/${org?.slug}/exhibition/${exh.slug}`}
           className="ui-row"
           style={{
-            display: 'grid', gridTemplateColumns: '32px 1fr 100px', gap: 10,
+            display: 'grid', gridTemplateColumns: '1fr 100px', gap: 10,
             padding: '16px 16px', borderBottom: `0.5px solid ${T.line}`,
             alignItems: 'start', textDecoration: 'none', color: T.ink,
           }}
         >
-          <div style={{ width: 26, height: 26, background: i === 0 ? T.accent : T.paperAlt, color: i === 0 ? T.paper : T.inkMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 10, paddingTop: 1 }}>{pad2(i + 1)}</div>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: T.serif, fontSize: 16, lineHeight: 1.3, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
             <div style={{ marginTop: 2, fontSize: 11, color: T.inkSoft, lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{org?.name}</div>
@@ -249,11 +298,12 @@ function DesktopFooter() {
     <div style={{ borderTop: `1px solid ${T.ink}`, marginTop: 80 }}>
       <div style={{
         maxWidth: 1200, margin: '0 auto', padding: '20px 32px',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16,
         fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted,
       }}>
         <span>© Artoir {new Date().getFullYear()}</span>
         <span>展覧会プラットフォーム</span>
+        <span>Artoir(アルトワール)</span>
       </div>
     </div>
   )

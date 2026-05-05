@@ -6,15 +6,25 @@ import ImageUploader from '../../components/ImageUploader'
 import { T, pad2 } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 
-function DragHandle() {
+function ListIcon({ active }) {
+  const c = active ? T.ink : T.inkMuted
   return (
-    <svg width="10" height="14" viewBox="0 0 10 14" style={{ flexShrink: 0, cursor: 'grab' }}>
-      <circle cx="2.5" cy="2.5"  r="1" fill={T.inkMuted} />
-      <circle cx="7.5" cy="2.5"  r="1" fill={T.inkMuted} />
-      <circle cx="2.5" cy="7"    r="1" fill={T.inkMuted} />
-      <circle cx="7.5" cy="7"    r="1" fill={T.inkMuted} />
-      <circle cx="2.5" cy="11.5" r="1" fill={T.inkMuted} />
-      <circle cx="7.5" cy="11.5" r="1" fill={T.inkMuted} />
+    <svg width="14" height="14" viewBox="0 0 14 14">
+      <rect x="1" y="2"  width="12" height="1.5" fill={c} />
+      <rect x="1" y="6.25" width="12" height="1.5" fill={c} />
+      <rect x="1" y="10.5" width="12" height="1.5" fill={c} />
+    </svg>
+  )
+}
+
+function GridIcon({ active }) {
+  const c = active ? T.ink : T.inkMuted
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14">
+      <rect x="1" y="1" width="5" height="5" fill={c} />
+      <rect x="8" y="1" width="5" height="5" fill={c} />
+      <rect x="1" y="8" width="5" height="5" fill={c} />
+      <rect x="8" y="8" width="5" height="5" fill={c} />
     </svg>
   )
 }
@@ -30,6 +40,7 @@ export default function DashArtworks() {
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')
   const [editDesc, setEditDesc] = useState('')
+  const [viewMode, setViewMode] = useState('list')
 
   useEffect(() => {
     if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
@@ -44,12 +55,27 @@ export default function DashArtworks() {
     load()
   }, [exhibitionId])
 
-  async function handleUploaded(cloudinaryUrl) {
+  function handleBeforeUpload(file) {
+    const dup = artworks.find((a) => a.file_name === file.name && Number(a.file_size) === file.size)
+    if (dup) {
+      return window.confirm(`同じファイル「${file.name}」がこの展覧会に既に登録されています。続行しますか？`)
+    }
+    return true
+  }
+
+  async function handleUploaded(cloudinaryUrl, meta = {}) {
     if (!supabase || !exhibitionId) return
     const maxOrder = artworks.length > 0 ? Math.max(...artworks.map((a) => a.order ?? 0)) : 0
     const { data: newWork } = await supabase
       .from('artworks')
-      .insert({ exhibition_id: exhibitionId, image_url: cloudinaryUrl, title: '', order: maxOrder + 1 })
+      .insert({
+        exhibition_id: exhibitionId,
+        image_url: cloudinaryUrl,
+        title: '',
+        order: maxOrder + 1,
+        file_name: meta.fileName || null,
+        file_size: meta.fileSize || null,
+      })
       .select()
       .single()
     if (newWork) {
@@ -80,29 +106,22 @@ export default function DashArtworks() {
     </div>
   )
 
-  const crumbs = ['DASHBOARD', 'EXHIBITIONS', exhibition?.title || '...', 'WORKS']
-
   const uploadArea = (
     <div style={{ padding: isDesktop ? '20px 0' : '0 16px 16px' }}>
-      <div className="ui-strong-panel" style={{ padding: '20px', border: `1px dashed ${T.ink}`, background: T.slate, color: T.paper }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.58)', marginBottom: 8, textAlign: 'center' }}>＋ UPLOAD</div>
-        <div style={{ fontFamily: T.serif, fontSize: 16, letterSpacing: '0.02em', color: T.paper, textAlign: 'center', marginBottom: 14 }}>作品を追加</div>
-        <ImageUploader onUploaded={handleUploaded} />
-      </div>
+      <ImageUploader onUploaded={handleUploaded} onBeforeUpload={handleBeforeUpload}>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>＋ UPLOAD</div>
+        <div style={{ fontFamily: T.serif, fontSize: 16, letterSpacing: '0.02em', color: T.ink, marginBottom: 14 }}>作品を追加</div>
+      </ImageUploader>
     </div>
   )
 
   const worksList = (
     <div style={{ borderTop: `1px solid ${T.ink}` }}>
-      <div style={{ padding: '10px 16px', display: 'grid', gridTemplateColumns: '24px 48px 1fr 40px', gap: 10, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
-        <span>#</span><span></span><span>TITLE</span><span style={{ textAlign: 'right' }}>···</span>
+      <div style={{ padding: '10px 16px', display: 'grid', gridTemplateColumns: '48px 1fr 40px', gap: 10, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
+        <span></span><span>TITLE</span><span style={{ textAlign: 'right' }}>···</span>
       </div>
-      {artworks.map((w, i) => (
-        <div key={w.id} className="ui-row" style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: '24px 48px 1fr 72px', gap: 10, borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>
-            <DragHandle />
-            {pad2(i + 1)}
-          </div>
+      {artworks.map((w) => (
+        <div key={w.id} style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: '48px 1fr 40px', gap: 10, borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
           <div style={{ width: 48, height: 48, background: '#D9D6CE', overflow: 'hidden', flexShrink: 0 }}>
             {w.image_url && <img src={w.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
           </div>
@@ -130,6 +149,50 @@ export default function DashArtworks() {
     </div>
   )
 
+  const worksGrid = (
+    <div style={{ borderTop: `1px solid ${T.ink}`, padding: isDesktop ? '16px 0' : '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isDesktop ? 'repeat(auto-fill, minmax(180px, 1fr))' : 'repeat(2, 1fr)', gap: isDesktop ? 16 : 10 }}>
+        {artworks.map((w) => (
+          <div key={w.id} style={{ background: T.card, border: `0.5px solid ${T.line}` }}>
+            <div
+              onClick={() => { setEditTarget(w); setEditTitle(w.title || ''); setEditDesc(w.description || '') }}
+              style={{ width: '100%', aspectRatio: '1 / 1', background: '#D9D6CE', overflow: 'hidden', cursor: 'pointer' }}
+            >
+              {w.image_url && <img src={w.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />}
+            </div>
+            <div style={{ padding: '8px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontFamily: T.serif, fontSize: 13, color: T.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{w.title || '（タイトルなし）'}</div>
+              </div>
+              <button
+                onClick={() => setDeleteTarget(w)}
+                style={{ background: 'none', border: 'none', fontFamily: T.mono, fontSize: 13, color: T.inkMuted, cursor: 'pointer', padding: '2px 4px', flexShrink: 0 }}
+              >⋯</button>
+            </div>
+          </div>
+        ))}
+      </div>
+      {artworks.length === 0 && <div style={{ padding: '24px 0', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>作品がまだありません</div>}
+    </div>
+  )
+
+  const viewToggle = (
+    <div style={{ display: 'flex', gap: 4, padding: isDesktop ? '12px 0 0' : '12px 16px 0', justifyContent: 'flex-end' }}>
+      <button
+        onClick={() => setViewMode('list')}
+        aria-label="リスト表示"
+        style={{ background: viewMode === 'list' ? T.lineSoft : 'transparent', border: `0.5px solid ${viewMode === 'list' ? T.ink : T.line}`, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+      ><ListIcon active={viewMode === 'list'} /></button>
+      <button
+        onClick={() => setViewMode('grid')}
+        aria-label="グリッド表示"
+        style={{ background: viewMode === 'grid' ? T.lineSoft : 'transparent', border: `0.5px solid ${viewMode === 'grid' ? T.ink : T.line}`, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+      ><GridIcon active={viewMode === 'grid'} /></button>
+    </div>
+  )
+
+  const worksView = viewMode === 'grid' ? worksGrid : worksList
+
   const deleteConfirm = deleteTarget && (
     <div style={{ margin: isDesktop ? '24px 0' : '24px 16px', padding: 14, background: 'rgba(180,69,44,0.05)', border: `0.5px solid ${T.accent}` }}>
       <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.accent, marginBottom: 6 }}>CONFIRM · DELETE</div>
@@ -143,8 +206,13 @@ export default function DashArtworks() {
 
   const editModal = editTarget && (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(17,17,16,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ background: T.paper, width: '100%', maxWidth: 480, padding: 24 }}>
+      <div style={{ background: T.paper, width: '100%', maxWidth: 480, padding: 24, maxHeight: 'calc(100vh - 40px)', overflowY: 'auto' }}>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 16 }}>EDIT WORK · {pad2(artworks.findIndex((a) => a.id === editTarget.id) + 1)}</div>
+        {editTarget.image_url && (
+          <div style={{ marginBottom: 16, background: '#D9D6CE', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 280, overflow: 'hidden' }}>
+            <img src={editTarget.image_url} alt="" style={{ width: '100%', maxHeight: 280, objectFit: 'contain', display: 'block' }} />
+          </div>
+        )}
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 6 }}>TITLE</div>
           <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${T.ink}`, fontFamily: T.sans, fontSize: 13, color: T.ink, background: T.card, boxSizing: 'border-box' }} />
@@ -163,7 +231,7 @@ export default function DashArtworks() {
 
   if (isDesktop) return (
     <>
-      <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
+      <DashShell orgSlug={orgSlug} active="exs">
         <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>{exhibition?.title || '...'}</div>
@@ -172,7 +240,8 @@ export default function DashArtworks() {
           <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted }}>{pad2(artworks.length)} WORKS</div>
         </div>
         {uploadArea}
-        {worksList}
+        {viewToggle}
+        {worksView}
         {deleteConfirm}
         <div style={{ height: 60 }} />
       </DashShell>
@@ -182,7 +251,7 @@ export default function DashArtworks() {
 
   return (
     <>
-      <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
+      <DashShell orgSlug={orgSlug} active="exs">
         <div style={{ padding: '20px 16px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>{exhibition?.title || '...'}</div>
@@ -191,7 +260,8 @@ export default function DashArtworks() {
           </div>
         </div>
         {uploadArea}
-        {worksList}
+        {viewToggle}
+        {worksView}
         {deleteConfirm}
         <div style={{ height: 40 }} />
       </DashShell>

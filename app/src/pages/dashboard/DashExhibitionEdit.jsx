@@ -7,14 +7,33 @@ import { useIsDesktop } from '../../lib/useIsDesktop'
 
 const SWATCHES = ['#FAF8F3', '#F3F0E8', '#E7E2D6', '#111110', '#2A2825', '#B4452C']
 
-function toSlug(text) {
-  return text
+function slugifyAscii(s) {
+  return String(s || '')
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-    .slice(0, 60)
+    .slice(0, 40)
+}
+
+function fallbackSlug() {
+  return 'exh-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
+}
+
+async function generateUniqueSlug(orgId, title) {
+  const base = slugifyAscii(title) || fallbackSlug()
+  const { data, error } = await supabase
+    .from('exhibitions')
+    .select('slug')
+    .eq('org_id', orgId)
+    .like('slug', `${base}%`)
+  if (error) throw error
+  const existing = new Set((data || []).map((r) => r.slug))
+  if (!existing.has(base)) return base
+  let n = 2
+  while (existing.has(`${base}-${n}`)) n++
+  return `${base}-${n}`
 }
 
 export default function DashExhibitionEdit() {
@@ -63,7 +82,7 @@ export default function DashExhibitionEdit() {
   function handleTitleChange(v) {
     setTitle(v)
     if (isNew && !slugTouched) {
-      const auto = toSlug(v)
+      const auto = slugifyAscii(v)
       if (auto) setSlug(auto)
     }
   }
@@ -81,23 +100,28 @@ export default function DashExhibitionEdit() {
       return
     }
     setSaving(true)
-    const payload = { title, slug, start_date: startDate || null, end_date: endDate || null, location, description, bg_color: bgColor, org_id: org.id }
     let nextPath = null
     try {
+      const finalSlug = (isNew || !slug) ? await generateUniqueSlug(org.id, title) : slug
+      const payload = { title, slug: finalSlug, start_date: startDate || null, end_date: endDate || null, location, description, bg_color: bgColor, org_id: org.id }
       if (isNew) {
         const { data, error } = await supabase.from('exhibitions').insert(payload).select().single()
         if (error) {
           window.alert(error.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
           return
         }
-        if (data) nextPath = `/${orgSlug}/dashboard/exhibitions/${data.id}/edit`
+        if (data) {
+          setSlug(data.slug)
+          nextPath = `/${orgSlug}/dashboard/exhibitions/${data.id}/edit`
+        }
       } else {
         const { error } = await supabase.from('exhibitions').update(payload).eq('id', exhibitionId)
         if (error) {
           window.alert(error.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
           return
         }
-        nextPath = `/${orgSlug}/dashboard/exhibitions`
+        setSlug(finalSlug)
+        nextPath = `/${orgSlug}/dashboard`
       }
     } catch (error) {
       window.alert(error?.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
@@ -120,7 +144,7 @@ export default function DashExhibitionEdit() {
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
       <DashSectionLabel>基本情報</DashSectionLabel>
       <DashField label="タイトル" value={title} onChange={handleTitleChange} placeholder="例: 静かな気配" />
-      <DashField
+            <DashField
         label="SLUG（公開URL）"
         prefix={`artoir.net/${orgSlug}/exhibition/`}
         value={slug}
@@ -128,7 +152,7 @@ export default function DashExhibitionEdit() {
         placeholder="shizukana-kehai"
         mono
         rightHint="半角英数字・ハイフンのみ"
-      />
+            />
 
       <DashSectionLabel>会期・会場</DashSectionLabel>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

@@ -20,9 +20,10 @@ function MetaCell({ label, value, span = 1, mono }) {
 function DesktopFooter() {
   return (
     <div style={{ borderTop: `1px solid ${T.ink}` }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
         <span>© Artoir {new Date().getFullYear()}</span>
         <span>展覧会プラットフォーム</span>
+        <span>Artoir(アルトワール)</span>
       </div>
     </div>
   )
@@ -116,15 +117,6 @@ export default function ExhibitionPage() {
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="top" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-
-        <div style={{ padding: '16px 0', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 8 }}>
-          <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← 展覧会一覧</Link>
-          <span>/</span>
-          <Link to={`/${orgSlug}`} style={{ color: T.inkMuted, textDecoration: 'none' }}>{org?.name}</Link>
-          <span>/</span>
-          <span style={{ color: T.ink }}>{exhibition.title}</span>
-        </div>
-
         {/* two-col hero */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 48, paddingBottom: 48, borderBottom: `1px solid ${T.ink}` }}>
           <div>
@@ -153,14 +145,14 @@ export default function ExhibitionPage() {
                 <div>{org.name}</div>
               </>}
               <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, paddingTop: 2 }}>作品数</div>
-              <div style={{ fontFamily: T.mono, fontSize: 12 }}>{pad2(artworks.length)} works</div>
+              <div style={{ fontFamily: T.mono, fontSize: 12 }}>{pad2(artworks.length)}</div>
             </div>
             {exhibition.description && (
               <div style={{ marginTop: 28, fontSize: 13, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody }}>{exhibition.description}</div>
             )}
-            <button onClick={copyLink} className="ui-action" style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: copied ? T.accent : 'transparent', border: `1px solid ${copied ? T.accent : T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: copied ? T.paper : T.ink }}>
+            <button onClick={copyLink} aria-label="URLをコピー" className="ui-action" style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', background: copied ? T.accent : 'transparent', border: `1px solid ${copied ? T.accent : T.ink}`, cursor: 'pointer', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.1em', color: copied ? T.paper : T.ink }}>
               <span style={{ color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>artoir.net/…/{exhibition.slug}</span>
-              <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'URLをコピー'}</span>
+              <span style={{ marginLeft: 12, flexShrink: 0 }}>{copied ? 'COPIED ✓' : 'COPY 🔗'}</span>
             </button>
           </div>
         </div>
@@ -170,7 +162,6 @@ export default function ExhibitionPage() {
           <div style={{ padding: '40px 0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24 }}>
               <div style={{ fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.ink }}>Works</div>
-              <div style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted, letterSpacing: '0.14em' }}>{pad2(artworks.length)} · クリックで詳細</div>
             </div>
             <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
               {artworks.map((w, i) => (

@@ -17,7 +17,6 @@ import AdminPage from './pages/AdminPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import DashHome from './pages/dashboard/DashHome'
 import DashSettings from './pages/dashboard/DashSettings'
-import DashExhibitions from './pages/dashboard/DashExhibitions'
 import DashExhibitionEdit from './pages/dashboard/DashExhibitionEdit'
 import DashArtworks from './pages/dashboard/DashArtworks'
 import AccountPage from './pages/AccountPage'
@@ -57,7 +56,6 @@ export default function App() {
           <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
           <Route path="/:orgSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
           <Route path="/:orgSlug/dashboard/settings" element={<ProtectedRoute><DashSettings /></ProtectedRoute>} />
-          <Route path="/:orgSlug/dashboard/exhibitions" element={<ProtectedRoute><DashExhibitions /></ProtectedRoute>} />
           <Route path="/:orgSlug/dashboard/exhibitions/new" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
           <Route path="/:orgSlug/dashboard/exhibitions/:exhibitionId/edit" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
           <Route path="/:orgSlug/dashboard/exhibitions/:exhibitionId/artworks" element={<ProtectedRoute><DashArtworks /></ProtectedRoute>} />

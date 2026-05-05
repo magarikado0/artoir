@@ -3,6 +3,11 @@ import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import BottomNav from './BottomNav'
 
+const PUBLIC_TABS = [
+  { key: 'top',  label: '展覧会一覧', path: '/' },
+  { key: 'orgs', label: '団体一覧',   path: '/orgs' },
+]
+
 // Desktop top nav for dashboard (same as public but with DASHBOARD indicator)
 function DashDesktopNav({ orgSlug }) {
   return (
