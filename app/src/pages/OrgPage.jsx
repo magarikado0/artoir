@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { IS_DEV, demoOrgs, demoExhibitions } from '../lib/demoData'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
-import { T, fmtDateDot, pad2 } from '../lib/tokens'
+import { T, fmtDateDot, pad2, externalHost } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 
 function DesktopFooter() {
@@ -63,22 +63,44 @@ export default function OrgPage() {
     <div style={{ background: T.paper, minHeight: '100vh' }}>
       <Header activeTab="orgs" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-        <div style={{ padding: '24px 0 40px', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 64, borderBottom: `1px solid ${T.ink}` }}>
+        <div style={{ padding: '48px 0 40px', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 64, borderBottom: `1px solid ${T.ink}` }}>
           <div>
             <div style={{ fontFamily: T.serif, fontSize: 36, lineHeight: 1.3, letterSpacing: '0.01em', color: T.ink }}>{org.name}</div>
             {org.description && (
               <div style={{ marginTop: 24, fontSize: 14, lineHeight: 2, color: T.inkSoft, fontFamily: T.serifBody, maxWidth: 600 }}>{org.description}</div>
             )}
           </div>
-          <div style={{ paddingTop: 42 }}>
+          <div style={{ paddingTop: 8 }}>
             {[
               sns.instagram && ['INSTAGRAM', sns.instagram],
               sns.x && ['X (TWITTER)', sns.x],
               org.homepage_url && ['WEBSITE', org.homepage_url],
             ].filter(Boolean).map(([k, href]) => (
-              <a key={k} href={href} target="_blank" rel="noreferrer" style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 0', borderBottom: `0.5px solid ${T.line}`, fontSize: 12, textDecoration: 'none', color: T.ink }}>
-                <span style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>{k}</span>
-                <span style={{ fontFamily: T.serifBody, color: T.ink }}>{href} ↗</span>
+              <a
+                key={k}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                  padding: '14px 12px', marginBottom: 8,
+                  border: `1px solid ${T.line}`, background: T.card,
+                  textDecoration: 'none', color: T.ink,
+                  borderLeft: `4px solid ${T.accent}`,
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <span aria-hidden style={{ fontSize: 14 }}>🔗</span>
+                  <span style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>{k}</span>
+                </span>
+                <span style={{
+                  fontFamily: T.serifBody, fontSize: 12, color: T.accent,
+                  textDecoration: 'underline', textUnderlineOffset: 3,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '52%',
+                }}
+                >
+                  {externalHost(href)} · ↗
+                </span>
               </a>
             ))}
           </div>
@@ -109,22 +131,56 @@ export default function OrgPage() {
 
   // mobile
   return (
-    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
+    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 72 }}>
       <Header activeTab="orgs" />
-      <div style={{ padding: '12px 16px', borderBottom: `0.5px solid ${T.line}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>
+      <div style={{ padding: '10px 14px', borderBottom: `0.5px solid ${T.line}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.1em', color: T.inkMuted }}>
         <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none' }}>← INDEX</Link>
         {' '}/ ORGANIZATION
       </div>
-      <div style={{ padding: '28px 16px 16px' }}>
-        <div style={{ fontFamily: T.serif, fontSize: 24, lineHeight: 1.35, letterSpacing: '0.02em', color: T.ink }}>{org.name}</div>
-        {org.description && <div style={{ marginTop: 20, fontSize: 13, lineHeight: 1.95, color: T.inkSoft, fontFamily: T.serifBody }}>{org.description}</div>}
+      <div style={{ padding: '18px 14px 12px' }}>
+        <div style={{ fontFamily: T.serif, fontSize: 22, lineHeight: 1.3, letterSpacing: '0.02em', color: T.ink }}>{org.name}</div>
+        {org.description && <div style={{ marginTop: 14, fontSize: 12, lineHeight: 1.85, color: T.inkSoft, fontFamily: T.serifBody }}>{org.description}</div>}
       </div>
 
       {(sns.instagram || sns.x || org.homepage_url) && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, background: T.line, margin: '8px 16px 28px' }}>
-          {sns.instagram && <a href={sns.instagram} target="_blank" rel="noreferrer" style={{ background: T.paper, padding: '14px 12px', textAlign: 'center', textDecoration: 'none' }}><div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: T.inkMuted }}>IG</div><div style={{ marginTop: 6, fontFamily: T.mono, fontSize: 11, color: T.ink }}>↗</div></a>}
-          {sns.x && <a href={sns.x} target="_blank" rel="noreferrer" style={{ background: T.paper, padding: '14px 12px', textAlign: 'center', textDecoration: 'none' }}><div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: T.inkMuted }}>X</div><div style={{ marginTop: 6, fontFamily: T.mono, fontSize: 11, color: T.ink }}>↗</div></a>}
-          {org.homepage_url && <a href={org.homepage_url} target="_blank" rel="noreferrer" style={{ background: T.paper, padding: '14px 12px', textAlign: 'center', textDecoration: 'none' }}><div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: T.inkMuted }}>WEB</div><div style={{ marginTop: 6, fontFamily: T.mono, fontSize: 11, color: T.ink }}>↗</div></a>}
+        <div style={{ margin: '8px 16px 22px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[
+            sns.instagram && ['Instagram', sns.instagram],
+            sns.x && ['X', sns.x],
+            org.homepage_url && ['公式サイト', org.homepage_url],
+          ].filter(Boolean).map(([label, href]) => (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: 'block',
+                padding: '11px 12px',
+                border: `1px solid ${T.line}`,
+                borderLeft: `4px solid ${T.accent}`,
+                background: T.card,
+                textDecoration: 'none',
+                color: T.ink,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span aria-hidden style={{ fontSize: 13 }}>🔗</span>
+                  <span style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>外部リンク</span>
+                </span>
+                <span style={{ fontFamily: T.mono, fontSize: 10, color: T.accent }}>↗</span>
+              </div>
+              <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 14, color: T.ink }}>{label}</div>
+              <div style={{
+                marginTop: 4, fontFamily: T.serifBody, fontSize: 11, color: T.accent,
+                textDecoration: 'underline', textUnderlineOffset: 2, wordBreak: 'break-all',
+              }}
+              >
+                {externalHost(href)}
+              </div>
+            </a>
+          ))}
         </div>
       )}
 

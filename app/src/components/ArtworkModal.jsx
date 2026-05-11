@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { T, pad2 } from '../lib/tokens'
+import { T } from '../lib/tokens'
 
 export default function ArtworkModal({ artwork, onClose }) {
   const open = !!artwork
@@ -38,12 +38,13 @@ export default function ArtworkModal({ artwork, onClose }) {
           onClick={onClose}
           className="ui-modal-close"
           aria-label="作品写真を閉じる"
+          type="button"
           style={{
-            width: 46, height: 46, borderRadius: '50%', border: `2px solid ${T.paper}`,
-            background: T.warning, color: T.paper, cursor: 'pointer',
+            minWidth: 44, minHeight: 44, padding: 0, borderRadius: 6,
+            border: `1.5px solid ${T.accent}`,
+            background: 'transparent', color: T.accent, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: T.mono, fontSize: 22, lineHeight: 1, fontWeight: 700,
-            boxShadow: `5px 5px 0 ${T.gold}`,
+            fontFamily: T.mono, fontSize: 22, lineHeight: 1, fontWeight: 600,
           }}
         >
           ×
@@ -59,7 +60,7 @@ export default function ArtworkModal({ artwork, onClose }) {
           />
         ) : (
           <div style={{
-            width: '100%', aspectRatio: '1 / 1', background: T.blueSoft,
+            width: '100%', aspectRatio: '1 / 1', background: T.surfaceMuted,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <span style={{

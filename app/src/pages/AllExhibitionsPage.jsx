@@ -108,7 +108,7 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
               fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
               color: T.accent, marginBottom: 8,
             }}>CURRENT / UPCOMING · {new Date().getFullYear()}</div>
-            <div style={{ fontFamily: T.serif, fontSize: 54, letterSpacing: '0.01em', lineHeight: 1.05 }}>
+            <div style={{ fontFamily: T.serif, fontSize: 38, letterSpacing: '0.01em', lineHeight: 1.12 }}>
               展覧会一覧
             </div>
           </div>
@@ -134,11 +134,13 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
           })}
         </div>
 
-        {/* table header */}
+        {/* table（団体一覧と同じ枠線で表全体をひとまとめに） */}
         <div style={{
+          marginTop: 28,
           display: 'grid', gridTemplateColumns: '1fr 260px 200px 80px',
-          padding: '10px 12px', gap: 20, borderBottom: `0.5px solid ${T.ink}`,
-          fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted,
+          padding: '10px 14px', gap: 20, border: `2px solid ${T.ink}`,
+          fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.paper,
+          background: T.ink,
         }}>
           <span>展覧会 · 団体</span>
           <span>会場</span>
@@ -153,8 +155,11 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
             className="ui-row"
             style={{
               display: 'grid', gridTemplateColumns: '1fr 260px 200px 80px',
-              padding: '18px 12px', gap: 20, alignItems: 'center',
-              borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer',
+              padding: '18px 14px', gap: 20, alignItems: 'center',
+              borderLeft: `2px solid ${T.ink}`,
+              borderRight: `2px solid ${T.ink}`,
+              borderBottom: `2px solid ${T.ink}`,
+              cursor: 'pointer',
               textDecoration: 'none', color: T.ink,
               background: i % 2 === 0 ? T.card : T.paperAlt,
             }}
@@ -175,7 +180,17 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
         ))}
 
         {rows.length === 0 && (
-          <div style={{ padding: '60px 0', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>
+          <div style={{
+            marginTop: 28,
+            padding: '48px 24px',
+            border: `2px solid ${T.ink}`,
+            background: T.card,
+            fontFamily: T.mono,
+            fontSize: 11,
+            color: T.inkMuted,
+            letterSpacing: '0.1em',
+            textAlign: 'center',
+          }}>
             NO EXHIBITIONS YET
           </div>
         )}
@@ -220,7 +235,7 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
 
 function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
   return (
-    <div className="ui-page-shell" style={{ minHeight: '100vh', paddingBottom: 80 }}>
+    <div className="ui-page-shell" style={{ minHeight: '100vh', paddingBottom: 72 }}>
       <Header activeTab="top" />
 
       <div style={{
@@ -249,41 +264,58 @@ function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
         })}
       </div>
 
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 100px',
-        padding: '10px 16px', borderBottom: `0.5px solid ${T.ink}`,
-        fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted, gap: 10,
-      }}>
-        <span>展覧会 · 団体</span><span style={{ textAlign: 'right' }}>会期</span>
+      <div style={{ marginTop: 12 }}>
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 100px',
+          padding: '10px 14px', gap: 10,
+          border: `2px solid ${T.ink}`,
+          fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.paper,
+          background: T.ink,
+        }}>
+          <span>展覧会 · 団体</span><span style={{ textAlign: 'right' }}>会期</span>
+        </div>
+
+        {rows.map(({ exhibition: exh, org }, i) => (
+          <Link
+            key={exh.id}
+            to={`/${org?.slug}/exhibition/${exh.slug}`}
+            className="ui-row"
+            style={{
+              display: 'grid', gridTemplateColumns: '1fr 100px', gap: 10,
+              padding: '14px 14px',
+              borderLeft: `2px solid ${T.ink}`,
+              borderRight: `2px solid ${T.ink}`,
+              borderBottom: `2px solid ${T.ink}`,
+              alignItems: 'start', textDecoration: 'none', color: T.ink,
+              background: i % 2 === 0 ? T.card : T.paperAlt,
+            }}
+          >
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontFamily: T.serif, fontSize: 16, lineHeight: 1.3, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
+              <div style={{ marginTop: 2, fontSize: 11, color: T.inkSoft, lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{org?.name}</div>
+              {exh.location && <div style={{ marginTop: 2, fontSize: 10.5, color: T.inkMuted, lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.location}</div>}
+            </div>
+            <div style={{ fontFamily: T.mono, fontSize: 10, color: T.ink, lineHeight: 1.5, textAlign: 'right' }}>
+              <div>{exh.start_date ? fmtDateDot(exh.start_date).slice(5) : ''}</div>
+              <div style={{ color: T.inkMuted }}>— {exh.end_date ? fmtDateDot(exh.end_date).slice(5) : ''}</div>
+            </div>
+          </Link>
+        ))}
+
+        {rows.length === 0 && (
+          <div style={{
+            padding: '32px 16px',
+            border: `2px solid ${T.ink}`,
+            borderTop: 'none',
+            background: T.card,
+            fontFamily: T.mono,
+            fontSize: 11,
+            color: T.inkMuted,
+            letterSpacing: '0.1em',
+            textAlign: 'center',
+          }}>NO EXHIBITIONS YET</div>
+        )}
       </div>
-
-      {rows.map(({ exhibition: exh, org }, i) => (
-        <Link
-          key={exh.id}
-          to={`/${org?.slug}/exhibition/${exh.slug}`}
-          className="ui-row"
-          style={{
-            display: 'grid', gridTemplateColumns: '1fr 100px', gap: 10,
-            padding: '16px 16px', borderBottom: `0.5px solid ${T.line}`,
-            alignItems: 'start', textDecoration: 'none', color: T.ink,
-            background: i % 2 === 0 ? T.card : T.paperAlt,
-          }}
-        >
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: T.serif, fontSize: 16, lineHeight: 1.3, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
-            <div style={{ marginTop: 2, fontSize: 11, color: T.inkSoft, lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{org?.name}</div>
-            {exh.location && <div style={{ marginTop: 2, fontSize: 10.5, color: T.inkMuted, lineHeight: 1.4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.location}</div>}
-          </div>
-          <div style={{ fontFamily: T.mono, fontSize: 10, color: T.ink, lineHeight: 1.5, textAlign: 'right' }}>
-            <div>{exh.start_date ? fmtDateDot(exh.start_date).slice(5) : ''}</div>
-            <div style={{ color: T.inkMuted }}>— {exh.end_date ? fmtDateDot(exh.end_date).slice(5) : ''}</div>
-          </div>
-        </Link>
-      ))}
-
-      {rows.length === 0 && (
-        <div style={{ padding: '48px 16px', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>NO EXHIBITIONS YET</div>
-      )}
 
       <div className="ui-strong-panel" style={{ margin: '32px 16px', padding: '28px 22px', background: T.ink, color: T.paper, border: `2px solid ${T.ink}`, boxShadow: `7px 7px 0 ${T.accent}` }}>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.55)' }}>FOR ORGANIZATIONS</div>

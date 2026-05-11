@@ -139,6 +139,11 @@ body {
 }
 
 .ui-modal-close:hover {
-  transform: rotate(6deg) scale(1.04);
-  box-shadow: 0 12px 28px rgba(180, 69, 44, 0.34);
+  background: rgba(182, 90, 69, 0.12);
+  border-color: #1E1A16;
+  color: #1E1A16;
+}
+.ui-modal-close:focus-visible {
+  outline: 2px solid #B65A45;
+  outline-offset: 2px;
 }

@@ -212,7 +212,7 @@ export default function AccountPage() {
   )
 
   return (
-    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
+    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 72 }}>
       <Header activeTab="account" />
       {topBar}
       {renderContent()}

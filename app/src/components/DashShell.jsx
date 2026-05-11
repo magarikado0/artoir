@@ -55,10 +55,10 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
   )
 
   return (
-    <div style={{ background: T.paper, minHeight: '100vh', color: T.ink, fontFamily: T.sans, paddingBottom: 80 }}>
+    <div style={{ background: T.paper, minHeight: '100vh', color: T.ink, fontFamily: T.sans, paddingBottom: 72 }}>
       {/* mobile header */}
-      <div style={{ padding: '18px 16px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `3px solid ${T.gold}`, background: T.ink, position: 'sticky', top: 0, zIndex: 50 }}>
-        <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.paper, textDecoration: 'none' }}>
+      <div style={{ padding: '8px 12px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `3px solid ${T.gold}`, background: T.ink, position: 'sticky', top: 0, zIndex: 50 }}>
+        <Link to="/" style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500, color: T.paper, textDecoration: 'none', lineHeight: 1.2 }}>
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.ink, background: T.gold, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px' }}>
@@ -138,7 +138,7 @@ export function DashSectionLabel({ children }) {
 export function StatusBadge({ kind }) {
   const map = {
     live:      { label: 'LIVE',      color: T.paper,    bg: T.accent },
-    upcoming:  { label: 'UPCOMING',  color: T.paper,    bg: T.moss },
+    upcoming:  { label: 'UPCOMING',  color: T.ink,      bg: T.gold },
     ended:     { label: 'ENDED',     color: T.inkMuted, bg: T.paper, border: true },
   }
   const m = map[kind] || map.ended

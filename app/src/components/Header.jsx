@@ -114,25 +114,26 @@ export default function Header({ activeTab }) {
     )
   }
 
-  // mobile header
+  // mobile header（縦占有を抑えつつ、主タップ領域は最小 44px）
   return (
     <div style={{
-      padding: '18px 16px 16px',
+      padding: '10px 14px 10px',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       borderBottom: `3px solid ${T.gold}`,
       background: T.ink, position: 'sticky', top: 0, zIndex: 50,
     }}>
       <Link to="/" style={{
-        fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500,
+        fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500,
+        lineHeight: 1.2,
         color: T.paper, textDecoration: 'none',
       }}>
         Artoir<span style={{ color: T.accent }}>.</span>
       </Link>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Link to="/account" className="ui-icon-button" aria-label="アカウント" style={{ width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', color: activeTab === 'account' ? T.ink : T.paper, background: activeTab === 'account' ? T.gold : 'rgba(255,249,233,0.08)', border: `1px solid ${T.paper}`, textDecoration: 'none' }}>
-          <Icon name="user" size={18} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <Link to="/account" className="ui-icon-button" aria-label="アカウント" style={{ minWidth: 44, minHeight: 44, width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', color: activeTab === 'account' ? T.ink : T.paper, background: activeTab === 'account' ? T.gold : 'rgba(255,249,233,0.08)', border: `1px solid ${T.paper}`, textDecoration: 'none' }}>
+          <Icon name="user" size={17} />
         </Link>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: 'rgba(255,249,233,0.74)' }}>
+        <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.1em', color: 'rgba(255,249,233,0.62)' }}>
           {new Date().getFullYear()}
         </div>
       </div>

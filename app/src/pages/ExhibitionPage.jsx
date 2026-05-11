@@ -132,7 +132,7 @@ export default function ExhibitionPage() {
             {featured?.image_url ? (
               <img className="ui-photo-frame" src={featured.image_url} alt={featured.title} style={{ width: '100%', aspectRatio: '4 / 3', objectFit: 'contain', display: 'block', background: T.card }} />
             ) : (
-              <div className="ui-photo-frame" style={{ width: '100%', aspectRatio: '4 / 3', background: T.blueSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="ui-photo-frame" style={{ width: '100%', aspectRatio: '4 / 3', background: T.surfaceMuted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ fontFamily: T.mono, fontSize: 10, color: T.ink, background: T.gold, border: `1px solid ${T.ink}`, padding: '5px 9px' }}>{exhibition.title}</span>
               </div>
             )}
@@ -215,7 +215,7 @@ export default function ExhibitionPage() {
 
   // mobile
   return (
-    <div className="ui-page-shell" style={{ minHeight: '100vh', paddingBottom: 80 }}>
+    <div className="ui-page-shell" style={{ minHeight: '100vh', paddingBottom: 72 }}>
       <Header activeTab="top" />
 
       <div style={{ padding: '12px 16px', borderBottom: `0.5px solid ${T.line}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 6, alignItems: 'center' }}>

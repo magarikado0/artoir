@@ -1,8 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../lib/auth'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
+
+const OAUTH_RETURN_KEY = 'oauthReturnTo'
+
+/** Same-origin pathname only — blocks `//evil` open redirects */
+function normalizeOAuthReturnPath(path) {
+  if (!path || typeof path !== 'string') return '/account'
+  if (!path.startsWith('/') || path.startsWith('//')) return '/account'
+  if (path === '/login') return '/account'
+  return path
+}
+
+/** OAuth コールバック直後（PKCEの code / implicit の fragment）のみ true */
+function hasOAuthRedirectMarker(search, hash) {
+  try {
+    const qs = typeof search === 'string'
+      ? (search.startsWith('?') ? search.slice(1) : search)
+      : ''
+    if (new URLSearchParams(qs).has('code')) return true
+  } catch { /* noop */ }
+  return typeof hash === 'string' && hash.includes('access_token')
+}
+
+function GoogleMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden>
+      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.81 32.657 29.288 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.047 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+      <path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.289 14.928 18.743 12 24 12c3.059 0 5.842 1.157 7.962 3.066l5.656-5.657C34.048 6.05 29.268 4 24 4 15.693 4 8.622 9.068 6.307 14.689l-.001.002z" />
+      <path fill="#4CAF50" d="M24 44c5.074 0 9.834-2.014 13.379-5.579l-6.207-6.207C29.298 34.089 26.734 36 24 36c-5.275 0-9.743-3.379-11.389-8.086l-.006.005-6.585 5.057C9.068 39.089 15.974 44 24 44z" />
+      <path fill="#1976D2" d="M43.611 20.083 42 20 24 20v8h11.308a15.94 15.94 0 01-7.074 10.086l-.006-.005 6.208 6.207C42.023 42.47 44 36.23 44 24c0-1.341-.138-2.65-.389-3.917z" />
+    </svg>
+  )
+}
 
 function Field({ label, value, onChange, type = 'text', placeholder, required, autoComplete }) {
   const [showPw, setShowPw] = useState(false)
@@ -61,15 +94,33 @@ function Field({ label, value, onChange, type = 'text', placeholder, required, a
   )
 }
 
+const tabBtn = (active) => ({
+  flex: 1,
+  padding: '12px 8px',
+  background: 'transparent',
+  border: 'none',
+  borderBottom: active ? `2px solid ${T.accent}` : '2px solid transparent',
+  marginBottom: '-1px',
+  cursor: 'pointer',
+  fontFamily: T.serif,
+  fontSize: 14,
+  letterSpacing: '0.08em',
+  color: active ? T.ink : T.inkMuted,
+})
+
 export default function LoginPage() {
   const isDesktop = useIsDesktop()
+  const { session } = useAuth()
+  const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  const { search: locSearch, hash: locHash } = location
   const rawFrom = location.state?.from
   const from = !rawFrom
     ? '/account'
@@ -77,18 +128,91 @@ export default function LoginPage() {
       ? rawFrom
       : `${rawFrom.pathname || ''}${rawFrom.search || ''}${rawFrom.hash || ''}`
 
+  const redirectUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}${from.startsWith('/') ? from : `/${from}`}`
+  const oauthReturnPath = normalizeOAuthReturnPath(from)
+  const oauthCallbackUrl =
+    typeof window !== 'undefined' ? `${window.location.origin}/login` : '/login'
+
+  useEffect(() => {
+    if (!session) return
+    if (!hasOAuthRedirectMarker(locSearch, locHash)) return
+    let target = oauthReturnPath
+    try {
+      const stored = sessionStorage.getItem(OAUTH_RETURN_KEY)
+      if (stored) target = normalizeOAuthReturnPath(stored)
+    } catch { /* ignore */ }
+    try {
+      sessionStorage.removeItem(OAUTH_RETURN_KEY)
+    } catch { /* ignore */ }
+    navigate(target, { replace: true })
+  }, [session, navigate, locSearch, locHash, oauthReturnPath])
+
+  async function handleGoogleAuth() {
+    if (!supabase) { setError('Supabase が未設定です'); return }
+    setError('')
+    setSuccess('')
+    setGoogleLoading(true)
+    try {
+      sessionStorage.setItem(OAUTH_RETURN_KEY, oauthReturnPath)
+      const { error: oAuthErr } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: oauthCallbackUrl,
+        },
+      })
+      if (oAuthErr) {
+        sessionStorage.removeItem(OAUTH_RETURN_KEY)
+        setError(oAuthErr.message)
+        setGoogleLoading(false)
+      }
+    } catch {
+      sessionStorage.removeItem(OAUTH_RETURN_KEY)
+      setError('Google ログインを開始できませんでした。')
+      setGoogleLoading(false)
+    }
+  }
+
+  function switchMode(next) {
+    setMode(next)
+    setError('')
+    setSuccess('')
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     if (!supabase) { setError('Supabase が未設定です'); return }
+    if (mode === 'signup' && password.length < 6) {
+      setError('パスワードは6文字以上にしてください')
+      return
+    }
     setLoading(true)
     setError('')
     setSuccess('')
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) {
-        setError(error.message)
+      if (mode === 'login') {
+        const { error: signErr } = await supabase.auth.signInWithPassword({ email, password })
+        if (signErr) {
+          setError(signErr.message)
+        } else {
+          sessionStorage.removeItem(OAUTH_RETURN_KEY)
+          navigate(from, { replace: true })
+        }
       } else {
-        navigate(from, { replace: true })
+        const { data, error: signErr } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: redirectUrl },
+        })
+        if (signErr) {
+          setError(signErr.message)
+        } else if (data.session) {
+          sessionStorage.removeItem(OAUTH_RETURN_KEY)
+          navigate(from, { replace: true })
+        } else {
+          setSuccess('確認メールを送信しました。メール内のリンクから登録を完了してください。')
+          setEmail('')
+          setPassword('')
+        }
       }
     } catch {
       setError('通信に失敗しました。時間をおいて再度お試しください。')
@@ -104,18 +228,76 @@ export default function LoginPage() {
       <div style={{
         fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
         color: T.inkMuted, marginBottom: 10,
-      }}>AUTH / 01</div>
+      }}>{mode === 'login' ? 'AUTH / 01 — LOGIN' : 'AUTH / 02 — SIGN UP'}</div>
       <div style={{
         fontFamily: T.serif, fontSize: 32, letterSpacing: '0.03em', lineHeight: 1.2, color: T.ink,
-      }}>Sign in.</div>
+      }}>{mode === 'login' ? 'Sign in.' : 'Join.'}</div>
       <div style={{
         marginTop: 8, fontSize: 13, color: T.inkSoft,
         fontFamily: T.serifBody, lineHeight: 1.7,
       }}>
-        団体アカウントへログインします。
+        {mode === 'login'
+          ? '団体アカウントへログインします。'
+          : 'メールとパスワードでアカウントを作成します。登録後、団体の作成に進めます。'}
       </div>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: 36 }}>
+      <button
+        type="button"
+        disabled={googleLoading || loading}
+        onClick={handleGoogleAuth}
+        aria-label="Google で続ける"
+        style={{
+          width: '100%',
+          marginTop: 28,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          padding: '14px 16px',
+          background: T.card,
+          color: T.ink,
+          border: `1px solid ${T.ink}`,
+          fontFamily: T.sans,
+          fontSize: 13,
+          fontWeight: 500,
+          letterSpacing: '0.06em',
+          cursor: googleLoading || loading ? 'wait' : 'pointer',
+          opacity: googleLoading || loading ? 0.65 : 1,
+        }}
+      >
+        <GoogleMark />
+        {googleLoading ? 'リダイレクト中…' : 'Google で続ける'}
+      </button>
+
+      <div style={{
+        marginTop: 20,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        fontFamily: T.mono,
+        fontSize: 9,
+        letterSpacing: '0.14em',
+        color: T.inkMuted,
+      }}>
+        <div style={{ flex: 1, height: '0.5px', background: T.line }} aria-hidden />
+        <span>または</span>
+        <div style={{ flex: 1, height: '0.5px', background: T.line }} aria-hidden />
+      </div>
+
+      <div style={{
+        display: 'flex',
+        marginTop: 28,
+        borderBottom: `1px solid ${T.ink}`,
+      }}>
+        <button type="button" style={tabBtn(mode === 'login')} onClick={() => switchMode('login')}>
+          ログイン
+        </button>
+        <button type="button" style={tabBtn(mode === 'signup')} onClick={() => switchMode('signup')}>
+          新規登録
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} style={{ marginTop: 28 }}>
         <Field
           label="MAIL"
           type="email"
@@ -132,7 +314,7 @@ export default function LoginPage() {
           onChange={setPassword}
           placeholder="••••••••••"
           required
-          autoComplete="current-password"
+          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
         />
 
         {error && (
@@ -160,7 +342,7 @@ export default function LoginPage() {
           padding: '16px', fontFamily: T.sans, fontSize: 13,
           fontWeight: 500, letterSpacing: '0.16em', cursor: loading ? 'wait' : 'pointer',
         }}>
-          {loading ? '...' : 'ログイン  →'}
+          {loading ? '...' : (mode === 'login' ? 'ログイン  →' : 'アカウント作成  →')}
         </button>
       </form>
 
@@ -169,8 +351,7 @@ export default function LoginPage() {
         fontSize: 11, color: T.inkMuted, lineHeight: 1.7,
         fontFamily: T.mono, letterSpacing: '0.08em',
       }}>
-        アカウントは招待制です。<br/>
-        利用希望は info@artoir.net まで。
+        ご不明な点は info@artoir.net まで。
       </div>
     </>
   )
