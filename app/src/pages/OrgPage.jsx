@@ -143,7 +143,7 @@ export default function OrgPage() {
       </div>
 
       {(sns.instagram || sns.x || org.homepage_url) && (
-        <div style={{ margin: '8px 16px 22px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ margin: '4px 14px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
           {[
             sns.instagram && ['Instagram', sns.instagram],
             sns.x && ['X', sns.x],
@@ -155,30 +155,40 @@ export default function OrgPage() {
               target="_blank"
               rel="noreferrer"
               style={{
-                display: 'block',
-                padding: '11px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10,
+                padding: '8px 10px',
                 border: `1px solid ${T.line}`,
-                borderLeft: `4px solid ${T.accent}`,
+                borderLeft: `3px solid ${T.accent}`,
                 background: T.card,
                 textDecoration: 'none',
                 color: T.ink,
+                minWidth: 0,
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span aria-hidden style={{ fontSize: 13 }}>🔗</span>
-                  <span style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>外部リンク</span>
-                </span>
-                <span style={{ fontFamily: T.mono, fontSize: 10, color: T.accent }}>↗</span>
-              </div>
-              <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 14, color: T.ink }}>{label}</div>
-              <div style={{
-                marginTop: 4, fontFamily: T.serifBody, fontSize: 11, color: T.accent,
-                textDecoration: 'underline', textUnderlineOffset: 2, wordBreak: 'break-all',
-              }}
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                <span aria-hidden style={{ fontSize: 12 }}>🔗</span>
+                <span style={{ fontFamily: T.serif, fontSize: 13, letterSpacing: '0.02em' }}>{label}</span>
+              </span>
+              <span
+                style={{
+                  flex: '1 1 0%',
+                  fontFamily: T.serifBody,
+                  fontSize: 10,
+                  color: T.accent,
+                  textDecoration: 'underline',
+                  textUnderlineOffset: 2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  minWidth: 0,
+                  textAlign: 'right',
+                }}
               >
-                {externalHost(href)}
-              </div>
+                {externalHost(href)} · ↗
+              </span>
             </a>
           ))}
         </div>

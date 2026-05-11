@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
+import { peekSupabaseAuthUrlErrorFromWindow, isGoogleExchangeExternalCodeError, getSupabaseAuthCallbackUrlForGoogle } from './lib/oauthUrlError'
 import { AuthContext } from './lib/auth'
 import AllExhibitionsPage from './pages/AllExhibitionsPage'
 import OrgsPage from './pages/OrgsPage'
@@ -15,11 +16,72 @@ import DashExhibitionEdit from './pages/dashboard/DashExhibitionEdit'
 import DashArtworks from './pages/dashboard/DashArtworks'
 import AccountPage from './pages/AccountPage'
 import AccountSetup from './pages/AccountSetup'
+import OAuthReturnRedirect from './components/OAuthReturnRedirect'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => { window.scrollTo(0, 0) }, [pathname])
   return null
+}
+
+/** OAuth 失敗時、Supabase が URL に載せる error がコンソールに出ない環境でも分かるようにする */
+function SupabaseOAuthErrorBanner() {
+  const [text] = useState(() => peekSupabaseAuthUrlErrorFromWindow())
+  if (!text) return null
+
+  const showGoogleHint = isGoogleExchangeExternalCodeError(text)
+  const supabaseCallback = getSupabaseAuthCallbackUrlForGoogle()
+
+  return (
+    <div
+      role="alert"
+      style={{
+        margin: 0,
+        padding: '12px 20px',
+        background: 'rgba(180,69,44,0.09)',
+        borderBottom: '0.5px solid #b4452c',
+        fontFamily: 'ui-monospace, monospace',
+        fontSize: 12,
+        lineHeight: 1.65,
+        color: '#b4452c',
+        letterSpacing: '0.04em',
+      }}
+    >
+      <div>認証: {text}</div>
+      {showGoogleHint && (
+        <div
+          style={{
+            marginTop: 12,
+            paddingTop: 12,
+            borderTop: '0.5px solid rgba(180,69,44,0.35)',
+            fontFamily: '"Noto Sans JP", system-ui, sans-serif',
+            fontSize: 12,
+            letterSpacing: '0.02em',
+            lineHeight: 1.75,
+            color: '#3d342c',
+          }}
+        >
+          <div style={{ fontWeight: 600, marginBottom: 6 }}>このエラーは「Google が返したコードを、Supabase 側でトークンに交換できない」ときに出ます。次を確認してください。</div>
+          <ul style={{ margin: '0 0 10px 1em', padding: 0 }}>
+            <li>Google Cloud Console → 認証情報 → 使用中の OAuth 2.0 クライアントが<strong>ウェブアプリケーション</strong>であること。</li>
+            <li>同画面の<strong>承認済みのリダイレクト URI</strong>に、次を<strong>一字一句同じ</strong>で追加していること（ローカル URL ではなく Supabase のコールバックです）。</li>
+          </ul>
+          {supabaseCallback ? (
+            <div style={{ wordBreak: 'break-all', fontFamily: 'ui-monospace, monospace', fontSize: 11, background: 'rgba(255,255,255,0.6)', padding: '8px 10px' }}>
+              {supabaseCallback}
+            </div>
+          ) : (
+            <div style={{ fontSize: 11 }}>VITE_SUPABASE_URL からコールバック URL を表示できませんでした。Project Settings → API の Project URL を基に、末尾に <code>/auth/v1/callback</code> を付けた URL を Google に登録してください。</div>
+          )}
+          <div style={{ marginTop: 10, fontSize: 11 }}>
+            Supabase ダッシュボード → Authentication → Providers → Google の <strong>Client ID / Client Secret</strong> が、上記 Google クライアントと一致していること（Secret を再発行したあと Supabase に未反映のことが多いです）。手順は{' '}
+            <a href="https://supabase.com/docs/guides/auth/social-login/auth-google" target="_blank" rel="noreferrer" style={{ color: '#b4452c' }}>Login with Google（Supabase）</a>
+            を参照してください。
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function App() {
@@ -28,23 +90,53 @@ export default function App() {
   useEffect(() => {
     if (!supabase) return undefined
     let isMounted = true
-    supabase.auth.getSession().then(({ data }) => {
-      if (isMounted) setSession(data.session)
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      if (!isMounted) return
+      setSession(s ?? null)
+    })
+
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!isMounted) return
+      if (error) {
+        console.warn('[supabase auth]', error.message)
+        setSession(null)
+        return
+      }
+      setSession(data.session ?? null)
     }).catch(() => {
       if (isMounted) setSession(null)
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, s) => setSession(s))
+
     return () => {
       isMounted = false
       subscription.unsubscribe()
     }
   }, [])
 
-  if (session === undefined) return null
+  if (session === undefined) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 0,
+        padding: '24px',
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: 14,
+        color: '#524a42',
+      }}>
+        読み込み中…
+      </div>
+    )
+  }
 
   return (
     <AuthContext.Provider value={{ session }}>
       <BrowserRouter>
+        <SupabaseOAuthErrorBanner />
+        <OAuthReturnRedirect />
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<AllExhibitionsPage />} />

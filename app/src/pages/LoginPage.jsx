@@ -1,30 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../lib/auth'
+import {
+  normalizeOAuthReturnPath,
+  markOAuthRedirectPending,
+  clearOAuthReturnState,
+  stashOAuthReturnPath,
+} from '../lib/oauthReturn'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
-
-const OAUTH_RETURN_KEY = 'oauthReturnTo'
-
-/** Same-origin pathname only — blocks `//evil` open redirects */
-function normalizeOAuthReturnPath(path) {
-  if (!path || typeof path !== 'string') return '/account'
-  if (!path.startsWith('/') || path.startsWith('//')) return '/account'
-  if (path === '/login') return '/account'
-  return path
-}
-
-/** OAuth コールバック直後（PKCEの code / implicit の fragment）のみ true */
-function hasOAuthRedirectMarker(search, hash) {
-  try {
-    const qs = typeof search === 'string'
-      ? (search.startsWith('?') ? search.slice(1) : search)
-      : ''
-    if (new URLSearchParams(qs).has('code')) return true
-  } catch { /* noop */ }
-  return typeof hash === 'string' && hash.includes('access_token')
-}
 
 function GoogleMark() {
   return (
@@ -110,7 +94,6 @@ const tabBtn = (active) => ({
 
 export default function LoginPage() {
   const isDesktop = useIsDesktop()
-  const { session } = useAuth()
   const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -120,7 +103,6 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const { search: locSearch, hash: locHash } = location
   const rawFrom = location.state?.from
   const from = !rawFrom
     ? '/account'
@@ -133,27 +115,14 @@ export default function LoginPage() {
   const oauthCallbackUrl =
     typeof window !== 'undefined' ? `${window.location.origin}/login` : '/login'
 
-  useEffect(() => {
-    if (!session) return
-    if (!hasOAuthRedirectMarker(locSearch, locHash)) return
-    let target = oauthReturnPath
-    try {
-      const stored = sessionStorage.getItem(OAUTH_RETURN_KEY)
-      if (stored) target = normalizeOAuthReturnPath(stored)
-    } catch { /* ignore */ }
-    try {
-      sessionStorage.removeItem(OAUTH_RETURN_KEY)
-    } catch { /* ignore */ }
-    navigate(target, { replace: true })
-  }, [session, navigate, locSearch, locHash, oauthReturnPath])
-
   async function handleGoogleAuth() {
     if (!supabase) { setError('Supabase が未設定です'); return }
     setError('')
     setSuccess('')
     setGoogleLoading(true)
     try {
-      sessionStorage.setItem(OAUTH_RETURN_KEY, oauthReturnPath)
+      stashOAuthReturnPath(oauthReturnPath)
+      markOAuthRedirectPending()
       const { error: oAuthErr } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -161,12 +130,12 @@ export default function LoginPage() {
         },
       })
       if (oAuthErr) {
-        sessionStorage.removeItem(OAUTH_RETURN_KEY)
+        clearOAuthReturnState()
         setError(oAuthErr.message)
         setGoogleLoading(false)
       }
     } catch {
-      sessionStorage.removeItem(OAUTH_RETURN_KEY)
+      clearOAuthReturnState()
       setError('Google ログインを開始できませんでした。')
       setGoogleLoading(false)
     }
@@ -194,7 +163,7 @@ export default function LoginPage() {
         if (signErr) {
           setError(signErr.message)
         } else {
-          sessionStorage.removeItem(OAUTH_RETURN_KEY)
+          clearOAuthReturnState()
           navigate(from, { replace: true })
         }
       } else {
@@ -206,9 +175,10 @@ export default function LoginPage() {
         if (signErr) {
           setError(signErr.message)
         } else if (data.session) {
-          sessionStorage.removeItem(OAUTH_RETURN_KEY)
+          clearOAuthReturnState()
           navigate(from, { replace: true })
         } else {
+          clearOAuthReturnState()
           setSuccess('確認メールを送信しました。メール内のリンクから登録を完了してください。')
           setEmail('')
           setPassword('')
