@@ -84,7 +84,7 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
 }
 
 // Shared form field component for dashboard forms
-export function DashField({ label, value, onChange, placeholder, prefix, multiline, mono, warning, help, rightHint, type = 'text', readOnly }) {
+export function DashField({ label, value, onChange, placeholder, prefix, multiline, mono, warning, help, rightHint, type = 'text', readOnly, min, max }) {
   return (
     <div style={{ marginBottom: 18 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
@@ -111,6 +111,8 @@ export function DashField({ label, value, onChange, placeholder, prefix, multili
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             placeholder={placeholder}
             readOnly={readOnly}
+            min={min}
+            max={max}
             style={{ flex: 1, padding: '12px 14px', fontFamily: mono ? T.mono : T.sans, fontSize: mono ? 12 : 13, lineHeight: 1.55, color: T.ink, border: 'none', outline: 'none', background: 'transparent' }}
           />
         )}

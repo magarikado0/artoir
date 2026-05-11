@@ -87,6 +87,26 @@ function OrgSelector({ orgs, onSelect, isDesktop }) {
           </div>
         ))}
       </div>
+      <Link
+        to="/account/setup"
+        style={{
+          marginTop: 20,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '16px 0',
+          borderTop: `1px solid ${T.ink}`,
+          fontFamily: T.sans,
+          fontWeight: 500,
+          fontSize: 13,
+          letterSpacing: '0.14em',
+          color: T.ink,
+          textDecoration: 'none',
+        }}
+      >
+        <span>＋ 新しい団体を作成</span>
+        <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
+      </Link>
     </div>
   )
 
@@ -165,7 +185,7 @@ export default function AccountPage() {
         <div style={{ fontFamily: T.serif, fontSize: isDesktop ? 32 : 24, color: T.ink, marginBottom: 8 }}>{session.user.email}</div>
         <div style={{ fontSize: 12, color: T.inkSoft, lineHeight: 1.7, marginBottom: 24 }}>まだ団体がありません。団体を作成してArtoirを始めましょう。</div>
         <Link to="/account/setup" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: T.ink, color: T.paper, padding: '16px 20px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', textDecoration: 'none', marginBottom: 12 }}>
-          <span>＋ 団体を作成する</span>
+          <span>＋ 新しい団体を作成</span>
           <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
         </Link>
         <button onClick={handleSignOut} style={{ background: 'transparent', color: T.inkMuted, border: `0.5px solid ${T.line}`, padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
@@ -183,7 +203,7 @@ export default function AccountPage() {
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
           <span>© Artoir {new Date().getFullYear()}</span>
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            {session && <Link to="/account/setup" style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, textDecoration: 'none' }}>＋ 別の団体を追加</Link>}
+            {session && <Link to="/account/setup" style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, textDecoration: 'none' }}>＋ 新しい団体を作成</Link>}
             {signOutButton}
           </div>
         </div>

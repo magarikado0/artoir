@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { IS_DEV, demoOrgs, demoExhibitions } from '../lib/demoData'
 import Header from '../components/Header'
@@ -19,7 +20,10 @@ function DesktopFooter() {
   )
 }
 
+const loginForSetupState = { from: '/account/setup' }
+
 export default function OrgsPage() {
+  const { session } = useAuth()
   const [orgs, setOrgs] = useState([])
   const [loading, setLoading] = useState(true)
   const isDesktop = useIsDesktop()
@@ -61,12 +65,23 @@ export default function OrgsPage() {
     <div className="ui-page-shell" style={{ minHeight: '100vh' }}>
       <Header activeTab="orgs" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-        <div className="ui-strong-panel" style={{ marginTop: 28, padding: '36px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.moss}` }}>
+        <div className="ui-strong-panel" style={{ marginTop: 28, padding: '36px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.moss}` }}>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>INDEX · ORGANIZATIONS</div>
             <div style={{ fontFamily: T.serif, fontSize: 54, letterSpacing: '0.01em', color: T.ink, lineHeight: 1.05 }}>団体一覧</div>
           </div>
-          <div style={{ fontFamily: T.mono, fontSize: 11, color: T.paper, background: T.ink, padding: '10px 12px', letterSpacing: '0.16em' }}>{pad2(orgs.length)} ORGS</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            {session ? (
+              <Link to="/account/setup" className="ui-action" style={{ padding: '10px 18px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>
+                ＋ 新しい団体を作成
+              </Link>
+            ) : (
+              <Link to="/login" state={loginForSetupState} className="ui-action" style={{ padding: '10px 18px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>
+                ログインして団体を作成
+              </Link>
+            )}
+            <div style={{ fontFamily: T.mono, fontSize: 11, color: T.paper, background: T.ink, padding: '10px 12px', letterSpacing: '0.16em' }}>{pad2(orgs.length)} ORGS</div>
+          </div>
         </div>
 
         <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '48px 1fr 80px', padding: '10px 14px', gap: 20, border: `2px solid ${T.ink}`, background: T.ink, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.paper }}>
@@ -85,7 +100,18 @@ export default function OrgsPage() {
         ))}
 
         {orgs.length === 0 && (
-          <div style={{ padding: '60px 0', fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em' }}>NO ORGANIZATIONS YET</div>
+          <div style={{ padding: '48px 0', textAlign: 'center' }}>
+            <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.1em', marginBottom: 20 }}>NO ORGANIZATIONS YET</div>
+            {session ? (
+              <Link to="/account/setup" className="ui-action" style={{ display: 'inline-flex', padding: '12px 22px', background: T.ink, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>
+                ＋ 新しい団体を作成
+              </Link>
+            ) : (
+              <Link to="/login" state={loginForSetupState} className="ui-action" style={{ display: 'inline-flex', padding: '12px 22px', background: T.ink, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>
+                ログインして団体を作成
+              </Link>
+            )}
+          </div>
         )}
         <div style={{ height: 60 }} />
       </div>
@@ -107,6 +133,17 @@ export default function OrgsPage() {
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>INDEX · ORGS</div>
         <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 28, letterSpacing: '0.02em', color: T.ink }}>団体一覧</div>
         <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.8 }}>Artoir に登録されている美術大学・研究室・コレクティブ。</div>
+        <div style={{ marginTop: 14 }}>
+          {session ? (
+            <Link to="/account/setup" className="ui-action" style={{ display: 'block', textAlign: 'center', padding: '12px 16px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>
+              ＋ 新しい団体を作成
+            </Link>
+          ) : (
+            <Link to="/login" state={loginForSetupState} className="ui-action" style={{ display: 'block', textAlign: 'center', padding: '12px 16px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>
+              ログインして団体を作成
+            </Link>
+          )}
+        </div>
       </div>
 
       <div style={{ borderTop: `2px solid ${T.ink}` }}>
@@ -123,7 +160,14 @@ export default function OrgsPage() {
           </Link>
         ))}
         {orgs.length === 0 && (
-          <div style={{ padding: '32px 16px', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>NO ORGANIZATIONS YET</div>
+          <div style={{ padding: '32px 16px', textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>
+            <div style={{ marginBottom: 16 }}>NO ORGANIZATIONS YET</div>
+            {session ? (
+              <Link to="/account/setup" style={{ color: T.accent, textDecoration: 'underline', letterSpacing: '0.08em' }}>＋ 新しい団体を作成</Link>
+            ) : (
+              <Link to="/login" state={loginForSetupState} style={{ color: T.accent, textDecoration: 'underline', letterSpacing: '0.08em' }}>ログインして団体を作成</Link>
+            )}
+          </div>
         )}
       </div>
 

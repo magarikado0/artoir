@@ -70,9 +70,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const from = location.state?.from
-    ? `${location.state.from.pathname || ''}${location.state.from.search || ''}${location.state.from.hash || ''}`
-    : '/account'
+  const rawFrom = location.state?.from
+  const from = !rawFrom
+    ? '/account'
+    : typeof rawFrom === 'string'
+      ? rawFrom
+      : `${rawFrom.pathname || ''}${rawFrom.search || ''}${rawFrom.hash || ''}`
 
   async function handleSubmit(e) {
     e.preventDefault()
