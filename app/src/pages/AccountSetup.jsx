@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
@@ -17,20 +17,17 @@ export default function AccountSetup() {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  function handleNameChange(value) {
-    setName(value)
-    if (!value) {
-      setSlug('')
-      return
-    }
-    const generated = value
+  // auto-generate slug from name
+  useEffect(() => {
+    if (!name) return
+    const generated = name
       .toLowerCase()
       .replace(/[\s\u3000]+/g, '-')
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
       .replace(/^-|-$/g, '')
     setSlug(generated)
-  }
+  }, [name])
 
   if (!session) return <Navigate to="/login" state={{ from: '/account/setup' }} replace />
 
@@ -77,7 +74,7 @@ export default function AccountSetup() {
       <DashField
         label="団体名"
         value={name}
-        onChange={handleNameChange}
+        onChange={setName}
         placeholder="例: 多摩美術大学 日本画研究室"
       />
       <DashField

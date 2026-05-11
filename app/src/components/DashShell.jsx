@@ -11,19 +11,28 @@ const PUBLIC_TABS = [
 // Desktop top nav for dashboard (same as public but with DASHBOARD indicator)
 function DashDesktopNav({ orgSlug }) {
   return (
-    <div style={{ borderBottom: `3px solid ${T.gold}`, background: T.ink, position: 'sticky', top: 0, zIndex: 50 }}>
+    <div style={{ borderBottom: `1px solid ${T.ink}`, background: T.paper, position: 'sticky', top: 0, zIndex: 50 }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', padding: '0 32px', height: 68, gap: 0 }}>
-        <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.paper, textDecoration: 'none', marginRight: 40, flexShrink: 0 }}>
+        <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none', marginRight: 40, flexShrink: 0 }}>
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-          <span style={{ width: 30, height: 30, background: T.gold, color: T.ink, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 13 }}>◆</span>
-          <span style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.paper }}>DASHBOARD</span>
+        <div style={{ display: 'flex', flex: 1, alignItems: 'center', gap: 0 }}>
+          {PUBLIC_TABS.map((t) => (
+            <Link key={t.key} to={t.path} style={{
+              padding: '0 18px', height: 68, display: 'flex', alignItems: 'center',
+              textDecoration: 'none',
+              fontFamily: T.sans, fontSize: 13, letterSpacing: '0.04em',
+              color: T.inkSoft,
+              borderBottom: '2px solid transparent', boxSizing: 'border-box',
+            }}>{t.label}</Link>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 18 }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, display: 'inline-block' }} />
+            <span style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.ink }}>DASHBOARD</span>
+          </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <Link to={`/${orgSlug}`} className="ui-icon-button" style={{ height: 34, padding: '0 11px', display: 'inline-flex', alignItems: 'center', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.paper, textDecoration: 'none', border: `1px solid rgba(255,249,233,0.38)` }}>PUBLIC ↗</Link>
-          <Link to={`/${orgSlug}/dashboard/settings`} className="ui-icon-button" style={{ height: 34, padding: '0 11px', display: 'inline-flex', alignItems: 'center', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.paper, textDecoration: 'none', border: `1px solid rgba(255,249,233,0.38)` }}>⚙ SETTINGS</Link>
-          <Link to={`/${orgSlug}/dashboard/exhibitions/new`} className="ui-action" style={{ padding: '9px 16px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>＋ 新規展覧会</Link>
+          <Link to={`/${orgSlug}`} style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkMuted, textDecoration: 'none' }}>PUBLIC ↗</Link>
         </div>
       </div>
     </div>
@@ -57,12 +66,12 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
   return (
     <div style={{ background: T.paper, minHeight: '100vh', color: T.ink, fontFamily: T.sans, paddingBottom: 80 }}>
       {/* mobile header */}
-      <div style={{ padding: '18px 16px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `3px solid ${T.gold}`, background: T.ink, position: 'sticky', top: 0, zIndex: 50 }}>
-        <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.paper, textDecoration: 'none' }}>
+      <div style={{ padding: '18px 16px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${T.ink}`, background: T.paper, position: 'sticky', top: 0, zIndex: 50 }}>
+        <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none' }}>
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.ink, background: T.gold, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px' }}>
-          <span style={{ color: T.accentInk }}>◆</span>
+        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.ink, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: T.accent, display: 'inline-block' }} />
           DASHBOARD
         </div>
       </div>
@@ -135,9 +144,9 @@ export function DashSectionLabel({ children }) {
 
 export function StatusBadge({ kind }) {
   const map = {
-    live:      { label: 'LIVE',      color: T.paper,    bg: T.accent },
-    upcoming:  { label: 'UPCOMING',  color: T.paper,    bg: T.moss },
-    ended:     { label: 'ENDED',     color: T.inkMuted, bg: T.paper, border: true },
+    live:      { label: 'LIVE',      color: T.accent,   bg: 'rgba(180,69,44,0.08)' },
+    upcoming:  { label: 'UPCOMING',  color: T.ink,      bg: T.lineSoft },
+    ended:     { label: 'ENDED',     color: T.inkMuted, bg: 'transparent', border: true },
   }
   const m = map[kind] || map.ended
   return (

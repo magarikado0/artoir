@@ -48,7 +48,6 @@ export default function DashExhibitionEdit() {
 
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
-  const [slugTouched, setSlugTouched] = useState(false)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [location, setLocation] = useState('')
@@ -79,26 +78,9 @@ export default function DashExhibitionEdit() {
     load()
   }, [orgSlug, exhibitionId, isNew])
 
-  function handleTitleChange(v) {
-    setTitle(v)
-    if (isNew && !slugTouched) {
-      const auto = slugifyAscii(v)
-      if (auto) setSlug(auto)
-    }
-  }
-
-  function handleSlugChange(v) {
-    setSlug(v)
-    setSlugTouched(true)
-  }
-
   async function handleSave() {
     if (!supabase || !org) return
     if (!isNew && (!exhibitionId || exhibitionId === 'undefined')) return
-    if (!slug.trim()) {
-      window.alert('URLを入力してください。\n例: spring-exhibition-2025\n\n半角英数字とハイフンで入力してください。')
-      return
-    }
     setSaving(true)
     let nextPath = null
     try {
@@ -143,16 +125,16 @@ export default function DashExhibitionEdit() {
   const formContent = (
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
       <DashSectionLabel>基本情報</DashSectionLabel>
-      <DashField label="タイトル" value={title} onChange={handleTitleChange} placeholder="例: 静かな気配" />
-            <DashField
-        label="SLUG（公開URL）"
+      <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
+      <DashField
+        label="URL"
         prefix={`artoir.net/${orgSlug}/exhibition/`}
-        value={slug}
-        onChange={handleSlugChange}
-        placeholder="shizukana-kehai"
+        value={isNew ? (slugifyAscii(title) || '(自動採番)') : slug}
+        readOnly
         mono
-        rightHint="半角英数字・ハイフンのみ"
-            />
+        rightHint="保存時に自動生成"
+        help="タイトルから自動生成されます。同じ名前の展覧会が既にある場合は連番（-2, -3 ...）が付きます。"
+      />
 
       <DashSectionLabel>会期・会場</DashSectionLabel>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -180,7 +162,7 @@ export default function DashExhibitionEdit() {
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {SWATCHES.map((c) => (
-            <div key={c} onClick={() => setBgColor(c)} className="ui-chip" style={{ width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
+            <div key={c} onClick={() => setBgColor(c)} style={{ width: 30, height: 30, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
               {bgColor === c && <div style={{ position: 'absolute', inset: 2, border: `1px solid ${c === '#111110' || c === '#2A2825' ? T.paper : T.ink}` }} />}
             </div>
           ))}
@@ -190,15 +172,14 @@ export default function DashExhibitionEdit() {
 
       <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
         {!isNew && (
-          <button onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} className="ui-icon-button" style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+          <button onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
             作品を管理 →
           </button>
         )}
         <button
           onClick={handleSave}
           disabled={saving}
-          className="ui-action"
-          style={{ flex: 1, padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+          style={{ flex: 1, padding: '14px', background: T.ink, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
         >{saving ? 'SAVING...' : 'SAVE ↩'}</button>
       </div>
       <div style={{ height: 40 }} />

@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "artoir",
+  "name": "artport",
   "compatibility_date": "2026-04-22",
   "observability": {
     "enabled": true
