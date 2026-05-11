@@ -58,22 +58,24 @@ export default function OrgsPage() {
   )
 
   if (isDesktop) return (
-    <div style={{ background: T.paper, minHeight: '100vh' }}>
+    <div className="ui-page-shell" style={{ minHeight: '100vh' }}>
       <Header activeTab="orgs" />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-        <div style={{ padding: '40px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
+        <div className="ui-strong-panel" style={{ marginTop: 28, padding: '36px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.moss}` }}>
           <div>
-            <div style={{ fontFamily: T.serif, fontSize: 42, letterSpacing: '0.01em', color: T.ink }}>団体一覧</div>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>INDEX · ORGANIZATIONS</div>
+            <div style={{ fontFamily: T.serif, fontSize: 54, letterSpacing: '0.01em', color: T.ink, lineHeight: 1.05 }}>団体一覧</div>
           </div>
-          <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted, letterSpacing: '0.16em' }}>{pad2(orgs.length)} グループ</div>
+          <div style={{ fontFamily: T.mono, fontSize: 11, color: T.paper, background: T.ink, padding: '10px 12px', letterSpacing: '0.16em' }}>{pad2(orgs.length)} ORGS</div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', padding: '10px 0', gap: 20, borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted }}>
-          <span>団体名</span><span style={{ textAlign: 'right' }}>展覧会数</span>
+        <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '48px 1fr 80px', padding: '10px 14px', gap: 20, border: `2px solid ${T.ink}`, background: T.ink, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.paper }}>
+          <span>NO.</span><span>団体名</span><span style={{ textAlign: 'right' }}>展覧会数</span>
         </div>
 
-        {orgs.map((o) => (
-          <Link key={o.id} to={`/${o.slug}`} style={{ display: 'grid', gridTemplateColumns: '1fr 80px', padding: '22px 0', gap: 20, alignItems: 'center', borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer', textDecoration: 'none', color: T.ink }}>
+        {orgs.map((o, i) => (
+          <Link key={o.id} to={`/${o.slug}`} className="ui-row" style={{ display: 'grid', gridTemplateColumns: '48px 1fr 80px', padding: '22px 14px', gap: 20, alignItems: 'center', borderLeft: `2px solid ${T.ink}`, borderRight: `2px solid ${T.ink}`, borderBottom: `2px solid ${T.ink}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, background: i % 2 === 0 ? T.card : T.paperAlt }}>
+            <div style={{ width: 28, height: 28, background: i === 0 ? T.moss : T.paperAlt, color: i === 0 ? T.paper : T.inkMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 10 }}>{pad2(i + 1)}</div>
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '0.02em' }}>{o.name}</div>
               {o.description && <div style={{ marginTop: 3, fontSize: 12, color: T.inkSoft }}>{o.description.slice(0, 60)}{o.description.length > 60 ? '…' : ''}</div>}
@@ -93,10 +95,10 @@ export default function OrgsPage() {
 
   // mobile
   return (
-    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 80 }}>
+    <div className="ui-page-shell" style={{ minHeight: '100vh', paddingBottom: 80 }}>
       <Header activeTab="orgs" />
 
-      <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>
+      <div style={{ padding: '14px 16px', borderBottom: `2px solid ${T.ink}`, background: T.card, display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>
         <span>ORGANIZATIONS / ALL</span>
         <span>{pad2(orgs.length)} ORGS</span>
       </div>
@@ -107,12 +109,13 @@ export default function OrgsPage() {
         <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.8 }}>Artoir に登録されている美術大学・研究室・コレクティブ。</div>
       </div>
 
-      <div style={{ borderTop: `1px solid ${T.ink}` }}>
-        <div style={{ padding: '8px 16px', display: 'grid', gridTemplateColumns: '1fr 48px', gap: 10, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted, borderBottom: `0.5px solid ${T.ink}` }}>
-          <span>団体名</span><span style={{ textAlign: 'right' }}>展覧会数</span>
+      <div style={{ borderTop: `2px solid ${T.ink}` }}>
+        <div style={{ padding: '8px 16px', display: 'grid', gridTemplateColumns: '32px 1fr 48px', gap: 10, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.paper, background: T.ink, borderBottom: `2px solid ${T.ink}` }}>
+          <span>NO.</span><span>団体名</span><span style={{ textAlign: 'right' }}>展覧会</span>
         </div>
-        {orgs.map((o) => (
-          <Link key={o.id} to={`/${o.slug}`} style={{ padding: '16px 16px', display: 'grid', gridTemplateColumns: '1fr 48px', gap: 10, borderBottom: `0.5px solid ${T.line}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, alignItems: 'center' }}>
+        {orgs.map((o, i) => (
+          <Link key={o.id} to={`/${o.slug}`} className="ui-row" style={{ padding: '16px 16px', display: 'grid', gridTemplateColumns: '32px 1fr 48px', gap: 10, borderBottom: `2px solid ${T.ink}`, cursor: 'pointer', textDecoration: 'none', color: T.ink, alignItems: 'center', background: i % 2 === 0 ? T.card : T.paperAlt }}>
+            <div style={{ width: 26, height: 26, background: i === 0 ? T.moss : T.paperAlt, color: i === 0 ? T.paper : T.inkMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 10 }}>{pad2(i + 1)}</div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', lineHeight: 1.4 }}>{o.name}</div>
             </div>

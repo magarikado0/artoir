@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import { AuthContext } from './lib/auth'
@@ -15,6 +15,12 @@ import DashExhibitionEdit from './pages/dashboard/DashExhibitionEdit'
 import DashArtworks from './pages/dashboard/DashArtworks'
 import AccountPage from './pages/AccountPage'
 import AccountSetup from './pages/AccountSetup'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
 
 export default function App() {
   const [session, setSession] = useState(() => (supabase ? undefined : null))
@@ -39,6 +45,7 @@ export default function App() {
   return (
     <AuthContext.Provider value={{ session }}>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<AllExhibitionsPage />} />
           <Route path="/orgs" element={<OrgsPage />} />

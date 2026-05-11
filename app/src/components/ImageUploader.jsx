@@ -69,8 +69,13 @@ export default function ImageUploader({ onUploaded, onBeforeUpload, children }) 
       return
     }
     if (onBeforeUpload) {
-      const ok = await onBeforeUpload(file)
-      if (!ok) return
+      try {
+        const ok = await onBeforeUpload(file)
+        if (!ok) return
+      } catch (err) {
+        setError(err?.message || 'アップロード前の確認中にエラーが発生しました')
+        return
+      }
     }
     try {
       await upload(file)

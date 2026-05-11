@@ -11,7 +11,7 @@ function slugifyAscii(s) {
   return String(s || '')
     .toLowerCase()
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 40)
@@ -55,7 +55,7 @@ export default function DashExhibitionEdit() {
   const [bgColor, setBgColor] = useState('#FAF8F3')
 
   useEffect(() => {
-    if (!supabase) return setLoading(false)
+    if (!supabase) { setLoading(false); return }
     async function load() {
       try {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
@@ -162,7 +162,7 @@ export default function DashExhibitionEdit() {
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {SWATCHES.map((c) => (
-            <div key={c} onClick={() => setBgColor(c)} style={{ width: 30, height: 30, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
+            <div key={c} onClick={() => setBgColor(c)} className="ui-chip" style={{ width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
               {bgColor === c && <div style={{ position: 'absolute', inset: 2, border: `1px solid ${c === '#111110' || c === '#2A2825' ? T.paper : T.ink}` }} />}
             </div>
           ))}
@@ -172,14 +172,16 @@ export default function DashExhibitionEdit() {
 
       <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
         {!isNew && (
-          <button onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+          <button type="button" onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} className="ui-icon-button" style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
             作品を管理 →
           </button>
         )}
         <button
+          type="button"
           onClick={handleSave}
           disabled={saving}
-          style={{ flex: 1, padding: '14px', background: T.ink, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+          className="ui-action"
+          style={{ flex: 1, padding: '14px', background: T.accent, color: T.paper, border: `1px solid ${T.paper}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
         >{saving ? 'SAVING...' : 'SAVE ↩'}</button>
       </div>
       <div style={{ height: 40 }} />

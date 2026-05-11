@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper:      #FAF8F3;
-  --color-paper-alt:  #F3F0E8;
-  --color-card:       #FFFFFF;
-  --color-ink:        #111110;
-  --color-ink-soft:   #3A3935;
-  --color-ink-muted:  #73726C;
-  --color-line:       #E4E2DC;
-  --color-line-soft:  #EFEDE6;
-  --color-accent:     #B4452C;
-  --color-accent-ink: #7C2B18;
+  --color-paper:      #F6F0E4;
+  --color-paper-alt:  #E7E0D0;
+  --color-card:       #FFFDF7;
+  --color-ink:        #1E1A16;
+  --color-ink-soft:   #3E3730;
+  --color-ink-muted:  #7E7569;
+  --color-line:       #3A332C;
+  --color-line-soft:  #DCD3C2;
+  --color-accent:     #B65A45;
+  --color-accent-ink: #7A2F24;
 }
 
 * {
@@ -25,8 +25,12 @@ html {
 }
 
 body {
-  background: #FAF8F3;
-  color: #111110;
+  background:
+    linear-gradient(90deg, rgba(30,26,22,0.025) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(30,26,22,0.02) 1px, transparent 1px),
+    #F6F0E4;
+  background-size: 36px 36px, 36px 36px, auto;
+  color: #1E1A16;
   font-family: 'Noto Sans JP', -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
@@ -53,3 +57,88 @@ body {
 .gallery-item:nth-child(5) { transition-delay: 0.24s; }
 .gallery-item:nth-child(6) { transition-delay: 0.30s; }
 .gallery-item:nth-child(n+7) { transition-delay: 0.36s; }
+
+.ui-invert,
+.ui-row,
+.ui-icon-button,
+.ui-bottom-item,
+.ui-chip,
+.ui-action {
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+::selection {
+  background: #B65A45;
+  color: #FFFDF7;
+}
+
+.ui-row:hover {
+  background: #1E1A16 !important;
+  color: #FFFDF7 !important;
+  transform: translateX(4px);
+  box-shadow: 8px 8px 0 #D4B15F;
+}
+
+.ui-row:hover * {
+  color: inherit !important;
+}
+
+.ui-row:hover img,
+.ui-row:hover .ui-thumb {
+  filter: saturate(0.75) contrast(1.08);
+}
+
+.ui-action:hover,
+.ui-icon-button:hover,
+.ui-chip:hover {
+  background: #F2B849 !important;
+  color: #1E1A16 !important;
+  border-color: #1E1A16 !important;
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0 #1E1A16;
+}
+
+.ui-action:hover svg,
+.ui-icon-button:hover svg,
+.ui-bottom-item:hover svg {
+  stroke: currentColor;
+}
+
+.ui-bottom-item:active,
+.ui-action:active,
+.ui-icon-button:active {
+  transform: scale(0.97);
+}
+
+.ui-strong-panel {
+  box-shadow: 8px 8px 0 #1E1A16;
+}
+
+.ui-ticket {
+  background:
+    radial-gradient(circle at 0 50%, transparent 0 12px, currentColor 13px 14px, transparent 15px),
+    radial-gradient(circle at 100% 50%, transparent 0 12px, currentColor 13px 14px, transparent 15px);
+}
+
+.ui-photo-frame {
+  border: 2px solid #1E1A16;
+  box-shadow: 7px 7px 0 #B65A45;
+}
+
+.ui-page-shell {
+  background:
+    linear-gradient(135deg, rgba(212,177,95,0.12) 0 24%, transparent 24% 100%),
+    linear-gradient(315deg, rgba(96,118,104,0.09) 0 18%, transparent 18% 100%),
+    #F6F0E4;
+}
+
+.ui-modal-close:hover {
+  transform: rotate(6deg) scale(1.04);
+  box-shadow: 0 12px 28px rgba(180, 69, 44, 0.34);
+}
