@@ -150,11 +150,10 @@ export default function DashSettings() {
   )
 
   if (isDesktop) return (
-    <DashShell orgSlug={orgSlug} active="set" crumbs={['DASHBOARD', 'SETTINGS']}>
+    <DashShell orgSlug={orgSlug} active="set">
       <div style={{ maxWidth: '80%', margin: '0 auto' }}>
         <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
           <div>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>ORGANIZATION / SETTINGS</div>
             <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>団体設定</div>
           </div>
         </div>
@@ -164,9 +163,8 @@ export default function DashSettings() {
   )
 
   return (
-    <DashShell orgSlug={orgSlug} active="set" crumbs={['DASHBOARD', 'SETTINGS']}>
+    <DashShell orgSlug={orgSlug} active="set">
       <div style={{ padding: '24px 16px 8px' }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 10 }}>ORGANIZATION / 設定</div>
         <div style={{ fontFamily: T.serif, fontSize: 26, letterSpacing: '0.02em', color: T.ink }}>団体設定</div>
         <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>公開ページに表示される情報を編集します。</div>
       </div>
