@@ -164,12 +164,11 @@ export default function DashExhibitionEdit() {
 
       <DashSectionLabel>説明文</DashSectionLabel>
       <DashField
-        label="DESCRIPTION"
+        label="公開ページのヒーロー下に表示されます。（最大400文字）"
         value={description}
         onChange={setDescription}
         multiline
         placeholder="展覧会の説明文を入力..."
-        help="公開ページのヒーロー下に表示されます（最大 400 文字）。"
       />
 
       <DashSectionLabel>背景色</DashSectionLabel>
