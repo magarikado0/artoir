@@ -129,7 +129,7 @@ export default function OrgsPage() {
 
       <div style={{ padding: '14px 14px 10px' }}>
         <div style={{ marginTop: 4, fontFamily: T.serif, fontSize: 22, letterSpacing: '0.02em', color: T.ink, lineHeight: 1.2 }}>団体一覧</div>
-        <div style={{ marginTop: 5, fontSize: 11, color: T.inkSoft, lineHeight: 1.65 }}>Artoir に登録されている美術大学・研究室・コレクティブ。</div>
+        <div style={{ marginTop: 5, fontSize: 11, color: T.inkSoft, lineHeight: 1.65 }}>Artoir に登録されている美術大学・研究室・コレクティブ</div>
         <div style={{ marginTop: 12 }}>
           {session ? (
             <Link to="/account/setup" className="ui-action" style={{ display: 'block', textAlign: 'center', padding: '10px 14px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>

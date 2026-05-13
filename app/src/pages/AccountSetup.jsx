@@ -152,7 +152,6 @@ export default function AccountSetup() {
       </div>
 
       <div style={{ flex: 1, padding: '32px 16px' }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 10 }}>SETUP / 01</div>
         <div style={{ fontFamily: T.serif, fontSize: 28, letterSpacing: '0.02em', color: T.ink, lineHeight: 1.35, marginBottom: 8 }}>団体を作成する</div>
         <div style={{ fontSize: 13, color: T.inkSoft, lineHeight: 1.9, marginBottom: 28 }}>Artoir に公開される団体ページを作成します。</div>
         {form}

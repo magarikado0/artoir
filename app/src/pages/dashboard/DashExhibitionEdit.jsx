@@ -232,7 +232,6 @@ export default function DashExhibitionEdit() {
   return (
     <DashShell orgSlug={orgSlug} active="exs">
       <div style={{ padding: '20px 16px 8px' }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
         <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.ink }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
         <div style={{ marginTop: 4, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{isNew ? '下の項目を入力すると、公開ページが作成されます。' : '変更は「保存」で反映されます。'}</div>
       </div>
