@@ -10,15 +10,14 @@ import { useIsDesktop } from '../lib/useIsDesktop'
 function LoggedOut({ isDesktop }) {
   const navigate = useNavigate()
   const benefits = [
-    ['01', '団体ページを作る', '展覧会の活動母体として情報を公開。'],
-    ['02', '展覧会を公開する', '作品・会期・会場を入力し、URL一つで共有。'],
-    ['03', '作品を管理する',   '画像・タイトル・技法を登録、並び替えも可。'],
+    ['01', '団体ページを作る', '展覧会の活動母体として情報を公開'],
+    ['02', '展覧会を公開する', '作品・会期・会場を入力し、URL一つで共有'],
+    ['03', '作品を管理する',   '画像・タイトル・技法を登録、並び替えも可'],
   ]
 
   if (isDesktop) return (
     <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 32px' }}>
       <div style={{ width: 480 }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>GUEST</div>
         <div style={{ fontFamily: T.serif, fontSize: 36, letterSpacing: '0.02em', color: T.ink, marginBottom: 8 }}>アカウント</div>
         <div style={{ fontSize: 13, color: T.inkSoft, lineHeight: 1.9, fontFamily: T.serifBody, marginBottom: 28 }}>
           ログインすると、あなたの団体として展覧会を作成・編集できます。
@@ -45,7 +44,6 @@ function LoggedOut({ isDesktop }) {
 
   return (
     <div style={{ padding: '28px 16px' }}>
-      <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>GUEST</div>
       <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 28, letterSpacing: '0.02em', lineHeight: 1.35, color: T.ink }}>アカウント</div>
       <div style={{ marginTop: 8, fontSize: 13, color: T.inkSoft, lineHeight: 1.9 }}>ログインすると、あなたの団体として展覧会を作成・編集できます。</div>
       <button onClick={() => navigate('/login')} style={{ marginTop: 22, width: '100%', background: T.ink, color: T.paper, border: 'none', padding: '16px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -170,7 +168,6 @@ export default function AccountPage() {
 
   const topBar = !isDesktop && (
     <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>
-      <span>ACCOUNT</span>
       {signOutButton}
     </div>
   )
