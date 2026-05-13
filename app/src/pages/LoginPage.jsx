@@ -32,7 +32,6 @@ function Field({ label, value, onChange, type = 'text', placeholder, required, a
         color: T.inkMuted, marginBottom: 6,
       }}>
         <span>{label}</span>
-        {required && <span>*</span>}
       </div>
       <div style={{ display: 'flex', alignItems: 'stretch', border: `1px solid ${T.ink}`, background: T.card }}>
         <input
@@ -196,12 +195,8 @@ export default function LoginPage() {
   const formBody = (
     <>
       <div style={{
-        fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
-        color: T.inkMuted, marginBottom: 10,
-      }}>{mode === 'login' ? 'AUTH / 01 — LOGIN' : 'AUTH / 02 — SIGN UP'}</div>
-      <div style={{
         fontFamily: T.serif, fontSize: 32, letterSpacing: '0.03em', lineHeight: 1.2, color: T.ink,
-      }}>{mode === 'login' ? 'Sign in.' : 'Join.'}</div>
+      }}>{mode === 'login' ? 'ログイン' : '新規登録'}</div>
       <div style={{
         marginTop: 8, fontSize: 13, color: T.inkSoft,
         fontFamily: T.serifBody, lineHeight: 1.7,
@@ -282,7 +277,7 @@ export default function LoginPage() {
           type="password"
           value={password}
           onChange={setPassword}
-          placeholder="••••••••••"
+          placeholder="6文字以上のパスワード"
           required
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
         />
@@ -316,13 +311,6 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div style={{
-        marginTop: 32, paddingTop: 20, borderTop: `0.5px solid ${T.line}`,
-        fontSize: 11, color: T.inkMuted, lineHeight: 1.7,
-        fontFamily: T.mono, letterSpacing: '0.08em',
-      }}>
-        ご不明な点は info@artoir.net まで。
-      </div>
     </>
   )
 
@@ -345,9 +333,6 @@ export default function LoginPage() {
             }}>
               Artoir<span style={{ color: T.accent }}>.</span>
             </Link>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
-              INDEX · {year}
-            </div>
           </div>
         </div>
 
@@ -395,9 +380,6 @@ export default function LoginPage() {
         }}>
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
-          INDEX · {year}
-        </div>
       </div>
 
       {/* mobile form content */}
