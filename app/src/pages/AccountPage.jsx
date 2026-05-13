@@ -160,15 +160,8 @@ export default function AccountPage() {
     </div>
   )
 
-  const signOutButton = session && (
-    <button onClick={handleSignOut} style={{ background: 'none', border: 'none', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.ink, cursor: 'pointer', padding: 0 }}>
-      SIGN OUT ↗
-    </button>
-  )
-
   const topBar = !isDesktop && (
     <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>
-      {signOutButton}
     </div>
   )
 
@@ -201,7 +194,6 @@ export default function AccountPage() {
           <span>© Artoir {new Date().getFullYear()}</span>
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             {session && <Link to="/account/setup" style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, textDecoration: 'none' }}>＋ 新しい団体を作成</Link>}
-            {signOutButton}
           </div>
         </div>
       </div>
