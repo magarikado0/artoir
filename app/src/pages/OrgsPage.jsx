@@ -123,10 +123,6 @@ export default function OrgsPage() {
     <div className="ui-page-shell" style={{ minHeight: '100vh', paddingBottom: 72 }}>
       <Header activeTab="orgs" />
 
-      <div style={{ padding: '10px 14px', borderBottom: `2px solid ${T.ink}`, background: T.card, display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 9, letterSpacing: '0.12em', color: T.inkMuted }}>
-        <span>{pad2(orgs.length)} ORGS</span>
-      </div>
-
       <div style={{ padding: '14px 14px 10px' }}>
         <div style={{ marginTop: 4, fontFamily: T.serif, fontSize: 22, letterSpacing: '0.02em', color: T.ink, lineHeight: 1.2 }}>団体一覧</div>
         <div style={{ marginTop: 5, fontSize: 11, color: T.inkSoft, lineHeight: 1.65 }}>Artoir に登録されている美術大学・研究室・コレクティブ</div>

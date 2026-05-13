@@ -233,16 +233,6 @@ function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
   return (
     <div className="ui-page-shell" style={{ minHeight: '100vh', paddingBottom: 72 }}>
       <Header activeTab="top" />
-
-      <div style={{
-        padding: '14px 16px', borderBottom: `2px solid ${T.ink}`,
-        background: T.card,
-        display: 'flex', justifyContent: 'space-between',
-        fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted,
-      }}>
-        <span>{pad2(rows.length)} EXH.</span>
-      </div>
-
       <div style={{ padding: '12px 16px', display: 'flex', gap: 6, borderBottom: `0.5px solid ${T.line}`, flexWrap: 'wrap' }}>
         {FILTERS.map((f) => {
           const active = filter === f
