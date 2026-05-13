@@ -155,14 +155,11 @@ export default function DashExhibitionEdit() {
         help="タイトルから自動生成されます。同じ名前の展覧会が既にある場合は連番（-2, -3 ...）が付きます。"
       />
 
-      <DashSectionLabel>会期・会場</DashSectionLabel>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <DashField label="START" value={startDate} onChange={onStartDateChange} placeholder="YYYY-MM-DD" mono type="date" />
         <DashField label="END" value={endDate} onChange={onEndDateChange} placeholder="YYYY-MM-DD" mono type="date" min={startDate || undefined} help={startDate ? '開始日以降のみ選択できます。' : undefined} />
       </div>
       <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
-
-      <DashSectionLabel>説明文</DashSectionLabel>
       <DashField
         label="公開ページのヒーロー下に表示されます。（最大400文字）"
         value={description}
@@ -171,8 +168,11 @@ export default function DashExhibitionEdit() {
         placeholder="展覧会の説明文を入力..."
       />
 
-      <DashSectionLabel>背景色</DashSectionLabel>
-      <div style={{ padding: 12, border: `1px solid ${T.ink}`, background: T.card }}>
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+          <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.inkMuted }}>背景色</div>
+        </div>
+        <div style={{ padding: 12, border: `1px solid ${T.ink}`, background: T.card }}>
         <div style={{ height: 90, marginBottom: 12, background: bgColor, border: `0.5px solid ${T.line}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.04em', color: isDark ? T.paper : T.ink }}>
             プレビュー — {title || '展覧会タイトル'}
@@ -185,6 +185,7 @@ export default function DashExhibitionEdit() {
             </div>
           ))}
         </div>
+        </div>
       </div>
 
       <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
@@ -193,13 +194,23 @@ export default function DashExhibitionEdit() {
             作品を管理 →
           </button>
         )}
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className="ui-action"
-          style={{ flex: 1, padding: '14px', background: T.accent, color: T.paper, border: `1px solid ${T.paper}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
-        >{saving ? 'SAVING...' : 'SAVE ↩'}</button>
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => navigate(`/${orgSlug}/dashboard`)}
+            className="ui-icon-button"
+            style={{ width: '100%', padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}
+          >
+            CANCEL
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="ui-action"
+            style={{ width: '100%', padding: '14px', background: T.accent, color: T.paper, border: `1px solid ${T.paper}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+          >{saving ? 'SAVING...' : 'SAVE ↩'}</button>
+        </div>
       </div>
       <div style={{ height: 40 }} />
     </div>
