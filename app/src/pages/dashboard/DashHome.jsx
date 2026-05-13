@@ -40,7 +40,6 @@ export default function DashHome() {
     <DashShell orgSlug={orgSlug} active="dash" crumbs={['DASHBOARD']}>
       <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
         <div>
-          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.accent, marginBottom: 8 }}>SIGNED IN AS · DASHBOARD</div>
           <div style={{ fontFamily: T.serif, fontSize: 44, lineHeight: 1.05, letterSpacing: '0.01em', color: T.ink }}>{org?.name || orgSlug}</div>
         </div>
         <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-action" style={{ background: T.accent, color: T.paper, border: `2px solid ${T.ink}`, padding: '14px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
@@ -55,14 +54,13 @@ export default function DashHome() {
             <div style={{ fontFamily: T.serif, fontSize: 22, letterSpacing: '0.02em', color: T.ink }}>展覧会</div>
           </div>
           <div style={{ borderTop: `1px solid ${T.ink}` }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px 100px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
-              <span></span><span>タイトル</span><span>会期</span><span>STATUS</span><span>EDIT</span>
+            <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
+              <span></span><span>タイトル</span><span>会期</span><span>STATUS</span>
             </div>
             {exhibitions.map((exh) => {
               const worksHref = `/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`
-              const editHref = `/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`
               return (
-                <div key={exh.id} style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px 100px', gap: 14, padding: '16px 0', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
+                <div key={exh.id} style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px', gap: 14, padding: '16px 0', borderBottom: `0.5px solid ${T.line}`, alignItems: 'center' }}>
                   <Link to={worksHref} aria-label={`${exh.title}の作品一覧へ`} style={{ display: 'block', width: 48, height: 48, background: '#D9D6CE' }} />
                   <Link to={worksHref} style={{ textDecoration: 'none' }}>
                     <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', color: T.ink }}>{exh.title}</div>
@@ -71,7 +69,6 @@ export default function DashHome() {
                     {fmtDateDot(exh.start_date)}<br/>— {fmtDateDot(exh.end_date)}
                   </div>
                   <div><StatusBadge kind={exhStatus(exh)} /></div>
-                  <Link to={editHref} style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.1em', color: T.ink, textDecoration: 'none' }}>編集 →</Link>
                 </div>
               )
             })}
@@ -82,7 +79,6 @@ export default function DashHome() {
         {/* sidebar */}
         <div>
           <div style={{ marginBottom: 28 }}>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 12 }}>OVERVIEW</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, background: T.line, border: `2px solid ${T.ink}` }}>
               {[['EXHIBITS', pad2(exhibitions.length), T.ink], ['LIVE', pad2(liveCount), T.accentInk]].map(([k, v, bg]) => (
                 <div key={k} style={{ background: bg, color: T.paper, padding: '14px 12px' }}>
@@ -110,7 +106,6 @@ export default function DashHome() {
   return (
     <DashShell orgSlug={orgSlug} active="dash" crumbs={['DASHBOARD']}>
       <div style={{ margin: '18px 16px 16px', padding: '20px 16px', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.accent, marginBottom: 10 }}>SIGNED IN AS</div>
         <div style={{ fontFamily: T.serif, fontSize: 28, lineHeight: 1.2, letterSpacing: '0.02em', color: T.ink }}>{org?.name || orgSlug}</div>
         {org?.description && <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{org.description.split('。')[0]}。</div>}
       </div>

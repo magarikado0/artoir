@@ -20,11 +20,6 @@ function DashDesktopNav({ orgSlug }) {
           <span style={{ width: 30, height: 30, background: T.gold, color: T.ink, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 13 }}>◆</span>
           <span style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.paper }}>DASHBOARD</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <Link to={`/${orgSlug}`} className="ui-icon-button" style={{ height: 34, padding: '0 11px', display: 'inline-flex', alignItems: 'center', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.paper, textDecoration: 'none', border: `1px solid rgba(255,249,233,0.38)` }}>PUBLIC ↗</Link>
-          <Link to={`/${orgSlug}/dashboard/settings`} className="ui-icon-button" style={{ height: 34, padding: '0 11px', display: 'inline-flex', alignItems: 'center', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.paper, textDecoration: 'none', border: `1px solid rgba(255,249,233,0.38)` }}>⚙ SETTINGS</Link>
-          <Link to={`/${orgSlug}/dashboard/exhibitions/new`} className="ui-action" style={{ padding: '9px 16px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>＋ 新規展覧会</Link>
-        </div>
       </div>
     </div>
   )
