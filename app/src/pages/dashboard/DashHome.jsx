@@ -37,7 +37,7 @@ export default function DashHome() {
   const liveCount = exhibitions.filter((e) => exhStatus(e) === 'live').length
 
   if (isDesktop) return (
-    <DashShell orgSlug={orgSlug} active="dash" crumbs={['DASHBOARD']}>
+    <DashShell orgSlug={orgSlug} active="dash">
       <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
         <div>
           <div style={{ fontFamily: T.serif, fontSize: 44, lineHeight: 1.05, letterSpacing: '0.01em', color: T.ink }}>{org?.name || orgSlug}</div>
@@ -55,7 +55,7 @@ export default function DashHome() {
           </div>
           <div style={{ borderTop: `1px solid ${T.ink}` }}>
             <div style={{ display: 'grid', gridTemplateColumns: '56px 1fr 140px 120px', gap: 14, padding: '10px 0', borderBottom: `0.5px solid ${T.ink}`, fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.inkMuted }}>
-              <span></span><span>タイトル</span><span>会期</span><span>STATUS</span>
+              <span></span><span>タイトル</span><span>会期</span>
             </div>
             {exhibitions.map((exh) => {
               const worksHref = `/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`
@@ -104,7 +104,7 @@ export default function DashHome() {
 
   // mobile
   return (
-    <DashShell orgSlug={orgSlug} active="dash" crumbs={['DASHBOARD']}>
+    <DashShell orgSlug={orgSlug} active="dash">
       <div style={{ margin: '18px 16px 16px', padding: '20px 16px', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
         <div style={{ fontFamily: T.serif, fontSize: 28, lineHeight: 1.2, letterSpacing: '0.02em', color: T.ink }}>{org?.name || orgSlug}</div>
         {org?.description && <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{org.description.split('。')[0]}。</div>}
@@ -128,7 +128,7 @@ export default function DashHome() {
 
       <div style={{ borderTop: `2px solid ${T.ink}` }}>
         <div style={{ padding: '10px 16px', display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 9, letterSpacing: '0.14em', color: T.paper, background: T.ink, borderBottom: `2px solid ${T.ink}` }}>
-          <span>YOUR EXHIBITIONS</span>
+          <span>展覧会</span>
         </div>
         {exhibitions.slice(0, 4).map((exh, i) => (
           <Link key={exh.id} to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} className="ui-row" style={{ padding: '14px 16px', borderBottom: `2px solid ${T.ink}`, display: 'flex', gap: 12, cursor: 'pointer', textDecoration: 'none', color: T.ink, background: i % 2 === 0 ? T.card : T.paperAlt }}>
