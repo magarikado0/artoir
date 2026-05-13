@@ -67,7 +67,6 @@ export default function OrgsPage() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
         <div className="ui-strong-panel" style={{ marginTop: 28, padding: '36px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
           <div>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>INDEX · ORGANIZATIONS</div>
             <div style={{ fontFamily: T.serif, fontSize: 38, letterSpacing: '0.01em', color: T.ink, lineHeight: 1.12 }}>団体一覧</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
@@ -125,12 +124,10 @@ export default function OrgsPage() {
       <Header activeTab="orgs" />
 
       <div style={{ padding: '10px 14px', borderBottom: `2px solid ${T.ink}`, background: T.card, display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 9, letterSpacing: '0.12em', color: T.inkMuted }}>
-        <span>ORGANIZATIONS / ALL</span>
         <span>{pad2(orgs.length)} ORGS</span>
       </div>
 
       <div style={{ padding: '14px 14px 10px' }}>
-        <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.16em', color: T.inkMuted }}>INDEX · ORGS</div>
         <div style={{ marginTop: 4, fontFamily: T.serif, fontSize: 22, letterSpacing: '0.02em', color: T.ink, lineHeight: 1.2 }}>団体一覧</div>
         <div style={{ marginTop: 5, fontSize: 11, color: T.inkSoft, lineHeight: 1.65 }}>Artoir に登録されている美術大学・研究室・コレクティブ。</div>
         <div style={{ marginTop: 12 }}>

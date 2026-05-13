@@ -133,9 +133,6 @@ export default function Header({ activeTab }) {
         <Link to="/account" className="ui-icon-button" aria-label="アカウント" style={{ minWidth: 44, minHeight: 44, width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', color: activeTab === 'account' ? T.ink : T.paper, background: activeTab === 'account' ? T.gold : 'rgba(255,249,233,0.08)', border: `1px solid ${T.paper}`, textDecoration: 'none' }}>
           <Icon name="user" size={17} />
         </Link>
-        <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.1em', color: 'rgba(255,249,233,0.62)' }}>
-          {new Date().getFullYear()}
-        </div>
       </div>
     </div>
   )
