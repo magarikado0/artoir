@@ -127,7 +127,7 @@ export default function DashSettings() {
       />
       <div style={{ marginBottom: 18, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>ほかの活動単位を Artoir に追加する場合は、新しい団体を作成できます。</div>
       <Link to="/account/setup" className="ui-icon-button" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 16px', border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.ink, textDecoration: 'none' }}>
-        ＋ 新しい団体を作成 →
+        ＋ 新しい団体を作成
       </Link>
 
       <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
