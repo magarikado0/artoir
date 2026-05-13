@@ -104,10 +104,6 @@ function DesktopView({ rows, filter, setFilter, navigate, handleCreate }) {
           boxShadow: `8px 8px 0 ${T.gold}`,
         }}>
           <div>
-            <div style={{
-              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
-              color: T.accent, marginBottom: 8,
-            }}>CURRENT / UPCOMING · {new Date().getFullYear()}</div>
             <div style={{ fontFamily: T.serif, fontSize: 38, letterSpacing: '0.01em', lineHeight: 1.12 }}>
               展覧会一覧
             </div>
@@ -244,7 +240,6 @@ function MobileView({ rows, filter, setFilter, navigate, handleCreate }) {
         display: 'flex', justifyContent: 'space-between',
         fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted,
       }}>
-        <span>CURRENT / UPCOMING</span>
         <span>{pad2(rows.length)} EXH.</span>
       </div>
 
