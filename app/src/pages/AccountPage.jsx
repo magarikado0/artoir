@@ -90,7 +90,6 @@ function OrgSelector({ orgs, onSelect, isDesktop }) {
           style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none', border: `1px solid ${T.paper}`, whiteSpace: 'nowrap' }}
         >
           ＋ 新しい団体を作成
-          <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
         </Link>
       </div>
       <div style={{ borderTop: `1px solid ${T.ink}` }}>
