@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
-import { T, pad2 } from '../lib/tokens'
+import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 
 function PageFooter() {
@@ -96,7 +96,6 @@ function OrgSelector({ orgs, onSelect, isDesktop }) {
         {orgs.map((org, i) => (
           <div key={org.id} onClick={() => onSelect(org)} style={{ padding: '20px 0', borderBottom: `0.5px solid ${T.line}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-              <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2(i + 1)}</div>
               <div>
                 <div style={{ fontFamily: T.serif, fontSize: 17, letterSpacing: '0.02em', color: T.ink }}>{org.name}</div>
                 {org.description && <div style={{ marginTop: 3, fontSize: 12, color: T.inkSoft }}>{org.description.slice(0, 50)}{org.description.length > 50 ? '…' : ''}</div>}

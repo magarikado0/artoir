@@ -41,6 +41,7 @@ export default function DashHome() {
       <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
         <div>
           <div style={{ fontFamily: T.serif, fontSize: 44, lineHeight: 1.05, letterSpacing: '0.01em', color: T.ink }}>{org?.name || orgSlug}</div>
+        {org?.description && <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{org.description.split('。')[0]}</div>}
         </div>
         <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-action" style={{ background: T.accent, color: T.paper, border: `2px solid ${T.ink}`, padding: '14px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
           ＋ 新しい展覧会を作成
@@ -107,7 +108,7 @@ export default function DashHome() {
     <DashShell orgSlug={orgSlug} active="dash">
       <div style={{ margin: '18px 16px 16px', padding: '20px 16px', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
         <div style={{ fontFamily: T.serif, fontSize: 28, lineHeight: 1.2, letterSpacing: '0.02em', color: T.ink }}>{org?.name || orgSlug}</div>
-        {org?.description && <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{org.description.split('。')[0]}。</div>}
+        {org?.description && <div style={{ marginTop: 6, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{org.description.split('。')[0]}</div>}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, background: T.line, margin: '4px 16px 24px', border: `2px solid ${T.ink}` }}>
@@ -132,14 +133,13 @@ export default function DashHome() {
         </div>
         {exhibitions.slice(0, 4).map((exh, i) => (
           <Link key={exh.id} to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} className="ui-row" style={{ padding: '14px 16px', borderBottom: `2px solid ${T.ink}`, display: 'flex', gap: 12, cursor: 'pointer', textDecoration: 'none', color: T.ink, background: i % 2 === 0 ? T.card : T.paperAlt }}>
-            <div style={{ width: 32, fontFamily: T.mono, fontSize: 11, color: T.inkMuted, paddingTop: 2 }}>{pad2(i + 1)}</div>
             <div style={{ width: 52, height: 52, background: '#D9D6CE', flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
               <div style={{ marginTop: 3, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>{fmtDateDot(exh.start_date)} — {fmtDateDot(exh.end_date)}</div>
               <div style={{ marginTop: 4 }}><StatusBadge kind={exhStatus(exh)} /></div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', fontFamily: T.mono, fontSize: 10, color: T.inkSoft }}>WORKS →</div>
+            <div style={{ display: 'flex', alignItems: 'center', fontFamily: T.mono, fontSize: 10, color: T.inkSoft }}>作品 →</div>
           </Link>
         ))}
         {exhibitions.length === 0 && <div style={{ padding: '24px 16px', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>展覧会がまだありません</div>}
