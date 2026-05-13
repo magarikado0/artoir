@@ -82,7 +82,17 @@ function LoggedOut({ isDesktop }) {
 function OrgSelector({ orgs, onSelect, isDesktop }) {
   const content = (
     <div style={{ padding: isDesktop ? '36px 0 60px' : '24px 16px' }}>
-      <div style={{ fontFamily: T.serif, fontSize: isDesktop ? 32 : 24, letterSpacing: '0.02em', color: T.ink, marginBottom: 24 }}>団体を選択</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+        <div style={{ fontFamily: T.serif, fontSize: isDesktop ? 32 : 24, letterSpacing: '0.02em', color: T.ink }}>団体を選択</div>
+        <Link
+          to="/account/setup"
+          className="ui-action"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none', border: `1px solid ${T.paper}`, whiteSpace: 'nowrap' }}
+        >
+          ＋ 新しい団体を作成
+          <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
+        </Link>
+      </div>
       <div style={{ borderTop: `1px solid ${T.ink}` }}>
         {orgs.map((org, i) => (
           <div key={org.id} onClick={() => onSelect(org)} style={{ padding: '20px 0', borderBottom: `0.5px solid ${T.line}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
@@ -97,26 +107,6 @@ function OrgSelector({ orgs, onSelect, isDesktop }) {
           </div>
         ))}
       </div>
-      <Link
-        to="/account/setup"
-        style={{
-          marginTop: 20,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '16px 0',
-          borderTop: `1px solid ${T.ink}`,
-          fontFamily: T.sans,
-          fontWeight: 500,
-          fontSize: 13,
-          letterSpacing: '0.14em',
-          color: T.ink,
-          textDecoration: 'none',
-        }}
-      >
-        <span>＋ 新しい団体を作成</span>
-        <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
-      </Link>
       <PageFooter />
     </div>
   )
@@ -189,7 +179,6 @@ export default function AccountPage() {
         <div style={{ fontSize: 12, color: T.inkSoft, lineHeight: 1.7, marginBottom: 24 }}>まだ団体がありません。団体を作成してArtoirを始めましょう。</div>
         <Link to="/account/setup" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: T.ink, color: T.paper, padding: '16px 20px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', textDecoration: 'none', marginBottom: 12 }}>
           <span>＋ 新しい団体を作成</span>
-          <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
         </Link>
         <button onClick={handleSignOut} style={{ background: 'transparent', color: T.inkMuted, border: `0.5px solid ${T.line}`, padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
           SIGN OUT
@@ -197,21 +186,6 @@ export default function AccountPage() {
       </div>
     )
   }
-
-  if (isDesktop) return (
-    <div style={{ background: T.paper, minHeight: '100vh' }}>
-      <Header activeTab="account" />
-      {renderContent()}
-      <div style={{ borderTop: `1px solid ${T.ink}`, marginTop: 40 }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
-          <span>© Artoir {new Date().getFullYear()}</span>
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            {session && <Link to="/account/setup" style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, textDecoration: 'none' }}>＋ 新しい団体を作成</Link>}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
 
   return (
     <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 72 }}>
