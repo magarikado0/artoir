@@ -5,7 +5,7 @@ import DashShell, { DashField, DashSectionLabel } from '../../components/DashShe
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 
-const SWATCHES = ['#FAF8F3', '#F3F0E8', '#E7E2D6', '#111110', '#2A2825', '#B4452C']
+const SWATCHES = ['#FAF8F3', '#E7E2D6', '#111110', '#2A2825', '#B4452C']
 
 function slugifyAscii(s) {
   return String(s || '')
@@ -144,7 +144,6 @@ export default function DashExhibitionEdit() {
 
   const formContent = (
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
-      <DashSectionLabel>基本情報</DashSectionLabel>
       <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
       <DashField
         label="URL"
@@ -182,12 +181,11 @@ export default function DashExhibitionEdit() {
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {SWATCHES.map((c) => (
-            <div key={c} onClick={() => setBgColor(c)} className="ui-chip" style={{ width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
+            <div key={c} onClick={() => setBgColor(c)} style={{ width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
               {bgColor === c && <div style={{ position: 'absolute', inset: 2, border: `1px solid ${c === '#111110' || c === '#2A2825' ? T.paper : T.ink}` }} />}
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 10, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>{bgColor.toUpperCase()}</div>
       </div>
 
       <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
@@ -208,14 +206,11 @@ export default function DashExhibitionEdit() {
     </div>
   )
 
-  const crumbs = isNew ? ['DASHBOARD', 'EXHIBITIONS', 'NEW'] : ['DASHBOARD', 'EXHIBITIONS', 'EDIT']
-
   if (isDesktop) return (
-    <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
+    <DashShell orgSlug={orgSlug} active="exs">
       <div style={{ maxWidth: '80%', margin: '0 auto' }}>
         <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
           <div>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
             <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
           </div>
         </div>
@@ -225,7 +220,7 @@ export default function DashExhibitionEdit() {
   )
 
   return (
-    <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
+    <DashShell orgSlug={orgSlug} active="exs">
       <div style={{ padding: '20px 16px 8px' }}>
         <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
         <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.ink }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
