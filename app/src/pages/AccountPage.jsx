@@ -69,9 +69,72 @@ function LoggedOut({ isDesktop }) {
 }
 
 // Multi-org selector — shown when user belongs to multiple orgs
-function OrgSelector({ orgs, onSelect, isDesktop }) {
-  const content = (
-    <div className="ui-account-surface" style={{ maxWidth: isDesktop ? 560 : undefined }}>
+function OrgSelector({ orgs, onSelect, isDesktop, session }) {
+  if (isDesktop) {
+    return (
+      <div className="ui-account-surface ui-account-org-selector-desktop">
+        <div className="ui-account-org-selector-bar">
+          <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
+          <div className="ui-account-org-selector-bar-meta">
+            <span className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</span>
+            {session?.user?.email && (
+              <span className="ui-account-org-selector-email">{session.user.email}</span>
+            )}
+          </div>
+          <span className="ui-account-org-selector-count">{pad2(orgs.length)} ORGS</span>
+        </div>
+
+        <div className="ui-app-topline">
+          <div className="ui-hero-screen-heading">
+            <div className="ui-kicker">ORGANIZATION</div>
+            <h1 className="ui-screen-title" style={{ marginTop: 8 }}>団体を選択</h1>
+          </div>
+        </div>
+
+        <div className="ui-org-table ui-account-org-picker-table">
+          <div className="ui-org-table-head" aria-hidden="true">
+            <span>No.</span>
+            <span>団体</span>
+            <span className="ui-account-org-picker-head-go" />
+          </div>
+          <div className="ui-org-list">
+            {orgs.map((org, i) => (
+              <button
+                key={org.id}
+                type="button"
+                onClick={() => onSelect(org)}
+                className="ui-org-row ui-account-org-pick-btn"
+              >
+                <div className="ui-org-index">{pad2(i + 1)}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div className="ui-org-name">{org.name}</div>
+                  {org.description && (
+                    <div className="ui-org-description">
+                      {org.description.slice(0, 120)}
+                      {org.description.length > 120 ? '…' : ''}
+                    </div>
+                  )}
+                </div>
+                <div className="ui-account-org-pick-go" aria-hidden="true">→</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Link
+          to="/account/setup"
+          className="ui-pill-action ui-account-org-selector-cta"
+          style={{ background: T.accent }}
+        >
+          <span>＋ 新しい団体を作成</span>
+          <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="ui-account-surface">
       <div className="ui-account-topline">
         <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
         <div>
@@ -80,9 +143,12 @@ function OrgSelector({ orgs, onSelect, isDesktop }) {
         </div>
         <span>{orgs.length} ORGS</span>
       </div>
-      <div className="ui-kicker">ORGANIZATION</div>
-      <div className="ui-screen-title" style={{ marginTop: 8 }}>団体を選択</div>
-      <div className="ui-screen-subtitle" style={{ marginBottom: 18 }}>管理する団体を選んでください。</div>
+      <div className="ui-app-topline" style={{ marginBottom: 12 }}>
+        <div className="ui-hero-screen-heading">
+          <div className="ui-kicker">ORGANIZATION</div>
+          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>団体を選択</h1>
+        </div>
+      </div>
       <div style={{ display: 'grid', gap: 8 }}>
         {orgs.map((org, i) => (
           <button key={org.id} onClick={() => onSelect(org)} className="ui-list-card" style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.18)', textAlign: 'left' }}>
@@ -107,8 +173,6 @@ function OrgSelector({ orgs, onSelect, isDesktop }) {
       </Link>
     </div>
   )
-
-  return content
 }
 
 export default function AccountPage() {
@@ -169,7 +233,7 @@ export default function AccountPage() {
 
   function renderContent() {
     if (!session) return <LoggedOut isDesktop={isDesktop} />
-    if (orgs.length > 1) return <OrgSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} />
+    if (orgs.length > 1) return <OrgSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} session={session} />
     // logged in but no org linked yet
     return (
       <div style={{ padding: isDesktop ? '60px 0' : '32px 16px', maxWidth: isDesktop ? 480 : undefined, margin: isDesktop ? '0 auto' : undefined }}>

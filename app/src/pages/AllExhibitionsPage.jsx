@@ -119,10 +119,9 @@ export default function AllExhibitionsPage() {
       <Header activeTab="top" />
       <main className="ui-app-main">
         <div className="ui-app-topline">
-          <div>
-            <div className="ui-kicker">CURRENT / UPCOMING</div>
+          <div className="ui-hero-screen-heading">
+            <div className="ui-kicker">EXHIBITIONS</div>
             <h1 className="ui-screen-title">展覧会</h1>
-            <p className="ui-screen-subtitle">作品と会期を、一覧からすぐ開けるアプリ画面にまとめました。</p>
           </div>
         </div>
 

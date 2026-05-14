@@ -52,10 +52,9 @@ export default function OrgsPage() {
       <Header activeTab="orgs" />
       <main className="ui-app-main">
         <div className="ui-app-topline">
-          <div>
+          <div className="ui-hero-screen-heading">
             <div className="ui-kicker">ORGANIZATIONS</div>
             <h1 className="ui-screen-title">団体</h1>
-            <p className="ui-screen-subtitle">展覧会を公開している団体を、アプリの連絡先リストのように探せます。</p>
           </div>
         </div>
 
