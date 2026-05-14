@@ -212,11 +212,12 @@ export default function DashExhibitionEdit() {
 
   if (isDesktop) return (
     <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
-      <div style={{ maxWidth: '80%', margin: '0 auto' }}>
-        <div style={{ padding: '36px 0 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: `1px solid ${T.ink}` }}>
+      <div style={{ maxWidth: 760, margin: '0 auto' }}>
+        <div className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
           <div>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
-            <div style={{ fontFamily: T.serif, fontSize: 32, letterSpacing: '0.01em', color: T.ink }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
+            <div className="ui-kicker">{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
+            <div className="ui-screen-title" style={{ marginTop: 8 }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
+            <p className="ui-screen-subtitle">{isNew ? '基本情報を入れると、公開ページが作成されます。' : '変更内容は保存後に公開ページへ反映されます。'}</p>
           </div>
         </div>
         {formContent}
@@ -226,10 +227,10 @@ export default function DashExhibitionEdit() {
 
   return (
     <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
-      <div style={{ padding: '20px 16px 8px' }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
-        <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 24, letterSpacing: '0.02em', color: T.ink }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
-        <div style={{ marginTop: 4, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{isNew ? '下の項目を入力すると、公開ページが作成されます。' : '変更は「保存」で反映されます。'}</div>
+      <div className="ui-app-card" style={{ padding: 16, margin: '14px 14px 0' }}>
+        <div className="ui-kicker">{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
+        <div className="ui-screen-title" style={{ marginTop: 6 }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
+        <div className="ui-screen-subtitle">{isNew ? '下の項目を入力すると、公開ページが作成されます。' : '変更は保存で反映されます。'}</div>
       </div>
       {formContent}
     </DashShell>

@@ -196,10 +196,10 @@ export default function AccountPage() {
   }
 
   if (isDesktop) return (
-    <div style={{ background: T.paper, minHeight: '100vh' }}>
+    <div className="ui-page-shell">
       <Header activeTab="account" />
-      {renderContent()}
-      <div style={{ borderTop: `1px solid ${T.ink}`, marginTop: 40 }}>
+      <main className="ui-app-main">{renderContent()}</main>
+      <div style={{ display: 'none' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
           <span>© Artoir {new Date().getFullYear()}</span>
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
@@ -212,7 +212,7 @@ export default function AccountPage() {
   )
 
   return (
-    <div style={{ background: T.paper, minHeight: '100vh', paddingBottom: 72 }}>
+    <div className="ui-page-shell" style={{ paddingBottom: 92 }}>
       <Header activeTab="account" />
       {topBar}
       {renderContent()}

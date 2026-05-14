@@ -2,31 +2,27 @@ import { Link } from 'react-router-dom'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import BottomNav from './BottomNav'
+import { Icon } from './Header'
 
-const PUBLIC_TABS = [
-  { key: 'top',  label: '展覧会一覧', path: '/' },
-  { key: 'orgs', label: '団体一覧',   path: '/orgs' },
-]
-
-// Desktop top nav for dashboard (same as public but with DASHBOARD indicator)
-function DashDesktopNav({ orgSlug }) {
+function DashNav({ orgSlug }) {
+  const items = [
+    [`/${orgSlug}/dashboard`, 'Home', 'list'],
+    [`/${orgSlug}/dashboard/exhibitions/new`, 'New', 'plus'],
+    [`/${orgSlug}/dashboard/settings`, 'Settings', 'user'],
+    [`/${orgSlug}`, 'Public', 'org'],
+  ]
   return (
-    <div style={{ borderBottom: `3px solid ${T.gold}`, background: T.ink, position: 'sticky', top: 0, zIndex: 50 }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', padding: '0 32px', height: 68, gap: 0 }}>
-        <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.paper, textDecoration: 'none', marginRight: 40, flexShrink: 0 }}>
-          Artoir<span style={{ color: T.accent }}>.</span>
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-          <span style={{ width: 30, height: 30, background: T.gold, color: T.ink, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 13 }}>◆</span>
-          <span style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', color: T.paper }}>DASHBOARD</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <Link to={`/${orgSlug}`} className="ui-icon-button" style={{ height: 34, padding: '0 11px', display: 'inline-flex', alignItems: 'center', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.paper, textDecoration: 'none', border: `1px solid rgba(255,249,233,0.38)` }}>PUBLIC ↗</Link>
-          <Link to={`/${orgSlug}/dashboard/settings`} className="ui-icon-button" style={{ height: 34, padding: '0 11px', display: 'inline-flex', alignItems: 'center', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.paper, textDecoration: 'none', border: `1px solid rgba(255,249,233,0.38)` }}>⚙ SETTINGS</Link>
-          <Link to={`/${orgSlug}/dashboard/exhibitions/new`} className="ui-action" style={{ padding: '9px 16px', background: T.accent, color: T.paper, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', textDecoration: 'none', border: `1px solid ${T.paper}` }}>＋ 新規展覧会</Link>
-        </div>
-      </div>
-    </div>
+    <aside className="ui-side-rail">
+      <Link to="/" className="ui-rail-brand" aria-label="Artoir home"><span>A</span></Link>
+      <nav className="ui-rail-nav" aria-label="Dashboard">
+        {items.map(([to, label, icon]) => (
+          <Link key={to} to={to} className="ui-rail-item" aria-label={label}>
+            <Icon name={icon} size={21} />
+            <span>{label}</span>
+          </Link>
+        ))}
+      </nav>
+    </aside>
   )
 }
 
@@ -34,47 +30,39 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
   const isDesktop = useIsDesktop()
 
   if (isDesktop) return (
-    <div style={{ background: T.paper, minHeight: '100vh', color: T.ink, fontFamily: T.sans }}>
-      <DashDesktopNav orgSlug={orgSlug} />
-      {crumbs.length > 0 && (
-        <div style={{ borderBottom: `0.5px solid ${T.line}`, background: T.paper }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '10px 32px', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 6 }}>
-            {crumbs.map((c, i) => (
-              <span key={i}>
-                {i > 0 && <span style={{ marginRight: 6 }}>/</span>}
-                <span style={{ color: i === crumbs.length - 1 ? T.ink : T.inkMuted }}>{c}</span>
-              </span>
-            ))}
+    <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans }}>
+      <DashNav orgSlug={orgSlug} />
+      <main className="ui-app-main">
+        <div className="ui-app-topline">
+          <div>
+            <div className="ui-kicker">DASHBOARD</div>
+            <div className="ui-crumbs">
+              {crumbs.length > 0 ? crumbs.map((c, i) => (
+                <span key={i}>{i > 0 ? ' / ' : ''}{c}</span>
+              )) : <span>管理</span>}
+            </div>
           </div>
+          <Link to={`/${orgSlug}/dashboard/exhibitions/new`} className="ui-pill-action">
+            <Icon name="plus" size={17} />
+            <span>新規展覧会</span>
+          </Link>
         </div>
-      )}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
         {children}
-      </div>
+      </main>
     </div>
   )
 
   return (
-    <div style={{ background: T.paper, minHeight: '100vh', color: T.ink, fontFamily: T.sans, paddingBottom: 72 }}>
-      {/* mobile header */}
-      <div style={{ padding: '8px 12px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `3px solid ${T.gold}`, background: T.ink, position: 'sticky', top: 0, zIndex: 50 }}>
-        <Link to="/" style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500, color: T.paper, textDecoration: 'none', lineHeight: 1.2 }}>
+    <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans, paddingBottom: 92 }}>
+      <div className="ui-mobile-topbar">
+        <Link to="/" style={{ fontFamily: T.serif, fontSize: 19, color: T.ink, textDecoration: 'none' }}>
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.ink, background: T.gold, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 10px' }}>
-          <span style={{ color: T.accentInk }}>◆</span>
-          DASHBOARD
-        </div>
+        <span className="ui-mini-badge">DASHBOARD</span>
       </div>
-      {/* crumbs */}
       {crumbs.length > 0 && (
-        <div style={{ padding: '10px 16px', borderBottom: `0.5px solid ${T.line}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, display: 'flex', gap: 6, overflowX: 'auto', whiteSpace: 'nowrap' }}>
-          {crumbs.map((c, i) => (
-            <span key={i}>
-              {i > 0 && <span style={{ marginRight: 6 }}>/</span>}
-              <span style={{ color: i === crumbs.length - 1 ? T.ink : T.inkMuted }}>{c}</span>
-            </span>
-          ))}
+        <div className="ui-mobile-crumbs">
+          {crumbs.map((c, i) => <span key={i}>{i > 0 ? ' / ' : ''}{c}</span>)}
         </div>
       )}
       {children}
@@ -83,18 +71,15 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
   )
 }
 
-// Shared form field component for dashboard forms
 export function DashField({ label, value, onChange, placeholder, prefix, multiline, mono, warning, help, rightHint, type = 'text', readOnly, min, max }) {
   return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-        <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em', color: T.inkMuted }}>{label.toUpperCase()}</div>
-        {rightHint && <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.12em', color: T.inkMuted }}>{rightHint}</div>}
+    <div className="ui-form-field">
+      <div className="ui-form-label-row">
+        <div className="ui-form-label">{label.toUpperCase()}</div>
+        {rightHint && <div className="ui-form-hint">{rightHint}</div>}
       </div>
-      <div style={{ display: 'flex', alignItems: 'stretch', border: `1px solid ${T.ink}`, background: readOnly ? T.lineSoft : T.card, minHeight: multiline ? 92 : 44 }}>
-        {prefix && (
-          <div style={{ padding: '12px 12px', background: T.lineSoft, fontFamily: T.mono, fontSize: 11, color: T.inkMuted, borderRight: `0.5px solid ${T.line}`, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center' }}>{prefix}</div>
-        )}
+      <div className="ui-input-wrap" data-readonly={readOnly ? 'true' : 'false'} data-multiline={multiline ? 'true' : 'false'}>
+        {prefix && <div className="ui-input-prefix">{prefix}</div>}
         {multiline ? (
           <textarea
             value={value ?? ''}
@@ -102,7 +87,7 @@ export function DashField({ label, value, onChange, placeholder, prefix, multili
             placeholder={placeholder}
             readOnly={readOnly}
             rows={4}
-            style={{ flex: 1, padding: '12px 14px', fontFamily: mono ? T.mono : T.sans, fontSize: mono ? 12 : 13, lineHeight: 1.55, color: T.ink, border: 'none', outline: 'none', background: 'transparent', resize: 'vertical', minHeight: 92 }}
+            style={{ fontFamily: mono ? T.mono : T.sans }}
           />
         ) : (
           <input
@@ -113,37 +98,29 @@ export function DashField({ label, value, onChange, placeholder, prefix, multili
             readOnly={readOnly}
             min={min}
             max={max}
-            style={{ flex: 1, padding: '12px 14px', fontFamily: mono ? T.mono : T.sans, fontSize: mono ? 12 : 13, lineHeight: 1.55, color: T.ink, border: 'none', outline: 'none', background: 'transparent' }}
+            style={{ fontFamily: mono ? T.mono : T.sans }}
           />
         )}
       </div>
-      {warning && (
-        <div style={{ marginTop: 6, display: 'flex', gap: 6, alignItems: 'flex-start', fontFamily: T.mono, fontSize: 10, color: T.accent, lineHeight: 1.5 }}>
-          <span>⚠</span><span>{warning}</span>
-        </div>
-      )}
-      {help && <div style={{ marginTop: 6, fontSize: 11, color: T.inkMuted, lineHeight: 1.5 }}>{help}</div>}
+      {warning && <div className="ui-field-warning">{warning}</div>}
+      {help && <div className="ui-field-help">{help}</div>}
     </div>
   )
 }
 
 export function DashSectionLabel({ children }) {
-  return (
-    <div style={{ marginTop: 28, marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.ink }}>
-      {children}
-    </div>
-  )
+  return <div className="ui-section-label">{children}</div>
 }
 
 export function StatusBadge({ kind }) {
   const map = {
-    live:      { label: 'LIVE',      color: T.paper,    bg: T.accent },
-    upcoming:  { label: 'UPCOMING',  color: T.ink,      bg: T.gold },
-    ended:     { label: 'ENDED',     color: T.inkMuted, bg: T.paper, border: true },
+    live: { label: 'LIVE', color: T.paper, bg: T.accent },
+    upcoming: { label: 'UPCOMING', color: T.ink, bg: T.gold },
+    ended: { label: 'ENDED', color: T.inkMuted, bg: T.paperAlt, border: true },
   }
   const m = map[kind] || map.ended
   return (
-    <span style={{ padding: '2px 6px', background: m.bg, color: m.color, border: m.border ? `0.5px solid ${T.inkMuted}` : 'none', letterSpacing: '0.16em', fontFamily: T.mono, fontSize: 9 }}>
+    <span className="ui-status-badge" style={{ color: m.color, background: m.bg, borderColor: m.border ? T.lineSoft : 'transparent' }}>
       {m.label}
     </span>
   )
