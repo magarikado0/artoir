@@ -10,7 +10,7 @@ import { useIsDesktop } from '../lib/useIsDesktop'
 function LoggedOut({ isDesktop }) {
   const navigate = useNavigate()
   const benefits = [
-    ['01', '団体ページを作る', '展覧会の活動母体として情報を公開。'],
+    ['01', '団体ページを作る', '展覧会の活動母体として、情報を公開。'],
     ['02', '展覧会を公開する', '作品・会期・会場を入力し、URL一つで共有。'],
     ['03', '作品を管理する',   '画像・タイトル・技法を登録、並び替えも可。'],
   ]
