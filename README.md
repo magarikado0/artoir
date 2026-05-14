@@ -26,11 +26,15 @@ npm run dev
 Google ログインは Supabase Auth の Redirect URL allowlist にローカル URL が入っていないと、Supabase の Site URL（本番デプロイ先）へ戻ります。Supabase Dashboard → Authentication → URL Configuration で、開発時に使う URL を追加してください。
 
 ```
+http://localhost:5173/
 http://localhost:5173/**
+http://127.0.0.1:5173/
 http://127.0.0.1:5173/**
+http://192.168.0.8:5173/
+http://192.168.0.8:5173/**
 ```
 
-アプリ側では Google OAuth 開始時に現在の origin から `http://localhost:5173/login` のような `redirectTo` を渡しています。Vite のポートを変えた場合は、そのポートの URL も Supabase 側に追加してください。
+アプリ側では Google OAuth 開始時に現在の origin から `http://localhost:5173/` や `http://192.168.0.8:5173/` のような `redirectTo` を渡しています。Vite のポートや LAN IP が変わった場合は、その URL も Supabase 側に追加してください。
 
 Google Cloud Console の「承認済みのリダイレクト URI」にはローカル URL ではなく、Supabase プロジェクトの callback URL を登録します。
 

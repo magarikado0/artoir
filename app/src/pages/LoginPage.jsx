@@ -113,7 +113,7 @@ export default function LoginPage() {
   const redirectUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}${from.startsWith('/') ? from : `/${from}`}`
   const oauthReturnPath = normalizeOAuthReturnPath(from)
   const oauthCallbackUrl =
-    typeof window !== 'undefined' ? `${window.location.origin}/login` : '/login'
+    typeof window !== 'undefined' ? `${window.location.origin}/` : '/'
 
   async function handleGoogleAuth() {
     if (!supabase) { setError('Supabase が未設定です'); return }
