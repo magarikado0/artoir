@@ -104,6 +104,20 @@ body {
   box-shadow: 4px 4px 0 #1E1A16;
 }
 
+.ui-chip.ui-swatch:hover,
+.ui-chip.ui-swatch:focus-visible {
+  background: var(--swatch-color) !important;
+  color: inherit !important;
+  border-color: var(--swatch-border) !important;
+  transform: none;
+  box-shadow: none;
+}
+
+.ui-chip.ui-swatch:focus-visible {
+  outline: 2px solid #D4B15F;
+  outline-offset: 2px;
+}
+
 .ui-action:hover svg,
 .ui-icon-button:hover svg,
 .ui-bottom-item:hover svg {

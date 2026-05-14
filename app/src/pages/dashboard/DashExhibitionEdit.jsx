@@ -161,11 +161,11 @@ export default function DashExhibitionEdit() {
       </div>
       <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
       <DashField
-        label="公開ページのヒーロー下に表示されます。（最大400文字）"
+        label="説明文"
         value={description}
         onChange={setDescription}
         multiline
-        placeholder="展覧会の説明文を入力..."
+        placeholder={`展覧会の説明文を入力...\n公開ページのヒーロー下に表示されます。（最大400文字）`}
       />
 
       <div style={{ marginBottom: 18 }}>
@@ -180,9 +180,17 @@ export default function DashExhibitionEdit() {
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {SWATCHES.map((c) => (
-            <div key={c} onClick={() => setBgColor(c)} style={{ width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
+            <button
+              key={c}
+              type="button"
+              aria-label={`背景色を${c}にする`}
+              aria-pressed={bgColor === c}
+              onClick={() => setBgColor(c)}
+              className="ui-chip ui-swatch"
+              style={{ ['--swatch-color']: c, ['--swatch-border']: bgColor === c ? T.ink : T.line, width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative', appearance: 'none', padding: 0 }}
+            >
               {bgColor === c && <div style={{ position: 'absolute', inset: 2, border: `1px solid ${c === '#111110' || c === '#2A2825' ? T.paper : T.ink}` }} />}
-            </div>
+            </button>
           ))}
         </div>
         </div>

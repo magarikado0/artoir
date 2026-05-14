@@ -37,7 +37,7 @@ export default function DashHome() {
   const liveCount = exhibitions.filter((e) => exhStatus(e) === 'live').length
 
   if (isDesktop) return (
-    <DashShell orgSlug={orgSlug} active="dash">
+    <DashShell orgSlug={orgSlug}>
       <div className="ui-strong-panel" style={{ marginTop: 30, padding: '32px 34px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: T.card, border: `2px solid ${T.ink}`, boxShadow: `8px 8px 0 ${T.gold}` }}>
         <div>
           <div style={{ fontFamily: T.serif, fontSize: 44, lineHeight: 1.05, letterSpacing: '0.01em', color: T.ink }}>{org?.name || orgSlug}</div>
