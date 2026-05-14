@@ -326,13 +326,38 @@ button {
   box-shadow: 0 18px 42px rgba(30,26,22,0.11), inset 0 3px 0 rgba(182,90,69,0.35);
 }
 
-.ui-org-list {
-  border-top: 1px solid rgba(30,26,22,0.76);
+.ui-org-table {
+  border: 1px solid rgba(30,26,22,0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255,253,247,0.72), rgba(246,240,228,0.52)),
+    #F6F0E4;
+  box-shadow: inset 0 3px 0 rgba(212,177,95,0.24), 0 10px 28px rgba(30,26,22,0.05);
+  overflow: hidden;
+}
+
+.ui-org-table-head {
+  min-height: 34px;
+  padding: 0 14px;
+  border-bottom: 1px solid rgba(30,26,22,0.18);
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 58px;
+  gap: 14px;
+  align-items: center;
+  background: rgba(231,224,208,0.48);
+  color: #7E7569;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+.ui-org-table-head span:last-child {
+  text-align: right;
 }
 
 .ui-org-row {
   min-height: 76px;
-  padding: 14px 0;
+  padding: 14px;
   border-bottom: 1px solid rgba(30,26,22,0.14);
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) 58px;
@@ -344,6 +369,7 @@ button {
 
 .ui-org-row:hover {
   border-bottom-color: rgba(30,26,22,0.42);
+  background: rgba(255,253,247,0.66);
 }
 
 .ui-org-index {
@@ -836,6 +862,13 @@ button {
     min-height: 72px;
     grid-template-columns: 32px minmax(0, 1fr) 48px;
     gap: 10px;
+    padding: 13px 12px;
+  }
+
+  .ui-org-table-head {
+    grid-template-columns: 32px minmax(0, 1fr) 48px;
+    gap: 10px;
+    padding: 0 12px;
   }
 
   .ui-org-name {

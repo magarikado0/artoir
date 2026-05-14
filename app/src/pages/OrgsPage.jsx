@@ -68,20 +68,27 @@ export default function OrgsPage() {
           </Link>
         </div>
 
-        <div className="ui-org-list">
-          {filtered.map((o, i) => (
-            <Link key={o.id} to={`/${o.slug}`} className="ui-org-row">
-              <div className="ui-org-index">{pad2(i + 1)}</div>
-              <div style={{ minWidth: 0 }}>
-                <div className="ui-org-name">{o.name}</div>
-                {o.description && <div className="ui-org-description">{o.description}</div>}
-              </div>
-              <div className="ui-org-count">
-                <span>{pad2(o.exh_count ?? 0)}</span>
-                <small>EXH.</small>
-              </div>
-            </Link>
-          ))}
+        <div className="ui-org-table">
+          <div className="ui-org-table-head" aria-hidden="true">
+            <span>No.</span>
+            <span>団体</span>
+            <span>展示</span>
+          </div>
+          <div className="ui-org-list">
+            {filtered.map((o, i) => (
+              <Link key={o.id} to={`/${o.slug}`} className="ui-org-row">
+                <div className="ui-org-index">{pad2(i + 1)}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div className="ui-org-name">{o.name}</div>
+                  {o.description && <div className="ui-org-description">{o.description}</div>}
+                </div>
+                <div className="ui-org-count">
+                  <span>{pad2(o.exh_count ?? 0)}</span>
+                  <small>EXH.</small>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {filtered.length === 0 && (
