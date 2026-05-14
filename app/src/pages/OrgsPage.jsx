@@ -68,17 +68,17 @@ export default function OrgsPage() {
           </Link>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
+        <div className="ui-org-list">
           {filtered.map((o, i) => (
-            <Link key={o.id} to={`/${o.slug}`} className="ui-list-card" style={{ padding: 14, display: 'grid', gridTemplateColumns: '48px 1fr auto', gap: 12, alignItems: 'center' }}>
-              <div style={{ width: 48, height: 48, borderRadius: 8, display: 'grid', placeItems: 'center', background: i === 0 ? T.ink : T.paperAlt, color: i === 0 ? T.paper : T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>{pad2(i + 1)}</div>
+            <Link key={o.id} to={`/${o.slug}`} className="ui-org-row">
+              <div className="ui-org-index">{pad2(i + 1)}</div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontFamily: T.serif, fontSize: 17, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.name}</div>
-                {o.description && <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.5, color: T.inkMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.description}</div>}
+                <div className="ui-org-name">{o.name}</div>
+                {o.description && <div className="ui-org-description">{o.description}</div>}
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontFamily: T.serif, fontSize: 22 }}>{pad2(o.exh_count ?? 0)}</div>
-                <div style={{ fontFamily: T.mono, fontSize: 9, color: T.inkMuted }}>EXH.</div>
+              <div className="ui-org-count">
+                <span>{pad2(o.exh_count ?? 0)}</span>
+                <small>EXH.</small>
               </div>
             </Link>
           ))}

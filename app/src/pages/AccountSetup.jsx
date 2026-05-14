@@ -4,12 +4,10 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { DashField } from '../components/DashShell'
 import { T } from '../lib/tokens'
-import { useIsDesktop } from '../lib/useIsDesktop'
 
 export default function AccountSetup() {
   const { session } = useAuth()
   const navigate = useNavigate()
-  const isDesktop = useIsDesktop()
 
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
@@ -106,7 +104,8 @@ export default function AccountSetup() {
       <button
         type="submit"
         disabled={saving || !name.trim() || !slug.trim()}
-        style={{ width: '100%', marginTop: 8, background: (saving || !name.trim() || !slug.trim()) ? T.inkMuted : T.ink, color: T.paper, border: 'none', padding: '16px', fontFamily: T.sans, fontSize: 13, fontWeight: 500, letterSpacing: '0.14em', cursor: (saving || !name.trim() || !slug.trim()) ? 'default' : 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        className="ui-pill-action"
+        style={{ width: '100%', marginTop: 8, background: (saving || !name.trim() || !slug.trim()) ? T.inkMuted : T.accent, justifyContent: 'space-between', cursor: (saving || !name.trim() || !slug.trim()) ? 'default' : 'pointer' }}
       >
         <span>{saving ? '作成中...' : '作成する'}</span>
         {!saving && <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>}
@@ -114,49 +113,24 @@ export default function AccountSetup() {
     </form>
   )
 
-  if (isDesktop) return (
-    <div style={{ background: T.paper, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* header */}
-      <div style={{ borderBottom: `1px solid ${T.ink}`, background: T.paper }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link to="/" style={{ fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none' }}>
-            Artoir<span style={{ color: T.accent }}>.</span>
-          </Link>
-          <Link to="/account" style={{ fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.inkMuted, textDecoration: 'none' }}>← BACK</Link>
+  return (
+    <div className="ui-page-shell ui-auth-shell">
+      <section className="ui-auth-card">
+        <div className="ui-auth-masthead">
+          <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
+          <div>
+            <div className="ui-kicker" style={{ color: T.gold }}>SETUP / 01</div>
+            <div className="ui-auth-masthead-title">団体ページを作る</div>
+          </div>
+          <Link to="/account" style={{ color: 'rgba(255,253,247,0.72)', textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>BACK</Link>
         </div>
-      </div>
-
-      {/* content */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '60px 32px' }}>
-        <div style={{ width: 480 }}>
-          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 10 }}>SETUP / 01</div>
-          <div style={{ fontFamily: T.serif, fontSize: 36, letterSpacing: '0.02em', color: T.ink, marginBottom: 8 }}>団体を作成する</div>
-          <div style={{ fontSize: 13, color: T.inkSoft, lineHeight: 1.9, fontFamily: T.serifBody, marginBottom: 32 }}>
+          <div className="ui-kicker">ORGANIZATION</div>
+          <div className="ui-screen-title" style={{ marginTop: 8 }}>団体を作成する</div>
+          <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody, marginBottom: 24 }}>
             Artoir に公開される団体ページを作成します。
           </div>
           {form}
-        </div>
-      </div>
-    </div>
-  )
-
-  // mobile
-  return (
-    <div style={{ background: T.paper, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* header */}
-      <div style={{ padding: '14px 16px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${T.ink}`, background: T.paper }}>
-        <Link to="/" style={{ fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500, color: T.ink, textDecoration: 'none' }}>
-          Artoir<span style={{ color: T.accent }}>.</span>
-        </Link>
-        <Link to="/account" style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted, textDecoration: 'none' }}>← BACK</Link>
-      </div>
-
-      <div style={{ flex: 1, padding: '32px 16px' }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 10 }}>SETUP / 01</div>
-        <div style={{ fontFamily: T.serif, fontSize: 28, letterSpacing: '0.02em', color: T.ink, lineHeight: 1.35, marginBottom: 8 }}>団体を作成する</div>
-        <div style={{ fontSize: 13, color: T.inkSoft, lineHeight: 1.9, marginBottom: 28 }}>Artoir に公開される団体ページを作成します。</div>
-        {form}
-      </div>
+      </section>
     </div>
   )
 }

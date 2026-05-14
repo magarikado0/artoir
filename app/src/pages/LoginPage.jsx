@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import Header from '../components/Header'
 import {
   normalizeOAuthReturnPath,
   markOAuthRedirectPending,
@@ -25,16 +26,12 @@ function Field({ label, value, onChange, type = 'text', placeholder, required, a
   const [showPw, setShowPw] = useState(false)
   const isPw = type === 'password'
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        fontFamily: T.mono, fontSize: 9, letterSpacing: '0.18em',
-        color: T.inkMuted, marginBottom: 6,
-      }}>
+    <div className="ui-form-field">
+      <div className="ui-form-label-row">
         <span>{label}</span>
         {required && <span>*</span>}
       </div>
-      <div style={{ display: 'flex', alignItems: 'stretch', border: `1px solid ${T.ink}`, background: T.card }}>
+      <div className="ui-input-wrap">
         <input
           type={isPw && showPw ? 'text' : type}
           value={value}
@@ -42,19 +39,14 @@ function Field({ label, value, onChange, type = 'text', placeholder, required, a
           placeholder={placeholder}
           required={required}
           autoComplete={autoComplete}
-          style={{
-            flex: 1, padding: '12px 14px',
-            fontFamily: isPw ? T.mono : T.sans,
-            fontSize: 14, border: 'none', outline: 'none',
-            background: 'transparent', color: T.ink,
-          }}
+          style={{ fontFamily: isPw ? T.mono : T.sans }}
         />
         {isPw && (
           <button
             type="button"
             onClick={() => setShowPw((v) => !v)}
             style={{
-              padding: '0 14px', background: 'none', border: 'none',
+              minWidth: 44, padding: '0 12px', background: 'none', border: 'none',
               cursor: 'pointer', color: T.inkMuted,
             }}
             aria-label={showPw ? 'パスワードを隠す' : 'パスワードを表示'}
@@ -77,20 +69,6 @@ function Field({ label, value, onChange, type = 'text', placeholder, required, a
     </div>
   )
 }
-
-const tabBtn = (active) => ({
-  flex: 1,
-  padding: '12px 8px',
-  background: 'transparent',
-  border: 'none',
-  borderBottom: active ? `2px solid ${T.accent}` : '2px solid transparent',
-  marginBottom: '-1px',
-  cursor: 'pointer',
-  fontFamily: T.serif,
-  fontSize: 14,
-  letterSpacing: '0.08em',
-  color: active ? T.ink : T.inkMuted,
-})
 
 export default function LoginPage() {
   const isDesktop = useIsDesktop()
@@ -195,17 +173,9 @@ export default function LoginPage() {
 
   const formBody = (
     <>
-      <div style={{
-        fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
-        color: T.inkMuted, marginBottom: 10,
-      }}>{mode === 'login' ? 'AUTH / 01 — LOGIN' : 'AUTH / 02 — SIGN UP'}</div>
-      <div style={{
-        fontFamily: T.serif, fontSize: 32, letterSpacing: '0.03em', lineHeight: 1.2, color: T.ink,
-      }}>{mode === 'login' ? 'Sign in.' : 'Join.'}</div>
-      <div style={{
-        marginTop: 8, fontSize: 13, color: T.inkSoft,
-        fontFamily: T.serifBody, lineHeight: 1.7,
-      }}>
+      <div className="ui-kicker">{mode === 'login' ? 'AUTH / LOGIN' : 'AUTH / SIGN UP'}</div>
+      <div className="ui-screen-title" style={{ marginTop: 8 }}>{mode === 'login' ? 'ログイン' : '新規登録'}</div>
+      <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>
         {mode === 'login'
           ? '団体アカウントへログインします。'
           : 'メールとパスワードでアカウントを作成します。登録後、団体の作成に進めます。'}
@@ -218,15 +188,17 @@ export default function LoginPage() {
         aria-label="Google で続ける"
         style={{
           width: '100%',
-          marginTop: 28,
+          marginTop: 20,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: 10,
-          padding: '14px 16px',
+          minHeight: 48,
+          padding: '0 16px',
           background: T.card,
           color: T.ink,
-          border: `1px solid ${T.ink}`,
+          border: `1px solid ${T.lineSoft}`,
+          borderRadius: 8,
           fontFamily: T.sans,
           fontSize: 13,
           fontWeight: 500,
@@ -240,7 +212,7 @@ export default function LoginPage() {
       </button>
 
       <div style={{
-        marginTop: 20,
+        marginTop: 16,
         display: 'flex',
         alignItems: 'center',
         gap: 12,
@@ -249,25 +221,21 @@ export default function LoginPage() {
         letterSpacing: '0.14em',
         color: T.inkMuted,
       }}>
-        <div style={{ flex: 1, height: '0.5px', background: T.line }} aria-hidden />
+        <div style={{ flex: 1, height: 1, background: T.lineSoft }} aria-hidden />
         <span>または</span>
-        <div style={{ flex: 1, height: '0.5px', background: T.line }} aria-hidden />
+        <div style={{ flex: 1, height: 1, background: T.lineSoft }} aria-hidden />
       </div>
 
-      <div style={{
-        display: 'flex',
-        marginTop: 28,
-        borderBottom: `1px solid ${T.ink}`,
-      }}>
-        <button type="button" style={tabBtn(mode === 'login')} onClick={() => switchMode('login')}>
+      <div className="ui-auth-tabs">
+        <button type="button" className={mode === 'login' ? 'is-active' : ''} onClick={() => switchMode('login')}>
           ログイン
         </button>
-        <button type="button" style={tabBtn(mode === 'signup')} onClick={() => switchMode('signup')}>
+        <button type="button" className={mode === 'signup' ? 'is-active' : ''} onClick={() => switchMode('signup')}>
           新規登録
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: 28 }}>
+      <form onSubmit={handleSubmit} style={{ marginTop: 22 }}>
         <Field
           label="MAIL"
           type="email"
@@ -309,111 +277,43 @@ export default function LoginPage() {
         <button type="submit" disabled={loading} style={{
           width: '100%', marginTop: 4,
           background: loading ? T.inkMuted : T.accent, color: T.paper, border: 'none',
-          padding: '16px', fontFamily: T.sans, fontSize: 13,
+          borderRadius: 8, minHeight: 48, padding: '0 16px', fontFamily: T.sans, fontSize: 13,
           fontWeight: 500, letterSpacing: '0.16em', cursor: loading ? 'wait' : 'pointer',
         }}>
           {loading ? '...' : (mode === 'login' ? 'ログイン  →' : 'アカウント作成  →')}
         </button>
       </form>
 
-      <div style={{
-        marginTop: 32, paddingTop: 20, borderTop: `0.5px solid ${T.line}`,
-        fontSize: 11, color: T.inkMuted, lineHeight: 1.7,
-        fontFamily: T.mono, letterSpacing: '0.08em',
-      }}>
+      <div className="ui-auth-note">
         ご不明な点は info@artoir.net まで。
       </div>
     </>
   )
 
-  if (isDesktop) {
-    return (
-      <div style={{
-        minHeight: '100vh', background: T.paper,
-        display: 'flex', flexDirection: 'column',
-      }}>
-        {/* desktop header */}
-        <div style={{ borderBottom: `1px solid ${T.ink}`, background: T.paper }}>
-          <div style={{
-            maxWidth: 1200, margin: '0 auto',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0 32px', height: 56,
-          }}>
-            <Link to="/" style={{
-              fontFamily: T.serif, fontSize: 20, letterSpacing: '-0.01em', fontWeight: 500,
-              color: T.ink, textDecoration: 'none',
-            }}>
-              Artoir<span style={{ color: T.accent }}>.</span>
-            </Link>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
-              INDEX · {year}
+  const loginContent = (
+    <main className={`ui-auth-shell ${isDesktop ? '' : 'ui-auth-shell-mobile'}`}>
+      <section className="ui-auth-login-surface">
+        {isDesktop && (
+          <div className="ui-auth-login-top">
+            <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
+            <div>
+              <div className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</div>
+              <div className="ui-auth-masthead-title">展示を作る入口</div>
             </div>
-          </div>
-        </div>
-
-        {/* centered form area */}
-        <div style={{
-          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '48px 24px',
-        }}>
-          <div style={{ width: '100%', maxWidth: 440 }}>
-            {formBody}
-          </div>
-        </div>
-
-        {/* desktop footer */}
-        <div style={{ borderTop: `0.5px solid ${T.line}` }}>
-          <div style={{
-            maxWidth: 1200, margin: '0 auto', padding: '16px 32px',
-            display: 'flex', justifyContent: 'space-between',
-            fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted,
-          }}>
-            <span>Artoir</span>
             <span>{year}</span>
           </div>
-        </div>
-      </div>
-    )
-  }
-
-  // mobile layout
-  return (
-    <div style={{
-      minHeight: '100vh', background: T.paper,
-      display: 'flex', flexDirection: 'column',
-    }}>
-      {/* mobile header */}
-      <div style={{
-        padding: '14px 16px 12px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: `1px solid ${T.ink}`,
-        background: T.paper,
-      }}>
-        <Link to="/" style={{
-          fontFamily: T.serif, fontSize: 18, letterSpacing: '-0.01em', fontWeight: 500,
-          color: T.ink, textDecoration: 'none',
-        }}>
-          Artoir<span style={{ color: T.accent }}>.</span>
-        </Link>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkSoft }}>
-          INDEX · {year}
-        </div>
-      </div>
-
-      {/* mobile form content */}
-      <div style={{ flex: 1, padding: '32px 16px', display: 'flex', flexDirection: 'column', maxWidth: 480 }}>
+        )}
         {formBody}
-        <div style={{ flex: 1, minHeight: 28 }} />
-        <div style={{
-          fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em',
-          color: T.inkMuted,
-          display: 'flex', justifyContent: 'space-between',
-          paddingTop: 16, borderTop: `0.5px solid ${T.line}`,
-        }}>
-          <span>Artoir</span>
-          <span>{year}</span>
-        </div>
-      </div>
+      </section>
+    </main>
+  )
+
+  if (!isDesktop) return (
+    <div className="ui-page-shell">
+      <Header activeTab="account" />
+      {loginContent}
     </div>
   )
+
+  return <div className="ui-page-shell">{loginContent}</div>
 }

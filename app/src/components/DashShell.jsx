@@ -65,7 +65,9 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
           {crumbs.map((c, i) => <span key={i}>{i > 0 ? ' / ' : ''}{c}</span>)}
         </div>
       )}
-      {children}
+      <main className="ui-app-main ui-dashboard-mobile-main">
+        {children}
+      </main>
       <BottomNav active="account" />
     </div>
   )

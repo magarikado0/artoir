@@ -16,21 +16,21 @@ function LoggedOut({ isDesktop }) {
   ]
 
   if (isDesktop) return (
-    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 32px' }}>
-      <div style={{ width: 480 }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>GUEST</div>
-        <div style={{ fontFamily: T.serif, fontSize: 36, letterSpacing: '0.02em', color: T.ink, marginBottom: 8 }}>アカウント</div>
-        <div style={{ fontSize: 13, color: T.inkSoft, lineHeight: 1.9, fontFamily: T.serifBody, marginBottom: 28 }}>
+    <div className="ui-account-surface ui-account-surface-desktop">
+      <div>
+        <div className="ui-kicker">GUEST</div>
+        <div className="ui-screen-title" style={{ marginTop: 8 }}>アカウント</div>
+        <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody, marginBottom: 22 }}>
           ログインすると、あなたの団体として展覧会を作成・編集できます。
         </div>
-        <Link to="/login" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: T.ink, color: T.paper, padding: '16px 20px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', textDecoration: 'none', boxSizing: 'border-box' }}>
+        <Link to="/login" className="ui-pill-action" style={{ width: '100%', justifyContent: 'space-between' }}>
           <span>ログイン / 新規登録</span>
           <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
         </Link>
-        <div style={{ marginTop: 36 }}>
+        <div className="ui-account-benefits">
           <div style={{ paddingBottom: 8, borderBottom: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.ink }}>ログインでできること</div>
           {benefits.map(([n, t, d]) => (
-            <div key={n} style={{ padding: '16px 0', borderBottom: `0.5px solid ${T.line}`, display: 'grid', gridTemplateColumns: '32px 1fr', gap: 10 }}>
+            <div key={n} className="ui-account-row" style={{ display: 'grid', gridTemplateColumns: '32px 1fr', gap: 10 }}>
               <div style={{ fontFamily: T.mono, fontSize: 11, color: T.accent }}>{n}</div>
               <div>
                 <div style={{ fontFamily: T.serif, fontSize: 15, color: T.ink }}>{t}</div>
@@ -44,18 +44,18 @@ function LoggedOut({ isDesktop }) {
   )
 
   return (
-    <div style={{ padding: '28px 16px' }}>
-      <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>GUEST</div>
-      <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 28, letterSpacing: '0.02em', lineHeight: 1.35, color: T.ink }}>アカウント</div>
-      <div style={{ marginTop: 8, fontSize: 13, color: T.inkSoft, lineHeight: 1.9 }}>ログインすると、あなたの団体として展覧会を作成・編集できます。</div>
-      <button onClick={() => navigate('/login')} style={{ marginTop: 22, width: '100%', background: T.ink, color: T.paper, border: 'none', padding: '16px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="ui-account-surface">
+      <div className="ui-kicker">GUEST</div>
+      <div className="ui-screen-title" style={{ marginTop: 6 }}>アカウント</div>
+      <div className="ui-screen-subtitle">ログインすると、あなたの団体として展覧会を作成・編集できます。</div>
+      <button onClick={() => navigate('/login')} className="ui-pill-action" style={{ marginTop: 22, width: '100%', justifyContent: 'space-between' }}>
         <span>ログイン / 新規登録</span>
         <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
       </button>
       <div style={{ marginTop: 32 }}>
         <div style={{ paddingBottom: 8, borderBottom: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.ink }}>ログインでできること</div>
         {benefits.map(([n, t, d]) => (
-          <div key={n} style={{ padding: '16px 0', borderBottom: `0.5px solid ${T.line}`, display: 'grid', gridTemplateColumns: '32px 1fr', gap: 10 }}>
+          <div key={n} className="ui-account-row" style={{ display: 'grid', gridTemplateColumns: '32px 1fr', gap: 10 }}>
             <div style={{ fontFamily: T.mono, fontSize: 11, color: T.accent }}>{n}</div>
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 15, color: T.ink }}>{t}</div>
@@ -71,38 +71,36 @@ function LoggedOut({ isDesktop }) {
 // Multi-org selector — shown when user belongs to multiple orgs
 function OrgSelector({ orgs, onSelect, isDesktop }) {
   const content = (
-    <div style={{ padding: isDesktop ? '36px 0 60px' : '24px 16px' }}>
-      <div style={{ fontFamily: T.serif, fontSize: isDesktop ? 32 : 24, letterSpacing: '0.02em', color: T.ink, marginBottom: 24 }}>団体を選択</div>
-      <div style={{ borderTop: `1px solid ${T.ink}` }}>
+    <div className="ui-account-surface" style={{ maxWidth: isDesktop ? 560 : undefined }}>
+      <div className="ui-account-topline">
+        <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
+        <div>
+          <div className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</div>
+          <div className="ui-auth-masthead-title" style={{ color: T.ink }}>管理する団体</div>
+        </div>
+        <span>{orgs.length} ORGS</span>
+      </div>
+      <div className="ui-kicker">ORGANIZATION</div>
+      <div className="ui-screen-title" style={{ marginTop: 8 }}>団体を選択</div>
+      <div className="ui-screen-subtitle" style={{ marginBottom: 18 }}>管理する団体を選んでください。</div>
+      <div style={{ display: 'grid', gap: 8 }}>
         {orgs.map((org, i) => (
-          <div key={org.id} onClick={() => onSelect(org)} style={{ padding: '20px 0', borderBottom: `0.5px solid ${T.line}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+          <button key={org.id} onClick={() => onSelect(org)} className="ui-list-card" style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.18)', textAlign: 'left' }}>
             <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-              <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2(i + 1)}</div>
+              <div className="ui-mini-badge" style={{ minWidth: 34 }}>{pad2(i + 1)}</div>
               <div>
                 <div style={{ fontFamily: T.serif, fontSize: 17, letterSpacing: '0.02em', color: T.ink }}>{org.name}</div>
                 {org.description && <div style={{ marginTop: 3, fontSize: 12, color: T.inkSoft }}>{org.description.slice(0, 50)}{org.description.length > 50 ? '…' : ''}</div>}
               </div>
             </div>
             <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>→</div>
-          </div>
+          </button>
         ))}
       </div>
       <Link
         to="/account/setup"
-        style={{
-          marginTop: 20,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '16px 0',
-          borderTop: `1px solid ${T.ink}`,
-          fontFamily: T.sans,
-          fontWeight: 500,
-          fontSize: 13,
-          letterSpacing: '0.14em',
-          color: T.ink,
-          textDecoration: 'none',
-        }}
+        className="ui-pill-action"
+        style={{ marginTop: 14, width: '100%', justifyContent: 'space-between', background: T.accent }}
       >
         <span>＋ 新しい団体を作成</span>
         <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
@@ -110,7 +108,6 @@ function OrgSelector({ orgs, onSelect, isDesktop }) {
     </div>
   )
 
-  if (isDesktop) return <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>{content}</div>
   return content
 }
 
@@ -168,12 +165,7 @@ export default function AccountPage() {
     </button>
   )
 
-  const topBar = !isDesktop && (
-    <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${T.line}`, display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>
-      <span>ACCOUNT</span>
-      {signOutButton}
-    </div>
-  )
+  const topBar = !isDesktop && session && <div style={{ display: 'none' }}>{signOutButton}</div>
 
   function renderContent() {
     if (!session) return <LoggedOut isDesktop={isDesktop} />
@@ -199,15 +191,6 @@ export default function AccountPage() {
     <div className="ui-page-shell">
       <Header activeTab="account" />
       <main className="ui-app-main">{renderContent()}</main>
-      <div style={{ display: 'none' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted }}>
-          <span>© Artoir {new Date().getFullYear()}</span>
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            {session && <Link to="/account/setup" style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.14em', color: T.inkMuted, textDecoration: 'none' }}>＋ 新しい団体を作成</Link>}
-            {signOutButton}
-          </div>
-        </div>
-      </div>
     </div>
   )
 
