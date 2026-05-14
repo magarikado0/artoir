@@ -58,7 +58,6 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
         <Link to="/" style={{ fontFamily: T.serif, fontSize: 19, color: T.ink, textDecoration: 'none' }}>
           Artoir<span style={{ color: T.accent }}>.</span>
         </Link>
-        <span className="ui-mini-badge">DASHBOARD</span>
       </div>
       {crumbs.length > 0 && (
         <div className="ui-mobile-crumbs">

@@ -81,7 +81,6 @@ export default function OrgPage() {
             <div className="ui-kicker">EXHIBITIONS</div>
             <div className="ui-screen-title" style={{ fontSize: 22 }}>展覧会</div>
           </div>
-          <span className="ui-mini-badge">{pad2(exhibitions.length)}</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>

@@ -57,7 +57,6 @@ export default function OrgsPage() {
             <h1 className="ui-screen-title">団体</h1>
             <p className="ui-screen-subtitle">展覧会を公開している団体を、アプリの連絡先リストのように探せます。</p>
           </div>
-          <span className="ui-mini-badge">{pad2(filtered.length)} ORGS</span>
         </div>
 
         <div className="ui-toolbar-grid">

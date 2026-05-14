@@ -124,7 +124,6 @@ export default function AllExhibitionsPage() {
             <h1 className="ui-screen-title">展覧会</h1>
             <p className="ui-screen-subtitle">作品と会期を、一覧からすぐ開けるアプリ画面にまとめました。</p>
           </div>
-          <span className="ui-mini-badge">{pad2(filteredRows.length)} EXH.</span>
         </div>
 
         <div className="ui-toolbar-grid">

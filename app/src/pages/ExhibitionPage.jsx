@@ -149,7 +149,6 @@ export default function ExhibitionPage() {
                 <div className="ui-kicker">WORKS</div>
                 <div className="ui-screen-title" style={{ fontSize: 22 }}>作品</div>
               </div>
-              <span className="ui-mini-badge">{pad2(artworks.length)}</span>
             </div>
             <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
               {artworks.map((w, i) => (
