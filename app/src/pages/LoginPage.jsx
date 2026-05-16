@@ -29,7 +29,6 @@ function Field({ label, value, onChange, type = 'text', placeholder, required, a
     <div className="ui-form-field">
       <div className="ui-form-label-row">
         <span>{label}</span>
-        {required && <span>*</span>}
       </div>
       <div className="ui-input-wrap">
         <input
@@ -169,8 +168,6 @@ export default function LoginPage() {
     }
   }
 
-  const year = new Date().getFullYear()
-
   const formBody = (
     <>
       <div className="ui-kicker">{mode === 'login' ? 'AUTH / LOGIN' : 'AUTH / SIGN UP'}</div>
@@ -250,7 +247,7 @@ export default function LoginPage() {
           type="password"
           value={password}
           onChange={setPassword}
-          placeholder="••••••••••"
+          placeholder="6文字以上のパスワード"
           required
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
         />
@@ -284,9 +281,6 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="ui-auth-note">
-        ご不明な点は info@artoir.net まで。
-      </div>
     </>
   )
 
@@ -300,7 +294,6 @@ export default function LoginPage() {
               <div className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</div>
               <div className="ui-auth-masthead-title">展示を作る入口</div>
             </div>
-            <span>{year}</span>
           </div>
         )}
         {formBody}

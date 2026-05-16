@@ -10,15 +10,14 @@ import { useIsDesktop } from '../lib/useIsDesktop'
 function LoggedOut({ isDesktop }) {
   const navigate = useNavigate()
   const benefits = [
-    ['01', '団体ページを作る', '展覧会の活動母体として、情報を公開。'],
-    ['02', '展覧会を公開する', '作品・会期・会場を入力し、URL一つで共有。'],
-    ['03', '作品を管理する',   '画像・タイトル・技法を登録、並び替えも可。'],
+    ['01', '団体ページを作る', '展覧会の活動母体として情報を公開'],
+    ['02', '展覧会を公開する', '作品・会期・会場を入力し、URL一つで共有'],
+    ['03', '作品を管理する',   '画像・タイトル・技法を登録、並び替えも可'],
   ]
 
   if (isDesktop) return (
     <div className="ui-account-surface ui-account-surface-desktop">
       <div>
-        <div className="ui-kicker">GUEST</div>
         <div className="ui-screen-title" style={{ marginTop: 8 }}>アカウント</div>
         <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody, marginBottom: 22 }}>
           ログインすると、あなたの団体として展覧会を作成・編集できます。
@@ -45,7 +44,6 @@ function LoggedOut({ isDesktop }) {
 
   return (
     <div className="ui-account-surface">
-      <div className="ui-kicker">GUEST</div>
       <div className="ui-screen-title" style={{ marginTop: 6 }}>アカウント</div>
       <div className="ui-screen-subtitle">ログインすると、あなたの団体として展覧会を作成・編集できます。</div>
       <button onClick={() => navigate('/login')} className="ui-pill-action" style={{ marginTop: 22, width: '100%', justifyContent: 'space-between' }}>
@@ -223,21 +221,12 @@ export default function AccountPage() {
     </div>
   )
 
-  const signOutButton = session && (
-    <button onClick={handleSignOut} style={{ background: 'none', border: 'none', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.ink, cursor: 'pointer', padding: 0 }}>
-      SIGN OUT ↗
-    </button>
-  )
-
-  const topBar = !isDesktop && session && <div style={{ display: 'none' }}>{signOutButton}</div>
-
   function renderContent() {
     if (!session) return <LoggedOut isDesktop={isDesktop} />
     if (orgs.length > 1) return <OrgSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} session={session} />
     // logged in but no org linked yet
     return (
       <div style={{ padding: isDesktop ? '60px 0' : '32px 16px', maxWidth: isDesktop ? 480 : undefined, margin: isDesktop ? '0 auto' : undefined }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>SIGNED IN</div>
         <div style={{ fontFamily: T.serif, fontSize: isDesktop ? 32 : 24, color: T.ink, marginBottom: 8 }}>{session.user.email}</div>
         <div style={{ fontSize: 12, color: T.inkSoft, lineHeight: 1.7, marginBottom: 24 }}>まだ団体がありません。団体を作成してArtoirを始めましょう。</div>
         <Link to="/account/setup" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: T.ink, color: T.paper, padding: '16px 20px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', textDecoration: 'none', marginBottom: 12 }}>
@@ -261,7 +250,6 @@ export default function AccountPage() {
   return (
     <div className="ui-page-shell" style={{ paddingBottom: 92 }}>
       <Header activeTab="account" />
-      {topBar}
       {renderContent()}
       <BottomNav active="account" />
     </div>

@@ -119,7 +119,6 @@ export default function AccountSetup() {
         <div className="ui-auth-masthead">
           <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
           <div>
-            <div className="ui-kicker" style={{ color: T.gold }}>SETUP / 01</div>
             <div className="ui-auth-masthead-title">団体ページを作る</div>
           </div>
           <Link to="/account" style={{ color: 'rgba(255,253,247,0.72)', textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>BACK</Link>

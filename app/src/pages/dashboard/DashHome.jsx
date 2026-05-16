@@ -32,7 +32,7 @@ function DashExhibitionCard({ exh, orgSlug, navigate }) {
         <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 11, color: T.inkSoft, alignItems: 'center' }}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exh.location || '会場未設定'}</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, fontFamily: T.mono, fontSize: 10 }}>
-            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} onClick={(e) => e.stopPropagation()} style={{ color: T.accent, textDecoration: 'none' }}>WORKS</Link>
+            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} onClick={(e) => e.stopPropagation()} style={{ color: T.accent, textDecoration: 'none' }}>作品</Link>
             <span style={{ color: T.inkMuted }}>EDIT →</span>
           </span>
         </div>
@@ -75,13 +75,12 @@ export default function DashHome() {
   const liveCount = exhibitions.filter((e) => exhStatus(e) === 'live').length
 
   return (
-    <DashShell orgSlug={orgSlug} crumbs={['HOME']}>
+    <DashShell orgSlug={orgSlug}>
       <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
-        <div className="ui-kicker">SIGNED IN</div>
         <div className="ui-app-topline" style={{ marginTop: 8, marginBottom: 0 }}>
           <div>
             <h1 className="ui-screen-title">{org?.name || orgSlug}</h1>
-            {org?.description && <p className="ui-screen-subtitle">{org.description.split('。')[0]}。</p>}
+            {org?.description && <p className="ui-screen-subtitle">{org.description.split('。')[0]}</p>}
           </div>
           <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-pill-action">
             <Icon name="plus" size={18} />
@@ -104,7 +103,7 @@ export default function DashHome() {
 
       <div className="ui-app-topline">
         <div>
-          <div className="ui-kicker">YOUR EXHIBITIONS</div>
+          <div className="ui-kicker">展覧会</div>
           <div className="ui-screen-title" style={{ fontSize: 22 }}>展覧会管理</div>
         </div>
       </div>

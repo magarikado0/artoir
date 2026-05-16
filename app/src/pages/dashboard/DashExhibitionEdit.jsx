@@ -165,12 +165,11 @@ export default function DashExhibitionEdit() {
 
       <DashSectionLabel>説明文</DashSectionLabel>
       <DashField
-        label="DESCRIPTION"
+        label="説明文"
         value={description}
         onChange={setDescription}
         multiline
-        placeholder="展覧会の説明文を入力..."
-        help="公開ページのヒーロー下に表示されます（最大 400 文字）。"
+        placeholder={`展覧会の説明文を入力...\n公開ページのヒーロー下に表示されます。（最大400文字）`}
       />
 
       <DashSectionLabel>背景色</DashSectionLabel>
@@ -182,26 +181,42 @@ export default function DashExhibitionEdit() {
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {SWATCHES.map((c) => (
-            <div key={c} onClick={() => setBgColor(c)} className="ui-chip" style={{ width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
+            <button
+              key={c}
+              type="button"
+              aria-label={`背景色を${c}にする`}
+              aria-pressed={bgColor === c}
+              onClick={() => setBgColor(c)}
+              className="ui-chip ui-swatch"
+              style={{ '--swatch-color': c, '--swatch-border': bgColor === c ? T.ink : T.line, width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative', appearance: 'none', padding: 0 }}
+            >
               {bgColor === c && <div style={{ position: 'absolute', inset: 2, border: `1px solid ${c === '#111110' || c === '#2A2825' ? T.paper : T.ink}` }} />}
-            </div>
+            </button>
           ))}
         </div>
         <div style={{ marginTop: 10, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>{bgColor.toUpperCase()}</div>
       </div>
 
-      <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
-        {!isNew && (
-          <button type="button" onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} className="ui-icon-button" style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
-            作品を管理 →
-          </button>
-        )}
+      {!isNew && (
+        <button type="button" onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} className="ui-icon-button" style={{ width: '100%', marginTop: 24, padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+          作品を管理 →
+        </button>
+      )}
+      <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <button
+          type="button"
+          onClick={() => navigate(`/${orgSlug}/dashboard`)}
+          className="ui-icon-button"
+          style={{ width: '100%', padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}
+        >
+          CANCEL
+        </button>
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
           className="ui-action"
-          style={{ flex: 1, padding: '14px', background: T.accent, color: T.paper, border: `1px solid ${T.paper}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+          style={{ width: '100%', padding: '14px', background: T.accent, color: T.paper, border: `1px solid ${T.paper}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
         >{saving ? 'SAVING...' : 'SAVE ↩'}</button>
       </div>
       <div style={{ height: 40 }} />
