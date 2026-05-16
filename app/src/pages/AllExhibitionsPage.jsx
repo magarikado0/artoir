@@ -43,9 +43,10 @@ function StatusDot({ exhibition }) {
 
 function ExhibitionCard({ row }) {
   const { exhibition: exh, org } = row
+  const placeholderBg = `linear-gradient(135deg, ${T.surfaceMuted}, ${T.mint} 58%, ${T.blush})`
   return (
     <Link to={`/${org?.slug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card" style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10 }}>
-      <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: T.surfaceMuted, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+      <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
         <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
       </div>
       <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0' }}>

@@ -1,27 +1,27 @@
-/** 配色は「紙色＋墨色」＋アクセント（テラコッタ・金）に寄せ、副次は ink 系と暖色のみに揃える */
+/** 配色は「紙色＋墨色」＋アクセント（赤土・金・くすみ緑）に寄せる */
 export const T = {
-  paper:     '#F6F0E4',
-  paperAlt:  '#E7E0D0',
-  card:      '#FFFDF7',
-  ink:       '#1E1A16',
-  inkSoft:   '#3E3730',
-  inkMuted:  '#7E7569',
-  line:      '#3A332C',
-  lineSoft:  '#DCD3C2',
-  accent:    '#B65A45',
-  accentInk: '#7A2F24',
-  /** 装飾スポット（旧 moss）。新規は accentInk 優先 */
-  moss:      '#8B4D3A',
+  paper:     '#F4E9D6',
+  paperAlt:  '#E4D3B8',
+  card:      '#FFF9ED',
+  ink:       '#211813',
+  inkSoft:   '#47382D',
+  inkMuted:  '#887869',
+  line:      '#43362C',
+  lineSoft:  '#D8C5A6',
+  accent:    '#BE553D',
+  accentInk: '#7C2E22',
+  /** 装飾スポット（旧 moss）。新規はくすみ緑の補助色として使用 */
+  moss:      '#687047',
   /** 非推奨: accentInk に置き換え済み。参照が残る型用 */
-  slate:     '#7A2F24',
-  gold:      '#D4B15F',
-  blush:     '#EBC9BD',
-  mint:      '#DDE5D0',
+  slate:     '#7C2E22',
+  gold:      '#D3A842',
+  blush:     '#E9BDAE',
+  mint:      '#DCE0C4',
   /** 画像プレースホルダ（旧 blueSoft）。寒色の水色は使わない */
-  surfaceMuted: '#E5D9C8',
-  blueSoft:  '#E5D9C8',
-  violet:    '#756988',
-  warning:   '#C54739',
+  surfaceMuted: '#E3D0B3',
+  blueSoft:  '#E3D0B3',
+  violet:    '#77677E',
+  warning:   '#C13E31',
 
   serif:     'Georgia, "Shippori Mincho", "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif',
   serifBody: '"Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif',
