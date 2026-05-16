@@ -44,7 +44,7 @@ function StatusDot({ exhibition }) {
 function ExhibitionCard({ row }) {
   const { exhibition: exh, org } = row
   return (
-    <Link to={`/${org?.slug}/exhibition/${exh.slug}`} className="ui-list-card" style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10 }}>
+    <Link to={`/${org?.slug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card" style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10 }}>
       <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: T.surfaceMuted, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
         <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
       </div>
@@ -118,11 +118,19 @@ export default function AllExhibitionsPage() {
     <div className="ui-page-shell">
       <Header activeTab="top" />
       <main className="ui-app-main">
-        <div className="ui-app-topline">
+        <div className="ui-app-topline ui-app-topline--with-create">
           <div className="ui-hero-screen-heading">
             <div className="ui-kicker">EXHIBITIONS</div>
             <h1 className="ui-screen-title">展覧会</h1>
           </div>
+          <button
+            type="button"
+            onClick={() => navigate(session ? '/account' : '/login')}
+            className="ui-floating-action ui-exhibitions-create-btn"
+          >
+            <Icon name="plus" size={18} />
+            <span>展覧会を作る</span>
+          </button>
         </div>
 
         <div className="ui-toolbar-grid">
@@ -140,10 +148,6 @@ export default function AllExhibitionsPage() {
           <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>NO EXHIBITIONS</div>
         )}
       </main>
-      <button onClick={() => navigate(session ? '/account' : '/login')} className="ui-floating-action">
-        <Icon name="plus" size={18} />
-        <span>展覧会を作る</span>
-      </button>
       <BottomNav active="top" />
     </div>
   )

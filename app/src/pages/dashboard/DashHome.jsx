@@ -6,6 +6,40 @@ import { exhStatus } from '../../lib/exhibitionStatus'
 import { T, fmtDateDot, pad2 } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 
+function DashExhibitionCard({ exh, orgSlug, navigate }) {
+  const status = exhStatus(exh)
+  return (
+    <div
+      onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`)}
+      className="ui-list-card"
+      style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10, cursor: 'pointer' }}
+    >
+      <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: T.surfaceMuted, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+        <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
+      </div>
+      <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7, flexWrap: 'wrap' }}>
+            <StatusBadge kind={status} />
+            <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{fmtDateDot(exh.start_date)}</span>
+          </div>
+          <div style={{ fontFamily: T.serif, fontSize: 18, lineHeight: 1.35, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
+          <div style={{ marginTop: 4, fontSize: 12, color: T.inkMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: T.mono }}>
+            {exh.slug || '—'}
+          </div>
+        </div>
+        <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 11, color: T.inkSoft, alignItems: 'center' }}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exh.location || '会場未設定'}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, fontFamily: T.mono, fontSize: 10 }}>
+            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} onClick={(e) => e.stopPropagation()} style={{ color: T.accent, textDecoration: 'none' }}>WORKS</Link>
+            <span style={{ color: T.inkMuted }}>EDIT →</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function DashHome() {
   const { orgSlug } = useParams()
   const navigate = useNavigate()
@@ -74,25 +108,11 @@ export default function DashHome() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gap: 10 }}>
-        {exhibitions.map((exh, i) => {
-          const status = exhStatus(exh)
-          return (
-            <div key={exh.id} onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`)} className="ui-list-card" style={{ padding: 12, display: 'grid', gridTemplateColumns: '58px 1fr auto', gap: 12, alignItems: 'center', cursor: 'pointer' }}>
-              <div style={{ width: 58, height: 58, borderRadius: 8, background: T.surfaceMuted, display: 'grid', placeItems: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2(i + 1)}</div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontFamily: T.serif, fontSize: 16, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exh.title}</div>
-                <div style={{ marginTop: 4, fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{fmtDateDot(exh.start_date)} — {fmtDateDot(exh.end_date)}</div>
-                <div style={{ marginTop: 6 }}><StatusBadge kind={status} /></div>
-              </div>
-              <div style={{ display: 'grid', gap: 7, justifyItems: 'end', fontFamily: T.mono, fontSize: 10 }}>
-                <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} onClick={(e) => e.stopPropagation()} style={{ color: T.accent, textDecoration: 'none' }}>WORKS</Link>
-                <span style={{ color: T.inkMuted }}>EDIT →</span>
-              </div>
-            </div>
-          )
-        })}
-        {exhibitions.length === 0 && <div className="ui-panel" style={{ padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>展覧会がまだありません</div>}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+        {exhibitions.map((exh) => (
+          <DashExhibitionCard key={exh.id} exh={exh} orgSlug={orgSlug} navigate={navigate} />
+        ))}
+        {exhibitions.length === 0 && <div className="ui-panel" style={{ gridColumn: '1 / -1', padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>展覧会がまだありません</div>}
       </div>
     </DashShell>
   )

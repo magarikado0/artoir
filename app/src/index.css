@@ -138,6 +138,16 @@ button {
   max-width: none;
 }
 
+.ui-app-topline--with-create {
+  align-items: flex-start;
+}
+
+.ui-app-topline--with-create > .ui-hero-screen-heading {
+  flex: 1 1 auto;
+  width: auto;
+  max-width: none;
+}
+
 .ui-hero-screen-heading .ui-screen-title {
   display: block;
   margin-top: 4px;
@@ -357,6 +367,15 @@ button {
   box-shadow: 0 18px 42px rgba(30,26,22,0.11), inset 0 3px 0 rgba(182,90,69,0.35);
 }
 
+.ui-exhibition-list-card {
+  box-shadow: 0 7px 18px rgba(30,26,22,0.045), inset 0 2px 0 rgba(212,177,95,0.22);
+}
+
+.ui-exhibition-list-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(30,26,22,0.075), inset 0 2px 0 rgba(182,90,69,0.28);
+}
+
 .ui-org-table {
   border: 1px solid rgba(30,26,22,0.18);
   border-radius: 8px;
@@ -523,6 +542,19 @@ button {
   z-index: 65;
   background: #B65A45;
   box-shadow: 0 14px 34px rgba(30,26,22,0.18), inset 0 -3px 0 #7A2F24;
+}
+
+.ui-floating-action.ui-exhibitions-create-btn {
+  position: static;
+  inset: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  z-index: auto;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-self: flex-start;
+  white-space: nowrap;
 }
 
 .ui-form-field {
@@ -963,6 +995,16 @@ button.ui-account-org-pick-btn.ui-org-row {
     left: 16px;
     right: 16px;
     bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ui-floating-action.ui-exhibitions-create-btn {
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: auto;
+    padding: 0 10px;
+    font-size: 12px;
+    gap: 6px;
   }
 
   .ui-toolbar-grid {
