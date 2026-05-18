@@ -43,6 +43,11 @@ export function fmtDateRange(start, end) {
   return end ? `${fmtDateDot(start)} — ${fmtDateDot(end)}` : fmtDateDot(start)
 }
 
+export function fmtTime(str) {
+  if (!str) return ''
+  return str
+}
+
 export function pad2(n) {
   return String(n).padStart(2, '0')
 }

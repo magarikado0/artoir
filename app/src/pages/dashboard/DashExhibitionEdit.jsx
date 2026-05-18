@@ -49,7 +49,9 @@ export default function DashExhibitionEdit() {
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [startDate, setStartDate] = useState('')
+  const [startTime, setStartTime] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [endTime, setEndTime] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
   const [bgColor, setBgColor] = useState('#FAF8F3')
@@ -83,7 +85,9 @@ export default function DashExhibitionEdit() {
             let e = exh.end_date || ''
             if (s && e && e < s) e = s
             setStartDate(s)
+            setStartTime(exh.start_time || '')
             setEndDate(e)
+            setEndTime(exh.end_time || '')
             setLocation(exh.location || '')
             setDescription(exh.description || '')
             setBgColor(exh.bg_color || '#FAF8F3')
@@ -105,7 +109,7 @@ export default function DashExhibitionEdit() {
     let nextPath = null
     try {
       const finalSlug = (isNew || !slug) ? await generateUniqueSlug(org.id, title) : slug
-      const payload = { title, slug: finalSlug, start_date: startDate || null, end_date: endDate || null, location, description, bg_color: bgColor, org_id: org.id }
+      const payload = { title, slug: finalSlug, start_date: startDate || null, start_time: startTime || null, end_date: endDate || null, end_time: endTime || null, location, description, bg_color: bgColor, org_id: org.id }
       if (isNew) {
         const { data, error } = await supabase.from('exhibitions').insert(payload).select().single()
         if (error) {
@@ -157,9 +161,11 @@ export default function DashExhibitionEdit() {
       />
 
       <DashSectionLabel>会期・会場</DashSectionLabel>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
         <DashField label="START" value={startDate} onChange={onStartDateChange} placeholder="YYYY-MM-DD" mono type="date" />
+        <DashField label="START TIME" value={startTime} onChange={setStartTime} placeholder="--:--" mono type="time" />
         <DashField label="END" value={endDate} onChange={onEndDateChange} placeholder="YYYY-MM-DD" mono type="date" min={startDate || undefined} help={startDate ? '開始日以降のみ選択できます。' : undefined} />
+        <DashField label="END TIME" value={endTime} onChange={setEndTime} placeholder="--:--" mono type="time" />
       </div>
       <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
 

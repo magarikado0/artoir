@@ -5,7 +5,7 @@ import { IS_DEV, demoOrgs, demoExhibitions, demoArtworks } from '../lib/demoData
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
-import { T, fmtDateDot, pad2 } from '../lib/tokens'
+import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
 
 function MetaPill({ label, value }) {
   if (!value) return null
@@ -133,7 +133,7 @@ export default function ExhibitionPage() {
               {exhibition.description && <p className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>{exhibition.description}</p>}
             </div>
             <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
-              <MetaPill label="会期" value={exhibition.start_date ? `${fmtDateDot(exhibition.start_date)} - ${fmtDateDot(exhibition.end_date)}` : ''} />
+              <MetaPill label="会期" value={exhibition.start_date ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}` : ''} />
               <MetaPill label="作品数" value={`${pad2(artworks.length)} `} />
               <MetaPill label="会場" value={exhibition.location} />
               <MetaPill label="主催団体" value={org?.name} />
