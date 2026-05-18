@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { IS_DEV, demoOrgs, demoExhibitions } from '../lib/demoData'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { T, fmtDateDot, pad2 } from '../lib/tokens'
@@ -77,12 +76,6 @@ export default function AllExhibitionsPage() {
 
   useEffect(() => {
     async function load() {
-      if (IS_DEV) {
-        const orgMap = Object.fromEntries(demoOrgs.map((o) => [o.id, o]))
-        setRows(demoExhibitions.map((exh) => ({ exhibition: exh, org: orgMap[exh.org_id] })))
-        setLoading(false)
-        return
-      }
       if (!supabase) return setLoading(false)
       try {
         const { data } = await supabase.from('exhibitions').select('*, organizations(id, name, slug)').order('start_date', { ascending: false })

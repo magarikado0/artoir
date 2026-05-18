@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { IS_DEV, demoOrgs, demoExhibitions } from '../lib/demoData'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { T, fmtDateDot, pad2, externalHost } from '../lib/tokens'
@@ -14,13 +13,6 @@ export default function OrgPage() {
 
   useEffect(() => {
     async function load() {
-      if (IS_DEV) {
-        const orgData = demoOrgs.find((o) => o.slug === orgSlug) ?? demoOrgs[0]
-        setOrg(orgData)
-        setExhibitions(demoExhibitions.filter((e) => e.org_id === orgData.id))
-        setLoading(false)
-        return
-      }
       if (!supabase) return setLoading(false)
       try {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()

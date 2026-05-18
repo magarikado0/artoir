@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { IS_DEV, demoOrgs, demoExhibitions, demoArtworks } from '../lib/demoData'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
@@ -29,15 +28,6 @@ export default function ExhibitionPage() {
 
   useEffect(() => {
     async function load() {
-      if (IS_DEV) {
-        const exh = demoExhibitions.find((e) => e.slug === exhibitionSlug) ?? demoExhibitions[0]
-        const orgData = demoOrgs.find((o) => o.id === exh.org_id) ?? demoOrgs[0]
-        setOrg(orgData)
-        setExhibition(exh)
-        setArtworks(demoArtworks.filter((a) => a.exhibition_id === exh.id))
-        setLoading(false)
-        return
-      }
       if (!supabase) return setLoading(false)
       try {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
@@ -141,13 +131,13 @@ export default function ExhibitionPage() {
           </div>
         </section>
 
-        {artworks.length > 0 && (
-          <section style={{ marginTop: 22 }}>
-            <div className="ui-app-topline">
-              <div>
-                <div className="ui-screen-title" style={{ fontSize: 22 }}>作品</div>
-              </div>
+        <section style={{ marginTop: 22 }}>
+          <div className="ui-app-topline">
+            <div>
+              <div className="ui-screen-title" style={{ fontSize: 22 }}>作品</div>
             </div>
+          </div>
+          {artworks.length > 0 ? (
             <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
               {artworks.map((w, i) => (
                 <button key={w.id} type="button" className="gallery-item ui-list-card" onClick={() => setSelectedArtwork(w)} style={{ padding: 8, textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
@@ -163,8 +153,12 @@ export default function ExhibitionPage() {
                 </button>
               ))}
             </div>
-          </section>
-        )}
+          ) : (
+            <div className="ui-app-card" style={{ padding: 32, textAlign: 'center' }}>
+              <p style={{ fontFamily: T.mono, fontSize: 12, color: T.inkMuted, letterSpacing: '0.05em' }}>作品がまだありません</p>
+            </div>
+          )}
+        </section>
       </main>
       <ArtworkModal artwork={selectedArtwork} onClose={() => setSelectedArtwork(null)} />
       <BottomNav active="top" />

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
-import { IS_DEV, demoOrgs, demoExhibitions } from '../lib/demoData'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { T, pad2 } from '../lib/tokens'
@@ -17,11 +16,6 @@ export default function OrgsPage() {
 
   useEffect(() => {
     async function load() {
-      if (IS_DEV) {
-        setOrgs(demoOrgs.map((o) => ({ ...o, exh_count: demoExhibitions.filter((e) => e.org_id === o.id).length })))
-        setLoading(false)
-        return
-      }
       if (!supabase) return setLoading(false)
       try {
         const { data } = await supabase.from('organizations').select('*, exhibitions(count)').order('name')
