@@ -3,6 +3,7 @@ import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
+import BrandMark from './BrandMark'
 
 const TABS = [
   { key: 'top', label: 'Exhibits', path: '/', icon: 'list' },
@@ -56,7 +57,7 @@ export default function Header({ activeTab }) {
     return (
       <aside className="ui-side-rail">
         <Link to="/" className="ui-rail-brand" aria-label="Artoir home">
-          <span>A</span>
+          <BrandMark size="rail" />
         </Link>
         <nav className="ui-rail-nav" aria-label="Primary">
           {TABS.map((t) => {

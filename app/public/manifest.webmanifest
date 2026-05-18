@@ -1,0 +1,20 @@
+{
+  "name": "Artoir",
+  "short_name": "Artoir",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8EDDD",
+  "theme_color": "#F8EDDD",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

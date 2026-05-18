@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
+import BrandMark from '../components/BrandMark'
 import { DashField } from '../components/DashShell'
 import { T } from '../lib/tokens'
 
@@ -117,7 +118,9 @@ export default function AccountSetup() {
     <div className="ui-page-shell ui-auth-shell">
       <section className="ui-auth-card">
         <div className="ui-auth-masthead">
-          <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
+          <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }} aria-label="Artoir home">
+            <BrandMark size="auth" />
+          </Link>
           <div>
             <div className="ui-kicker" style={{ color: T.gold }}>SETUP / 01</div>
             <div className="ui-auth-masthead-title">団体ページを作る</div>

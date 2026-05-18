@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
+import BrandMark from './BrandMark'
 import BottomNav from './BottomNav'
 import { Icon } from './Header'
 
@@ -13,7 +14,7 @@ function DashNav({ orgSlug }) {
   ]
   return (
     <aside className="ui-side-rail">
-      <Link to="/" className="ui-rail-brand" aria-label="Artoir home"><span>A</span></Link>
+      <Link to="/" className="ui-rail-brand" aria-label="Artoir home"><BrandMark size="rail" /></Link>
       <nav className="ui-rail-nav" aria-label="Dashboard">
         {items.map(([to, label, icon]) => (
           <Link key={to} to={to} className="ui-rail-item" aria-label={label}>

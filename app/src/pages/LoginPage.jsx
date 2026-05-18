@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import BrandMark from '../components/BrandMark'
 import Header from '../components/Header'
 import {
   normalizeOAuthReturnPath,
@@ -295,7 +296,9 @@ export default function LoginPage() {
       <section className="ui-auth-login-surface">
         {isDesktop && (
           <div className="ui-auth-login-top">
-            <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
+            <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }} aria-label="Artoir home">
+              <BrandMark size="auth" />
+            </Link>
             <div>
               <div className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</div>
               <div className="ui-auth-masthead-title">展示を作る入口</div>

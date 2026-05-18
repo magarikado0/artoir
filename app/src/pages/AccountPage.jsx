@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
+import BrandMark from '../components/BrandMark'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { T, pad2 } from '../lib/tokens'
@@ -74,7 +75,9 @@ function OrgSelector({ orgs, onSelect, isDesktop, session }) {
     return (
       <div className="ui-account-surface ui-account-org-selector-desktop">
         <div className="ui-account-org-selector-bar">
-          <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
+          <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }} aria-label="Artoir home">
+            <BrandMark size="auth" />
+          </Link>
           <div className="ui-account-org-selector-bar-meta">
             <span className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</span>
             {session?.user?.email && (
@@ -136,7 +139,9 @@ function OrgSelector({ orgs, onSelect, isDesktop, session }) {
   return (
     <div className="ui-account-surface">
       <div className="ui-account-topline">
-        <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }}>A</Link>
+        <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }} aria-label="Artoir home">
+          <BrandMark size="auth" />
+        </Link>
         <div>
           <div className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</div>
           <div className="ui-auth-masthead-title" style={{ color: T.ink }}>管理する団体</div>
