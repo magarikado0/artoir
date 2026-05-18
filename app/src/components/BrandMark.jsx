@@ -16,9 +16,15 @@ export function BrandLockup({ className = '' }) {
   return (
     <span className={`ui-brand-lockup ${className}`.trim()}>
       <span className="ui-brand-lockup-mark">
-        <BrandMark size="lockup" />
+        <img
+          className="ui-brand-mark ui-brand-mark-lockup"
+          src="/favicon.svg"
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+        />
       </span>
-      <span className="ui-brand-lockup-word">Artoir</span>
+      <span className="ui-brand-lockup-word">Artoir<span className="ui-brand-lockup-dot">.</span></span>
     </span>
   )
 }
