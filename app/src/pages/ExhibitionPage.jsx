@@ -16,6 +16,32 @@ function MetaPill({ label, value }) {
   )
 }
 
+function ArtworkPreview({ artwork, alt, style, className, placeholderStyle, placeholderContent }) {
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    setFailed(false)
+  }, [artwork?.image_url])
+
+  if (!artwork?.image_url || failed) {
+    return (
+      <div style={placeholderStyle}>
+        {placeholderContent}
+      </div>
+    )
+  }
+
+  return (
+    <img
+      src={artwork.image_url}
+      alt={alt}
+      onError={() => setFailed(true)}
+      style={style}
+      className={className}
+    />
+  )
+}
+
 export default function ExhibitionPage() {
   const { orgSlug, exhibitionSlug } = useParams()
   const [org, setOrg] = useState(null)
@@ -108,13 +134,14 @@ export default function ExhibitionPage() {
 
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'start' }}>
           <div className="ui-app-card" style={{ padding: 8, overflow: 'hidden' }}>
-            {featured?.image_url ? (
-              <img src={featured.image_url} alt={featured.title} style={{ width: '100%', maxHeight: 640, aspectRatio: '4 / 3', objectFit: 'contain', display: 'block', background: T.ink, borderRadius: 7 }} />
-            ) : (
-              <div style={{ width: '100%', aspectRatio: '4 / 3', background: T.surfaceMuted, borderRadius: 7, display: 'grid', placeItems: 'center' }}>
-                <span className="ui-mini-badge">{exhibition.title}</span>
-              </div>
-            )}
+            <ArtworkPreview
+              artwork={featured}
+              alt={featured?.title || exhibition.title}
+              className="ui-exhibition-featured-image"
+              style={{ width: '100%', maxHeight: 640, aspectRatio: '4 / 3', objectFit: 'contain', display: 'block', background: T.ink, borderRadius: 7 }}
+              placeholderStyle={{ width: '100%', aspectRatio: '4 / 3', background: T.surfaceMuted, borderRadius: 7, display: 'grid', placeItems: 'center' }}
+              placeholderContent={<span className="ui-mini-badge">{exhibition.title}</span>}
+            />
           </div>
 
           <div>
@@ -141,11 +168,13 @@ export default function ExhibitionPage() {
             <div ref={galleryRef} className="ui-exhibition-gallery">
               {artworks.map((w, i) => (
                 <button key={w.id} type="button" className="gallery-item ui-list-card" onClick={() => setSelectedArtwork(w)} style={{ padding: 8, textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
-                  {w.image_url ? (
-                    <img src={w.image_url} alt={w.title} style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block', borderRadius: 7 }} />
-                  ) : (
-                    <div style={{ width: '100%', aspectRatio: '1 / 1', background: T.surfaceMuted, borderRadius: 7 }} />
-                  )}
+                  <ArtworkPreview
+                    artwork={w}
+                    alt={w.title || 'artwork image'}
+                    style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block', borderRadius: 7 }}
+                    placeholderStyle={{ width: '100%', aspectRatio: '1 / 1', background: T.surfaceMuted, borderRadius: 7 }}
+                    placeholderContent={null}
+                  />
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'baseline' }}>
                     <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</span>
                     <span style={{ fontFamily: T.serif, fontSize: 14, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '-'}</span>

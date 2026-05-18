@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell from '../../components/DashShell'
 import ImageUploader from '../../components/ImageUploader'
+import ArtworkCreateModal from '../../components/ArtworkCreateModal'
 import { T, pad2 } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 
@@ -16,6 +17,7 @@ export default function DashArtworks() {
   const [editTitle, setEditTitle] = useState('')
   const [editDesc, setEditDesc] = useState('')
   const [viewMode, setViewMode] = useState('grid')
+  const [createFile, setCreateFile] = useState(null)
 
   useEffect(() => {
     if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
@@ -40,20 +42,8 @@ export default function DashArtworks() {
     return true
   }
 
-  async function handleUploaded(cloudinaryUrl, meta = {}) {
-    if (!supabase || !exhibitionId) return
-    const maxOrder = artworks.length > 0 ? Math.max(...artworks.map((a) => a.order ?? 0)) : 0
-    const { data: newWork } = await supabase
-      .from('artworks')
-      .insert({ exhibition_id: exhibitionId, image_url: cloudinaryUrl, title: '', order: maxOrder + 1, file_name: meta.fileName || null, file_size: meta.fileSize || null })
-      .select()
-      .single()
-    if (newWork) {
-      setArtworks((prev) => [...prev, newWork])
-      setEditTarget(newWork)
-      setEditTitle('')
-      setEditDesc('')
-    }
+  function handleCreateFile(file) {
+    setCreateFile(file)
   }
 
   async function handleDelete() {
@@ -99,7 +89,7 @@ export default function DashArtworks() {
         </section>
 
         <div style={{ marginBottom: 14 }}>
-          <ImageUploader onUploaded={handleUploaded} onBeforeUpload={handleBeforeUpload}>
+          <ImageUploader onBeforeUpload={handleBeforeUpload} onFileSelected={handleCreateFile}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span className="ui-mini-badge"><Icon name="plus" size={15} /> UPLOAD</span>
               <span style={{ fontFamily: T.serif, fontSize: 16, color: T.ink }}>作品を追加</span>
@@ -152,6 +142,19 @@ export default function DashArtworks() {
         )}
         {artworks.length === 0 && <div className="ui-panel" style={{ padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>作品がまだありません</div>}
       </DashShell>
+
+      <ArtworkCreateModal
+        open={Boolean(createFile)}
+        file={createFile}
+        exhibitionId={exhibitionId}
+        nextOrder={artworks.length > 0 ? Math.max(...artworks.map((a) => a.order ?? 0)) + 1 : 1}
+        onClose={() => setCreateFile(null)}
+        onCreated={(newWork) => {
+          if (!newWork) return
+          setArtworks((prev) => [...prev, newWork])
+          setCreateFile(null)
+        }}
+      />
 
       {editTarget && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(17,17,16,0.44)', display: 'grid', placeItems: 'center', padding: 16 }}>

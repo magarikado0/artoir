@@ -5,7 +5,7 @@ const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
-export default function ImageUploader({ onUploaded, onBeforeUpload, children }) {
+export default function ImageUploader({ onUploaded, onBeforeUpload, onFileSelected, children }) {
   const [dragging, setDragging] = useState(false)
   const [progress, setProgress] = useState(null) // 0-100 or null
   const [error, setError] = useState('')
@@ -76,6 +76,10 @@ export default function ImageUploader({ onUploaded, onBeforeUpload, children }) 
         setError(err?.message || 'アップロード前の確認中にエラーが発生しました')
         return
       }
+    }
+    if (onFileSelected) {
+      onFileSelected(file)
+      return
     }
     try {
       await upload(file)

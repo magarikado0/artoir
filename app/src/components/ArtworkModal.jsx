@@ -1,5 +1,41 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { T } from '../lib/tokens'
+
+function ArtworkImage({ artwork }) {
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    setFailed(false)
+  }, [artwork?.image_url])
+
+  if (!artwork?.image_url || failed) {
+    return (
+      <div style={{
+        width: '100%', minHeight: 240, aspectRatio: '1 / 1', background: T.surfaceMuted,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <span style={{
+          fontFamily: T.mono, fontSize: 10, letterSpacing: '0.5px',
+          color: T.ink, textTransform: 'uppercase',
+          background: T.gold, border: `1px solid ${T.ink}`, padding: '4px 8px',
+        }}>
+          {artwork.title}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'grid', placeItems: 'center', padding: 16, background: '#1A1410' }}>
+      <img
+        src={artwork.image_url}
+        alt={artwork.title}
+        onError={() => setFailed(true)}
+        style={{ width: '100%', height: 'auto', maxWidth: 'min(100%, 1280px)', maxHeight: 'calc(100vh - 220px)', objectFit: 'contain', display: 'block', background: '#D9D6CE', borderRadius: 8 }}
+      />
+    </div>
+  )
+}
 
 export default function ArtworkModal({ artwork, onClose }) {
   const open = !!artwork
@@ -41,8 +77,8 @@ export default function ArtworkModal({ artwork, onClose }) {
           type="button"
           style={{
             minWidth: 44, minHeight: 44, padding: 0, borderRadius: 6,
-            border: `1.5px solid ${T.accent}`,
-            background: 'transparent', color: T.accent, cursor: 'pointer',
+            border: `1.5px solid ${T.paper}`,
+            background: 'transparent', color: T.paper, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: T.mono, fontSize: 22, lineHeight: 1, fontWeight: 600,
           }}
@@ -51,27 +87,8 @@ export default function ArtworkModal({ artwork, onClose }) {
         </button>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        {artwork.image_url ? (
-          <img
-            src={artwork.image_url}
-            alt={artwork.title}
-            style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'contain', display: 'block', background: '#D9D6CE' }}
-          />
-        ) : (
-          <div style={{
-            width: '100%', aspectRatio: '1 / 1', background: T.surfaceMuted,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <span style={{
-              fontFamily: T.mono, fontSize: 10, letterSpacing: '0.5px',
-              color: T.ink, textTransform: 'uppercase',
-              background: T.gold, border: `1px solid ${T.ink}`, padding: '4px 8px',
-            }}>
-              {artwork.title}
-            </span>
-          </div>
-        )}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <ArtworkImage artwork={artwork} />
 
         <div style={{ padding: '22px 16px 48px', background: T.card, color: T.ink, borderTop: `3px solid ${T.ink}` }}>
           <div style={{

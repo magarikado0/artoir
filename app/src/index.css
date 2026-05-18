@@ -1082,6 +1082,11 @@ button.ui-account-org-pick-btn.ui-org-row {
   opacity: 0.9;
 }
 
+.ui-artwork-create-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.9fr);
+}
+
 @media (min-width: 820px) {
   .ui-page-shell {
     padding-left: 100px;
@@ -1124,6 +1129,15 @@ button.ui-account-org-pick-btn.ui-org-row {
     padding: 0 10px;
     font-size: 12px;
     gap: 6px;
+  }
+
+  .ui-artwork-create-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ui-artwork-create-cropbox {
+    min-height: 280px;
+    height: min(42vh, 420px);
   }
 
   .ui-toolbar-grid {
