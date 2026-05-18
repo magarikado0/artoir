@@ -32,7 +32,7 @@ function LoggedOut({ isDesktop }) {
           <div style={{ paddingBottom: 8, borderBottom: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.ink }}>ログインでできること</div>
           {benefits.map(([n, t, d]) => (
             <div key={n} className="ui-account-row" style={{ display: 'grid', gridTemplateColumns: '32px 1fr', gap: 10 }}>
-              <div style={{ fontFamily: T.mono, fontSize: 11, color: T.accent }}>{n}</div>
+              <div style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{n}</div>
               <div>
                 <div style={{ fontFamily: T.serif, fontSize: 15, color: T.ink }}>{t}</div>
                 <div style={{ marginTop: 4, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{d}</div>
@@ -79,7 +79,6 @@ function OrgSelector({ orgs, onSelect, isDesktop, session }) {
             <BrandMark size="auth" />
           </Link>
           <div className="ui-account-org-selector-bar-meta">
-            <span className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</span>
             {session?.user?.email && (
               <span className="ui-account-org-selector-email">{session.user.email}</span>
             )}
@@ -143,7 +142,6 @@ function OrgSelector({ orgs, onSelect, isDesktop, session }) {
           <BrandMark size="auth" />
         </Link>
         <div>
-          <div className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</div>
           <div className="ui-auth-masthead-title" style={{ color: T.ink }}>管理する団体</div>
         </div>
         <span>{orgs.length} ORGS</span>

@@ -300,7 +300,6 @@ export default function LoginPage() {
               <BrandMark size="auth" />
             </Link>
             <div>
-              <div className="ui-kicker" style={{ color: T.accent }}>ARTOIR ACCOUNT</div>
               <div className="ui-auth-masthead-title">展示を作る入口</div>
             </div>
             <span>{year}</span>
