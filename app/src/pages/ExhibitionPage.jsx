@@ -5,7 +5,7 @@ import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ArtworkMedia from '../components/ArtworkMedia'
-import { getExhibitionFeeDetail, getExhibitionFeeType } from '../lib/exhibitionFee'
+import { getExhibitionFeeDetail, getExhibitionFeeType } from '../lib/exhibition'
 import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
 
 function MetaPill({ label, value }) {

@@ -1,5 +1,5 @@
 import { T } from '../lib/tokens'
-import { getExhibitionFeeType } from '../lib/exhibitionFee'
+import { getExhibitionFeeType } from '../lib/exhibition'
 
 export default function ExhibitionFeeBadge({ exhibition, style }) {
   const paid = getExhibitionFeeType(exhibition) === 'paid'

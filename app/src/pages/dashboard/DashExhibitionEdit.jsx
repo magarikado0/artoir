@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
-import { getExhibitionFeeType } from '../../lib/exhibitionFee'
+import { getExhibitionFeeType } from '../../lib/exhibition'
 
 const SWATCHES = ['#FAF8F3', '#F3F0E8', '#E7E2D6', '#111110', '#2A2825', '#B4452C']
 
