@@ -81,7 +81,7 @@ export default function DashHome() {
         <div className="ui-app-topline" style={{ marginTop: 8, marginBottom: 0 }}>
           <div>
             <h1 className="ui-screen-title">{org?.name || orgSlug}</h1>
-            {org?.description && <p className="ui-screen-subtitle">{org.description.split('。')[0]}。</p>}
+            {org?.description && <p className="ui-screen-subtitle">{org.description.split('。')[0]}</p>}
           </div>
           <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-pill-action">
             <Icon name="plus" size={18} />

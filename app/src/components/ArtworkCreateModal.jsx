@@ -137,12 +137,12 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
   const canSave = Boolean(croppedAreaPixels) && !saving
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(17,17,16,0.6)', display: 'grid', placeItems: 'center', padding: 16 }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="artwork-create-title" style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(17,17,16,0.6)', display: 'grid', placeItems: 'center', padding: 16 }}>
       <div className="ui-app-card" style={{ width: 'min(100%, 1080px)', maxHeight: 'calc(100vh - 32px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '16px 18px 14px', borderBottom: `1px solid ${T.lineSoft}`, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
           <div>
             <div className="ui-kicker">NEW WORK</div>
-            <div className="ui-screen-title" style={{ fontSize: 22, marginTop: 6 }}>作品を追加</div>
+            <div id="artwork-create-title" className="ui-screen-title" style={{ fontSize: 22, marginTop: 6 }}>作品を追加</div>
           </div>
           <button onClick={onClose} disabled={saving} className="ui-modal-close" type="button" style={{ minWidth: 44, minHeight: 44, padding: 0, borderRadius: 6, border: `1.5px solid ${T.ink}`, background: T.paper, color: T.ink, cursor: saving ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 22, lineHeight: 1, fontWeight: 600 }}>
             ×

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import ImageUploader from '../components/ImageUploader'
+import ArtworkMedia from '../components/ArtworkMedia'
 
 const GAP = 'clamp(2rem, 5vw, 5rem)'
 
@@ -274,7 +275,16 @@ export default function AdminPage() {
             />
             <ImageUploader onUploaded={(url) => setForm((prev) => ({ ...prev, image_url: url }))} />
             {form.image_url && (
-              <img src={form.image_url} alt="preview" style={{ maxHeight: '200px', objectFit: 'contain', border: '1px solid rgba(26,22,18,0.1)' }} />
+              <ArtworkMedia
+                src={form.image_url}
+                alt=""
+                decorative
+                loading="eager"
+                fit="contain"
+                minHeight={120}
+                wrapperStyle={{ maxHeight: '200px', border: '1px solid rgba(26,22,18,0.1)' }}
+                imageStyle={{ objectFit: 'contain', maxHeight: '200px' }}
+              />
             )}
             {message && (
               <p style={{ fontSize: '0.8rem', color: message.includes('失敗') ? '#c0392b' : '#3d7a3d' }}>{message}</p>
@@ -312,9 +322,17 @@ export default function AdminPage() {
               padding: '1rem 0',
               borderBottom: '1px solid rgba(26,22,18,0.08)',
             }}>
-              {artwork.image_url && (
-                <img src={artwork.image_url} alt={artwork.title} style={{ width: '60px', height: '60px', objectFit: 'cover', flexShrink: 0 }} />
-              )}
+              <div style={{ width: '60px', height: '60px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
+                <ArtworkMedia
+                  src={artwork.image_url}
+                  alt=""
+                  decorative
+                  loading="lazy"
+                  fillHeight
+                  wrapperStyle={{ width: '100%', height: '100%' }}
+                  imageStyle={{ objectFit: 'cover' }}
+                />
+              </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: 'Shippori Mincho, serif', fontSize: '0.95rem', color: '#1a1612' }}>{artwork.title}</div>
                 {artwork.description && (

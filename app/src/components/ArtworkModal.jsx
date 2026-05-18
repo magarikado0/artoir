@@ -1,41 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { T } from '../lib/tokens'
-
-function ArtworkImage({ artwork }) {
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    setFailed(false)
-  }, [artwork?.image_url])
-
-  if (!artwork?.image_url || failed) {
-    return (
-      <div style={{
-        width: '100%', minHeight: 240, aspectRatio: '1 / 1', background: T.surfaceMuted,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <span style={{
-          fontFamily: T.mono, fontSize: 10, letterSpacing: '0.5px',
-          color: T.ink, textTransform: 'uppercase',
-          background: T.gold, border: `1px solid ${T.ink}`, padding: '4px 8px',
-        }}>
-          {artwork.title}
-        </span>
-      </div>
-    )
-  }
-
-  return (
-    <div style={{ display: 'grid', placeItems: 'center', padding: 16, background: '#1A1410' }}>
-      <img
-        src={artwork.image_url}
-        alt={artwork.title}
-        onError={() => setFailed(true)}
-        style={{ width: '100%', height: 'auto', maxWidth: 'min(100%, 1280px)', maxHeight: 'calc(100vh - 220px)', objectFit: 'contain', display: 'block', background: '#D9D6CE', borderRadius: 8 }}
-      />
-    </div>
-  )
-}
+import ArtworkMedia from './ArtworkMedia'
 
 export default function ArtworkModal({ artwork, onClose }) {
   const open = !!artwork
@@ -54,7 +19,7 @@ export default function ArtworkModal({ artwork, onClose }) {
   if (!open) return null
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-labelledby="artwork-modal-title" style={{
       position: 'fixed', inset: 0, zIndex: 500,
       background: T.ink, color: T.paper, display: 'flex', flexDirection: 'column',
       animation: 'modalSlideUp 260ms cubic-bezier(.2,.8,.2,1)',
@@ -88,10 +53,22 @@ export default function ArtworkModal({ artwork, onClose }) {
       </div>
 
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <ArtworkImage artwork={artwork} />
+        <div style={{ display: 'grid', placeItems: 'center', padding: 16, background: '#1A1410' }}>
+          <ArtworkMedia
+            src={artwork.image_url}
+            alt={artwork.title}
+            label={artwork.title}
+            loading="eager"
+            fit="contain"
+            minHeight={240}
+            background="#1A1410"
+            wrapperStyle={{ maxWidth: 'min(100%, 1280px)', borderRadius: 8 }}
+            imageStyle={{ background: '#D9D6CE', borderRadius: 8, maxHeight: 'calc(100vh - 220px)' }}
+          />
+        </div>
 
         <div style={{ padding: '22px 16px 48px', background: T.card, color: T.ink, borderTop: `3px solid ${T.ink}` }}>
-          <div style={{
+          <div id="artwork-modal-title" style={{
             fontFamily: T.serif, fontSize: 26, letterSpacing: '0.02em', lineHeight: 1.25,
             color: T.ink,
           }}>

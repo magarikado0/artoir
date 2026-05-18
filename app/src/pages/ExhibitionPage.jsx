@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
+import ArtworkMedia from '../components/ArtworkMedia'
 import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
 
 function MetaPill({ label, value }) {
@@ -13,32 +14,6 @@ function MetaPill({ label, value }) {
       <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.1em', color: T.inkMuted }}>{label}</div>
       <div style={{ marginTop: 3, fontSize: 12, lineHeight: 1.5, color: T.ink }}>{value}</div>
     </div>
-  )
-}
-
-function ArtworkPreview({ artwork, alt, style, className, placeholderStyle, placeholderContent }) {
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    setFailed(false)
-  }, [artwork?.image_url])
-
-  if (!artwork?.image_url || failed) {
-    return (
-      <div style={placeholderStyle}>
-        {placeholderContent}
-      </div>
-    )
-  }
-
-  return (
-    <img
-      src={artwork.image_url}
-      alt={alt}
-      onError={() => setFailed(true)}
-      style={style}
-      className={className}
-    />
   )
 }
 
@@ -134,13 +109,16 @@ export default function ExhibitionPage() {
 
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'start' }}>
           <div className="ui-app-card" style={{ padding: 8, overflow: 'hidden' }}>
-            <ArtworkPreview
-              artwork={featured}
+            <ArtworkMedia
+              src={featured?.image_url}
               alt={featured?.title || exhibition.title}
-              className="ui-exhibition-featured-image"
-              style={{ width: '100%', maxHeight: 640, aspectRatio: '4 / 3', objectFit: 'contain', display: 'block', background: T.ink, borderRadius: 7 }}
-              placeholderStyle={{ width: '100%', aspectRatio: '4 / 3', background: T.surfaceMuted, borderRadius: 7, display: 'grid', placeItems: 'center' }}
-              placeholderContent={<span className="ui-mini-badge">{exhibition.title}</span>}
+              label={featured?.title || exhibition.title}
+              loading="eager"
+              fit="contain"
+              aspectRatio="4 / 3"
+              background={T.ink}
+              wrapperStyle={{ borderRadius: 7 }}
+              imageStyle={{ background: T.ink, borderRadius: 7 }}
             />
           </div>
 
@@ -168,12 +146,14 @@ export default function ExhibitionPage() {
             <div ref={galleryRef} className="ui-exhibition-gallery">
               {artworks.map((w, i) => (
                 <button key={w.id} type="button" className="gallery-item ui-list-card" onClick={() => setSelectedArtwork(w)} style={{ padding: 8, textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
-                  <ArtworkPreview
-                    artwork={w}
-                    alt={w.title || 'artwork image'}
-                    style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block', borderRadius: 7 }}
-                    placeholderStyle={{ width: '100%', aspectRatio: '1 / 1', background: T.surfaceMuted, borderRadius: 7 }}
-                    placeholderContent={null}
+                  <ArtworkMedia
+                    src={w.image_url}
+                    alt=""
+                    decorative
+                    loading="lazy"
+                    aspectRatio="1 / 1"
+                    wrapperStyle={{ borderRadius: 7 }}
+                    imageStyle={{ borderRadius: 7 }}
                   />
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'baseline' }}>
                     <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</span>

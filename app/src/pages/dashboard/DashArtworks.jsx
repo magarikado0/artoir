@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import DashShell from '../../components/DashShell'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkCreateModal from '../../components/ArtworkCreateModal'
+import ArtworkMedia from '../../components/ArtworkMedia'
 import { T, pad2 } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 
@@ -113,11 +114,16 @@ export default function DashArtworks() {
             {artworks.map((w) => (
               <div key={w.id} className="ui-list-card" style={{ padding: 8 }}>
                 <button type="button" onClick={() => editWork(w)} style={{ width: '100%', border: 0, padding: 0, background: 'transparent', cursor: 'pointer' }}>
-                  {w.image_url ? (
-                    <img src={w.image_url} alt="" style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block', borderRadius: 7 }} />
-                  ) : (
-                    <div style={{ width: '100%', aspectRatio: '1 / 1', background: T.surfaceMuted, borderRadius: 7 }} />
-                  )}
+                  <ArtworkMedia
+                    src={w.image_url}
+                    alt=""
+                    decorative
+                    loading="lazy"
+                    fillHeight
+                    aspectRatio="1 / 1"
+                    wrapperStyle={{ borderRadius: 7 }}
+                    imageStyle={{ borderRadius: 7 }}
+                  />
                 </button>
                 <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', gap: 6, alignItems: 'center' }}>
                   <div style={{ fontFamily: T.serif, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '（タイトルなし）'}</div>
@@ -130,7 +136,17 @@ export default function DashArtworks() {
           <div style={{ display: 'grid', gap: 8 }}>
             {artworks.map((w, i) => (
               <div key={w.id} className="ui-list-card" style={{ padding: 10, display: 'grid', gridTemplateColumns: '52px 1fr auto', gap: 10, alignItems: 'center' }}>
-                <div style={{ width: 52, height: 52, borderRadius: 7, background: T.surfaceMuted, overflow: 'hidden' }}>{w.image_url && <img src={w.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}</div>
+                <div style={{ width: 52, height: 52, borderRadius: 7, overflow: 'hidden' }}>
+                  <ArtworkMedia
+                    src={w.image_url}
+                    alt=""
+                    decorative
+                    loading="lazy"
+                    fillHeight
+                    wrapperStyle={{ width: '100%', height: '100%', borderRadius: 7 }}
+                    imageStyle={{ borderRadius: 7 }}
+                  />
+                </div>
                 <button type="button" onClick={() => editWork(w)} style={{ minWidth: 0, textAlign: 'left', border: 0, background: 'transparent', cursor: 'pointer' }}>
                   <div style={{ fontFamily: T.serif, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '（タイトルなし）'}</div>
                   <div style={{ marginTop: 3, fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>#{pad2(i + 1)}</div>
@@ -157,10 +173,21 @@ export default function DashArtworks() {
       />
 
       {editTarget && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(17,17,16,0.44)', display: 'grid', placeItems: 'center', padding: 16 }}>
+        <div role="dialog" aria-modal="true" aria-labelledby="edit-work-title" style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(17,17,16,0.44)', display: 'grid', placeItems: 'center', padding: 16 }}>
           <div className="ui-app-card" style={{ width: 'min(100%, 480px)', maxHeight: 'calc(100vh - 32px)', overflowY: 'auto', padding: 18 }}>
-            <div className="ui-kicker">EDIT WORK</div>
-            {editTarget.image_url && <img src={editTarget.image_url} alt="" style={{ marginTop: 12, width: '100%', maxHeight: 280, objectFit: 'contain', background: T.surfaceMuted, borderRadius: 8 }} />}
+            <div id="edit-work-title" className="ui-kicker">EDIT WORK</div>
+            <div style={{ marginTop: 12 }}>
+              <ArtworkMedia
+                src={editTarget.image_url}
+                alt=""
+                decorative
+                loading="eager"
+                fit="contain"
+                minHeight={160}
+                wrapperStyle={{ borderRadius: 8, background: T.surfaceMuted }}
+                imageStyle={{ borderRadius: 8, maxHeight: 280, objectFit: 'contain' }}
+              />
+            </div>
             <div style={{ marginTop: 14 }}>
               <div className="ui-form-label">TITLE</div>
               <div className="ui-input-wrap"><input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} /></div>
