@@ -112,7 +112,7 @@ export default function ExhibitionPage() {
           <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 展覧会</Link>
           <button onClick={copyLink} className="ui-pill-action" style={{ background: copied ? T.accent : T.ink }}>
             <Icon name="list" size={17} />
-            <span>{copied ? 'コピー済み' : '共有'}</span>
+            <span>{copied ? 'コピー済み' : 'リンクを共有'}</span>
           </button>
         </div>
 
@@ -129,15 +129,14 @@ export default function ExhibitionPage() {
 
           <div>
             <div className="ui-app-card" style={{ padding: 18 }}>
-              <div className="ui-kicker">EXHIBITION</div>
               <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{exhibition.title}</h1>
               {exhibition.description && <p className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>{exhibition.description}</p>}
             </div>
             <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
               <MetaPill label="会期" value={exhibition.start_date ? `${fmtDateDot(exhibition.start_date)} - ${fmtDateDot(exhibition.end_date)}` : ''} />
-              <MetaPill label="作品" value={`${pad2(artworks.length)} works`} />
+              <MetaPill label="作品数" value={`${pad2(artworks.length)} `} />
               <MetaPill label="会場" value={exhibition.location} />
-              <MetaPill label="団体" value={org?.name} />
+              <MetaPill label="主催団体" value={org?.name} />
             </div>
           </div>
         </section>
@@ -146,7 +145,6 @@ export default function ExhibitionPage() {
           <section style={{ marginTop: 22 }}>
             <div className="ui-app-topline">
               <div>
-                <div className="ui-kicker">WORKS</div>
                 <div className="ui-screen-title" style={{ fontSize: 22 }}>作品</div>
               </div>
             </div>
@@ -160,7 +158,7 @@ export default function ExhibitionPage() {
                   )}
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'baseline' }}>
                     <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</span>
-                    <span style={{ fontFamily: T.serif, fontSize: 14, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || 'Untitled'}</span>
+                    <span style={{ fontFamily: T.serif, fontSize: 14, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '-'}</span>
                   </div>
                 </button>
               ))}
