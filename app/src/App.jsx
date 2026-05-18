@@ -1,22 +1,23 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import { peekSupabaseAuthUrlErrorFromWindow, isGoogleExchangeExternalCodeError, getSupabaseAuthCallbackUrlForGoogle } from './lib/oauthUrlError'
 import { AuthContext } from './lib/auth'
-import AllExhibitionsPage from './pages/AllExhibitionsPage'
-import OrgsPage from './pages/OrgsPage'
-import OrgPage from './pages/OrgPage'
-import ExhibitionPage from './pages/ExhibitionPage'
-import LoginPage from './pages/LoginPage'
-import AdminPage from './pages/AdminPage'
 import ProtectedRoute from './components/ProtectedRoute'
-import DashHome from './pages/dashboard/DashHome'
-import DashSettings from './pages/dashboard/DashSettings'
-import DashExhibitionEdit from './pages/dashboard/DashExhibitionEdit'
-import DashArtworks from './pages/dashboard/DashArtworks'
-import AccountPage from './pages/AccountPage'
-import AccountSetup from './pages/AccountSetup'
 import OAuthReturnRedirect from './components/OAuthReturnRedirect'
+
+const AllExhibitionsPage = lazy(() => import('./pages/AllExhibitionsPage'))
+const OrgsPage = lazy(() => import('./pages/OrgsPage'))
+const OrgPage = lazy(() => import('./pages/OrgPage'))
+const ExhibitionPage = lazy(() => import('./pages/ExhibitionPage'))
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const AdminPage = lazy(() => import('./pages/AdminPage'))
+const DashHome = lazy(() => import('./pages/dashboard/DashHome'))
+const DashSettings = lazy(() => import('./pages/dashboard/DashSettings'))
+const DashExhibitionEdit = lazy(() => import('./pages/dashboard/DashExhibitionEdit'))
+const DashArtworks = lazy(() => import('./pages/dashboard/DashArtworks'))
+const AccountPage = lazy(() => import('./pages/AccountPage'))
+const AccountSetup = lazy(() => import('./pages/AccountSetup'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -138,21 +139,27 @@ export default function App() {
         <SupabaseOAuthErrorBanner />
         <OAuthReturnRedirect />
         <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<AllExhibitionsPage />} />
-          <Route path="/orgs" element={<OrgsPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/account/setup" element={<AccountSetup />} />
-          <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
-          <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-          <Route path="/:orgSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
-          <Route path="/:orgSlug/dashboard/settings" element={<ProtectedRoute><DashSettings /></ProtectedRoute>} />
-          <Route path="/:orgSlug/dashboard/exhibitions/new" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
-          <Route path="/:orgSlug/dashboard/exhibitions/:exhibitionId/edit" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
-          <Route path="/:orgSlug/dashboard/exhibitions/:exhibitionId/artworks" element={<ProtectedRoute><DashArtworks /></ProtectedRoute>} />
-          <Route path="/:orgSlug" element={<OrgPage />} />
-        </Routes>
+        <Suspense fallback={(
+          <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', fontFamily: 'system-ui, sans-serif', fontSize: 14, color: '#524a42' }}>
+            読み込み中…
+          </div>
+        )}>
+          <Routes>
+            <Route path="/" element={<AllExhibitionsPage />} />
+            <Route path="/orgs" element={<OrgsPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/account/setup" element={<AccountSetup />} />
+            <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
+            <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+            <Route path="/:orgSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
+            <Route path="/:orgSlug/dashboard/settings" element={<ProtectedRoute><DashSettings /></ProtectedRoute>} />
+            <Route path="/:orgSlug/dashboard/exhibitions/new" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
+            <Route path="/:orgSlug/dashboard/exhibitions/:exhibitionId/edit" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
+            <Route path="/:orgSlug/dashboard/exhibitions/:exhibitionId/artworks" element={<ProtectedRoute><DashArtworks /></ProtectedRoute>} />
+            <Route path="/:orgSlug" element={<OrgPage />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </AuthContext.Provider>
   )

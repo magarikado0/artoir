@@ -6,7 +6,7 @@ import BottomNav from '../components/BottomNav'
 import { T, fmtDateDot, pad2 } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
 
-const FILTERS = ['ALL', 'OPEN NOW', 'UPCOMING']
+const FILTERS = ['全て', '開催中', '予定']
 
 function startOfToday() {
   const d = new Date()

@@ -59,6 +59,21 @@ export default function ExhibitionPage() {
     return () => observer.disconnect()
   }, [artworks])
 
+  useEffect(() => {
+    const handlePopState = (event) => {
+      const artworkId = event.state?.artworkModalArtworkId
+      if (!artworkId) {
+        setSelectedArtwork(null)
+        return
+      }
+      const nextArtwork = artworks.find((artwork) => String(artwork.id) === String(artworkId)) || null
+      setSelectedArtwork(nextArtwork)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [artworks])
+
   async function copyLink() {
     const url = window.location.href
     try {
@@ -80,6 +95,19 @@ export default function ExhibitionPage() {
         document.body.removeChild(el)
       }
     }
+  }
+
+  function openArtwork(artwork) {
+    window.history.pushState({ artworkModalArtworkId: artwork.id }, '', window.location.href)
+    setSelectedArtwork(artwork)
+  }
+
+  function closeArtwork() {
+    if (window.history.state?.artworkModalArtworkId) {
+      window.history.back()
+      return
+    }
+    setSelectedArtwork(null)
   }
 
   if (loading) return (
@@ -145,7 +173,7 @@ export default function ExhibitionPage() {
           {artworks.length > 0 ? (
             <div ref={galleryRef} className="ui-exhibition-gallery">
               {artworks.map((w, i) => (
-                <button key={w.id} type="button" className="gallery-item ui-list-card" onClick={() => setSelectedArtwork(w)} style={{ padding: 8, textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
+                <button key={w.id} type="button" className="gallery-item ui-list-card" onClick={() => openArtwork(w)} style={{ padding: 8, textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
                   <ArtworkMedia
                     src={w.image_url}
                     alt=""
@@ -169,7 +197,7 @@ export default function ExhibitionPage() {
           )}
         </section>
       </main>
-      <ArtworkModal artwork={selectedArtwork} onClose={() => setSelectedArtwork(null)} />
+      <ArtworkModal artwork={selectedArtwork} onClose={closeArtwork} />
       <BottomNav active="top" />
     </div>
   )
