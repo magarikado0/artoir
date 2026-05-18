@@ -11,3 +11,14 @@ export default function BrandMark({ className = '', size = 'default' }) {
     />
   )
 }
+
+export function BrandLockup({ className = '' }) {
+  return (
+    <span className={`ui-brand-lockup ${className}`.trim()}>
+      <span className="ui-brand-lockup-mark">
+        <BrandMark size="lockup" />
+      </span>
+      <span className="ui-brand-lockup-word">Artoir</span>
+    </span>
+  )
+}

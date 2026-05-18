@@ -1,9 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
-import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
-import BrandMark from './BrandMark'
+import BrandMark, { BrandLockup } from './BrandMark'
 
 const TABS = [
   { key: 'top', label: 'Exhibits', path: '/', icon: 'list' },
@@ -85,11 +84,8 @@ export default function Header({ activeTab }) {
 
   return (
     <div className="ui-mobile-topbar">
-      <Link to="/" style={{
-        fontFamily: T.serif, fontSize: 19, letterSpacing: 0, fontWeight: 500,
-        color: T.ink, textDecoration: 'none', lineHeight: 1.2,
-      }}>
-        Artoir<span style={{ color: T.accent }}>.</span>
+      <Link to="/" className="ui-mobile-brand" aria-label="Artoir home">
+        <BrandLockup />
       </Link>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Link to="/account" className={`ui-top-icon ${activeTab === 'account' ? 'is-active' : ''}`} aria-label="アカウント">

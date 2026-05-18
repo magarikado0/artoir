@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
-import BrandMark from './BrandMark'
+import BrandMark, { BrandLockup } from './BrandMark'
 import BottomNav from './BottomNav'
 import { Icon } from './Header'
 
@@ -35,7 +35,10 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
       <DashNav orgSlug={orgSlug} />
       <main className="ui-app-main">
         <div className="ui-app-topline">
-          <div>
+          <div className="ui-dashboard-header-title">
+            <Link to="/" className="ui-header-brand" aria-label="Artoir home">
+              <BrandLockup />
+            </Link>
             <div className="ui-kicker">DASHBOARD</div>
             <div className="ui-crumbs">
               {crumbs.length > 0 ? crumbs.map((c, i) => (
@@ -56,8 +59,8 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
   return (
     <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans, paddingBottom: 92 }}>
       <div className="ui-mobile-topbar">
-        <Link to="/" style={{ fontFamily: T.serif, fontSize: 19, color: T.ink, textDecoration: 'none' }}>
-          Artoir<span style={{ color: T.accent }}>.</span>
+        <Link to="/" className="ui-mobile-brand" aria-label="Artoir home">
+          <BrandLockup />
         </Link>
       </div>
       {crumbs.length > 0 && (
