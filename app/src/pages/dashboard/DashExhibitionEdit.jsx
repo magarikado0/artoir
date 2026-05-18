@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
+import { getExhibitionFeeType } from '../../lib/exhibitionFee'
 
 const SWATCHES = ['#FAF8F3', '#F3F0E8', '#E7E2D6', '#111110', '#2A2825', '#B4452C']
 
@@ -54,6 +55,8 @@ export default function DashExhibitionEdit() {
   const [endTime, setEndTime] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
+  const [feeType, setFeeType] = useState('free')
+  const [feeDetail, setFeeDetail] = useState('')
   const [bgColor, setBgColor] = useState('#FAF8F3')
 
   function onStartDateChange(next) {
@@ -90,6 +93,8 @@ export default function DashExhibitionEdit() {
             setEndTime(exh.end_time || '')
             setLocation(exh.location || '')
             setDescription(exh.description || '')
+            setFeeType(getExhibitionFeeType(exh))
+            setFeeDetail(exh.fee_detail || '')
             setBgColor(exh.bg_color || '#FAF8F3')
           }
         }
@@ -105,11 +110,28 @@ export default function DashExhibitionEdit() {
       window.alert('終了日は開始日以降である必要があります。')
       return
     }
+    if (feeType === 'paid' && !feeDetail.trim()) {
+      window.alert('有料の場合は料金詳細を入力してください。')
+      return
+    }
     setSaving(true)
     let nextPath = null
     try {
       const finalSlug = (isNew || !slug) ? await generateUniqueSlug(org.id, title) : slug
-      const payload = { title, slug: finalSlug, start_date: startDate || null, start_time: startTime || null, end_date: endDate || null, end_time: endTime || null, location, description, bg_color: bgColor, org_id: org.id }
+      const payload = {
+        title,
+        slug: finalSlug,
+        start_date: startDate || null,
+        start_time: startTime || null,
+        end_date: endDate || null,
+        end_time: endTime || null,
+        location,
+        description,
+        fee_type: feeType,
+        fee_detail: feeType === 'paid' ? feeDetail.trim() : null,
+        bg_color: bgColor,
+        org_id: org.id,
+      }
       if (isNew) {
         const { data, error } = await supabase.from('exhibitions').insert(payload).select().single()
         if (error) {
@@ -178,6 +200,26 @@ export default function DashExhibitionEdit() {
         placeholder="展覧会の説明文を入力..."
         help="公開ページのヒーロー下に表示されます（最大 400 文字）。"
       />
+
+      <DashSectionLabel>料金</DashSectionLabel>
+      <div style={{ display: 'grid', gap: 10 }}>
+        <div className="ui-segment" style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+          <button type="button" onClick={() => setFeeType('free')} className={feeType === 'free' ? 'is-active' : ''}>無料</button>
+          <button type="button" onClick={() => setFeeType('paid')} className={feeType === 'paid' ? 'is-active' : ''}>有料</button>
+        </div>
+        {feeType === 'paid' ? (
+          <DashField
+            label="料金詳細"
+            value={feeDetail}
+            onChange={setFeeDetail}
+            multiline
+            placeholder="例: 一般 500円 / 学生 300円 / 中学生以下無料"
+            help="有料の場合は、公開ページに表示する料金情報を自由記述で入力してください。"
+          />
+        ) : (
+          <div className="ui-field-help">無料の展覧会として表示されます。</div>
+        )}
+      </div>
 
       <DashSectionLabel>背景色</DashSectionLabel>
       <div style={{ padding: 12, border: `1px solid ${T.ink}`, background: T.card }}>

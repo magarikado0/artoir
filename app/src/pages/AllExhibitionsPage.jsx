@@ -5,6 +5,7 @@ import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { T, fmtDateDot, pad2 } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
+import ExhibitionFeeBadge from '../components/ExhibitionFeeBadge'
 
 const FILTERS = ['全て', '開催中', '予定']
 
@@ -52,6 +53,7 @@ function ExhibitionCard({ row }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
             <StatusDot exhibition={exh} />
+            <ExhibitionFeeBadge exhibition={exh} />
             <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{fmtDateDot(exh.start_date)}</span>
           </div>
           <div style={{ fontFamily: T.serif, fontSize: 18, lineHeight: 1.35, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>

@@ -5,6 +5,7 @@ import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ArtworkMedia from '../components/ArtworkMedia'
+import { getExhibitionFeeDetail, getExhibitionFeeType } from '../lib/exhibitionFee'
 import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
 
 function MetaPill({ label, value }) {
@@ -122,6 +123,8 @@ export default function ExhibitionPage() {
   )
 
   const featured = artworks[0]
+  const feeType = getExhibitionFeeType(exhibition)
+  const feeDetail = getExhibitionFeeDetail(exhibition)
 
   return (
     <div className="ui-page-shell">
@@ -160,6 +163,12 @@ export default function ExhibitionPage() {
               <MetaPill label="作品数" value={`${pad2(artworks.length)} `} />
               <MetaPill label="会場" value={exhibition.location} />
               <MetaPill label="主催団体" value={org?.name} />
+              <MetaPill label="料金" value={feeType === 'paid' ? (
+                <div style={{ display: 'grid', gap: 3 }}>
+                  <div style={{ fontFamily: T.serif, fontSize: 14, lineHeight: 1.45, color: T.ink }}>有料</div>
+                  {feeDetail ? <div style={{ fontSize: 11, lineHeight: 1.65, color: T.inkSoft, whiteSpace: 'pre-wrap' }}>{feeDetail}</div> : <div style={{ fontSize: 11, lineHeight: 1.65, color: T.inkMuted }}>料金詳細は未設定です</div>}
+                </div>
+              ) : '無料'} />
             </div>
           </div>
         </section>

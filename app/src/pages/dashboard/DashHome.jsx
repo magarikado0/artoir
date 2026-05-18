@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { StatusBadge } from '../../components/DashShell'
 import { exhStatus } from '../../lib/exhibitionStatus'
+import ExhibitionFeeBadge from '../../components/ExhibitionFeeBadge'
 import { T, fmtDateDot, pad2 } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 
@@ -22,6 +23,7 @@ function DashExhibitionCard({ exh, orgSlug, navigate }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7, flexWrap: 'wrap' }}>
             <StatusBadge kind={status} />
+            <ExhibitionFeeBadge exhibition={exh} />
             <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{fmtDateDot(exh.start_date)}</span>
           </div>
           <div style={{ fontFamily: T.serif, fontSize: 18, lineHeight: 1.35, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
