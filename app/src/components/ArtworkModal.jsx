@@ -60,10 +60,9 @@ export default function ArtworkModal({ artwork, onClose }) {
             label={artwork.title}
             loading="eager"
             fit="contain"
-            minHeight={240}
             background="#1A1410"
-            wrapperStyle={{ maxWidth: 'min(100%, 1280px)', borderRadius: 8 }}
-            imageStyle={{ background: '#D9D6CE', borderRadius: 8, maxHeight: 'calc(100vh - 220px)' }}
+            wrapperStyle={{ width: '100%', height: 'min(72vh, calc(100vh - 220px))', maxWidth: 'min(100%, 1280px)', borderRadius: 8 }}
+            imageStyle={{ background: '#D9D6CE', borderRadius: 8 }}
           />
         </div>
 
