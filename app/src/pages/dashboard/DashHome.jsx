@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { StatusBadge } from '../../components/DashShell'
-import { exhStatus } from '../../lib/exhibition'
+import ArtworkMedia from '../../components/ArtworkMedia'
+import { exhStatus, getExhibitionThumbnailUrl } from '../../lib/exhibition'
 import ExhibitionFeeBadge from '../../components/ExhibitionFeeBadge'
 import { T, fmtDateDot, pad2 } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
@@ -10,15 +11,29 @@ import { Icon } from '../../components/Header'
 function DashExhibitionCard({ exh, orgSlug, navigate }) {
   const status = exhStatus(exh)
   const placeholderBg = `linear-gradient(135deg, ${T.surfaceMuted}, ${T.mint} 58%, ${T.blush})`
+  const thumbnailUrl = getExhibitionThumbnailUrl(exh)
   return (
     <div
-      onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`)}
+      onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`)}
       className="ui-list-card"
       style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10, cursor: 'pointer' }}
     >
-      <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-        <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
-      </div>
+      {thumbnailUrl ? (
+        <ArtworkMedia
+          src={thumbnailUrl}
+          alt=""
+          decorative
+          loading="lazy"
+          aspectRatio="1 / 1"
+          fit="cover"
+          wrapperStyle={{ width: 96, borderRadius: 7, boxShadow: `inset 0 -3px 0 ${T.gold}` }}
+          imageStyle={{ borderRadius: 7 }}
+        />
+      ) : (
+        <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+          <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
+        </div>
+      )}
       <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7, flexWrap: 'wrap' }}>
@@ -27,15 +42,11 @@ function DashExhibitionCard({ exh, orgSlug, navigate }) {
             <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{fmtDateDot(exh.start_date)}</span>
           </div>
           <div style={{ fontFamily: T.serif, fontSize: 18, lineHeight: 1.35, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
-          <div style={{ marginTop: 4, fontSize: 12, color: T.inkMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: T.mono }}>
-            {exh.slug || '—'}
-          </div>
         </div>
         <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 11, color: T.inkSoft, alignItems: 'center' }}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exh.location || '会場未設定'}</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, fontFamily: T.mono, fontSize: 10 }}>
-            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`} onClick={(e) => e.stopPropagation()} style={{ color: T.accent, textDecoration: 'none' }}>WORKS</Link>
-            <span style={{ color: T.inkMuted }}>EDIT →</span>
+            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} onClick={(e) => e.stopPropagation()} style={{ color: T.accent, textDecoration: 'none' }}>EDIT →</Link>
           </span>
         </div>
       </div>
@@ -77,9 +88,8 @@ export default function DashHome() {
   const liveCount = exhibitions.filter((e) => exhStatus(e) === 'live').length
 
   return (
-    <DashShell orgSlug={orgSlug} crumbs={['HOME']}>
+    <DashShell orgSlug={orgSlug} >
       <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
-        <div className="ui-kicker">SIGNED IN</div>
         <div className="ui-app-topline" style={{ marginTop: 8, marginBottom: 0 }}>
           <div>
             <h1 className="ui-screen-title">{org?.name || orgSlug}</h1>
@@ -87,7 +97,7 @@ export default function DashHome() {
           </div>
           <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-pill-action">
             <Icon name="plus" size={18} />
-            <span>作成</span>
+            <span>新規展覧会作成</span>
           </button>
         </div>
       </section>

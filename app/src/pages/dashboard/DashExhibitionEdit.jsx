@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
+import ImageUploader from '../../components/ImageUploader'
+import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
-import { getExhibitionFeeType } from '../../lib/exhibition'
+import { getExhibitionFeeType, getExhibitionThumbnailUrl } from '../../lib/exhibition'
 
 const SWATCHES = ['#FAF8F3', '#F3F0E8', '#E7E2D6', '#111110', '#2A2825', '#B4452C']
 
@@ -55,6 +57,7 @@ export default function DashExhibitionEdit() {
   const [endTime, setEndTime] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
+  const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [feeType, setFeeType] = useState('free')
   const [feeDetail, setFeeDetail] = useState('')
   const [bgColor, setBgColor] = useState('#FAF8F3')
@@ -93,6 +96,7 @@ export default function DashExhibitionEdit() {
             setEndTime(exh.end_time || '')
             setLocation(exh.location || '')
             setDescription(exh.description || '')
+            setThumbnailUrl(getExhibitionThumbnailUrl(exh))
             setFeeType(getExhibitionFeeType(exh))
             setFeeDetail(exh.fee_detail || '')
             setBgColor(exh.bg_color || '#FAF8F3')
@@ -127,6 +131,7 @@ export default function DashExhibitionEdit() {
         end_time: endTime || null,
         location,
         description,
+        thumbnail_url: thumbnailUrl || null,
         fee_type: feeType,
         fee_detail: feeType === 'paid' ? feeDetail.trim() : null,
         bg_color: bgColor,
@@ -200,6 +205,35 @@ export default function DashExhibitionEdit() {
         placeholder="展覧会の説明文を入力..."
         help="公開ページのヒーロー下に表示されます（最大 400 文字）。"
       />
+
+      <DashSectionLabel>サムネイル</DashSectionLabel>
+      <div style={{ display: 'grid', gap: 10 }}>
+        {thumbnailUrl ? (
+          <div style={{ display: 'grid', gap: 8 }}>
+            <ArtworkMedia
+              src={thumbnailUrl}
+              alt={title || '展覧会サムネイル'}
+              label={title || '展覧会サムネイル'}
+              loading="eager"
+              fit="cover"
+              aspectRatio="16 / 9"
+              wrapperStyle={{ borderRadius: 7 }}
+              imageStyle={{ borderRadius: 7 }}
+            />
+            <button type="button" onClick={() => setThumbnailUrl('')} className="ui-icon-button" style={{ width: 'fit-content', padding: '10px 14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+              サムネイルを削除
+            </button>
+          </div>
+        ) : (
+          <div className="ui-field-help">公開ページと一覧の先頭で使う画像です。設定しない場合は作品画像の先頭を使います。</div>
+        )}
+        <ImageUploader onUploaded={(url) => setThumbnailUrl(url)}>
+          <div style={{ display: 'grid', gap: 6 }}>
+            <div style={{ fontFamily: T.serif, fontSize: 14, color: T.ink }}>画像をアップロード</div>
+            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>クリックまたはドラッグ&ドロップ</div>
+          </div>
+        </ImageUploader>
+      </div>
 
       <DashSectionLabel>料金</DashSectionLabel>
       <div style={{ display: 'grid', gap: 10 }}>

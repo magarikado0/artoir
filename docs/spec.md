@@ -44,6 +44,7 @@ organizations
 | location | string |
 | description | text |
 | bg_color | string (hex) |
+| thumbnail_url | string |
 
 ### artworks
 
@@ -80,6 +81,7 @@ organizations
 ### 展覧会ページ
 
 - タイトル・会期・場所・説明
+- サムネイル（あれば一覧・先頭画像として表示）
 - 作品グリッド（3カラム）
 - 作品クリック → モーダル（画像・タイトル・説明）
 - 背景色は `bg_color` で制御

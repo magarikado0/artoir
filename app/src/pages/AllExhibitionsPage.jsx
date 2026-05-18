@@ -6,6 +6,8 @@ import BottomNav from '../components/BottomNav'
 import { T, fmtDateDot, pad2 } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
 import ExhibitionFeeBadge from '../components/ExhibitionFeeBadge'
+import ArtworkMedia from '../components/ArtworkMedia'
+import { getExhibitionThumbnailUrl } from '../lib/exhibition'
 
 const FILTERS = ['全て', '開催中', '予定']
 
@@ -44,11 +46,25 @@ function StatusDot({ exhibition }) {
 function ExhibitionCard({ row }) {
   const { exhibition: exh, org } = row
   const placeholderBg = `linear-gradient(135deg, ${T.surfaceMuted}, ${T.mint} 58%, ${T.blush})`
+  const thumbnailUrl = getExhibitionThumbnailUrl(exh)
   return (
     <Link to={`/${org?.slug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card" style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10 }}>
-      <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-        <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
-      </div>
+      {thumbnailUrl ? (
+        <ArtworkMedia
+          src={thumbnailUrl}
+          alt=""
+          decorative
+          loading="lazy"
+          aspectRatio="1 / 1"
+          fit="cover"
+          wrapperStyle={{ width: 96, borderRadius: 7, boxShadow: `inset 0 -3px 0 ${T.gold}` }}
+          imageStyle={{ borderRadius: 7 }}
+        />
+      ) : (
+        <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+          <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
+        </div>
+      )}
       <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>

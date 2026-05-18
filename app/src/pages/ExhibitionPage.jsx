@@ -5,7 +5,7 @@ import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ArtworkMedia from '../components/ArtworkMedia'
-import { getExhibitionFeeDetail, getExhibitionFeeType } from '../lib/exhibition'
+import { getExhibitionFeeDetail, getExhibitionFeeType, getExhibitionThumbnailUrl } from '../lib/exhibition'
 import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
 
 function MetaPill({ label, value }) {
@@ -125,6 +125,7 @@ export default function ExhibitionPage() {
   const featured = artworks[0]
   const feeType = getExhibitionFeeType(exhibition)
   const feeDetail = getExhibitionFeeDetail(exhibition)
+  const heroImage = getExhibitionThumbnailUrl(exhibition) || featured?.image_url
 
   return (
     <div className="ui-page-shell">
@@ -141,11 +142,11 @@ export default function ExhibitionPage() {
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'start' }}>
           <div className="ui-app-card" style={{ padding: 8, overflow: 'hidden' }}>
             <ArtworkMedia
-              src={featured?.image_url}
-              alt={featured?.title || exhibition.title}
-              label={featured?.title || exhibition.title}
+              src={heroImage}
+              alt={exhibition.title}
+              label={getExhibitionThumbnailUrl(exhibition) ? exhibition.title : featured?.title || exhibition.title}
               loading="eager"
-              fit="contain"
+              fit={getExhibitionThumbnailUrl(exhibition) ? 'cover' : 'contain'}
               aspectRatio="4 / 3"
               background={T.ink}
               wrapperStyle={{ borderRadius: 7 }}

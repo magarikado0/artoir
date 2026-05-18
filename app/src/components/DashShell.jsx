@@ -119,9 +119,9 @@ export function DashSectionLabel({ children }) {
 
 export function StatusBadge({ kind }) {
   const map = {
-    live: { label: 'LIVE', color: T.paper, bg: T.accent },
-    upcoming: { label: 'UPCOMING', color: T.ink, bg: T.gold },
-    ended: { label: 'ENDED', color: T.inkMuted, bg: T.paperAlt, border: true },
+    live: { label: '開催中', color: T.paper, bg: T.accent },
+    upcoming: { label: '予定', color: T.ink, bg: T.gold },
+    ended: { label: '終了', color: T.inkMuted, bg: T.paperAlt, border: true },
   }
   const m = map[kind] || map.ended
   return (

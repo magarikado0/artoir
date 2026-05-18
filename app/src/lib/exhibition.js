@@ -26,3 +26,7 @@ export function getExhibitionFeeSummary(exhibition) {
   const feeDetail = getExhibitionFeeDetail(exhibition)
   return feeDetail ? `有料 / ${feeDetail}` : '有料'
 }
+
+export function getExhibitionThumbnailUrl(exhibition) {
+  return String(exhibition?.thumbnail_url || '').trim()
+}

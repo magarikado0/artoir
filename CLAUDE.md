@@ -45,7 +45,7 @@ organizations
 各テーブルの主なフィールド：
 
 **organizations**: name, slug, description, sns_links, homepage_url
-**exhibitions**: org_id, title, slug, start_date, end_date, location, description, bg_color
+**exhibitions**: org_id, title, slug, start_date, end_date, location, description, bg_color, thumbnail_url
 **artworks**: exhibition_id, title, description, image_url, order
 
 ---
