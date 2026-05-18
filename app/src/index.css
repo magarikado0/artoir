@@ -1057,6 +1057,25 @@ button.ui-account-org-pick-btn.ui-org-row {
   transform: translateY(0);
 }
 
+.ui-exhibition-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 820px) {
+  .ui-exhibition-gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .ui-exhibition-gallery {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .ui-modal-close:hover,
 .ui-pill-action:hover,
 .ui-floating-action:hover {

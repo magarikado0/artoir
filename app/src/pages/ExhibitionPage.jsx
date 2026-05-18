@@ -138,7 +138,7 @@ export default function ExhibitionPage() {
             </div>
           </div>
           {artworks.length > 0 ? (
-            <div ref={galleryRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10 }}>
+            <div ref={galleryRef} className="ui-exhibition-gallery">
               {artworks.map((w, i) => (
                 <button key={w.id} type="button" className="gallery-item ui-list-card" onClick={() => setSelectedArtwork(w)} style={{ padding: 8, textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
                   {w.image_url ? (
