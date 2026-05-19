@@ -216,8 +216,8 @@ export default function DashExhibitionEdit() {
               label={title || '展覧会サムネイル'}
               loading="eager"
               fit="cover"
-              aspectRatio="16 / 9"
-              wrapperStyle={{ borderRadius: 7 }}
+              aspectRatio="1 / 1"
+              wrapperStyle={{ width: 'min(220px, 100%)', borderRadius: 7 }}
               imageStyle={{ borderRadius: 7 }}
             />
             <button type="button" onClick={() => setThumbnailUrl('')} className="ui-icon-button" style={{ width: 'fit-content', padding: '10px 14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
@@ -225,14 +225,16 @@ export default function DashExhibitionEdit() {
             </button>
           </div>
         ) : (
-          <div className="ui-field-help">公開ページと一覧の先頭で使う画像です。設定しない場合は作品画像の先頭を使います。</div>
+          <>
+            <div className="ui-field-help">公開ページと一覧の先頭で使う画像です。設定しない場合は作品画像の先頭を使います。</div>
+            <ImageUploader onUploaded={(url) => setThumbnailUrl(url)}>
+              <div style={{ display: 'grid', gap: 6 }}>
+                <div style={{ fontFamily: T.serif, fontSize: 14, color: T.ink }}>画像をアップロード</div>
+                <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>クリックまたはドラッグ&ドロップ</div>
+              </div>
+            </ImageUploader>
+          </>
         )}
-        <ImageUploader onUploaded={(url) => setThumbnailUrl(url)}>
-          <div style={{ display: 'grid', gap: 6 }}>
-            <div style={{ fontFamily: T.serif, fontSize: 14, color: T.ink }}>画像をアップロード</div>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>クリックまたはドラッグ&ドロップ</div>
-          </div>
-        </ImageUploader>
       </div>
 
       <DashSectionLabel>料金</DashSectionLabel>
