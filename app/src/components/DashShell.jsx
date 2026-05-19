@@ -8,9 +8,9 @@ import { Icon } from './Header'
 function DashNav({ orgSlug }) {
   const items = [
     [`/${orgSlug}/dashboard`, 'Home', 'list'],
-    [`/${orgSlug}/dashboard/exhibitions/new`, 'New', 'plus'],
-    [`/${orgSlug}/dashboard/settings`, 'Settings', 'user'],
-    [`/${orgSlug}`, 'Public', 'org'],
+    [`/${orgSlug}/dashboard/exhibitions/new`, '展覧会作成', 'plus'],
+    [`/${orgSlug}/dashboard/settings`, '団体設定', 'user'],
+    [`/${orgSlug}`, '公開', 'org'],
   ]
   return (
     <aside className="ui-side-rail">
