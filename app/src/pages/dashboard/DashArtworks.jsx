@@ -7,6 +7,7 @@ import ArtworkCreateModal from '../../components/ArtworkCreateModal'
 import ArtworkMedia from '../../components/ArtworkMedia'
 import { T, pad2 } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
+import { getExhibitionThumbnailUrl } from '../../lib/exhibition'
 
 export default function DashArtworks() {
   const { orgSlug, exhibitionId } = useParams()
@@ -19,6 +20,7 @@ export default function DashArtworks() {
   const [editDesc, setEditDesc] = useState('')
   const [viewMode, setViewMode] = useState('grid')
   const [createFile, setCreateFile] = useState(null)
+  const thumbnailUrl = getExhibitionThumbnailUrl(exhibition)
 
   useEffect(() => {
     if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
@@ -79,9 +81,21 @@ export default function DashArtworks() {
         <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
           <div className="ui-kicker">{exhibition?.title || 'WORKS'}</div>
           <div className="ui-app-topline" style={{ marginTop: 8, marginBottom: 0 }}>
-            <div>
-              <h1 className="ui-screen-title">作品管理</h1>
-              <p className="ui-screen-subtitle">{pad2(artworks.length)} works</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+              <ArtworkMedia
+                src={thumbnailUrl}
+                alt={exhibition?.title || '展覧会サムネイル'}
+                label={exhibition?.title || '展覧会サムネイル'}
+                loading="eager"
+                fit="cover"
+                aspectRatio="1 / 1"
+                wrapperStyle={{ width: 56, borderRadius: 8, flexShrink: 0 }}
+                imageStyle={{ borderRadius: 8 }}
+              />
+              <div style={{ minWidth: 0 }}>
+                <h1 className="ui-screen-title">作品管理</h1>
+                <p className="ui-screen-subtitle">{pad2(artworks.length)} works</p>
+              </div>
             </div>
             <div className="ui-segment">
               {['grid', 'list'].map((m) => <button key={m} type="button" onClick={() => setViewMode(m)} className={viewMode === m ? 'is-active' : ''}>{m.toUpperCase()}</button>)}

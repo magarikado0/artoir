@@ -16,7 +16,7 @@ function DashExhibitionCard({ exh, orgSlug, navigate }) {
     <div
       onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`)}
       className="ui-list-card"
-      style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10, cursor: 'pointer' }}
+      style={{ display: 'grid', gridTemplateColumns: '112px 1fr', gap: 12, padding: 10, cursor: 'pointer' }}
     >
       {thumbnailUrl ? (
         <ArtworkMedia
@@ -26,11 +26,11 @@ function DashExhibitionCard({ exh, orgSlug, navigate }) {
           loading="lazy"
           aspectRatio="1 / 1"
           fit="cover"
-          wrapperStyle={{ width: 96, borderRadius: 7, boxShadow: `inset 0 -3px 0 ${T.gold}` }}
+          wrapperStyle={{ width: 112, borderRadius: 7, boxShadow: `inset 0 -3px 0 ${T.gold}` }}
           imageStyle={{ borderRadius: 7 }}
         />
       ) : (
-        <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+        <div style={{ width: 112, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
           <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
         </div>
       )}

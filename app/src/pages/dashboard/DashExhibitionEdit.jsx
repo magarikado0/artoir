@@ -191,10 +191,30 @@ export default function DashExhibitionEdit() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
         <DashField label="START" value={startDate} onChange={onStartDateChange} placeholder="YYYY-MM-DD" mono type="date" />
         <DashField label="START TIME" value={startTime} onChange={setStartTime} placeholder="--:--" mono type="time" />
-        <DashField label="END" value={endDate} onChange={onEndDateChange} placeholder="YYYY-MM-DD" mono type="date" min={startDate || undefined} help={startDate ? '開始日以降のみ選択できます。' : undefined} />
+        <DashField label="END" value={endDate} onChange={onEndDateChange} placeholder="YYYY-MM-DD" mono type="date" min={startDate || undefined} />
         <DashField label="END TIME" value={endTime} onChange={setEndTime} placeholder="--:--" mono type="time" />
       </div>
       <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
+
+      <DashSectionLabel>料金</DashSectionLabel>
+      <div style={{ display: 'grid', gap: 10 }}>
+        <div className="ui-segment" style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+          <button type="button" onClick={() => setFeeType('free')} className={feeType === 'free' ? 'is-active' : ''}>無料</button>
+          <button type="button" onClick={() => setFeeType('paid')} className={feeType === 'paid' ? 'is-active' : ''}>有料</button>
+        </div>
+        {feeType === 'paid' ? (
+          <DashField
+            label="料金詳細"
+            value={feeDetail}
+            onChange={setFeeDetail}
+            multiline
+            placeholder="例: 一般 500円 / 学生 300円 / 中学生以下無料"
+            help="有料の場合は、公開ページに表示する料金情報を自由記述で入力してください。"
+          />
+        ) : (
+          <div className="ui-field-help">無料の展覧会として表示されます。</div>
+        )}
+      </div>
 
       <DashSectionLabel>説明文</DashSectionLabel>
       <DashField
@@ -235,43 +255,6 @@ export default function DashExhibitionEdit() {
             </ImageUploader>
           </>
         )}
-      </div>
-
-      <DashSectionLabel>料金</DashSectionLabel>
-      <div style={{ display: 'grid', gap: 10 }}>
-        <div className="ui-segment" style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-          <button type="button" onClick={() => setFeeType('free')} className={feeType === 'free' ? 'is-active' : ''}>無料</button>
-          <button type="button" onClick={() => setFeeType('paid')} className={feeType === 'paid' ? 'is-active' : ''}>有料</button>
-        </div>
-        {feeType === 'paid' ? (
-          <DashField
-            label="料金詳細"
-            value={feeDetail}
-            onChange={setFeeDetail}
-            multiline
-            placeholder="例: 一般 500円 / 学生 300円 / 中学生以下無料"
-            help="有料の場合は、公開ページに表示する料金情報を自由記述で入力してください。"
-          />
-        ) : (
-          <div className="ui-field-help">無料の展覧会として表示されます。</div>
-        )}
-      </div>
-
-      <DashSectionLabel>背景色</DashSectionLabel>
-      <div style={{ padding: 12, border: `1px solid ${T.ink}`, background: T.card }}>
-        <div style={{ height: 90, marginBottom: 12, background: bgColor, border: `0.5px solid ${T.line}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontFamily: T.serif, fontSize: 15, letterSpacing: '0.04em', color: isDark ? T.paper : T.ink }}>
-            プレビュー — {title || '展覧会タイトル'}
-          </span>
-        </div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {SWATCHES.map((c) => (
-            <div key={c} onClick={() => setBgColor(c)} className="ui-chip" style={{ width: 34, height: 34, background: c, cursor: 'pointer', border: bgColor === c ? `2px solid ${T.ink}` : `0.5px solid ${T.line}`, position: 'relative' }}>
-              {bgColor === c && <div style={{ position: 'absolute', inset: 2, border: `1px solid ${c === '#111110' || c === '#2A2825' ? T.paper : T.ink}` }} />}
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop: 10, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.inkMuted }}>{bgColor.toUpperCase()}</div>
       </div>
 
       <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
