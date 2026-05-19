@@ -18,7 +18,6 @@ export default function DashArtworks() {
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')
   const [editDesc, setEditDesc] = useState('')
-  const [viewMode, setViewMode] = useState('grid')
   const [createFile, setCreateFile] = useState(null)
   const thumbnailUrl = getExhibitionThumbnailUrl(exhibition)
 
@@ -77,7 +76,7 @@ export default function DashArtworks() {
 
   return (
     <>
-      <DashShell orgSlug={orgSlug} crumbs={['EXHIBITIONS', 'WORKS']}>
+      <DashShell orgSlug={orgSlug} >
         <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
           <div className="ui-kicker">{exhibition?.title || 'WORKS'}</div>
           <div className="ui-app-topline" style={{ marginTop: 8, marginBottom: 0 }}>
@@ -96,9 +95,6 @@ export default function DashArtworks() {
                 <h1 className="ui-screen-title">作品管理</h1>
                 <p className="ui-screen-subtitle">{pad2(artworks.length)} works</p>
               </div>
-            </div>
-            <div className="ui-segment">
-              {['grid', 'list'].map((m) => <button key={m} type="button" onClick={() => setViewMode(m)} className={viewMode === m ? 'is-active' : ''}>{m.toUpperCase()}</button>)}
             </div>
           </div>
         </section>
@@ -123,53 +119,28 @@ export default function DashArtworks() {
           </div>
         )}
 
-        {viewMode === 'grid' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
-            {artworks.map((w) => (
-              <div key={w.id} className="ui-list-card" style={{ padding: 8 }}>
-                <button type="button" onClick={() => editWork(w)} style={{ width: '100%', border: 0, padding: 0, background: 'transparent', cursor: 'pointer' }}>
-                  <ArtworkMedia
-                    src={w.image_url}
-                    alt=""
-                    decorative
-                    loading="lazy"
-                    fillHeight
-                    aspectRatio="1 / 1"
-                    wrapperStyle={{ borderRadius: 7 }}
-                    imageStyle={{ borderRadius: 7 }}
-                  />
-                </button>
-                <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', gap: 6, alignItems: 'center' }}>
-                  <div style={{ fontFamily: T.serif, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '（タイトルなし）'}</div>
-                  <button onClick={() => setDeleteTarget(w)} style={{ border: 0, background: 'transparent', color: T.inkMuted, cursor: 'pointer', padding: 6 }}>...</button>
-                </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
+          {artworks.map((w) => (
+            <div key={w.id} className="ui-list-card" style={{ padding: 8 }}>
+              <button type="button" onClick={() => editWork(w)} style={{ width: '100%', border: 0, padding: 0, background: 'transparent', cursor: 'pointer' }}>
+                <ArtworkMedia
+                  src={w.image_url}
+                  alt=""
+                  decorative
+                  loading="lazy"
+                  fillHeight
+                  aspectRatio="1 / 1"
+                  wrapperStyle={{ borderRadius: 7 }}
+                  imageStyle={{ borderRadius: 7 }}
+                />
+              </button>
+              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', gap: 6, alignItems: 'center' }}>
+                <div style={{ fontFamily: T.serif, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '（タイトルなし）'}</div>
+                <button onClick={() => setDeleteTarget(w)} style={{ border: 0, background: 'transparent', color: T.inkMuted, cursor: 'pointer', padding: 6 }}>...</button>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gap: 8 }}>
-            {artworks.map((w, i) => (
-              <div key={w.id} className="ui-list-card" style={{ padding: 10, display: 'grid', gridTemplateColumns: '52px 1fr auto', gap: 10, alignItems: 'center' }}>
-                <div style={{ width: 52, height: 52, borderRadius: 7, overflow: 'hidden' }}>
-                  <ArtworkMedia
-                    src={w.image_url}
-                    alt=""
-                    decorative
-                    loading="lazy"
-                    fillHeight
-                    wrapperStyle={{ width: '100%', height: '100%', borderRadius: 7 }}
-                    imageStyle={{ borderRadius: 7 }}
-                  />
-                </div>
-                <button type="button" onClick={() => editWork(w)} style={{ minWidth: 0, textAlign: 'left', border: 0, background: 'transparent', cursor: 'pointer' }}>
-                  <div style={{ fontFamily: T.serif, fontSize: 15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '（タイトルなし）'}</div>
-                  <div style={{ marginTop: 3, fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>#{pad2(i + 1)}</div>
-                </button>
-                <button onClick={() => setDeleteTarget(w)} style={{ border: 0, background: 'transparent', color: T.inkMuted, cursor: 'pointer', padding: 8 }}>...</button>
-              </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
         {artworks.length === 0 && <div className="ui-panel" style={{ padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>作品がまだありません</div>}
       </DashShell>
 
