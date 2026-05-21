@@ -13,7 +13,16 @@ function normalizeMimeType(mimeType) {
   return 'image/jpeg'
 }
 
-export async function getCroppedBlob(imageSrc, cropPixels, mimeType = 'image/jpeg') {
+function calculateDimensions(sourceWidth, sourceHeight, maxWidth) {
+  if (sourceWidth <= maxWidth) return { width: sourceWidth, height: sourceHeight }
+  const ratio = maxWidth / sourceWidth
+  return {
+    width: Math.round(sourceWidth * ratio),
+    height: Math.round(sourceHeight * ratio),
+  }
+}
+
+export async function getCroppedBlob(imageSrc, cropPixels, mimeType = 'image/jpeg', maxWidth = 1920) {
   if (!cropPixels) throw new Error('クロップ範囲が未設定です')
 
   const image = await loadImage(imageSrc)
@@ -22,8 +31,14 @@ export async function getCroppedBlob(imageSrc, cropPixels, mimeType = 'image/jpe
 
   if (!context) throw new Error('キャンバスを初期化できませんでした')
 
-  canvas.width = Math.max(1, Math.round(cropPixels.width))
-  canvas.height = Math.max(1, Math.round(cropPixels.height))
+  const { width: targetWidth, height: targetHeight } = calculateDimensions(
+    Math.max(1, Math.round(cropPixels.width)),
+    Math.max(1, Math.round(cropPixels.height)),
+    maxWidth,
+  )
+
+  canvas.width = targetWidth
+  canvas.height = targetHeight
 
   context.drawImage(
     image,
@@ -33,12 +48,12 @@ export async function getCroppedBlob(imageSrc, cropPixels, mimeType = 'image/jpe
     cropPixels.height,
     0,
     0,
-    canvas.width,
-    canvas.height,
+    targetWidth,
+    targetHeight,
   )
 
   const targetMimeType = normalizeMimeType(mimeType)
-  const quality = targetMimeType === 'image/jpeg' ? 0.92 : undefined
+  const quality = targetMimeType === 'image/jpeg' ? 0.8 : undefined
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {

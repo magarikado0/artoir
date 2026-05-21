@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import DashShell, { StatusBadge } from '../../components/DashShell'
 import ArtworkMedia from '../../components/ArtworkMedia'
 import { exhStatus, getExhibitionThumbnailUrl } from '../../lib/exhibition'
+import { getThumbnailUrl } from '../../lib/imageUrl'
 import ExhibitionFeeBadge from '../../components/ExhibitionFeeBadge'
 import { T, fmtDateDot, pad2 } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
@@ -20,7 +21,7 @@ function DashExhibitionCard({ exh, orgSlug, navigate }) {
     >
       {thumbnailUrl ? (
         <ArtworkMedia
-          src={thumbnailUrl}
+          src={getThumbnailUrl(thumbnailUrl, 112)}
           alt=""
           decorative
           loading="lazy"

@@ -6,6 +6,7 @@ import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ArtworkMedia from '../components/ArtworkMedia'
 import { getExhibitionFeeDetail, getExhibitionFeeType, getExhibitionThumbnailUrl } from '../lib/exhibition'
+import { getThumbnailUrl, getHeroImageUrl, getFullImageUrl } from '../lib/imageUrl'
 import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
 
 function MetaPill({ label, value }) {
@@ -126,6 +127,7 @@ export default function ExhibitionPage() {
   const feeType = getExhibitionFeeType(exhibition)
   const feeDetail = getExhibitionFeeDetail(exhibition)
   const heroImage = getExhibitionThumbnailUrl(exhibition) || featured?.image_url
+  const heroThumbnail = heroImage ? getHeroImageUrl(heroImage) : null
 
   return (
     <div className="ui-page-shell">
@@ -142,7 +144,7 @@ export default function ExhibitionPage() {
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'start' }}>
           <div className="ui-app-card" style={{ padding: 8, overflow: 'hidden' }}>
             <ArtworkMedia
-              src={heroImage}
+              src={heroThumbnail}
               alt={exhibition.title}
               label={getExhibitionThumbnailUrl(exhibition) ? exhibition.title : featured?.title || exhibition.title}
               loading="eager"
@@ -185,7 +187,7 @@ export default function ExhibitionPage() {
               {artworks.map((w, i) => (
                 <button key={w.id} type="button" className="gallery-item ui-list-card" onClick={() => openArtwork(w)} style={{ padding: 8, textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
                   <ArtworkMedia
-                    src={w.image_url}
+                    src={getThumbnailUrl(w.image_url)}
                     alt=""
                     decorative
                     loading="lazy"

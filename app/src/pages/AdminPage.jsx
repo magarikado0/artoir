@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import ImageUploader from '../components/ImageUploader'
 import ArtworkMedia from '../components/ArtworkMedia'
+import { getThumbnailUrl } from '../lib/imageUrl'
 
 const GAP = 'clamp(2rem, 5vw, 5rem)'
 
@@ -324,7 +325,7 @@ export default function AdminPage() {
             }}>
               <div style={{ width: '60px', height: '60px', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
                 <ArtworkMedia
-                  src={artwork.image_url}
+                  src={getThumbnailUrl(artwork.image_url, 60)}
                   alt=""
                   decorative
                   loading="lazy"

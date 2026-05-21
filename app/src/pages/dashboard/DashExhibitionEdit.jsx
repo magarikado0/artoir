@@ -7,6 +7,7 @@ import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import { getExhibitionFeeType, getExhibitionThumbnailUrl } from '../../lib/exhibition'
+import { getThumbnailUrl } from '../../lib/imageUrl'
 
 const SWATCHES = ['#FAF8F3', '#F3F0E8', '#E7E2D6', '#111110', '#2A2825', '#B4452C']
 
@@ -231,7 +232,7 @@ export default function DashExhibitionEdit() {
         {thumbnailUrl ? (
           <div style={{ display: 'grid', gap: 8 }}>
             <ArtworkMedia
-              src={thumbnailUrl}
+              src={getThumbnailUrl(thumbnailUrl, 220)}
               alt={title || '展覧会サムネイル'}
               label={title || '展覧会サムネイル'}
               loading="eager"

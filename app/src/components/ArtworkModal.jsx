@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { T } from '../lib/tokens'
 import ArtworkMedia from './ArtworkMedia'
+import { getFullImageUrl } from '../lib/imageUrl'
 
 export default function ArtworkModal({ artwork, onClose }) {
   const open = !!artwork
@@ -55,7 +56,7 @@ export default function ArtworkModal({ artwork, onClose }) {
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <div style={{ display: 'grid', placeItems: 'center', padding: 16, background: '#1A1410' }}>
           <ArtworkMedia
-            src={artwork.image_url}
+            src={getFullImageUrl(artwork.image_url)}
             alt={artwork.title}
             label={artwork.title}
             loading="eager"

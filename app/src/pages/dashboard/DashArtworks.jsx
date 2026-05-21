@@ -8,6 +8,7 @@ import ArtworkMedia from '../../components/ArtworkMedia'
 import { T, pad2 } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 import { getExhibitionThumbnailUrl } from '../../lib/exhibition'
+import { getThumbnailUrl } from '../../lib/imageUrl'
 
 export default function DashArtworks() {
   const { orgSlug, exhibitionId } = useParams()
@@ -82,7 +83,7 @@ export default function DashArtworks() {
           <div className="ui-app-topline" style={{ marginTop: 8, marginBottom: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
               <ArtworkMedia
-                src={thumbnailUrl}
+                src={getThumbnailUrl(thumbnailUrl, 56)}
                 alt={exhibition?.title || '展覧会サムネイル'}
                 label={exhibition?.title || '展覧会サムネイル'}
                 loading="eager"
@@ -124,7 +125,7 @@ export default function DashArtworks() {
             <div key={w.id} className="ui-list-card" style={{ padding: 8 }}>
               <button type="button" onClick={() => editWork(w)} style={{ width: '100%', border: 0, padding: 0, background: 'transparent', cursor: 'pointer' }}>
                 <ArtworkMedia
-                  src={w.image_url}
+                  src={getThumbnailUrl(w.image_url)}
                   alt=""
                   decorative
                   loading="lazy"

@@ -8,6 +8,7 @@ import { useAuth } from '../lib/auth'
 import ExhibitionFeeBadge from '../components/ExhibitionFeeBadge'
 import ArtworkMedia from '../components/ArtworkMedia'
 import { getExhibitionThumbnailUrl } from '../lib/exhibition'
+import { getThumbnailUrl } from '../lib/imageUrl'
 
 const FILTERS = [
   { label: '全て', value: 'ALL' },
@@ -55,7 +56,7 @@ function ExhibitionCard({ row }) {
     <Link to={`/${org?.slug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card" style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10 }}>
       {thumbnailUrl ? (
         <ArtworkMedia
-          src={thumbnailUrl}
+          src={getThumbnailUrl(thumbnailUrl, 96)}
           alt=""
           decorative
           loading="lazy"
