@@ -9,7 +9,11 @@ import ExhibitionFeeBadge from '../components/ExhibitionFeeBadge'
 import ArtworkMedia from '../components/ArtworkMedia'
 import { getExhibitionThumbnailUrl } from '../lib/exhibition'
 
-const FILTERS = ['全て', '開催中', '予定']
+const FILTERS = [
+  { label: '全て', value: 'ALL' },
+  { label: '開催中', value: 'OPEN NOW' },
+  { label: '予定', value: 'UPCOMING' },
+]
 
 function startOfToday() {
   const d = new Date()
@@ -148,7 +152,11 @@ export default function AllExhibitionsPage() {
         <div className="ui-toolbar-grid">
           <input className="ui-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="展覧会・団体・会場を検索" />
           <div className="ui-segment">
-            {FILTERS.map((f) => <button key={f} type="button" onClick={() => setFilter(f)} className={filter === f ? 'is-active' : ''}>{f}</button>)}
+            {FILTERS.map((f) => (
+              <button key={f.value} type="button" onClick={() => setFilter(f.value)} className={filter === f.value ? 'is-active' : ''}>
+                {f.label}
+              </button>
+            ))}
           </div>
         </div>
 

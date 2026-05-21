@@ -97,7 +97,7 @@ export default function DashHome() {
           </div>
           <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-pill-action">
             <Icon name="plus" size={18} />
-            <span>新規展覧会作成</span>
+            <span>展覧会作成</span>
           </button>
         </div>
       </section>

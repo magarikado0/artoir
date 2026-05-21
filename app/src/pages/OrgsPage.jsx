@@ -76,7 +76,6 @@ export default function OrgsPage() {
                 </div>
                 <div className="ui-org-count">
                   <span>{pad2(o.exh_count ?? 0)}</span>
-                  <small>EXH.</small>
                 </div>
               </Link>
             ))}
