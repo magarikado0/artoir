@@ -45,7 +45,7 @@ organizations
 各テーブルの主なフィールド：
 
 **organizations**: name, slug, description, sns_links, homepage_url
-**exhibitions**: org_id, title, slug, start_date, end_date, location, description, bg_color, thumbnail_url
+**exhibitions**: org_id, title, slug, start_date, start_time, end_date, end_time, location, description, fee_type, fee_detail, thumbnail_url
 **artworks**: exhibition_id, title, description, image_url, order
 
 ---
@@ -62,7 +62,7 @@ artoir.net/{org-slug}/exhibition/{exhibition-slug}
 
 作るもの：
 - 団体ページ（名前・説明・SNS・HP・展覧会一覧）
-- 展覧会ページ（タイトル・期間・場所・説明・作品一覧・背景色カスタム）
+- 展覧会ページ（タイトル・期間・場所・説明・料金情報・作品一覧）
 - 作品表示（タイトル・説明・画像）※作者名は掲載しない
 - シェアリンク
 

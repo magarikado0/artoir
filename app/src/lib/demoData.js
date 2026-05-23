@@ -34,7 +34,6 @@ export const demoExhibitions = [
     end_date: '2025-04-20',
     end_time: '18:00',
     location: '東京都渋谷区 ギャラリー白',
-    bg_color: '#f5f0e8',
   },
   {
     id: 'demo-exh-2',
@@ -47,7 +46,6 @@ export const demoExhibitions = [
     end_date: '2024-12-22',
     end_time: '19:00',
     location: '東京都新宿区 ギャラリー銀',
-    bg_color: '#f5f0e8',
   },
   {
     id: 'demo-exh-3',
@@ -60,7 +58,6 @@ export const demoExhibitions = [
     end_date: '2024-07-28',
     end_time: '20:00',
     location: '東京都港区 スペースAO',
-    bg_color: '#f5f0e8',
   },
   {
     id: 'demo-exh-4',
@@ -73,7 +70,6 @@ export const demoExhibitions = [
     end_date: '2023-11-12',
     end_time: '17:00',
     location: '東京都台東区 3331 Arts Chiyoda',
-    bg_color: '#f5f0e8',
   },
   {
     id: 'demo-exh-5',
@@ -86,7 +82,6 @@ export const demoExhibitions = [
     end_date: '2025-03-16',
     end_time: '18:00',
     location: '東京都中央区 VOID+',
-    bg_color: '#f5f0e8',
   },
   {
     id: 'demo-exh-6',
@@ -99,7 +94,6 @@ export const demoExhibitions = [
     end_date: '2024-09-29',
     end_time: '21:00',
     location: '東京都渋谷区 WWW',
-    bg_color: '#f5f0e8',
   },
 ]
 

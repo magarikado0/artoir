@@ -9,8 +9,6 @@ import { useIsDesktop } from '../../lib/useIsDesktop'
 import { getExhibitionFeeType, getExhibitionThumbnailUrl } from '../../lib/exhibition'
 import { getThumbnailUrl } from '../../lib/imageUrl'
 
-const SWATCHES = ['#FAF8F3', '#F3F0E8', '#E7E2D6', '#111110', '#2A2825', '#B4452C']
-
 function slugifyAscii(s) {
   return String(s || '')
     .toLowerCase()
@@ -61,7 +59,6 @@ export default function DashExhibitionEdit() {
   const [thumbnailUrl, setThumbnailUrl] = useState('')
   const [feeType, setFeeType] = useState('free')
   const [feeDetail, setFeeDetail] = useState('')
-  const [bgColor, setBgColor] = useState('#FAF8F3')
 
   function onStartDateChange(next) {
     setStartDate(next)
@@ -100,7 +97,6 @@ export default function DashExhibitionEdit() {
             setThumbnailUrl(getExhibitionThumbnailUrl(exh))
             setFeeType(getExhibitionFeeType(exh))
             setFeeDetail(exh.fee_detail || '')
-            setBgColor(exh.bg_color || '#FAF8F3')
           }
         }
       } catch { /* unavailable */ } finally { setLoading(false) }
@@ -135,7 +131,6 @@ export default function DashExhibitionEdit() {
         thumbnail_url: thumbnailUrl || null,
         fee_type: feeType,
         fee_detail: feeType === 'paid' ? feeDetail.trim() : null,
-        bg_color: bgColor,
         org_id: org.id,
       }
       if (isNew) {
@@ -171,8 +166,6 @@ export default function DashExhibitionEdit() {
       <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
     </div>
   )
-
-  const isDark = bgColor === '#111110' || bgColor === '#2A2825' || bgColor === '#B4452C'
 
   const formContent = (
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
