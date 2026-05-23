@@ -56,6 +56,7 @@ export default function ArtworkMedia({
   const containerStyle = {
     position: 'relative',
     width: '100%',
+    height: fillHeight ? '100%' : undefined,
     minHeight,
     background,
     overflow: 'hidden',
