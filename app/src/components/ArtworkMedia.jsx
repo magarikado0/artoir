@@ -86,7 +86,7 @@ export default function ArtworkMedia({
   }
 
   if (status === 'error') {
-    const caption = status === 'loading' ? '読み込み中' : '画像を表示できません'
+    const caption = '画像を表示できません'
     return (
       <div
         className={className}
@@ -96,7 +96,7 @@ export default function ArtworkMedia({
           placeItems: 'center',
         }}
         aria-hidden={decorative ? 'true' : undefined}
-        aria-busy={!decorative && status === 'loading' ? 'true' : undefined}
+        aria-busy={undefined}
         role={decorative ? undefined : 'img'}
         aria-label={decorative ? undefined : `${title} ${caption}`}
       >
