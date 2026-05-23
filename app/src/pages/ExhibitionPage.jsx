@@ -6,7 +6,7 @@ import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ArtworkMedia from '../components/ArtworkMedia'
 import { getExhibitionFeeDetail, getExhibitionFeeType, getExhibitionThumbnailUrl } from '../lib/exhibition'
-import { getThumbnailUrl, getHeroImageUrl, getFullImageUrl } from '../lib/imageUrl'
+import { getThumbnailUrl, getHeroImageUrl } from '../lib/imageUrl'
 import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
 
 function MetaPill({ label, value }) {
