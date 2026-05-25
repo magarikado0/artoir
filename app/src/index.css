@@ -219,14 +219,7 @@ button {
   margin-top: 8px;
 }
 
-.ui-artworks-add-desktop {
-  background:
-    linear-gradient(135deg, #BE553D, #7C2E22),
-    #BE553D;
-  box-shadow: inset 0 -3px 0 #7C2E22;
-}
-
-.ui-artworks-add-mobile {
+.ui-floating-upload.ui-artworks-add-mobile {
   display: none;
 }
 
@@ -1565,7 +1558,7 @@ button.ui-account-org-pick-btn.ui-org-row {
     display: none;
   }
 
-  .ui-artworks-add-mobile {
+  .ui-floating-upload.ui-artworks-add-mobile {
     display: flex;
   }
 

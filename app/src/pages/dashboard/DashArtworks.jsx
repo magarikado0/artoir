@@ -107,7 +107,7 @@ export default function DashArtworks() {
             )}
             <ImageUploader
               variant="button"
-              buttonClassName="ui-artworks-add-desktop"
+              buttonClassName="ui-pill-action--accent ui-artworks-add-desktop"
               buttonLabel="作品追加"
               onBeforeUpload={handleBeforeUpload}
               onFileSelected={handleCreateFile}

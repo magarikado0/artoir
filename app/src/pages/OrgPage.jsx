@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
-import { T, fmtDateDot, pad2, externalHost } from '../lib/tokens'
+import ExhibitionListCard from '../components/ExhibitionListCard'
+import { T, externalHost } from '../lib/tokens'
 
 export default function OrgPage() {
   const { orgSlug } = useParams()
@@ -74,16 +75,9 @@ export default function OrgPage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
-          {exhibitions.map((exh, i) => (
-            <Link key={exh.id} to={`/${orgSlug}/exhibition/${exh.slug}`} className="ui-list-card" style={{ padding: 10, display: 'grid', gridTemplateColumns: '82px 1fr', gap: 12 }}>
-              <div style={{ width: 82, aspectRatio: '1 / 1', borderRadius: 7, background: T.surfaceMuted, display: 'grid', placeItems: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2(i + 1)}</div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontFamily: T.serif, fontSize: 17, color: T.ink, lineHeight: 1.35 }}>{exh.title}</div>
-                <div style={{ marginTop: 7, fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{fmtDateDot(exh.start_date)} — {fmtDateDot(exh.end_date)}</div>
-                {exh.location && <div style={{ marginTop: 5, fontSize: 11, color: T.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exh.location}</div>}
-              </div>
-            </Link>
+        <div className="ui-exhibition-list-grid">
+          {exhibitions.map((exh) => (
+            <ExhibitionListCard key={exh.id} exhibition={exh} org={org} showOrgName={false} />
           ))}
         </div>
       </main>
