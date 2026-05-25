@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { T } from '../lib/tokens'
 
 function PlaceholderBadge({ label, caption }) {
@@ -29,79 +29,56 @@ function PlaceholderBadge({ label, caption }) {
   )
 }
 
-export default function ArtworkMedia({
-  src,
-  alt = '',
-  label,
-  decorative = false,
-  loading = 'lazy',
-  fit = 'cover',
-  aspectRatio,
-  fillHeight = false,
-  background = T.surfaceMuted,
-  minHeight,
+function ArtworkMediaPlaceholder({
   className,
-  wrapperStyle,
+  containerStyle,
+  decorative,
+  title,
+  caption,
+}) {
+  return (
+    <div
+      className={className}
+      style={{
+        ...containerStyle,
+        display: 'grid',
+        placeItems: 'center',
+      }}
+      aria-hidden={decorative ? 'true' : undefined}
+      aria-busy={undefined}
+      role={decorative ? undefined : 'img'}
+      aria-label={decorative ? undefined : `${title} ${caption}`}
+    >
+      {!decorative && <PlaceholderBadge label={title} caption={caption} />}
+    </div>
+  )
+}
+
+function ArtworkMediaImage({
+  src,
+  alt,
+  label,
+  decorative,
+  loading,
+  fit,
+  className,
+  containerStyle,
   imageStyle,
   onLoad,
   onError,
 }) {
-  const [status, setStatus] = useState(src ? 'loading' : 'error')
-
-  useEffect(() => {
-    setStatus(src ? 'loading' : 'error')
-  }, [src])
-
+  const [status, setStatus] = useState('loading')
   const title = label || alt || '画像'
-  const containerStyle = {
-    position: 'relative',
-    width: '100%',
-    height: fillHeight ? '100%' : undefined,
-    minHeight,
-    background,
-    overflow: 'hidden',
-    ...wrapperStyle,
-  }
-
-  if (aspectRatio) containerStyle.aspectRatio = aspectRatio
-
-  if (!src) {
-    const caption = '画像を表示できません'
-    return (
-      <div
-        className={className}
-        style={{
-          ...containerStyle,
-          display: 'grid',
-          placeItems: 'center',
-        }}
-        aria-hidden={decorative ? 'true' : undefined}
-        aria-busy={undefined}
-        role={decorative ? undefined : 'img'}
-        aria-label={decorative ? undefined : `${title} ${caption}`}
-      >
-        {!decorative && <PlaceholderBadge label={title} caption={caption} />}
-      </div>
-    )
-  }
 
   if (status === 'error') {
-    const caption = '画像を表示できません'
     return (
-      <div
+      <ArtworkMediaPlaceholder
         className={className}
-        style={{
-          ...containerStyle,
-          display: 'grid',
-          placeItems: 'center',
-        }}
-        aria-hidden={decorative ? 'true' : undefined}
-        aria-busy={undefined}
-        role={decorative ? undefined : 'img'}
-        aria-label={decorative ? undefined : `${title} ${caption}`}
-      >
-        {!decorative && <PlaceholderBadge label={title} caption={caption} />}
-      </div>
+        containerStyle={containerStyle}
+        decorative={decorative}
+        title={title}
+        caption="画像を表示できません"
+      />
     )
   }
 
@@ -147,5 +124,65 @@ export default function ArtworkMedia({
         }}
       />
     </div>
+  )
+}
+
+export default function ArtworkMedia({
+  src,
+  alt = '',
+  label,
+  decorative = false,
+  loading = 'lazy',
+  fit = 'cover',
+  aspectRatio,
+  fillHeight = false,
+  background = T.surfaceMuted,
+  minHeight,
+  className,
+  wrapperStyle,
+  imageStyle,
+  onLoad,
+  onError,
+}) {
+  const title = label || alt || '画像'
+  const containerStyle = {
+    position: 'relative',
+    width: '100%',
+    height: fillHeight ? '100%' : undefined,
+    minHeight,
+    background,
+    overflow: 'hidden',
+    ...wrapperStyle,
+  }
+
+  if (aspectRatio) containerStyle.aspectRatio = aspectRatio
+
+  if (!src) {
+    return (
+      <ArtworkMediaPlaceholder
+        className={className}
+        containerStyle={containerStyle}
+        decorative={decorative}
+        title={title}
+        caption="画像を表示できません"
+      />
+    )
+  }
+
+  return (
+    <ArtworkMediaImage
+      key={src}
+      src={src}
+      alt={alt}
+      label={label}
+      decorative={decorative}
+      loading={loading}
+      fit={fit}
+      className={className}
+      containerStyle={containerStyle}
+      imageStyle={imageStyle}
+      onLoad={onLoad}
+      onError={onError}
+    />
   )
 }
