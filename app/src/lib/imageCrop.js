@@ -1,3 +1,5 @@
+import { calculateDimensions } from './imageCompress'
+
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const image = new Image()
@@ -6,20 +8,6 @@ function loadImage(src) {
     image.onerror = () => reject(new Error('画像の読み込みに失敗しました'))
     image.src = src
   })
-}
-
-function normalizeMimeType(mimeType) {
-  if (mimeType === 'image/png' || mimeType === 'image/webp' || mimeType === 'image/jpeg') return mimeType
-  return 'image/jpeg'
-}
-
-function calculateDimensions(sourceWidth, sourceHeight, maxWidth) {
-  if (sourceWidth <= maxWidth) return { width: sourceWidth, height: sourceHeight }
-  const ratio = maxWidth / sourceWidth
-  return {
-    width: Math.round(sourceWidth * ratio),
-    height: Math.round(sourceHeight * ratio),
-  }
 }
 
 export async function getCroppedBlob(imageSrc, cropPixels, mimeType = 'image/jpeg', maxWidth = 1920) {
@@ -52,8 +40,8 @@ export async function getCroppedBlob(imageSrc, cropPixels, mimeType = 'image/jpe
     targetHeight,
   )
 
-  const targetMimeType = normalizeMimeType(mimeType)
-  const quality = targetMimeType === 'image/jpeg' ? 0.8 : undefined
+  const targetMimeType = mimeType === 'image/png' ? 'image/png' : 'image/jpeg'
+  const quality = targetMimeType === 'image/jpeg' ? 0.82 : undefined
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {

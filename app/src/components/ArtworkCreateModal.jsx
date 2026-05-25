@@ -106,7 +106,7 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
     try {
       const croppedBlob = await getCroppedBlob(previewUrl, croppedAreaPixels, file.type)
       const croppedName = file.name?.replace(/\.[^.]+$/, '') || 'artwork'
-      const uploadName = `${croppedName}-crop.${croppedBlob.type === 'image/png' ? 'png' : croppedBlob.type === 'image/webp' ? 'webp' : 'jpg'}`
+      const uploadName = `${croppedName}-crop.${croppedBlob.type === 'image/png' ? 'png' : 'jpg'}`
       const imageUrl = await uploadToCloudinary(croppedBlob, uploadName, setProgress)
 
       const payload = {
@@ -116,7 +116,7 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
         description: description.trim() || null,
         order: nextOrder,
         file_name: file.name,
-        file_size: file.size,
+        file_size: croppedBlob.size,
       }
 
       const { data: newWork, error: insertError } = await supabase.from('artworks').insert(payload).select().single()

@@ -241,7 +241,7 @@ export default function DashExhibitionEdit() {
         ) : (
           <>
             <div className="ui-field-help">公開ページと一覧の先頭で使う画像です。設定しない場合は作品画像の先頭を使います。</div>
-            <ImageUploader onUploaded={(url) => setThumbnailUrl(url)}>
+            <ImageUploader compressMaxDimension={1200} onUploaded={(url) => setThumbnailUrl(url)}>
               <div style={{ display: 'grid', gap: 6 }}>
                 <div style={{ fontFamily: T.serif, fontSize: 14, color: T.ink }}>画像をアップロード</div>
                 <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>クリックまたはドラッグ&ドロップ</div>

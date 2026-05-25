@@ -1,11 +1,18 @@
 import { useRef, useState } from 'react'
+import { compressImageFile } from '../lib/imageCompress'
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
-export default function ImageUploader({ onUploaded, onBeforeUpload, onFileSelected, children }) {
+export default function ImageUploader({
+  onUploaded,
+  onBeforeUpload,
+  onFileSelected,
+  compressMaxDimension = 1920,
+  children,
+}) {
   const [dragging, setDragging] = useState(false)
   const [progress, setProgress] = useState(null) // 0-100 or null
   const [error, setError] = useState('')
@@ -82,7 +89,8 @@ export default function ImageUploader({ onUploaded, onBeforeUpload, onFileSelect
       return
     }
     try {
-      await upload(file)
+      const compressed = await compressImageFile(file, { maxDimension: compressMaxDimension })
+      await upload(compressed)
     } catch {
       // upload() updates error state. catch here to avoid unhandled rejection.
     }
