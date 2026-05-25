@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
+import DashShell, { DashField } from '../../components/DashShell'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import { deleteOrganization } from '../../lib/deleteOrganization'
@@ -22,6 +22,7 @@ export default function DashSettings() {
   const [homepageUrl, setHomepageUrl] = useState('')
   const [slug, setSlug] = useState('')
   const [slugChanged, setSlugChanged] = useState(false)
+  const [editSection, setEditSection] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [deleteSlugInput, setDeleteSlugInput] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -70,6 +71,22 @@ export default function DashSettings() {
     if (savedResetTimerRef.current) clearTimeout(savedResetTimerRef.current)
   }, [])
 
+  function resetFieldsFromOrg() {
+    if (!org) return
+    setName(org.name || '')
+    setDescription(org.description || '')
+    setInstagram(normalizeSnsValue(org.sns_links?.instagram || '', 'instagram.com'))
+    setTwitter(normalizeSnsValue(org.sns_links?.x || '', 'x.com'))
+    setHomepageUrl(org.homepage_url || '')
+    setSlug(org.slug || '')
+    setSlugChanged(false)
+  }
+
+  function handleCancelEdit() {
+    resetFieldsFromOrg()
+    setEditSection(null)
+  }
+
   async function handleSave() {
     if (!supabase || !org) return
     setSaving(true)
@@ -89,6 +106,9 @@ export default function DashSettings() {
         window.alert(error.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
         return
       }
+      setOrg((prev) => prev ? { ...prev, ...updates } : prev)
+      setEditSection(null)
+      setSlugChanged(false)
       setSaved(true)
       if (slug !== orgSlug) {
         navigate(`/${slug}/dashboard/settings`)
@@ -130,53 +150,125 @@ export default function DashSettings() {
     </div>
   )
 
-  const formContent = (
-    <div style={{ padding: isDesktop ? '28px 0' : '18px 16px' }}>
-      <DashField label="団体名" value={name} onChange={setName} placeholder="例: 多摩美術大学 日本画研究室" />
-      <DashField label="説明文" value={description} onChange={setDescription} placeholder="団体の説明文を入力..." multiline />
+  const fieldValue = (value, fallback = '未設定') => value || fallback
+  const publicUrl = `artoir.net/${org?.slug || orgSlug}`
+  const snsInstagram = buildSnsUrl(instagram, 'instagram.com')
+  const snsTwitter = buildSnsUrl(twitter, 'x.com')
 
-      <DashSectionLabel>SNS · WEB</DashSectionLabel>
-      <DashField label="INSTAGRAM" prefix="instagram.com/" value={instagram} onChange={setInstagram} placeholder="username" mono />
-      <DashField label="X (TWITTER)" prefix="x.com/" value={twitter} onChange={setTwitter} placeholder="username" mono />
-      <DashField label="WEBSITE" value={homepageUrl} onChange={setHomepageUrl} placeholder="https://example.com" mono />
+  function SaveActions() {
+    return (
+      <div className="ui-settings-edit-actions">
+        <button type="button" onClick={handleCancelEdit} disabled={saving} className="ui-settings-secondary-button">
+          キャンセル
+        </button>
+        <button type="button" onClick={handleSave} disabled={saving || deleting} className="ui-settings-primary-button">
+          {saved ? '保存済み' : saving ? '保存中...' : '保存'}
+        </button>
+      </div>
+    )
+  }
 
-      <DashSectionLabel>URL · SLUG</DashSectionLabel>
-      <DashField
-        label="SLUG"
-        prefix="artoir.net/"
-        value={slug}
-        onChange={(v) => { setSlug(v); setSlugChanged(v !== orgSlug) }}
-        placeholder="org-slug"
-        mono
-        warning={slugChanged ? 'slug変更時は既存URLが無効になります。' : undefined}
+  function SettingsItem({ id, label, value, mono, editChildren }) {
+    const editing = editSection === id
+    return (
+      <section className="ui-settings-item">
+        <div className="ui-settings-item-head">
+          <div className="ui-settings-item-label">{label}</div>
+          {!editing && (
+            <button type="button" onClick={() => setEditSection(id)} className="ui-settings-edit-button">
+              編集
+            </button>
+          )}
+        </div>
+        {editing ? editChildren : (
+          <div className={`ui-settings-item-value ${mono ? 'is-mono' : ''}`}>{value}</div>
+        )}
+      </section>
+    )
+  }
+
+  function LinkValue({ label, value }) {
+    return (
+      <div className="ui-settings-link-value">
+        <span>{label}</span>
+        <strong>{fieldValue(value)}</strong>
+      </div>
+    )
+  }
+
+  const settingsContent = (
+    <div className="ui-settings-page">
+      <SettingsItem
+        id="basic"
+        label="団体名"
+        value={fieldValue(org?.name)}
+        editChildren={(
+          <>
+            <DashField label="団体名" value={name} onChange={setName} placeholder="例: 多摩美術大学 日本画研究室" />
+            <SaveActions />
+          </>
+        )}
       />
 
-      <DashSectionLabel>別の団体</DashSectionLabel>
-      <div style={{ marginBottom: 18, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>ほかの活動単位を Artoir に追加する場合は、新しい団体を作成できます。</div>
-      <Link to="/account/setup" state={{ from: `/${orgSlug}/dashboard/settings` }} className="ui-icon-button" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '12px 16px', border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', color: T.ink, textDecoration: 'none' }}>
-        ＋ 新しい団体を作成 →
-      </Link>
+      <SettingsItem
+        id="description"
+        label="説明文"
+        value={fieldValue(org?.description)}
+        editChildren={(
+          <>
+            <DashField label="説明文" value={description} onChange={setDescription} placeholder="団体の説明文を入力..." multiline />
+            <SaveActions />
+          </>
+        )}
+      />
 
-      <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <button
-          type="button"
-          onClick={() => navigate(`/${orgSlug}/dashboard`)}
-          className="ui-icon-button"
-          style={{ padding: '14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}
-        >CANCEL</button>
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving || deleting}
-          className="ui-action"
-          style={{ padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving || deleting ? 0.6 : 1 }}
-        >{saved ? 'SAVED ✓' : saving ? 'SAVING...' : 'SAVE ↩'}</button>
-      </div>
+      <SettingsItem
+        id="links"
+        label="各種リンク"
+        value={(
+          <div className="ui-settings-link-list">
+            <LinkValue label="Instagram" value={snsInstagram} />
+            <LinkValue label="X" value={snsTwitter} />
+            <LinkValue label="Website" value={org?.homepage_url} />
+          </div>
+        )}
+        editChildren={(
+          <>
+            <DashField label="INSTAGRAM" prefix="instagram.com/" value={instagram} onChange={setInstagram} placeholder="username" mono />
+            <DashField label="X (TWITTER)" prefix="x.com/" value={twitter} onChange={setTwitter} placeholder="username" mono />
+            <DashField label="WEBSITE" value={homepageUrl} onChange={setHomepageUrl} placeholder="https://example.com" mono />
+            <SaveActions />
+          </>
+        )}
+      />
 
-      <div style={{ marginTop: 36, paddingTop: 24, borderTop: `1px solid ${T.ink}` }}>
-        <DashSectionLabel>危険な操作</DashSectionLabel>
-        <p style={{ margin: '0 0 14px', fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>
-          「{name || orgSlug}」と配下の展覧会・作品をすべて削除します。復元できません。
+      <SettingsItem
+        id="url"
+        label="公開URL"
+        value={publicUrl}
+        mono
+        editChildren={(
+          <>
+            <DashField
+              label="SLUG"
+              prefix="artoir.net/"
+              value={slug}
+              onChange={(v) => { setSlug(v); setSlugChanged(v !== orgSlug) }}
+              placeholder="org-slug"
+              mono
+              warning={slugChanged ? 'slug変更時は既存URLが無効になります。' : undefined}
+            />
+            <SaveActions />
+          </>
+        )}
+      />
+
+      <section className="ui-settings-section is-danger">
+        <div className="ui-settings-section-head">
+          <div className="ui-section-label">危険な操作</div>
+        </div>
+        <p className="ui-settings-danger-copy">
+          「{org?.name || orgSlug}」と配下の展覧会・作品をすべて削除します。復元できません。
         </p>
         {deleteConfirm ? (
           <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
@@ -201,7 +293,7 @@ export default function DashSettings() {
                 className="ui-pill-action"
                 style={{ flex: 1, background: T.paperAlt, color: T.ink }}
               >
-                CANCEL
+                キャンセル
               </button>
               <button
                 type="button"
@@ -210,46 +302,30 @@ export default function DashSettings() {
                 className="ui-pill-action"
                 style={{ flex: 1, background: T.accent, opacity: deleting || deleteSlugInput.trim() !== (org?.slug || orgSlug) ? 0.5 : 1 }}
               >
-                {deleting ? 'DELETING...' : 'DELETE'}
+                {deleting ? '削除中...' : '削除する'}
               </button>
             </div>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => setDeleteConfirm(true)}
-            className="ui-icon-button"
-            style={{ padding: '12px 16px', background: 'transparent', color: T.accent, border: `1px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer' }}
-          >
+          <button type="button" onClick={() => setDeleteConfirm(true)} className="ui-settings-danger-button">
             団体を削除
           </button>
         )}
-      </div>
-
-      <div style={{ height: 40 }} />
+      </section>
     </div>
   )
 
   if (isDesktop) return (
-    <DashShell orgSlug={orgSlug} active="set" crumbs={['DASHBOARD', 'SETTINGS']}>
-      <div style={{ maxWidth: '80%', margin: '0 auto' }}>
-        <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
-          <div className="ui-kicker">ORGANIZATION / SETTINGS</div>
-          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>団体設定</h1>
-        </div>
-        {formContent}
+    <DashShell orgSlug={orgSlug}>
+      <div style={{ maxWidth: 820, margin: '0 auto' }}>
+        {settingsContent}
       </div>
     </DashShell>
   )
 
   return (
-    <DashShell orgSlug={orgSlug} active="set" crumbs={['DASHBOARD', 'SETTINGS']}>
-      <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
-        <div className="ui-kicker">ORGANIZATION / 設定</div>
-        <h1 className="ui-screen-title" style={{ marginTop: 6 }}>団体設定</h1>
-        <p className="ui-screen-subtitle">公開ページに表示される情報を編集します。</p>
-      </div>
-      {formContent}
+    <DashShell orgSlug={orgSlug}>
+      {settingsContent}
     </DashShell>
   )
 }

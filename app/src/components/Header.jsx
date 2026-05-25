@@ -34,6 +34,12 @@ export function Icon({ name, size = 20 }) {
       <path d="M12 5v14M5 12h14" {...s} />
     </svg>
   )
+  if (name === 'edit') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 20h5l10.5-10.5a2.1 2.1 0 0 0-3-3L6 17v3Z" {...s} />
+      <path d="M14.5 8.5l3 3" {...s} />
+    </svg>
+  )
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M5 7h14M5 12h14M5 17h9" {...s} />

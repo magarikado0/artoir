@@ -1,59 +1,85 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
-import BrandMark, { BrandLockup } from './BrandMark'
+import { supabase } from '../lib/supabase'
+import { BrandLockup } from './BrandMark'
 import BottomNav from './BottomNav'
-import { Icon } from './Header'
+import Header, { Icon } from './Header'
 
-function DashNav({ orgSlug }) {
+function getRailActive(pathname, orgSlug) {
+  if (pathname === `/${orgSlug}`) return 'public'
+  if (pathname.includes('/dashboard/settings')) return 'settings'
+  if (pathname.startsWith(`/${orgSlug}/dashboard`)) return 'home'
+  return null
+}
+
+function DashboardSubNav({ orgSlug }) {
+  const { pathname } = useLocation()
+  const active = getRailActive(pathname, orgSlug)
   const items = [
-    [`/${orgSlug}/dashboard`, 'Home', 'list'],
-    [`/${orgSlug}/dashboard/exhibitions/new`, '展覧会作成', 'plus'],
-    [`/${orgSlug}/dashboard/settings`, '団体設定', 'user'],
-    [`/${orgSlug}`, '公開', 'org'],
+    { key: 'home', to: `/${orgSlug}/dashboard`, label: '展覧会', icon: 'list' },
+    { key: 'settings', to: `/${orgSlug}/dashboard/settings`, label: '団体設定', icon: 'user' },
+    { key: 'public', to: `/${orgSlug}`, label: '公開ページ', icon: 'org' },
   ]
   return (
-    <aside className="ui-side-rail">
-      <Link to="/" className="ui-rail-brand" aria-label="Artoir home"><BrandMark size="rail" /></Link>
-      <nav className="ui-rail-nav" aria-label="Dashboard">
-        {items.map(([to, label, icon]) => (
-          <Link key={to} to={to} className="ui-rail-item" aria-label={label}>
-            <Icon name={icon} size={21} />
-            <span>{label}</span>
-          </Link>
-        ))}
-      </nav>
-    </aside>
+    <nav className="ui-dashboard-subnav" aria-label="Dashboard">
+      {items.map(({ key, to, label, icon }) => (
+        <Link
+          key={key}
+          to={to}
+          className={`ui-dashboard-subnav-item ${active === key ? 'is-active' : ''}`}
+          aria-label={label}
+          aria-current={active === key ? 'page' : undefined}
+        >
+          <Icon name={icon} size={18} />
+          <span>{label}</span>
+        </Link>
+      ))}
+    </nav>
   )
 }
 
-function SetupNav() {
-  const items = [
-    ['/', 'Home', 'list'],
-    ['/account', 'アカウント', 'user'],
-  ]
+function DashOrgBar({ orgSlug, orgName }) {
   return (
-    <aside className="ui-side-rail">
-      <Link to="/" className="ui-rail-brand" aria-label="Artoir home"><BrandMark size="rail" /></Link>
-      <nav className="ui-rail-nav" aria-label="Setup">
-        {items.map(([to, label, icon]) => (
-          <Link key={to} to={to} className="ui-rail-item" aria-label={label}>
-            <Icon name={icon} size={21} />
-            <span>{label}</span>
-          </Link>
-        ))}
-      </nav>
-    </aside>
+    <div className="ui-dash-org-bar">
+      <Link to={`/${orgSlug}/dashboard`} className="ui-dash-org-bar-link ui-dashboard-header-title">
+        {orgName || orgSlug}
+      </Link>
+    </div>
   )
 }
 
 export default function DashShell({ children, orgSlug, crumbs = [] }) {
   const isDesktop = useIsDesktop()
+  const [org, setOrg] = useState(null)
+
+  useEffect(() => {
+    if (!orgSlug || !supabase) return
+    let cancelled = false
+    async function load() {
+      const { data } = await supabase.from('organizations').select('name, slug').eq('slug', orgSlug).single()
+      if (!cancelled && data) setOrg(data)
+    }
+    load()
+    return () => { cancelled = true }
+  }, [orgSlug])
+
+  const orgName = org?.name || orgSlug
+  const showSetupCrumbs = !orgSlug && crumbs.length > 0
+
+  const orgContext = orgSlug ? (
+    isDesktop ? (
+      <DashOrgBar orgSlug={orgSlug} orgName={orgName} />
+    ) : null
+  ) : null
 
   if (isDesktop) return (
     <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans }}>
-      {orgSlug ? <DashNav orgSlug={orgSlug} /> : <SetupNav />}
+      <Header activeTab="account" />
       <main className="ui-app-main">
+        {orgContext}
+        {orgSlug && <DashboardSubNav orgSlug={orgSlug} />}
         {children}
       </main>
     </div>
@@ -62,20 +88,31 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
   return (
     <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans, paddingBottom: 92 }}>
       <div className="ui-mobile-topbar">
-        <Link to="/" className="ui-mobile-brand" aria-label="Artoir home">
-          <BrandLockup />
-        </Link>
+        {orgSlug ? (
+          <Link
+            to={`/${orgSlug}/dashboard`}
+            className="ui-dash-mobile-org-title ui-dashboard-header-title"
+            aria-label={`${orgName} のダッシュボード`}
+          >
+            {orgName}
+          </Link>
+        ) : (
+          <Link to="/" className="ui-mobile-brand" aria-label="Artoir home">
+            <BrandLockup />
+          </Link>
+        )}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Link to="/account" className="ui-top-icon" aria-label="アカウント">
             <Icon name="user" size={18} />
           </Link>
         </div>
       </div>
-      {crumbs.length > 0 && (
+      {showSetupCrumbs && (
         <div className="ui-mobile-crumbs">
           {crumbs.map((c, i) => <span key={i}>{i > 0 ? ' / ' : ''}{c}</span>)}
         </div>
       )}
+      {orgSlug && <DashboardSubNav orgSlug={orgSlug} />}
       <main className="ui-app-main ui-dashboard-mobile-main">
         {children}
       </main>

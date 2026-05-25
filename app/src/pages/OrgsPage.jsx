@@ -15,6 +15,11 @@ export default function OrgsPage() {
   const [query, setQuery] = useState('')
 
   useEffect(() => {
+    document.title = '団体一覧 | Artoir'
+    return () => { document.title = 'Artoir' }
+  }, [])
+
+  useEffect(() => {
     async function load() {
       if (!supabase) return setLoading(false)
       try {
@@ -45,18 +50,13 @@ export default function OrgsPage() {
     <div className="ui-page-shell">
       <Header activeTab="orgs" />
       <main className="ui-app-main">
-        <div className="ui-app-topline">
-          <div className="ui-hero-screen-heading">
-            <div className="ui-kicker">ORGANIZATIONS</div>
-            <h1 className="ui-screen-title">団体</h1>
-          </div>
-        </div>
+        <h1 className="ui-sr-only">団体一覧</h1>
 
         <div className="ui-toolbar-grid">
           <input className="ui-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="団体名を検索" />
-          <Link to={session ? '/account/setup' : '/login'} state={session ? undefined : loginForSetupState} className="ui-pill-action">
+          <Link to={session ? '/account/setup' : '/login'} state={session ? undefined : loginForSetupState} className="ui-floating-action ui-create-action">
             <Icon name="plus" size={17} />
-            <span>団体作成</span>
+            <span>団体を作成</span>
           </Link>
         </div>
 

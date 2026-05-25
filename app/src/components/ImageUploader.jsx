@@ -11,6 +11,10 @@ export default function ImageUploader({
   onBeforeUpload,
   onFileSelected,
   compressMaxDimension = 1920,
+  variant = 'dropzone',
+  buttonClassName = '',
+  wrapperClassName = '',
+  buttonLabel = '',
   children,
 }) {
   const [dragging, setDragging] = useState(false)
@@ -96,12 +100,28 @@ export default function ImageUploader({
     }
   }
 
+  const isButton = variant === 'button'
+  const isFab = variant === 'fab'
+  const isCompactTrigger = isButton || isFab
+
+  const triggerClassName = isFab
+    ? ['ui-floating-action ui-floating-action--round', buttonClassName].filter(Boolean).join(' ')
+    : isButton
+      ? ['ui-pill-action', buttonClassName].filter(Boolean).join(' ')
+      : undefined
+
+  const accessibleLabel = isCompactTrigger && buttonLabel ? buttonLabel : undefined
+
   return (
-    <div>
+    <div className={[isFab ? 'ui-floating-upload' : undefined, wrapperClassName].filter(Boolean).join(' ') || undefined}>
+      {isFab && error && <p className="ui-floating-upload-error">{error}</p>}
       <div
         role="button"
         tabIndex={0}
         aria-disabled={!hasUploadConfig}
+        aria-label={accessibleLabel}
+        title={accessibleLabel}
+        className={triggerClassName}
         onClick={() => {
           if (!hasUploadConfig) {
             setError('Cloudinary の設定が不足しています')
@@ -115,9 +135,9 @@ export default function ImageUploader({
             inputRef.current?.click()
           }
         }}
-        onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
+        onDragOver={isCompactTrigger ? undefined : (e) => { e.preventDefault(); setDragging(true) }}
+        onDragLeave={isCompactTrigger ? undefined : () => setDragging(false)}
+        onDrop={isCompactTrigger ? undefined : (e) => {
           e.preventDefault()
           setDragging(false)
           if (!hasUploadConfig) {
@@ -126,7 +146,13 @@ export default function ImageUploader({
           }
           void handleFiles(e.dataTransfer.files)
         }}
-        style={{
+        style={isFab ? {
+          cursor: hasUploadConfig ? 'pointer' : 'not-allowed',
+          opacity: hasUploadConfig ? 1 : 0.65,
+        } : isButton ? {
+          cursor: hasUploadConfig ? 'pointer' : 'not-allowed',
+          opacity: hasUploadConfig ? 1 : 0.65,
+        } : {
           border: `2px dashed ${dragging ? '#1a1612' : 'rgba(26,22,18,0.2)'}`,
           borderRadius: '2px',
           padding: '2rem',
@@ -138,7 +164,7 @@ export default function ImageUploader({
         }}
       >
         {children}
-        {progress !== null ? (
+        {!isCompactTrigger && progress !== null ? (
           <div>
             <div style={{
               height: '2px',
@@ -156,7 +182,7 @@ export default function ImageUploader({
             </div>
             <span style={{ fontSize: '0.75rem', color: '#9a9088' }}>{progress}%</span>
           </div>
-        ) : (
+        ) : !isCompactTrigger && !children ? (
           <span style={{
             fontFamily: 'Cormorant Garamond, serif',
             fontSize: '0.8rem',
@@ -165,12 +191,12 @@ export default function ImageUploader({
           }}>
             クリックまたはドラッグ&ドロップで画像を選択
           </span>
-        )}
+        ) : null}
       </div>
-      {error && (
+      {error && !isFab && (
         <p style={{ fontSize: '0.75rem', color: '#c0392b', marginTop: '0.5rem' }}>{error}</p>
       )}
-      {!hasUploadConfig && (
+      {!hasUploadConfig && !isFab && (
         <p style={{ fontSize: '0.75rem', color: '#9a9088', marginTop: '0.5rem' }}>
           Cloudinary 側の unsigned preset はアップロード先フォルダ・形式・サイズ制限を必ず設定してください。
         </p>

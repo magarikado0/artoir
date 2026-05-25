@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
-import BrandMark from '../components/BrandMark'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { T, pad2 } from '../lib/tokens'
@@ -70,25 +69,13 @@ function LoggedOut({ isDesktop }) {
 }
 
 // Multi-org selector — shown when user belongs to multiple orgs
-function OrgSelector({ orgs, onSelect, isDesktop, session }) {
+function OrgSelector({ orgs, onSelect, isDesktop }) {
   if (isDesktop) {
     return (
       <div className="ui-account-surface ui-account-org-selector-desktop">
-        <div className="ui-account-org-selector-bar">
-          <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }} aria-label="Artoir home">
-            <BrandMark size="auth" />
-          </Link>
-          <div className="ui-account-org-selector-bar-meta">
-            {session?.user?.email && (
-              <span className="ui-account-org-selector-email">{session.user.email}</span>
-            )}
-          </div>
-          <span className="ui-account-org-selector-count">{pad2(orgs.length)} ORGS</span>
-        </div>
-
+        <h1 className="ui-sr-only">団体を選択</h1>
         <div className="ui-app-topline">
           <div className="ui-hero-screen-heading">
-            <div className="ui-kicker">ORGANIZATION</div>
             <h1 className="ui-screen-title" style={{ marginTop: 8 }}>団体を選択</h1>
           </div>
         </div>
@@ -137,18 +124,9 @@ function OrgSelector({ orgs, onSelect, isDesktop, session }) {
 
   return (
     <div className="ui-account-surface">
-      <div className="ui-account-topline">
-        <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }} aria-label="Artoir home">
-          <BrandMark size="auth" />
-        </Link>
-        <div>
-          <div className="ui-auth-masthead-title" style={{ color: T.ink }}>管理する団体</div>
-        </div>
-        <span>{orgs.length} ORGS</span>
-      </div>
+      <h1 className="ui-sr-only">団体を選択</h1>
       <div className="ui-app-topline" style={{ marginBottom: 12 }}>
         <div className="ui-hero-screen-heading">
-          <div className="ui-kicker">ORGANIZATION</div>
           <h1 className="ui-screen-title" style={{ marginTop: 8 }}>団体を選択</h1>
         </div>
       </div>
@@ -236,7 +214,7 @@ export default function AccountPage() {
 
   function renderContent() {
     if (!session) return <LoggedOut isDesktop={isDesktop} />
-    if (orgs.length > 1) return <OrgSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} session={session} />
+    if (orgs.length > 1) return <OrgSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} />
     // logged in but no org linked yet
     return (
       <div style={{ padding: isDesktop ? '60px 0' : '32px 16px', maxWidth: isDesktop ? 480 : undefined, margin: isDesktop ? '0 auto' : undefined }}>

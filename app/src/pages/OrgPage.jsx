@@ -53,7 +53,6 @@ export default function OrgPage() {
       <main className="ui-app-main">
         <Link to="/orgs" style={{ display: 'inline-flex', marginBottom: 14, color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 団体一覧</Link>
         <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
-          <div className="ui-kicker">ORGANIZATION</div>
           <h1 className="ui-screen-title" style={{ marginTop: 7 }}>{org.name}</h1>
           {org.description && <p className="ui-screen-subtitle" style={{ maxWidth: 720 }}>{org.description}</p>}
           {links.length > 0 && (

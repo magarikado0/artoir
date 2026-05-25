@@ -50,6 +50,8 @@ export default function DashExhibitionEdit() {
   const [saving, setSaving] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [exhibition, setExhibition] = useState(null)
+  const [editSection, setEditSection] = useState(null)
 
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
@@ -86,6 +88,7 @@ export default function DashExhibitionEdit() {
         if (!isNew && exhibitionId && exhibitionId !== 'undefined') {
           const { data: exh } = await supabase.from('exhibitions').select('*').eq('id', exhibitionId).single()
           if (exh) {
+            setExhibition(exh)
             setTitle(exh.title || '')
             setSlug(exh.slug || '')
             const s = exh.start_date || ''
@@ -153,7 +156,8 @@ export default function DashExhibitionEdit() {
           return
         }
         setSlug(finalSlug)
-        nextPath = `/${orgSlug}/dashboard`
+        setExhibition((prev) => prev ? { ...prev, ...payload } : payload)
+        setEditSection(null)
       }
     } catch (error) {
       window.alert(error?.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
@@ -162,6 +166,29 @@ export default function DashExhibitionEdit() {
     }
 
     if (nextPath) navigate(nextPath)
+  }
+
+  function resetFieldsFromExhibition() {
+    if (!exhibition) return
+    setTitle(exhibition.title || '')
+    setSlug(exhibition.slug || '')
+    const s = exhibition.start_date || ''
+    let e = exhibition.end_date || ''
+    if (s && e && e < s) e = s
+    setStartDate(s)
+    setStartTime(exhibition.start_time || '')
+    setEndDate(e)
+    setEndTime(exhibition.end_time || '')
+    setLocation(exhibition.location || '')
+    setDescription(exhibition.description || '')
+    setThumbnailUrl(getExhibitionThumbnailUrl(exhibition))
+    setFeeType(getExhibitionFeeType(exhibition))
+    setFeeDetail(exhibition.fee_detail || '')
+  }
+
+  function handleCancelEdit() {
+    resetFieldsFromExhibition()
+    setEditSection(null)
   }
 
   async function handleDeleteExhibition() {
@@ -188,6 +215,49 @@ export default function DashExhibitionEdit() {
     </div>
   )
 
+  const fieldValue = (value, fallback = '未設定') => value || fallback
+  const publicUrl = `artoir.net/${orgSlug}/exhibition/${slug || '(未保存)'}`
+  const periodText = [
+    startDate || '未設定',
+    startTime,
+    '〜',
+    endDate || '未設定',
+    endTime,
+  ].filter(Boolean).join(' ')
+  const feeText = feeType === 'paid' ? (feeDetail ? `有料 / ${feeDetail}` : '有料') : '無料'
+
+  function SaveActions() {
+    return (
+      <div className="ui-settings-edit-actions">
+        <button type="button" onClick={handleCancelEdit} disabled={saving} className="ui-settings-secondary-button">
+          キャンセル
+        </button>
+        <button type="button" onClick={handleSave} disabled={saving || deleting} className="ui-settings-primary-button">
+          {saving ? '保存中...' : '保存'}
+        </button>
+      </div>
+    )
+  }
+
+  function ExhibitionItem({ id, label, value, mono, editChildren }) {
+    const editing = editSection === id
+    return (
+      <section className="ui-settings-item">
+        <div className="ui-settings-item-head">
+          <div className="ui-settings-item-label">{label}</div>
+          {!editing && editChildren && (
+            <button type="button" onClick={() => setEditSection(id)} className="ui-settings-edit-button">
+              編集
+            </button>
+          )}
+        </div>
+        {editing ? editChildren : (
+          <div className={`ui-settings-item-value ${mono ? 'is-mono' : ''}`}>{value}</div>
+        )}
+      </section>
+    )
+  }
+
   const formContent = (
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
       <DashSectionLabel>基本情報</DashSectionLabel>
@@ -203,7 +273,7 @@ export default function DashExhibitionEdit() {
       />
 
       <DashSectionLabel>会期・会場</DashSectionLabel>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10 }}>
+      <div className="ui-exhibition-date-grid">
         <DashField label="START" value={startDate} onChange={onStartDateChange} placeholder="YYYY-MM-DD" mono type="date" />
         <DashField label="START TIME" value={startTime} onChange={setStartTime} placeholder="--:--" mono type="time" />
         <DashField label="END" value={endDate} onChange={onEndDateChange} placeholder="YYYY-MM-DD" mono type="date" min={startDate || undefined} />
@@ -319,29 +389,212 @@ export default function DashExhibitionEdit() {
     </div>
   )
 
-  const crumbs = isNew ? ['DASHBOARD', 'EXHIBITIONS', 'NEW'] : ['DASHBOARD', 'EXHIBITIONS', 'EDIT']
+  const existingContent = (
+    <div className="ui-settings-page">
+      <div className="ui-dashboard-list-head" style={{ marginBottom: 12 }}>
+        <div className="ui-dashboard-list-head-copy">
+          <div className="ui-dashboard-list-count">{title || '展覧会情報'}</div>
+        </div>
+        <button
+          type="button"
+          onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)}
+          className="ui-pill-action"
+        >
+          作品を管理
+        </button>
+      </div>
+
+      <ExhibitionItem
+        id="title"
+        label="タイトル"
+        value={fieldValue(exhibition?.title)}
+        editChildren={(
+          <>
+            <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
+            <SaveActions />
+          </>
+        )}
+      />
+
+      <ExhibitionItem
+        id="period"
+        label="会期"
+        value={periodText}
+        mono
+        editChildren={(
+          <>
+            <div className="ui-exhibition-date-grid">
+              <DashField label="START" value={startDate} onChange={onStartDateChange} placeholder="YYYY-MM-DD" mono type="date" />
+              <DashField label="START TIME" value={startTime} onChange={setStartTime} placeholder="--:--" mono type="time" />
+              <DashField label="END" value={endDate} onChange={onEndDateChange} placeholder="YYYY-MM-DD" mono type="date" min={startDate || undefined} />
+              <DashField label="END TIME" value={endTime} onChange={setEndTime} placeholder="--:--" mono type="time" />
+            </div>
+            <SaveActions />
+          </>
+        )}
+      />
+
+      <ExhibitionItem
+        id="location"
+        label="会場"
+        value={fieldValue(exhibition?.location)}
+        editChildren={(
+          <>
+            <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
+            <SaveActions />
+          </>
+        )}
+      />
+
+      <ExhibitionItem
+        id="fee"
+        label="料金"
+        value={feeText}
+        editChildren={(
+          <>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div className="ui-segment" style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+                <button type="button" onClick={() => setFeeType('free')} className={feeType === 'free' ? 'is-active' : ''}>無料</button>
+                <button type="button" onClick={() => setFeeType('paid')} className={feeType === 'paid' ? 'is-active' : ''}>有料</button>
+              </div>
+              {feeType === 'paid' ? (
+                <DashField
+                  label="料金詳細"
+                  value={feeDetail}
+                  onChange={setFeeDetail}
+                  multiline
+                  placeholder="例: 一般 500円 / 学生 300円 / 中学生以下無料"
+                />
+              ) : (
+                <div className="ui-field-help">無料の展覧会として表示されます。</div>
+              )}
+            </div>
+            <SaveActions />
+          </>
+        )}
+      />
+
+      <ExhibitionItem
+        id="description"
+        label="説明文"
+        value={fieldValue(exhibition?.description)}
+        editChildren={(
+          <>
+            <DashField
+              label="DESCRIPTION"
+              value={description}
+              onChange={setDescription}
+              multiline
+              placeholder="展覧会の説明文を入力..."
+            />
+            <SaveActions />
+          </>
+        )}
+      />
+
+      <ExhibitionItem
+        id="thumbnail"
+        label="サムネイル"
+        value={thumbnailUrl ? (
+          <ArtworkMedia
+            src={getThumbnailUrl(thumbnailUrl, 220)}
+            alt={title || '展覧会サムネイル'}
+            label={title || '展覧会サムネイル'}
+            loading="eager"
+            fit="cover"
+            aspectRatio="1 / 1"
+            wrapperStyle={{ width: 'min(180px, 100%)', borderRadius: 7 }}
+            imageStyle={{ borderRadius: 7 }}
+          />
+        ) : '未設定'}
+        editChildren={(
+          <div style={{ display: 'grid', gap: 10 }}>
+            {thumbnailUrl ? (
+              <>
+                <ArtworkMedia
+                  src={getThumbnailUrl(thumbnailUrl, 220)}
+                  alt={title || '展覧会サムネイル'}
+                  label={title || '展覧会サムネイル'}
+                  loading="eager"
+                  fit="cover"
+                  aspectRatio="1 / 1"
+                  wrapperStyle={{ width: 'min(220px, 100%)', borderRadius: 7 }}
+                  imageStyle={{ borderRadius: 7 }}
+                />
+                <button type="button" onClick={() => setThumbnailUrl('')} className="ui-settings-secondary-button" style={{ width: 'fit-content' }}>
+                  サムネイルを削除
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="ui-field-help">公開ページと一覧の先頭で使う画像です。設定しない場合は作品画像の先頭を使います。</div>
+                <ImageUploader compressMaxDimension={1200} onUploaded={(url) => setThumbnailUrl(url)}>
+                  <div style={{ display: 'grid', gap: 6 }}>
+                    <div style={{ fontFamily: T.serif, fontSize: 14, color: T.ink }}>画像をアップロード</div>
+                    <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>クリックまたはドラッグ&ドロップ</div>
+                  </div>
+                </ImageUploader>
+              </>
+            )}
+            <SaveActions />
+          </div>
+        )}
+      />
+
+      <ExhibitionItem id="url" label="公開URL" value={publicUrl} mono />
+
+      <section className="ui-settings-section is-danger">
+        <div className="ui-settings-section-head">
+          <div className="ui-section-label">危険な操作</div>
+        </div>
+        <p className="ui-settings-danger-copy">
+          この展覧会と登録済みの作品をすべて削除します。公開 URL は無効になります。
+        </p>
+        {deleteConfirm ? (
+          <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
+            <div className="ui-kicker">CONFIRM DELETE</div>
+            <div style={{ marginTop: 8, fontSize: 13 }}>「{title || '（タイトルなし）'}」を削除します。</div>
+            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+              <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>キャンセル</button>
+              <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? '削除中...' : '削除する'}</button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setDeleteConfirm(true)} className="ui-settings-danger-button">
+            展覧会を削除
+          </button>
+        )}
+      </section>
+    </div>
+  )
 
   if (isDesktop) return (
-    <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
+    <DashShell orgSlug={orgSlug}>
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
-        <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
-          <div className="ui-kicker">{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
-          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</h1>
-          <p className="ui-screen-subtitle">{isNew ? '基本情報を入れると、公開ページが作成されます。' : '変更内容は保存後に公開ページへ反映されます。'}</p>
-        </div>
-        {formContent}
+        {isNew ? (
+          <>
+            <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
+              <h1 className="ui-screen-title" style={{ marginTop: 8 }}>新しい展覧会</h1>
+              <p className="ui-screen-subtitle">基本情報を入れると、公開ページが作成されます。</p>
+            </div>
+            {formContent}
+          </>
+        ) : existingContent}
       </div>
     </DashShell>
   )
 
   return (
-    <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
-      <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
-        <div className="ui-kicker">{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
-        <h1 className="ui-screen-title" style={{ marginTop: 6 }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</h1>
-        <p className="ui-screen-subtitle">{isNew ? '下の項目を入力すると、公開ページが作成されます。' : '変更は保存で反映されます。'}</p>
-      </div>
-      {formContent}
+    <DashShell orgSlug={orgSlug}>
+      {isNew ? (
+        <>
+          <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
+            <h1 className="ui-screen-title" style={{ marginTop: 6 }}>新しい展覧会</h1>
+            <p className="ui-screen-subtitle">下の項目を入力すると、公開ページが作成されます。</p>
+          </div>
+          {formContent}
+        </>
+      ) : existingContent}
     </DashShell>
   )
 }

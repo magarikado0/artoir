@@ -5,9 +5,8 @@ import DashShell from '../../components/DashShell'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkCreateModal from '../../components/ArtworkCreateModal'
 import ArtworkMedia from '../../components/ArtworkMedia'
-import { T, pad2 } from '../../lib/tokens'
+import { T } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
-import { getExhibitionThumbnailUrl } from '../../lib/exhibition'
 import { getThumbnailUrl } from '../../lib/imageUrl'
 
 export default function DashArtworks() {
@@ -21,7 +20,6 @@ export default function DashArtworks() {
   const [editDesc, setEditDesc] = useState('')
   const [createFile, setCreateFile] = useState(null)
   const [deleting, setDeleting] = useState(false)
-  const thumbnailUrl = getExhibitionThumbnailUrl(exhibition)
 
   useEffect(() => {
     if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
@@ -92,44 +90,32 @@ export default function DashArtworks() {
   return (
     <>
       <DashShell orgSlug={orgSlug} >
-        <div style={{ marginBottom: 14 }}>
-          <div className="ui-kicker">{exhibition?.title || 'WORKS'}</div>
-          <div className="ui-app-topline" style={{ marginTop: 8, marginBottom: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-              <ArtworkMedia
-                src={getThumbnailUrl(thumbnailUrl, 56)}
-                alt={exhibition?.title || '展覧会サムネイル'}
-                label={exhibition?.title || '展覧会サムネイル'}
-                loading="eager"
-                fit="cover"
-                aspectRatio="1 / 1"
-                wrapperStyle={{ width: 56, borderRadius: 8, flexShrink: 0 }}
-                imageStyle={{ borderRadius: 8 }}
-              />
-              <div className="ui-hero-screen-heading" style={{ minWidth: 0 }}>
-                <h1 className="ui-screen-title">作品管理</h1>
-                <p className="ui-screen-subtitle">{pad2(artworks.length)} works</p>
-              </div>
-            </div>
+        <div className="ui-artworks-heading-block" style={{ marginBottom: 14 }}>
+          <section className="ui-app-card" style={{ padding: 18, marginBottom: 8 }}>
+            <h1 className="ui-screen-title" style={{ marginTop: 7 }}>{exhibition?.title || '展覧会'}</h1>
+          </section>
+          <div className="ui-artworks-header-actions">
             {exhibitionId && exhibitionId !== 'undefined' && (
               <Link
                 to={`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/edit`}
-                className="ui-pill-action"
-                style={{ flexShrink: 0 }}
+                className="ui-inline-edit-action"
+                aria-label="展覧会情報を編集"
               >
-                <span>展覧会情報を編集</span>
+                <Icon name="edit" size={15} />
+                <span>情報を編集</span>
               </Link>
             )}
+            <ImageUploader
+              variant="button"
+              buttonClassName="ui-artworks-add-desktop"
+              buttonLabel="作品追加"
+              onBeforeUpload={handleBeforeUpload}
+              onFileSelected={handleCreateFile}
+            >
+              <Icon name="plus" size={17} />
+              <span>作品追加</span>
+            </ImageUploader>
           </div>
-        </div>
-
-        <div style={{ marginBottom: 14 }}>
-          <ImageUploader onBeforeUpload={handleBeforeUpload} onFileSelected={handleCreateFile}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span className="ui-mini-badge"><Icon name="plus" size={15} /> UPLOAD</span>
-              <span style={{ fontFamily: T.serif, fontSize: 16, color: T.ink }}>作品を追加</span>
-            </div>
-          </ImageUploader>
         </div>
 
         {deleteTarget && (
@@ -167,6 +153,16 @@ export default function DashArtworks() {
         </div>
         {artworks.length === 0 && <div className="ui-panel" style={{ padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>作品がまだありません</div>}
       </DashShell>
+
+      <ImageUploader
+        variant="fab"
+        wrapperClassName="ui-artworks-add-mobile"
+        buttonLabel="作品追加"
+        onBeforeUpload={handleBeforeUpload}
+        onFileSelected={handleCreateFile}
+      >
+        <Icon name="plus" size={22} />
+      </ImageUploader>
 
       <ArtworkCreateModal
         open={Boolean(createFile)}

@@ -96,8 +96,6 @@ export default function DashHome() {
     </div>
   )
 
-  const liveCount = exhibitions.filter((e) => exhStatus(e) === 'live').length
-
   async function handleDeleteExhibition() {
     if (!deleteTarget || !supabase) return
     setDeleting(true)
@@ -118,34 +116,17 @@ export default function DashHome() {
 
   return (
     <DashShell orgSlug={orgSlug} >
-      <div className="ui-app-topline">
-        <div className="ui-hero-screen-heading">
-          <h1 className="ui-screen-title">{org?.name || orgSlug}</h1>
-          {org?.description && <p className="ui-screen-subtitle">{org.description.split('。')[0]}</p>}
+      <div className="ui-dashboard-list-head">
+        <div className="ui-dashboard-list-head-copy">
+          <div className="ui-dashboard-list-count">{exhibitions.length}件の展覧会</div>
+          {org?.description && (
+            <p className="ui-screen-subtitle">{org.description.split('。')[0]}</p>
+          )}
         </div>
-        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-pill-action">
+        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-pill-action ui-pill-action--accent">
           <Icon name="plus" size={18} />
-          <span>展覧会作成</span>
+          <span>展覧会を作成</span>
         </button>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginBottom: 18 }}>
-        {[
-          ['EXHIBITS', pad2(exhibitions.length), T.ink],
-          ['LIVE', pad2(liveCount), T.accent],
-        ].map(([k, v, bg]) => (
-          <div key={k} className="ui-app-card" style={{ padding: 16, background: bg, color: T.paper }}>
-            <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', opacity: 0.7 }}>{k}</div>
-            <div style={{ marginTop: 6, fontFamily: T.serif, fontSize: 28 }}>{v}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="ui-app-topline">
-        <div>
-          <div className="ui-kicker">YOUR EXHIBITIONS</div>
-          <div className="ui-screen-title" style={{ fontSize: 22 }}>展覧会管理</div>
-        </div>
       </div>
 
       {deleteTarget && (

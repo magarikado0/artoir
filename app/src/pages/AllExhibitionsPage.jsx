@@ -98,6 +98,11 @@ export default function AllExhibitionsPage() {
   const { session } = useAuth()
 
   useEffect(() => {
+    document.title = '展覧会一覧 | Artoir'
+    return () => { document.title = 'Artoir' }
+  }, [])
+
+  useEffect(() => {
     async function load() {
       if (!supabase) return setLoading(false)
       try {
@@ -135,30 +140,26 @@ export default function AllExhibitionsPage() {
     <div className="ui-page-shell">
       <Header activeTab="top" />
       <main className="ui-app-main">
-        <div className="ui-app-topline ui-app-topline--with-create">
-          <div className="ui-hero-screen-heading">
-            <div className="ui-kicker">EXHIBITIONS</div>
-            <h1 className="ui-screen-title">展覧会</h1>
-          </div>
+        <h1 className="ui-sr-only">展覧会一覧</h1>
+
+        <div className="ui-toolbar-grid">
+          <input className="ui-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="展覧会を検索" />
           <button
             type="button"
             onClick={() => navigate(session ? '/account' : '/login')}
-            className="ui-floating-action ui-exhibitions-create-btn"
+            className="ui-floating-action ui-create-action"
           >
             <Icon name="plus" size={18} />
-            <span>展覧会を作る</span>
+            <span>展覧会を作成</span>
           </button>
         </div>
 
-        <div className="ui-toolbar-grid">
-          <input className="ui-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="展覧会・団体・会場を検索" />
-          <div className="ui-segment">
-            {FILTERS.map((f) => (
-              <button key={f.value} type="button" onClick={() => setFilter(f.value)} className={filter === f.value ? 'is-active' : ''}>
-                {f.label}
-              </button>
-            ))}
-          </div>
+        <div className="ui-segment" style={{ marginBottom: 14 }}>
+          {FILTERS.map((f) => (
+            <button key={f.value} type="button" onClick={() => setFilter(f.value)} className={filter === f.value ? 'is-active' : ''}>
+              {f.label}
+            </button>
+          ))}
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
