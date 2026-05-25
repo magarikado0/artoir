@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell from '../../components/DashShell'
 import ImageUploader from '../../components/ImageUploader'
@@ -78,7 +78,7 @@ export default function DashArtworks() {
   return (
     <>
       <DashShell orgSlug={orgSlug} >
-        <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
+        <div style={{ marginBottom: 14 }}>
           <div className="ui-kicker">{exhibition?.title || 'WORKS'}</div>
           <div className="ui-app-topline" style={{ marginTop: 8, marginBottom: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
@@ -92,13 +92,22 @@ export default function DashArtworks() {
                 wrapperStyle={{ width: 56, borderRadius: 8, flexShrink: 0 }}
                 imageStyle={{ borderRadius: 8 }}
               />
-              <div style={{ minWidth: 0 }}>
+              <div className="ui-hero-screen-heading" style={{ minWidth: 0 }}>
                 <h1 className="ui-screen-title">作品管理</h1>
                 <p className="ui-screen-subtitle">{pad2(artworks.length)} works</p>
               </div>
             </div>
+            {exhibitionId && exhibitionId !== 'undefined' && (
+              <Link
+                to={`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/edit`}
+                className="ui-pill-action"
+                style={{ flexShrink: 0 }}
+              >
+                <span>展覧会情報を編集</span>
+              </Link>
+            )}
           </div>
-        </section>
+        </div>
 
         <div style={{ marginBottom: 14 }}>
           <ImageUploader onBeforeUpload={handleBeforeUpload} onFileSelected={handleCreateFile}>

@@ -274,12 +274,10 @@ export default function DashExhibitionEdit() {
   if (isDesktop) return (
     <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
-        <div className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
-          <div>
-            <div className="ui-kicker">{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
-            <div className="ui-screen-title" style={{ marginTop: 8 }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
-            <p className="ui-screen-subtitle">{isNew ? '基本情報を入れると、公開ページが作成されます。' : '変更内容は保存後に公開ページへ反映されます。'}</p>
-          </div>
+        <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
+          <div className="ui-kicker">{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
+          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</h1>
+          <p className="ui-screen-subtitle">{isNew ? '基本情報を入れると、公開ページが作成されます。' : '変更内容は保存後に公開ページへ反映されます。'}</p>
         </div>
         {formContent}
       </div>
@@ -288,10 +286,10 @@ export default function DashExhibitionEdit() {
 
   return (
     <DashShell orgSlug={orgSlug} active="exs" crumbs={crumbs}>
-      <div className="ui-app-card" style={{ padding: 16, margin: '14px 14px 0' }}>
+      <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
         <div className="ui-kicker">{isNew ? 'NEW EXHIBITION' : 'EDIT EXHIBITION'}</div>
-        <div className="ui-screen-title" style={{ marginTop: 6 }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</div>
-        <div className="ui-screen-subtitle">{isNew ? '下の項目を入力すると、公開ページが作成されます。' : '変更は保存で反映されます。'}</div>
+        <h1 className="ui-screen-title" style={{ marginTop: 6 }}>{isNew ? '新しい展覧会' : (title || '展覧会を編集')}</h1>
+        <p className="ui-screen-subtitle">{isNew ? '下の項目を入力すると、公開ページが作成されます。' : '変更は保存で反映されます。'}</p>
       </div>
       {formContent}
     </DashShell>

@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
-import BrandMark from '../components/BrandMark'
-import { DashField } from '../components/DashShell'
+import DashShell, { DashField, DashSectionLabel } from '../components/DashShell'
 import { T } from '../lib/tokens'
+import { useIsDesktop } from '../lib/useIsDesktop'
 
 export default function AccountSetup() {
   const { session } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const isDesktop = useIsDesktop()
+  const cancelTo = typeof location.state?.from === 'string' ? location.state.from : '/account'
 
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
@@ -33,107 +36,135 @@ export default function AccountSetup() {
 
   if (!session) return <Navigate to="/login" state={{ from: '/account/setup' }} replace />
 
-  async function handleSubmit(e) {
-    e.preventDefault()
+  async function handleSave(e) {
+    e?.preventDefault()
     if (!name.trim() || !slug.trim()) return
     if (!supabase) { setError('Supabase が未設定です'); return }
     setSaving(true)
     setError('')
+    const trimmedSlug = slug.trim()
+    let nextPath = null
     try {
-      // create org
       const { data: newOrg, error: orgErr } = await supabase
         .from('organizations')
-        .insert({ name: name.trim(), slug: slug.trim(), description: description.trim() || null })
+        .insert({ name: name.trim(), slug: trimmedSlug, description: description.trim() || null })
         .select()
         .single()
 
       if (orgErr) {
         if (orgErr.code === '23505') {
-          setError('このSLUGはすでに使われています。別のSLUGを入力してください。')
+          setError('この SLUG はすでに使われています。別の SLUG を入力してください。')
         } else {
           setError(orgErr.message)
         }
-        setSaving(false)
         return
       }
 
-      // link user to org
       const { error: linkErr } = await supabase
         .from('user_orgs')
         .insert({ user_id: session.user.id, org_id: newOrg.id, role: 'owner' })
 
-      if (linkErr) { setError(linkErr.message); setSaving(false); return }
+      if (linkErr) {
+        setError(linkErr.message)
+        return
+      }
 
-      navigate(`/${newOrg.slug}/dashboard`, { replace: true })
+      nextPath = `/${newOrg.slug || trimmedSlug}/dashboard`
     } catch {
       setError('通信に失敗しました。時間をおいて再度お試しください。')
+    } finally {
       setSaving(false)
     }
+
+    if (nextPath) navigate(nextPath, { replace: true })
   }
 
-  const form = (
-    <form onSubmit={handleSubmit}>
-      <DashField
-        label="団体名"
-        value={name}
-        onChange={handleNameChange}
-        placeholder="例: 多摩美術大学 日本画研究室"
-      />
-      <DashField
-        label="SLUG"
-        prefix="artoir.net/"
-        value={slug}
-        onChange={setSlug}
-        placeholder="tamabi-nihonga"
-        mono
-        help="公開URLに使われます。英数字とハイフンのみ。"
-      />
-      <DashField
-        label="説明文（任意）"
-        value={description}
-        onChange={setDescription}
-        placeholder="団体の紹介文を入力..."
-        multiline
-      />
+  const formContent = (
+    <form onSubmit={handleSave}>
+      <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
+        <DashSectionLabel>基本情報</DashSectionLabel>
+        <DashField
+          label="団体名"
+          value={name}
+          onChange={handleNameChange}
+          placeholder="例: 多摩美術大学 日本画研究室"
+        />
+        <DashField
+          label="SLUG"
+          prefix="artoir.net/"
+          value={slug}
+          onChange={setSlug}
+          placeholder="tamabi-nihonga"
+          mono
+          help="公開 URL に使われます。英数字とハイフンのみ。"
+        />
+        <DashField
+          label="説明文"
+          value={description}
+          onChange={setDescription}
+          placeholder="団体の紹介文を入力..."
+          multiline
+          help="任意。公開ページに表示されます。"
+        />
 
-      {error && (
-        <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(180,69,44,0.06)', border: `0.5px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, color: T.accent, letterSpacing: '0.06em' }}>
-          {error}
+        {error && (
+          <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(180,69,44,0.06)', border: `0.5px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, color: T.accent, letterSpacing: '0.06em' }}>
+            {error}
+          </div>
+        )}
+
+        <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <button
+            type="button"
+            onClick={() => navigate(cancelTo)}
+            className="ui-icon-button"
+            style={{ padding: '14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}
+          >
+            CANCEL
+          </button>
+          <button
+            type="submit"
+            disabled={saving || !name.trim() || !slug.trim()}
+            className="ui-action"
+            style={{ padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: (saving || !name.trim() || !slug.trim()) ? 0.6 : 1 }}
+          >
+            {saving ? 'SAVING...' : 'SAVE ↩'}
+          </button>
         </div>
-      )}
-
-      <button
-        type="submit"
-        disabled={saving || !name.trim() || !slug.trim()}
-        className="ui-pill-action"
-        style={{ width: '100%', marginTop: 8, background: (saving || !name.trim() || !slug.trim()) ? T.inkMuted : T.accent, justifyContent: 'space-between', cursor: (saving || !name.trim() || !slug.trim()) ? 'default' : 'pointer' }}
-      >
-        <span>{saving ? '作成中...' : '作成する'}</span>
-        {!saving && <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>}
-      </button>
+        <div style={{ height: 40 }} />
+      </div>
     </form>
   )
 
-  return (
-    <div className="ui-page-shell ui-auth-shell">
-      <section className="ui-auth-card">
-        <div className="ui-auth-masthead">
-          <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }} aria-label="Artoir home">
-            <BrandMark size="auth" />
-          </Link>
-          <div>
-            <div className="ui-kicker" style={{ color: T.gold }}>SETUP / 01</div>
-            <div className="ui-auth-masthead-title">団体ページを作る</div>
-          </div>
-          <Link to="/account" style={{ color: 'rgba(255,253,247,0.72)', textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>BACK</Link>
-        </div>
-          <div className="ui-kicker">ORGANIZATION</div>
-          <div className="ui-screen-title" style={{ marginTop: 8 }}>団体を作成する</div>
-          <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody, marginBottom: 24 }}>
-            Artoir に公開される団体ページを作成します。
-          </div>
-          {form}
-      </section>
+  const pageHeader = (
+    <div className="ui-hero-screen-heading" style={{ marginBottom: isDesktop ? 14 : 0 }}>
+      <div className="ui-kicker">NEW ORGANIZATION</div>
+      <h1 className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>団体を作成する</h1>
+      <p className="ui-screen-subtitle">
+        {isDesktop
+          ? '基本情報を入力すると、公開用の団体ページが作成されます。'
+          : '下の項目を入力すると、公開ページが作成されます。'}
+      </p>
     </div>
+  )
+
+  const crumbs = ['ACCOUNT', 'SETUP']
+
+  if (isDesktop) {
+    return (
+      <DashShell crumbs={crumbs}>
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+          {pageHeader}
+          {formContent}
+        </div>
+      </DashShell>
+    )
+  }
+
+  return (
+    <DashShell crumbs={crumbs}>
+      {pageHeader}
+      {formContent}
+    </DashShell>
   )
 }

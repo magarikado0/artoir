@@ -27,12 +27,32 @@ function DashNav({ orgSlug }) {
   )
 }
 
+function SetupNav() {
+  const items = [
+    ['/', 'Home', 'list'],
+    ['/account', 'アカウント', 'user'],
+  ]
+  return (
+    <aside className="ui-side-rail">
+      <Link to="/" className="ui-rail-brand" aria-label="Artoir home"><BrandMark size="rail" /></Link>
+      <nav className="ui-rail-nav" aria-label="Setup">
+        {items.map(([to, label, icon]) => (
+          <Link key={to} to={to} className="ui-rail-item" aria-label={label}>
+            <Icon name={icon} size={21} />
+            <span>{label}</span>
+          </Link>
+        ))}
+      </nav>
+    </aside>
+  )
+}
+
 export default function DashShell({ children, orgSlug, crumbs = [] }) {
   const isDesktop = useIsDesktop()
 
   if (isDesktop) return (
     <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans }}>
-      <DashNav orgSlug={orgSlug} />
+      {orgSlug ? <DashNav orgSlug={orgSlug} /> : <SetupNav />}
       <main className="ui-app-main">
         {children}
       </main>
@@ -45,6 +65,11 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
         <Link to="/" className="ui-mobile-brand" aria-label="Artoir home">
           <BrandLockup />
         </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Link to="/account" className="ui-top-icon" aria-label="アカウント">
+            <Icon name="user" size={18} />
+          </Link>
+        </div>
       </div>
       {crumbs.length > 0 && (
         <div className="ui-mobile-crumbs">

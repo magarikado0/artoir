@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { StatusBadge } from '../../components/DashShell'
 import ArtworkMedia from '../../components/ArtworkMedia'
@@ -16,22 +16,22 @@ function DashExhibitionCard({ exh, orgSlug, navigate }) {
   return (
     <div
       onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`)}
-      className="ui-list-card"
-      style={{ display: 'grid', gridTemplateColumns: '112px 1fr', gap: 12, padding: 10, cursor: 'pointer' }}
+      className="ui-list-card ui-exhibition-list-card"
+      style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10, cursor: 'pointer' }}
     >
       {thumbnailUrl ? (
         <ArtworkMedia
-          src={getThumbnailUrl(thumbnailUrl, 112)}
+          src={getThumbnailUrl(thumbnailUrl, 96)}
           alt=""
           decorative
           loading="lazy"
           aspectRatio="1 / 1"
           fit="cover"
-          wrapperStyle={{ width: 112, borderRadius: 7, boxShadow: `inset 0 -3px 0 ${T.gold}` }}
+          wrapperStyle={{ width: 96, borderRadius: 7, boxShadow: `inset 0 -3px 0 ${T.gold}` }}
           imageStyle={{ borderRadius: 7 }}
         />
       ) : (
-        <div style={{ width: 112, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+        <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
           <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
         </div>
       )}
@@ -46,9 +46,7 @@ function DashExhibitionCard({ exh, orgSlug, navigate }) {
         </div>
         <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 11, color: T.inkSoft, alignItems: 'center' }}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exh.location || '会場未設定'}</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, fontFamily: T.mono, fontSize: 10 }}>
-            <Link to={`/${orgSlug}/dashboard/exhibitions/${exh.id}/edit`} onClick={(e) => e.stopPropagation()} style={{ color: T.accent, textDecoration: 'none' }}>EDIT →</Link>
-          </span>
+          <span style={{ fontFamily: T.mono, flexShrink: 0 }}>→</span>
         </div>
       </div>
     </div>
@@ -90,18 +88,16 @@ export default function DashHome() {
 
   return (
     <DashShell orgSlug={orgSlug} >
-      <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
-        <div className="ui-app-topline" style={{ marginTop: 8, marginBottom: 0 }}>
-          <div>
-            <h1 className="ui-screen-title">{org?.name || orgSlug}</h1>
-            {org?.description && <p className="ui-screen-subtitle">{org.description.split('。')[0]}</p>}
-          </div>
-          <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-pill-action">
-            <Icon name="plus" size={18} />
-            <span>展覧会作成</span>
-          </button>
+      <div className="ui-app-topline">
+        <div className="ui-hero-screen-heading">
+          <h1 className="ui-screen-title">{org?.name || orgSlug}</h1>
+          {org?.description && <p className="ui-screen-subtitle">{org.description.split('。')[0]}</p>}
         </div>
-      </section>
+        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-pill-action">
+          <Icon name="plus" size={18} />
+          <span>展覧会作成</span>
+        </button>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginBottom: 18 }}>
         {[
@@ -122,7 +118,7 @@ export default function DashHome() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+      <div className="ui-exhibition-list-grid">
         {exhibitions.map((exh) => (
           <DashExhibitionCard key={exh.id} exh={exh} orgSlug={orgSlug} navigate={navigate} />
         ))}

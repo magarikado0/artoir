@@ -467,6 +467,18 @@ button {
   box-shadow: 0 10px 24px rgba(33,24,19,0.1), inset 0 2px 0 rgba(190,85,61,0.36);
 }
 
+.ui-exhibition-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .ui-exhibition-list-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 360px));
+  }
+}
+
 .ui-org-table {
   border: 1px solid rgba(67,54,44,0.2);
   border-radius: 8px;
