@@ -8,6 +8,7 @@ import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import { getExhibitionFeeType, getExhibitionThumbnailUrl } from '../../lib/exhibition'
 import { getThumbnailUrl } from '../../lib/imageUrl'
+import { deleteExhibition } from '../../lib/deleteExhibition'
 
 function slugifyAscii(s) {
   return String(s || '')
@@ -47,6 +48,8 @@ export default function DashExhibitionEdit() {
   const [org, setOrg] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
@@ -161,6 +164,24 @@ export default function DashExhibitionEdit() {
     if (nextPath) navigate(nextPath)
   }
 
+  async function handleDeleteExhibition() {
+    if (!supabase || isNew || !exhibitionId || exhibitionId === 'undefined') return
+    setDeleting(true)
+    try {
+      const { error } = await deleteExhibition(supabase, exhibitionId)
+      if (error) {
+        window.alert(error.message ? `削除に失敗しました: ${error.message}` : '削除に失敗しました。')
+        return
+      }
+      navigate(`/${orgSlug}/dashboard`, { replace: true })
+    } catch (error) {
+      window.alert(error?.message ? `削除に失敗しました: ${error.message}` : '削除に失敗しました。')
+    } finally {
+      setDeleting(false)
+      setDeleteConfirm(false)
+    }
+  }
+
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
       <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
@@ -260,11 +281,40 @@ export default function DashExhibitionEdit() {
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || deleting}
           className="ui-action"
-          style={{ flex: 1, padding: '14px', background: T.accent, color: T.paper, border: `1px solid ${T.paper}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+          style={{ flex: 1, padding: '14px', background: T.accent, color: T.paper, border: `1px solid ${T.paper}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving || deleting ? 0.6 : 1 }}
         >{saving ? 'SAVING...' : 'SAVE ↩'}</button>
       </div>
+
+      {!isNew && (
+        <div style={{ marginTop: 36, paddingTop: 24, borderTop: `1px solid ${T.ink}` }}>
+          <DashSectionLabel>危険な操作</DashSectionLabel>
+          <p style={{ margin: '0 0 14px', fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>
+            この展覧会と登録済みの作品をすべて削除します。公開 URL は無効になります。
+          </p>
+          {deleteConfirm ? (
+            <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
+              <div className="ui-kicker">CONFIRM DELETE</div>
+              <div style={{ marginTop: 8, fontSize: 13 }}>「{title || '（タイトルなし）'}」を削除します。</div>
+              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
+                <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? 'DELETING...' : 'DELETE'}</button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setDeleteConfirm(true)}
+              className="ui-icon-button"
+              style={{ padding: '12px 16px', background: 'transparent', color: T.accent, border: `1px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer' }}
+            >
+              展覧会を削除
+            </button>
+          )}
+        </div>
+      )}
+
       <div style={{ height: 40 }} />
     </div>
   )

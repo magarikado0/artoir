@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
+import { deleteOrganization } from '../../lib/deleteOrganization'
 
 export default function DashSettings() {
   const { orgSlug } = useParams()
@@ -21,6 +22,9 @@ export default function DashSettings() {
   const [homepageUrl, setHomepageUrl] = useState('')
   const [slug, setSlug] = useState('')
   const [slugChanged, setSlugChanged] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleteSlugInput, setDeleteSlugInput] = useState('')
+  const [deleting, setDeleting] = useState(false)
   const savedResetTimerRef = useRef(null)
 
   function normalizeSnsValue(value, host) {
@@ -99,6 +103,27 @@ export default function DashSettings() {
     }
   }
 
+  async function handleDeleteOrganization() {
+    if (!supabase || !org) return
+    if (deleteSlugInput.trim() !== (org.slug || orgSlug)) {
+      window.alert('確認のため、正しい SLUG を入力してください。')
+      return
+    }
+    setDeleting(true)
+    try {
+      const { error } = await deleteOrganization(supabase, org.id)
+      if (error) {
+        window.alert(error.message ? `削除に失敗しました: ${error.message}` : '削除に失敗しました。')
+        return
+      }
+      navigate('/account', { replace: true })
+    } catch (error) {
+      window.alert(error?.message ? `削除に失敗しました: ${error.message}` : '削除に失敗しました。')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
       <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
@@ -134,17 +159,73 @@ export default function DashSettings() {
 
       <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         <button
+          type="button"
           onClick={() => navigate(`/${orgSlug}/dashboard`)}
           className="ui-icon-button"
           style={{ padding: '14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}
         >CANCEL</button>
         <button
+          type="button"
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || deleting}
           className="ui-action"
-          style={{ padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}
+          style={{ padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving || deleting ? 0.6 : 1 }}
         >{saved ? 'SAVED ✓' : saving ? 'SAVING...' : 'SAVE ↩'}</button>
       </div>
+
+      <div style={{ marginTop: 36, paddingTop: 24, borderTop: `1px solid ${T.ink}` }}>
+        <DashSectionLabel>危険な操作</DashSectionLabel>
+        <p style={{ margin: '0 0 14px', fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>
+          「{name || orgSlug}」と配下の展覧会・作品をすべて削除します。復元できません。
+        </p>
+        {deleteConfirm ? (
+          <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
+            <div className="ui-kicker">CONFIRM DELETE</div>
+            <div style={{ marginTop: 8, fontSize: 13 }}>続行するには SLUG「{org?.slug || orgSlug}」を入力してください。</div>
+            <div style={{ marginTop: 12 }}>
+              <div className="ui-form-label">SLUG</div>
+              <div className="ui-input-wrap">
+                <input
+                  value={deleteSlugInput}
+                  onChange={(e) => setDeleteSlugInput(e.target.value)}
+                  placeholder={org?.slug || orgSlug}
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                onClick={() => { setDeleteConfirm(false); setDeleteSlugInput('') }}
+                disabled={deleting}
+                className="ui-pill-action"
+                style={{ flex: 1, background: T.paperAlt, color: T.ink }}
+              >
+                CANCEL
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteOrganization}
+                disabled={deleting || deleteSlugInput.trim() !== (org?.slug || orgSlug)}
+                className="ui-pill-action"
+                style={{ flex: 1, background: T.accent, opacity: deleting || deleteSlugInput.trim() !== (org?.slug || orgSlug) ? 0.5 : 1 }}
+              >
+                {deleting ? 'DELETING...' : 'DELETE'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setDeleteConfirm(true)}
+            className="ui-icon-button"
+            style={{ padding: '12px 16px', background: 'transparent', color: T.accent, border: `1px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer' }}
+          >
+            団体を削除
+          </button>
+        )}
+      </div>
+
       <div style={{ height: 40 }} />
     </div>
   )

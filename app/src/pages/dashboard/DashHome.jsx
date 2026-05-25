@@ -8,8 +8,9 @@ import { getThumbnailUrl } from '../../lib/imageUrl'
 import ExhibitionFeeBadge from '../../components/ExhibitionFeeBadge'
 import { T, fmtDateDot, pad2 } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
+import { deleteExhibition } from '../../lib/deleteExhibition'
 
-function DashExhibitionCard({ exh, orgSlug, navigate }) {
+function DashExhibitionCard({ exh, orgSlug, navigate, onDelete }) {
   const status = exhStatus(exh)
   const placeholderBg = `linear-gradient(135deg, ${T.surfaceMuted}, ${T.mint} 58%, ${T.blush})`
   const thumbnailUrl = getExhibitionThumbnailUrl(exh)
@@ -46,7 +47,16 @@ function DashExhibitionCard({ exh, orgSlug, navigate }) {
         </div>
         <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 11, color: T.inkSoft, alignItems: 'center' }}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exh.location || '会場未設定'}</span>
-          <span style={{ fontFamily: T.mono, flexShrink: 0 }}>→</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onDelete(exh) }}
+              style={{ border: 0, background: 'transparent', color: T.inkMuted, cursor: 'pointer', padding: '4px 6px', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em' }}
+            >
+              削除
+            </button>
+            <span style={{ fontFamily: T.mono }}>→</span>
+          </div>
         </div>
       </div>
     </div>
@@ -59,6 +69,8 @@ export default function DashHome() {
   const [org, setOrg] = useState(null)
   const [exhibitions, setExhibitions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!supabase) return setLoading(false)
@@ -85,6 +97,24 @@ export default function DashHome() {
   )
 
   const liveCount = exhibitions.filter((e) => exhStatus(e) === 'live').length
+
+  async function handleDeleteExhibition() {
+    if (!deleteTarget || !supabase) return
+    setDeleting(true)
+    try {
+      const { error } = await deleteExhibition(supabase, deleteTarget.id)
+      if (error) {
+        window.alert(`削除に失敗しました: ${error.message}`)
+        return
+      }
+      setExhibitions((prev) => prev.filter((e) => e.id !== deleteTarget.id))
+      setDeleteTarget(null)
+    } catch (error) {
+      window.alert(error?.message ? `削除に失敗しました: ${error.message}` : '削除に失敗しました。')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   return (
     <DashShell orgSlug={orgSlug} >
@@ -118,9 +148,20 @@ export default function DashHome() {
         </div>
       </div>
 
+      {deleteTarget && (
+        <div className="ui-app-card" style={{ padding: 14, marginBottom: 14, borderColor: T.accent }}>
+          <div className="ui-kicker">CONFIRM DELETE</div>
+          <div style={{ marginTop: 8, fontSize: 13 }}>「{deleteTarget.title || '（タイトルなし）'}」と登録済みの作品をすべて削除します。</div>
+          <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+            <button type="button" onClick={() => setDeleteTarget(null)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
+            <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? 'DELETING...' : 'DELETE'}</button>
+          </div>
+        </div>
+      )}
+
       <div className="ui-exhibition-list-grid">
         {exhibitions.map((exh) => (
-          <DashExhibitionCard key={exh.id} exh={exh} orgSlug={orgSlug} navigate={navigate} />
+          <DashExhibitionCard key={exh.id} exh={exh} orgSlug={orgSlug} navigate={navigate} onDelete={setDeleteTarget} />
         ))}
         {exhibitions.length === 0 && <div className="ui-panel" style={{ gridColumn: '1 / -1', padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>展覧会がまだありません</div>}
       </div>

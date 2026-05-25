@@ -20,6 +20,7 @@ export default function DashArtworks() {
   const [editTitle, setEditTitle] = useState('')
   const [editDesc, setEditDesc] = useState('')
   const [createFile, setCreateFile] = useState(null)
+  const [deleting, setDeleting] = useState(false)
   const thumbnailUrl = getExhibitionThumbnailUrl(exhibition)
 
   useEffect(() => {
@@ -51,9 +52,22 @@ export default function DashArtworks() {
 
   async function handleDelete() {
     if (!deleteTarget || !supabase) return
-    await supabase.from('artworks').delete().eq('id', deleteTarget.id)
-    setArtworks((prev) => prev.filter((a) => a.id !== deleteTarget.id))
+    setDeleting(true)
+    const id = deleteTarget.id
+    const { error } = await supabase.from('artworks').delete().eq('id', id)
+    setDeleting(false)
+    if (error) {
+      window.alert(`削除に失敗しました: ${error.message}`)
+      return
+    }
+    setArtworks((prev) => prev.filter((a) => a.id !== id))
     setDeleteTarget(null)
+    if (editTarget?.id === id) setEditTarget(null)
+  }
+
+  function requestDelete(work) {
+    setEditTarget(null)
+    setDeleteTarget(work)
   }
 
   async function handleEditSave() {
@@ -123,8 +137,8 @@ export default function DashArtworks() {
             <div className="ui-kicker">CONFIRM DELETE</div>
             <div style={{ marginTop: 8, fontSize: 13 }}>「{deleteTarget.title || '（タイトルなし）'}」を削除します。</div>
             <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-              <button onClick={() => setDeleteTarget(null)} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
-              <button onClick={handleDelete} className="ui-pill-action" style={{ flex: 1, background: T.accent }}>DELETE</button>
+              <button type="button" onClick={() => setDeleteTarget(null)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
+              <button type="button" onClick={handleDelete} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? 'DELETING...' : 'DELETE'}</button>
             </div>
           </div>
         )}
@@ -146,7 +160,7 @@ export default function DashArtworks() {
               </button>
               <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', gap: 6, alignItems: 'center' }}>
                 <div style={{ fontFamily: T.serif, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '（タイトルなし）'}</div>
-                <button onClick={() => setDeleteTarget(w)} style={{ border: 0, background: 'transparent', color: T.inkMuted, cursor: 'pointer', padding: 6 }}>...</button>
+                <button type="button" onClick={() => requestDelete(w)} style={{ border: 0, background: 'transparent', color: T.inkMuted, cursor: 'pointer', padding: '4px 6px', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', flexShrink: 0 }}>削除</button>
               </div>
             </div>
           ))}
@@ -192,9 +206,17 @@ export default function DashArtworks() {
               <div className="ui-input-wrap" data-multiline="true"><textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} /></div>
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button onClick={() => setEditTarget(null)} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
-              <button onClick={handleEditSave} className="ui-pill-action" style={{ flex: 1, background: T.accent }}>SAVE</button>
+              <button type="button" onClick={() => setEditTarget(null)} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
+              <button type="button" onClick={handleEditSave} className="ui-pill-action" style={{ flex: 1, background: T.accent }}>SAVE</button>
             </div>
+            <button
+              type="button"
+              onClick={() => requestDelete(editTarget)}
+              className="ui-icon-button"
+              style={{ marginTop: 12, width: '100%', padding: '12px', background: 'transparent', color: T.accent, border: `1px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer' }}
+            >
+              作品を削除
+            </button>
           </div>
         </div>
       )}

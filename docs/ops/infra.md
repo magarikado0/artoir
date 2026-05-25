@@ -31,3 +31,7 @@ Root Directoryは `app` に設定する。
 - モックアップHTML作成済み（`docs/design/mockups/`）
 - Supabaseスキーマ：未設計
 - 認証：未実装
+
+## Supabase RLS（削除）
+
+ダッシュボードの削除機能（団体・展覧会・作品）を使うには、`user_orgs` に紐づくメンバーが自分の org 配下の `organizations` / `exhibitions` / `artworks` / `user_orgs` を **DELETE** できる RLS ポリシーが必要。FK が `RESTRICT` の場合はアプリ側で子→親の順に削除しているが、`ON DELETE CASCADE` の追加を推奨。
