@@ -5,9 +5,9 @@ import { useIsDesktop } from '../lib/useIsDesktop'
 import BrandMark, { BrandLockup } from './BrandMark'
 
 const TABS = [
-  { key: 'top', label: 'Exhibits', path: '/', icon: 'list' },
-  { key: 'orgs', label: 'Orgs', path: '/orgs', icon: 'org' },
-  { key: 'account', label: 'Account', path: '/account', icon: 'user' },
+  { key: 'top', label: '展覧会', path: '/', icon: 'list' },
+  { key: 'orgs', label: '団体', path: '/orgs', icon: 'org' },
+  { key: 'account', label: '管理', path: '/account', icon: 'user' },
 ]
 
 export function Icon({ name, size = 20 }) {
@@ -27,6 +27,11 @@ export function Icon({ name, size = 20 }) {
   if (name === 'login') return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M9 18l6-6-6-6M15 12H3M21 4v16" {...s} />
+    </svg>
+  )
+  if (name === 'logout') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M15 18l-6-6 6-6M9 12h12M3 4v16" {...s} />
     </svg>
   )
   if (name === 'plus') return (
@@ -64,7 +69,7 @@ export default function Header({ activeTab }) {
         <Link to="/" className="ui-rail-brand" aria-label="Artoir home">
           <BrandMark size="rail" />
         </Link>
-        <nav className="ui-rail-nav" aria-label="Primary">
+        <nav className="ui-rail-nav" aria-label="メインメニュー">
           {TABS.map((t) => {
             const on = activeTab === t.key
             return (
@@ -77,9 +82,11 @@ export default function Header({ activeTab }) {
         </nav>
         <div className="ui-rail-bottom">
           {session ? (
-            <button onClick={handleLogout} className="ui-rail-mini" aria-label="Sign out">OUT</button>
+            <button onClick={handleLogout} className="ui-rail-mini" aria-label="ログアウト">
+              <Icon name="logout" size={17} />
+            </button>
           ) : (
-            <Link to="/login" className="ui-rail-mini" aria-label="Log in">
+            <Link to="/login" className="ui-rail-mini" aria-label="ログイン">
               <Icon name="login" size={17} />
             </Link>
           )}

@@ -4,7 +4,7 @@ import { useIsDesktop } from '../lib/useIsDesktop'
 import { Icon } from './Header'
 
 const ITEMS = [
-  { key: 'top', label: '展示', icon: 'list', path: '/' },
+  { key: 'top', label: '展覧会', icon: 'list', path: '/' },
   { key: 'orgs', label: '団体', icon: 'org', path: '/orgs' },
   { key: 'account', label: '管理', icon: 'user', path: '/account' },
 ]
