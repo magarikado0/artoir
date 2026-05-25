@@ -34,23 +34,6 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
     <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans }}>
       <DashNav orgSlug={orgSlug} />
       <main className="ui-app-main">
-        <div className="ui-app-topline">
-          <div className="ui-dashboard-header-title">
-            <Link to="/" className="ui-header-brand" aria-label="Artoir home">
-              <BrandLockup />
-            </Link>
-            <div className="ui-kicker">DASHBOARD</div>
-            <div className="ui-crumbs">
-              {crumbs.length > 0 ? crumbs.map((c, i) => (
-                <span key={i}>{i > 0 ? ' / ' : ''}{c}</span>
-              )) : <span>管理</span>}
-            </div>
-          </div>
-          <Link to={`/${orgSlug}/dashboard/exhibitions/new`} className="ui-pill-action">
-            <Icon name="plus" size={17} />
-            <span>新規展覧会</span>
-          </Link>
-        </div>
         {children}
       </main>
     </div>
