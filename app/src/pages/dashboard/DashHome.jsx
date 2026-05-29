@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { StatusBadge } from '../../components/DashShell'
 import { exhStatus, getExhibitionThumbnailUrl, mapExhibitionListRow } from '../../lib/exhibition'
-import ExhibitionFeeBadge from '../../components/ExhibitionFeeBadge'
 import { ExhibitionCardMedia } from '../../components/ExhibitionListCard'
 import { T, fmtDateRangeShort } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
@@ -21,17 +20,18 @@ function DashExhibitionCard({ exh, orgSlug, navigate, onDelete, artworkCount }) 
       <div className="ui-exhibition-list-card-body">
         <div className="ui-exhibition-list-card-meta">
           <StatusBadge kind={status} className="ui-exhibition-list-card-badge" />
-          <ExhibitionFeeBadge exhibition={exh} className="ui-exhibition-list-card-badge" />
         </div>
         <div className="ui-exhibition-list-card-content">
           <div className="ui-exhibition-list-card-title">{exh.title}</div>
-          <div className="ui-exhibition-list-card-location">
-            <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" className="ui-exhibition-list-card-pin">
-              <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="12" cy="10" r="2.2" fill="#FFF9ED" />
-            </svg>
-            <span>{exh.location || '会場未設定'}</span>
-          </div>
+          {exh.location?.trim() && (
+            <div className="ui-exhibition-list-card-location">
+              <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" className="ui-exhibition-list-card-pin">
+                <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" />
+                <circle cx="12" cy="10" r="2.2" fill="#FFF9ED" />
+              </svg>
+              <span>{exh.location}</span>
+            </div>
+          )}
         </div>
         <div className="ui-exhibition-list-card-footer">
           <span className="ui-exhibition-list-card-date">{fmtDateRangeShort(exh.start_date, exh.end_date)}</span>

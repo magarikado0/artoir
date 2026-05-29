@@ -7,33 +7,18 @@ import { T } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { mapExhibitionListRow } from '../lib/exhibition'
+import { isPersonPublisher, PUBLISHER_KIND } from '../lib/publisher'
 
 const FILTERS = [
-  { label: '全て', value: 'ALL' },
-  { label: '開催中', value: 'OPEN NOW' },
-  { label: '予定', value: 'UPCOMING' },
+  { label: 'すべて', value: 'ALL' },
+  { label: '団体', value: PUBLISHER_KIND.ORGANIZATION },
+  { label: '個人', value: PUBLISHER_KIND.PERSON },
 ]
 
-function startOfToday() {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-function parseLocalDate(s) {
-  if (!s) return null
-  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/)
-  if (!m) return new Date(s)
-  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
-}
-
-function matchesFilter(exh, filter) {
+function matchesPublisherFilter(org, filter) {
   if (filter === 'ALL') return true
-  const today = startOfToday()
-  const start = parseLocalDate(exh.start_date)
-  const end = parseLocalDate(exh.end_date)
-  if (filter === 'OPEN NOW') return Boolean(start && end && start <= today && today <= end)
-  if (filter === 'UPCOMING') return Boolean(start && start > today)
+  if (filter === PUBLISHER_KIND.PERSON) return isPersonPublisher(org)
+  if (filter === PUBLISHER_KIND.ORGANIZATION) return !isPersonPublisher(org)
   return true
 }
 
@@ -88,7 +73,7 @@ export default function AllExhibitionsPage() {
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase()
     return rows
-      .filter(({ exhibition }) => matchesFilter(exhibition, filter))
+      .filter(({ org }) => matchesPublisherFilter(org, filter))
       .filter(({ exhibition, org }) => {
         if (!q) return true
         return [exhibition.title, exhibition.location, org?.name].filter(Boolean).join(' ').toLowerCase().includes(q)

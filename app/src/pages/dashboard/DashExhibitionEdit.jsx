@@ -7,8 +7,6 @@ import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import {
-  getExhibitionFeeSummary,
-  getExhibitionFeeType,
   getExhibitionPeriodText,
   getExhibitionThumbnailUrlFromRecord,
 } from '../../lib/exhibition'
@@ -103,8 +101,6 @@ export default function DashExhibitionEdit() {
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
-  const [feeType, setFeeType] = useState('free')
-  const [feeDetail, setFeeDetail] = useState('')
 
   function onStartDateChange(next) {
     setStartDate(next)
@@ -142,8 +138,6 @@ export default function DashExhibitionEdit() {
             setLocation(exh.location || '')
             setDescription(exh.description || '')
             setThumbnailUrl(getExhibitionThumbnailUrlFromRecord(exh))
-            setFeeType(getExhibitionFeeType(exh))
-            setFeeDetail(exh.fee_detail || '')
           }
         }
       } catch { /* unavailable */ } finally { setLoading(false) }
@@ -156,10 +150,6 @@ export default function DashExhibitionEdit() {
     if (!isNew && (!exhibitionId || exhibitionId === 'undefined')) return
     if (startDate && endDate && endDate < startDate) {
       window.alert('終了日は開始日以降である必要があります。')
-      return
-    }
-    if (feeType === 'paid' && !feeDetail.trim()) {
-      window.alert('有料の場合は料金詳細を入力してください。')
       return
     }
     setSaving(true)
@@ -176,8 +166,6 @@ export default function DashExhibitionEdit() {
         location,
         description,
         thumbnail_url: thumbnailUrl || null,
-        fee_type: feeType,
-        fee_detail: feeType === 'paid' ? feeDetail.trim() : null,
         org_id: org.id,
       }
       if (isNew) {
@@ -223,8 +211,6 @@ export default function DashExhibitionEdit() {
     setLocation(exhibition.location || '')
     setDescription(exhibition.description || '')
     setThumbnailUrl(getExhibitionThumbnailUrlFromRecord(exhibition))
-    setFeeType(getExhibitionFeeType(exhibition))
-    setFeeDetail(exhibition.fee_detail || '')
   }
 
   function handleCancelEdit() {
@@ -263,7 +249,6 @@ export default function DashExhibitionEdit() {
 
   const savedPublicUrl = `artoir.net/${orgSlug}/exhibition/${exhibition?.slug || '(未保存)'}`
   const savedPeriodText = getExhibitionPeriodText(exhibition)
-  const savedFeeText = getExhibitionFeeSummary(exhibition)
   const savedThumbnailUrl = getExhibitionThumbnailUrlFromRecord(exhibition)
 
   const formContent = (
@@ -288,26 +273,6 @@ export default function DashExhibitionEdit() {
         <DashField label="END TIME" value={endTime} onChange={setEndTime} placeholder="--:--" mono type="time" />
       </div>
       <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
-
-      <DashSectionLabel>料金</DashSectionLabel>
-      <div style={{ display: 'grid', gap: 10 }}>
-        <div className="ui-segment" style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-          <button type="button" onClick={() => setFeeType('free')} className={feeType === 'free' ? 'is-active' : ''}>無料</button>
-          <button type="button" onClick={() => setFeeType('paid')} className={feeType === 'paid' ? 'is-active' : ''}>有料</button>
-        </div>
-        {feeType === 'paid' ? (
-          <DashField
-            label="料金詳細"
-            value={feeDetail}
-            onChange={setFeeDetail}
-            multiline
-            placeholder="例: 一般 500円 / 学生 300円 / 中学生以下無料"
-            help="有料の場合は、公開ページに表示する料金情報を自由記述で入力してください。"
-          />
-        ) : (
-          <div className="ui-field-help">無料の展覧会として表示されます。</div>
-        )}
-      </div>
 
       <DashSectionLabel>説明文</DashSectionLabel>
       <DashField
@@ -455,36 +420,6 @@ export default function DashExhibitionEdit() {
         editChildren={(
           <>
             <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
-            <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
-          </>
-        )}
-      />
-
-      <ExhibitionItem
-        editSection={editSection}
-        onBeginEdit={beginEditSection}
-        id="fee"
-        label="料金"
-        value={savedFeeText}
-        editChildren={(
-          <>
-            <div style={{ display: 'grid', gap: 10 }}>
-              <div className="ui-segment" style={{ width: '100%', display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-                <button type="button" onClick={() => setFeeType('free')} className={feeType === 'free' ? 'is-active' : ''}>無料</button>
-                <button type="button" onClick={() => setFeeType('paid')} className={feeType === 'paid' ? 'is-active' : ''}>有料</button>
-              </div>
-              {feeType === 'paid' ? (
-                <DashField
-                  label="料金詳細"
-                  value={feeDetail}
-                  onChange={setFeeDetail}
-                  multiline
-                  placeholder="例: 一般 500円 / 学生 300円 / 中学生以下無料"
-                />
-              ) : (
-                <div className="ui-field-help">無料の展覧会として表示されます。</div>
-              )}
-            </div>
             <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
           </>
         )}

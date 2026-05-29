@@ -1,42 +1,9 @@
 import { Link } from 'react-router-dom'
 import { T, fmtDateRangeShort, pad2 } from '../lib/tokens'
-import ExhibitionFeeBadge from './ExhibitionFeeBadge'
 import ArtworkMedia from './ArtworkMedia'
 import { getExhibitionThumbnailUrl } from '../lib/exhibition'
 import { getThumbnailUrl } from '../lib/imageUrl'
 import { getPublisherKindLabel } from '../lib/publisher'
-
-function startOfToday() {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-function parseLocalDate(s) {
-  if (!s) return null
-  const m = String(s).match(/^(\d{4})-(\d{2})-(\d{2})/)
-  if (!m) return new Date(s)
-  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
-}
-
-function matchesFilter(exh, filter) {
-  if (filter === 'ALL') return true
-  const today = startOfToday()
-  const start = parseLocalDate(exh.start_date)
-  const end = parseLocalDate(exh.end_date)
-  if (filter === 'OPEN NOW') return Boolean(start && end && start <= today && today <= end)
-  if (filter === 'UPCOMING') return Boolean(start && start > today)
-  return true
-}
-
-function StatusDot({ exhibition }) {
-  const live = matchesFilter(exhibition, 'OPEN NOW')
-  const upcoming = matchesFilter(exhibition, 'UPCOMING')
-  const text = live ? '開催中' : upcoming ? '予定' : '終了'
-  const bg = live ? T.accent : upcoming ? T.gold : T.paperAlt
-  const color = live ? T.paper : T.ink
-  return <span className="ui-exhibition-list-card-badge" style={{ background: bg, color }}>{text}</span>
-}
 
 function LocationPin() {
   return (
@@ -80,19 +47,22 @@ export default function ExhibitionListCard({ exhibition: exh, org, showOrgName =
   return (
     <Link to={`/${org?.slug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card">
       <div className="ui-exhibition-list-card-body">
-        <div className="ui-exhibition-list-card-meta">
-          <StatusDot exhibition={exh} />
-          <ExhibitionFeeBadge exhibition={exh} className="ui-exhibition-list-card-badge" />
-          {showOrgName && org?.name && (
-            <span className="ui-exhibition-list-card-tag">{org.name} / {getPublisherKindLabel(org)}</span>
-          )}
-        </div>
+        {showOrgName && org && (
+          <div className="ui-exhibition-list-card-meta">
+            <span className="ui-publisher-kind-badge">{getPublisherKindLabel(org)}</span>
+            {org.name && (
+              <span className="ui-exhibition-list-card-tag">{org.name}</span>
+            )}
+          </div>
+        )}
         <div className="ui-exhibition-list-card-content">
           <div className="ui-exhibition-list-card-title">{exh.title}</div>
-          <div className="ui-exhibition-list-card-location">
-            <LocationPin />
-            <span>{exh.location || '会場未設定'}</span>
-          </div>
+          {exh.location?.trim() && (
+            <div className="ui-exhibition-list-card-location">
+              <LocationPin />
+              <span>{exh.location}</span>
+            </div>
+          )}
         </div>
         <div className="ui-exhibition-list-card-footer">
           <span className="ui-exhibition-list-card-date">{fmtDateRangeShort(exh.start_date, exh.end_date)}</span>
