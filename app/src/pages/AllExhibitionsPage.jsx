@@ -6,6 +6,7 @@ import BottomNav from '../components/BottomNav'
 import { T } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
 import ExhibitionListCard from '../components/ExhibitionListCard'
+import { mapExhibitionListRow } from '../lib/exhibition'
 
 const FILTERS = [
   { label: '全て', value: 'ALL' },
@@ -42,11 +43,11 @@ async function fetchExhibitionRows() {
     .select(select)
     .order('start_date', { ascending: false })
 
-  const withKind = await runQuery('*, organizations(id, name, slug, kind), artworks(count)')
+  const withKind = await runQuery('*, organizations(id, name, slug, kind), artworks(image_url, order)')
 
   if (!withKind.error) return withKind.data || []
 
-  const withoutKind = await runQuery('*, organizations(id, name, slug), artworks(count)')
+  const withoutKind = await runQuery('*, organizations(id, name, slug), artworks(image_url, order)')
 
   if (withoutKind.error) throw withoutKind.error
   return withoutKind.data || []
@@ -71,9 +72,9 @@ export default function AllExhibitionsPage() {
       try {
         const data = await fetchExhibitionRows()
         setRows((data || []).map((exh) => {
-          const { organizations: org, artworks, ...exhibition } = exh
-          const artworkCount = artworks?.[0]?.count ?? 0
-          return { exhibition, org, artworkCount }
+          const { organizations: org, ...rest } = exh
+          const exhibition = mapExhibitionListRow(rest)
+          return { exhibition, org, artworkCount: exhibition.artworkCount }
         }))
       } catch {
         /* unavailable */

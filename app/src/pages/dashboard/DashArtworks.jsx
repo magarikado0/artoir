@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell from '../../components/DashShell'
@@ -8,6 +8,22 @@ import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 import { getThumbnailUrl } from '../../lib/imageUrl'
+import { persistArtworkOrder, reorderArtworksById } from '../../lib/reorderArtworks'
+
+function DragHandleIcon() {
+  const s = { stroke: 'currentColor', strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round' }
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 6h.01M8 12h.01M8 18h.01M16 6h.01M16 12h.01M16 18h.01" {...s} />
+      <circle cx="8" cy="6" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="8" cy="12" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="8" cy="18" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="6" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="12" r="1.5" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="18" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
 
 export default function DashArtworks() {
   const { orgSlug, exhibitionId } = useParams()
@@ -20,6 +36,15 @@ export default function DashArtworks() {
   const [editDesc, setEditDesc] = useState('')
   const [createFile, setCreateFile] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [draggingId, setDraggingId] = useState(null)
+  const [dragOverId, setDragOverId] = useState(null)
+  const [reordering, setReordering] = useState(false)
+  const dragOverIdRef = useRef(null)
+  const artworksRef = useRef(artworks)
+
+  useEffect(() => {
+    artworksRef.current = artworks
+  }, [artworks])
 
   useEffect(() => {
     if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
@@ -66,6 +91,71 @@ export default function DashArtworks() {
   function requestDelete(work) {
     setEditTarget(null)
     setDeleteTarget(work)
+  }
+
+  function updateDragOver(targetId) {
+    dragOverIdRef.current = targetId
+    setDragOverId(targetId)
+  }
+
+  function clearDragState() {
+    setDraggingId(null)
+    setDragOverId(null)
+    dragOverIdRef.current = null
+  }
+
+  function handleDragHandlePointerDown(event, artworkId) {
+    if (reordering || artworks.length < 2) return
+    if (event.button !== 0) return
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    const handle = event.currentTarget
+    handle.setPointerCapture(event.pointerId)
+    setDraggingId(artworkId)
+    updateDragOver(artworkId)
+
+    function resolveDropTarget(clientX, clientY) {
+      const card = document.elementFromPoint(clientX, clientY)?.closest('[data-artwork-id]')
+      return card?.dataset?.artworkId ?? null
+    }
+
+    function onPointerMove(e) {
+      const targetId = resolveDropTarget(e.clientX, e.clientY)
+      if (targetId) updateDragOver(targetId)
+    }
+
+    async function onPointerEnd(e) {
+      handle.releasePointerCapture(e.pointerId)
+      handle.removeEventListener('pointermove', onPointerMove)
+      handle.removeEventListener('pointerup', onPointerEnd)
+      handle.removeEventListener('pointercancel', onPointerEnd)
+
+      const fromId = artworkId
+      const toId = dragOverIdRef.current
+      clearDragState()
+
+      if (!toId || String(fromId) === String(toId) || !supabase) return
+
+      const previous = artworksRef.current
+      const reordered = reorderArtworksById(previous, fromId, toId)
+      setArtworks(reordered)
+      setReordering(true)
+
+      try {
+        await persistArtworkOrder(supabase, reordered)
+      } catch (error) {
+        setArtworks(previous)
+        window.alert(`並び替えの保存に失敗しました: ${error?.message || '不明なエラー'}`)
+      } finally {
+        setReordering(false)
+      }
+    }
+
+    handle.addEventListener('pointermove', onPointerMove)
+    handle.addEventListener('pointerup', onPointerEnd)
+    handle.addEventListener('pointercancel', onPointerEnd)
   }
 
   async function handleEditSave() {
@@ -129,28 +219,63 @@ export default function DashArtworks() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
-          {artworks.map((w) => (
-            <div key={w.id} className="ui-list-card" style={{ padding: 8 }}>
-              <button type="button" onClick={() => editWork(w)} style={{ width: '100%', border: 0, padding: 0, background: 'transparent', cursor: 'pointer' }}>
-                <ArtworkMedia
-                  src={getThumbnailUrl(w.image_url)}
-                  alt=""
-                  decorative
-                  loading="lazy"
-                  fillHeight
-                  aspectRatio="1 / 1"
-                  fit="contain"
-                  wrapperStyle={{ borderRadius: 7 }}
-                  imageStyle={{ borderRadius: 7 }}
-                />
-              </button>
-              <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', gap: 6, alignItems: 'center' }}>
-                <div style={{ fontFamily: T.serif, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '（タイトルなし）'}</div>
-                <button type="button" onClick={() => requestDelete(w)} style={{ border: 0, background: 'transparent', color: T.inkMuted, cursor: 'pointer', padding: '4px 6px', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', flexShrink: 0 }}>削除</button>
+        {artworks.length > 1 && (
+          <p className="ui-artworks-sort-hint">
+            グリップ（⋮⋮）をドラッグして並び順を変更できます
+          </p>
+        )}
+
+        <div
+          className={['ui-artworks-grid', reordering && 'ui-artworks-grid--busy'].filter(Boolean).join(' ')}
+          aria-busy={reordering || undefined}
+        >
+          {artworks.map((w) => {
+            const isDragging = String(draggingId) === String(w.id)
+            const isDragOver = String(dragOverId) === String(w.id) && draggingId && !isDragging
+            return (
+              <div
+                key={w.id}
+                data-artwork-id={w.id}
+                className={[
+                  'ui-list-card',
+                  'ui-artwork-sort-card',
+                  isDragging && 'is-dragging',
+                  isDragOver && 'is-drag-over',
+                ].filter(Boolean).join(' ')}
+              >
+                {artworks.length > 1 && (
+                  <button
+                    type="button"
+                    className="ui-artwork-drag-handle"
+                    aria-label={`「${w.title || 'タイトルなし'}」の並び順を変更`}
+                    disabled={reordering}
+                    onPointerDown={(event) => handleDragHandlePointerDown(event, w.id)}
+                  >
+                    <DragHandleIcon />
+                  </button>
+                )}
+                <button type="button" onClick={() => editWork(w)} className="ui-artwork-sort-card-media">
+                  <ArtworkMedia
+                    src={getThumbnailUrl(w.image_url)}
+                    alt=""
+                    decorative
+                    loading="lazy"
+                    fillHeight
+                    aspectRatio="1 / 1"
+                    fit="contain"
+                    wrapperStyle={{ borderRadius: 7 }}
+                    imageStyle={{ borderRadius: 7 }}
+                  />
+                </button>
+                <div className="ui-artwork-sort-card-footer">
+                  <div className="ui-artwork-sort-card-title">{w.title || '（タイトルなし）'}</div>
+                  <button type="button" onClick={() => requestDelete(w)} className="ui-artwork-sort-card-delete">
+                    削除
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
         {artworks.length === 0 && <div className="ui-panel" style={{ padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>作品がまだありません</div>}
       </DashShell>

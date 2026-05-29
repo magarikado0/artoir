@@ -6,6 +6,7 @@ import BottomNav from '../components/BottomNav'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { T, externalHost } from '../lib/tokens'
 import { getPublisherKindLabel } from '../lib/publisher'
+import { mapExhibitionListRow } from '../lib/exhibition'
 
 export default function OrgPage() {
   const { orgSlug } = useParams()
@@ -22,13 +23,10 @@ export default function OrgPage() {
         setOrg(orgData)
         const { data: exhData } = await supabase
           .from('exhibitions')
-          .select('*, artworks(count)')
+          .select('*, artworks(image_url, order)')
           .eq('org_id', orgData.id)
           .order('start_date', { ascending: false })
-        setExhibitions((exhData || []).map(({ artworks, ...exhibition }) => ({
-          ...exhibition,
-          artworkCount: artworks?.[0]?.count ?? 0,
-        })))
+        setExhibitions((exhData || []).map(mapExhibitionListRow))
       } catch {
         /* unavailable */
       } finally {

@@ -27,6 +27,30 @@ export function getExhibitionFeeSummary(exhibition) {
   return feeDetail ? `有料 / ${feeDetail}` : '有料'
 }
 
+export function sortArtworksByOrder(artworks) {
+  if (!Array.isArray(artworks)) return []
+  return artworks.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+}
+
+export function getFirstArtworkImageUrl(artworks) {
+  for (const artwork of sortArtworksByOrder(artworks)) {
+    const url = String(artwork?.image_url || '').trim()
+    if (url) return url
+  }
+  return ''
+}
+
+export function mapExhibitionListRow({ artworks, ...exhibition }) {
+  const sortedArtworks = sortArtworksByOrder(artworks)
+  return {
+    ...exhibition,
+    artworks: sortedArtworks,
+    artworkCount: sortedArtworks.length,
+  }
+}
+
 export function getExhibitionThumbnailUrl(exhibition) {
-  return String(exhibition?.thumbnail_url || '').trim()
+  const explicit = String(exhibition?.thumbnail_url || '').trim()
+  if (explicit) return explicit
+  return getFirstArtworkImageUrl(exhibition?.artworks)
 }

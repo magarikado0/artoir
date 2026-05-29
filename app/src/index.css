@@ -223,6 +223,111 @@ button {
   display: none;
 }
 
+.ui-artworks-sort-hint {
+  margin: 0 0 10px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: #887869;
+}
+
+.ui-artworks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.ui-artworks-grid--busy {
+  pointer-events: none;
+  opacity: 0.72;
+}
+
+.ui-artwork-sort-card {
+  position: relative;
+  padding: 8px;
+  transition: box-shadow 140ms ease, opacity 140ms ease, transform 140ms ease;
+}
+
+.ui-artwork-sort-card.is-dragging {
+  opacity: 0.42;
+  transform: scale(0.98);
+}
+
+.ui-artwork-sort-card.is-drag-over {
+  box-shadow: 0 0 0 2px #D3A842;
+}
+
+.ui-artwork-drag-handle {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(67,54,44,0.22);
+  border-radius: 6px;
+  background: rgba(255,249,237,0.94);
+  color: #47382D;
+  cursor: grab;
+  touch-action: none;
+  display: grid;
+  place-items: center;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.ui-artwork-drag-handle:hover:not(:disabled) {
+  background: #FFF9ED;
+  border-color: #211813;
+}
+
+.ui-artwork-drag-handle:active:not(:disabled) {
+  cursor: grabbing;
+}
+
+.ui-artwork-drag-handle:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ui-artwork-sort-card-media {
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+}
+
+.ui-artwork-sort-card-footer {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  align-items: center;
+}
+
+.ui-artwork-sort-card-title {
+  min-width: 0;
+  font-family: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-artwork-sort-card-delete {
+  border: 0;
+  background: transparent;
+  color: #887869;
+  cursor: pointer;
+  padding: 4px 6px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
 .ui-app-topline--with-create {
   align-items: flex-start;
 }

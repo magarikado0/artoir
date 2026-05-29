@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { StatusBadge } from '../../components/DashShell'
-import { exhStatus, getExhibitionThumbnailUrl } from '../../lib/exhibition'
+import { exhStatus, getExhibitionThumbnailUrl, mapExhibitionListRow } from '../../lib/exhibition'
 import ExhibitionFeeBadge from '../../components/ExhibitionFeeBadge'
 import { ExhibitionCardMedia } from '../../components/ExhibitionListCard'
 import { T, fmtDateRangeShort } from '../../lib/tokens'
@@ -74,13 +74,10 @@ export default function DashHome() {
         setOrg(orgData)
         const { data: exhData } = await supabase
           .from('exhibitions')
-          .select('*, artworks(count)')
+          .select('*, artworks(image_url, order)')
           .eq('org_id', orgData.id)
           .order('start_date', { ascending: false })
-        setExhibitions((exhData || []).map(({ artworks, ...exhibition }) => ({
-          ...exhibition,
-          artworkCount: artworks?.[0]?.count ?? 0,
-        })))
+        setExhibitions((exhData || []).map(mapExhibitionListRow))
       } catch {
         /* unavailable */
       } finally {
