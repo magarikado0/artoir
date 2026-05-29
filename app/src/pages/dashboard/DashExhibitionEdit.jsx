@@ -6,7 +6,12 @@ import ImageUploader from '../../components/ImageUploader'
 import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
-import { getExhibitionFeeType, getExhibitionThumbnailUrl } from '../../lib/exhibition'
+import {
+  getExhibitionFeeSummary,
+  getExhibitionFeeType,
+  getExhibitionPeriodText,
+  getExhibitionThumbnailUrlFromRecord,
+} from '../../lib/exhibition'
 import { getThumbnailUrl } from '../../lib/imageUrl'
 import { deleteExhibition } from '../../lib/deleteExhibition'
 
@@ -100,7 +105,7 @@ export default function DashExhibitionEdit() {
             setEndTime(exh.end_time || '')
             setLocation(exh.location || '')
             setDescription(exh.description || '')
-            setThumbnailUrl(getExhibitionThumbnailUrl(exh))
+            setThumbnailUrl(getExhibitionThumbnailUrlFromRecord(exh))
             setFeeType(getExhibitionFeeType(exh))
             setFeeDetail(exh.fee_detail || '')
           }
@@ -181,7 +186,7 @@ export default function DashExhibitionEdit() {
     setEndTime(exhibition.end_time || '')
     setLocation(exhibition.location || '')
     setDescription(exhibition.description || '')
-    setThumbnailUrl(getExhibitionThumbnailUrl(exhibition))
+    setThumbnailUrl(getExhibitionThumbnailUrlFromRecord(exhibition))
     setFeeType(getExhibitionFeeType(exhibition))
     setFeeDetail(exhibition.fee_detail || '')
   }
@@ -189,6 +194,11 @@ export default function DashExhibitionEdit() {
   function handleCancelEdit() {
     resetFieldsFromExhibition()
     setEditSection(null)
+  }
+
+  function beginEditSection(id) {
+    resetFieldsFromExhibition()
+    setEditSection(id)
   }
 
   async function handleDeleteExhibition() {
@@ -216,15 +226,10 @@ export default function DashExhibitionEdit() {
   )
 
   const fieldValue = (value, fallback = '未設定') => value || fallback
-  const publicUrl = `artoir.net/${orgSlug}/exhibition/${slug || '(未保存)'}`
-  const periodText = [
-    startDate || '未設定',
-    startTime,
-    '〜',
-    endDate || '未設定',
-    endTime,
-  ].filter(Boolean).join(' ')
-  const feeText = feeType === 'paid' ? (feeDetail ? `有料 / ${feeDetail}` : '有料') : '無料'
+  const savedPublicUrl = `artoir.net/${orgSlug}/exhibition/${exhibition?.slug || '(未保存)'}`
+  const savedPeriodText = getExhibitionPeriodText(exhibition)
+  const savedFeeText = getExhibitionFeeSummary(exhibition)
+  const savedThumbnailUrl = getExhibitionThumbnailUrlFromRecord(exhibition)
 
   function SaveActions() {
     return (
@@ -246,7 +251,7 @@ export default function DashExhibitionEdit() {
         <div className="ui-settings-item-head">
           <div className="ui-settings-item-label">{label}</div>
           {!editing && editChildren && (
-            <button type="button" onClick={() => setEditSection(id)} className="ui-settings-edit-button">
+            <button type="button" onClick={() => beginEditSection(id)} className="ui-settings-edit-button">
               編集
             </button>
           )}
@@ -366,7 +371,7 @@ export default function DashExhibitionEdit() {
           {deleteConfirm ? (
             <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
               <div className="ui-kicker">CONFIRM DELETE</div>
-              <div style={{ marginTop: 8, fontSize: 13 }}>「{title || '（タイトルなし）'}」を削除します。</div>
+              <div style={{ marginTop: 8, fontSize: 13 }}>「{exhibition?.title || '（タイトルなし）'}」を削除します。</div>
               <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
                 <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
                 <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? 'DELETING...' : 'DELETE'}</button>
@@ -393,7 +398,7 @@ export default function DashExhibitionEdit() {
     <div className="ui-settings-page">
       <div className="ui-dashboard-list-head" style={{ marginBottom: 12 }}>
         <div className="ui-dashboard-list-head-copy">
-          <div className="ui-dashboard-list-count">{title || '展覧会情報'}</div>
+          <div className="ui-dashboard-list-count">{exhibition?.title || '展覧会情報'}</div>
         </div>
         <button
           type="button"
@@ -419,7 +424,7 @@ export default function DashExhibitionEdit() {
       <ExhibitionItem
         id="period"
         label="会期"
-        value={periodText}
+        value={savedPeriodText}
         mono
         editChildren={(
           <>
@@ -449,7 +454,7 @@ export default function DashExhibitionEdit() {
       <ExhibitionItem
         id="fee"
         label="料金"
-        value={feeText}
+        value={savedFeeText}
         editChildren={(
           <>
             <div style={{ display: 'grid', gap: 10 }}>
@@ -495,11 +500,11 @@ export default function DashExhibitionEdit() {
       <ExhibitionItem
         id="thumbnail"
         label="サムネイル"
-        value={thumbnailUrl ? (
+        value={savedThumbnailUrl ? (
           <ArtworkMedia
-            src={getThumbnailUrl(thumbnailUrl, 220)}
-            alt={title || '展覧会サムネイル'}
-            label={title || '展覧会サムネイル'}
+            src={getThumbnailUrl(savedThumbnailUrl, 220)}
+            alt={exhibition?.title || '展覧会サムネイル'}
+            label={exhibition?.title || '展覧会サムネイル'}
             loading="eager"
             fit="contain"
             aspectRatio="1 / 1"
@@ -541,7 +546,7 @@ export default function DashExhibitionEdit() {
         )}
       />
 
-      <ExhibitionItem id="url" label="公開URL" value={publicUrl} mono />
+      <ExhibitionItem id="url" label="公開URL" value={savedPublicUrl} mono />
 
       <section className="ui-settings-section is-danger">
         <div className="ui-settings-section-head">
@@ -553,7 +558,7 @@ export default function DashExhibitionEdit() {
         {deleteConfirm ? (
           <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
             <div className="ui-kicker">CONFIRM DELETE</div>
-            <div style={{ marginTop: 8, fontSize: 13 }}>「{title || '（タイトルなし）'}」を削除します。</div>
+            <div style={{ marginTop: 8, fontSize: 13 }}>「{exhibition?.title || '（タイトルなし）'}」を削除します。</div>
             <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
               <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>キャンセル</button>
               <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? '削除中...' : '削除する'}</button>

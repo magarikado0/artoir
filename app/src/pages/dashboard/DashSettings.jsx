@@ -88,6 +88,11 @@ export default function DashSettings() {
     setEditSection(null)
   }
 
+  function beginEditSection(id) {
+    resetFieldsFromOrg()
+    setEditSection(id)
+  }
+
   async function handleSave() {
     if (!supabase || !org) return
     setSaving(true)
@@ -153,8 +158,6 @@ export default function DashSettings() {
 
   const fieldValue = (value, fallback = '未設定') => value || fallback
   const publicUrl = `artoir.net/${org?.slug || orgSlug}`
-  const snsInstagram = buildSnsUrl(instagram, 'instagram.com')
-  const snsTwitter = buildSnsUrl(twitter, 'x.com')
   const nameLabel = getPublisherNameLabel(org)
   const deleteLabel = isPersonPublisher(org) ? '公開ページ' : '団体'
 
@@ -179,7 +182,7 @@ export default function DashSettings() {
         <div className="ui-settings-item-head">
           <div className="ui-settings-item-label">{label}</div>
           {editable && !editing && (
-            <button type="button" onClick={() => setEditSection(id)} className="ui-settings-edit-button">
+            <button type="button" onClick={() => beginEditSection(id)} className="ui-settings-edit-button">
               編集
             </button>
           )}
@@ -231,8 +234,8 @@ export default function DashSettings() {
         label="各種リンク"
         value={(
           <div className="ui-settings-link-list">
-            <LinkValue label="Instagram" value={snsInstagram} />
-            <LinkValue label="X" value={snsTwitter} />
+            <LinkValue label="Instagram" value={org?.sns_links?.instagram} />
+            <LinkValue label="X" value={org?.sns_links?.x} />
             <LinkValue label="Website" value={org?.homepage_url} />
           </div>
         )}

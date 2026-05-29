@@ -27,6 +27,21 @@ export function getExhibitionFeeSummary(exhibition) {
   return feeDetail ? `有料 / ${feeDetail}` : '有料'
 }
 
+export function getExhibitionPeriodText(exhibition) {
+  if (!exhibition) return '未設定'
+  return [
+    exhibition.start_date || '未設定',
+    exhibition.start_time,
+    '〜',
+    exhibition.end_date || '未設定',
+    exhibition.end_time,
+  ].filter(Boolean).join(' ')
+}
+
+export function getExhibitionThumbnailUrlFromRecord(exhibition) {
+  return String(exhibition?.thumbnail_url || '').trim()
+}
+
 export function sortArtworksByOrder(artworks) {
   if (!Array.isArray(artworks)) return []
   return artworks.slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
