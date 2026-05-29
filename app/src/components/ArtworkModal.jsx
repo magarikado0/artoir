@@ -1,9 +1,84 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import ArtworkMedia from './ArtworkMedia'
-import { getGalleryThumbnailUrl, getModalImageUrl } from '../lib/imageUrl'
+import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
 
-export default function ArtworkModal({ artwork, onClose }) {
+const SWIPE_THRESHOLD_PX = 48
+
+function ModalNavIcon({ direction }) {
+  const s = { stroke: 'currentColor', strokeWidth: 2, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' }
+  return (
+    <svg width={22} height={22} viewBox="0 0 24 24" aria-hidden="true">
+      {direction === 'prev' ? (
+        <path d="M14 6l-6 6 6 6" {...s} />
+      ) : (
+        <path d="M10 6l6 6-6 6" {...s} />
+      )}
+    </svg>
+  )
+}
+
+function useArtworkSwipe(ref, { onPrev, onNext, enabled }) {
+  const startRef = useRef(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el || !enabled) return undefined
+
+    function onTouchStart(e) {
+      const touch = e.changedTouches?.[0]
+      if (!touch) return
+      startRef.current = { x: touch.clientX, y: touch.clientY }
+    }
+
+    function onTouchEnd(e) {
+      const touch = e.changedTouches?.[0]
+      const start = startRef.current
+      startRef.current = null
+      if (!touch || !start) return
+
+      const dx = touch.clientX - start.x
+      const dy = touch.clientY - start.y
+      if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) return
+
+      if (dx < 0) onNext?.()
+      else onPrev?.()
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true })
+    el.addEventListener('touchend', onTouchEnd, { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart)
+      el.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [enabled, onPrev, onNext, ref])
+}
+
+export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, onClose }) {
   const open = !!artwork
+  const viewerRef = useRef(null)
+
+  const currentIndex = open
+    ? artworks.findIndex((item) => String(item.id) === String(artwork.id))
+    : -1
+  const hasMultiple = artworks.length > 1
+  const canGoPrev = hasMultiple && currentIndex > 0
+  const canGoNext = hasMultiple && currentIndex >= 0 && currentIndex < artworks.length - 1
+
+  const goPrev = useCallback(() => {
+    if (!canGoPrev || !onSelectArtwork) return
+    onSelectArtwork(artworks[currentIndex - 1])
+  }, [artworks, canGoPrev, currentIndex, onSelectArtwork])
+
+  const goNext = useCallback(() => {
+    if (!canGoNext || !onSelectArtwork) return
+    onSelectArtwork(artworks[currentIndex + 1])
+  }, [artworks, canGoNext, currentIndex, onSelectArtwork])
+
+  useArtworkSwipe(viewerRef, {
+    onPrev: canGoPrev ? goPrev : undefined,
+    onNext: canGoNext ? goNext : undefined,
+    enabled: open && hasMultiple,
+  })
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
@@ -11,10 +86,33 @@ export default function ArtworkModal({ artwork, onClose }) {
   }, [open])
 
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    if (!open) return undefined
+    const handler = (e) => {
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        goPrev()
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        goNext()
+      }
+    }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
+  }, [open, onClose, goPrev, goNext])
+
+  useEffect(() => {
+    if (!open || currentIndex < 0) return
+    const neighbors = [artworks[currentIndex - 1], artworks[currentIndex + 1]].filter(Boolean)
+    neighbors.forEach((item) => {
+      preloadImageUrl(getModalImageUrl(item.image_url))
+      preloadImageUrl(getGalleryThumbnailUrl(item.image_url))
+    })
+  }, [open, currentIndex, artworks])
 
   if (!open) return null
 
@@ -23,6 +121,9 @@ export default function ArtworkModal({ artwork, onClose }) {
   const hasTitle = Boolean(title)
   const hasDescription = Boolean(description)
   const hasDetail = hasTitle || hasDescription
+  const positionLabel = hasMultiple && currentIndex >= 0
+    ? `${currentIndex + 1} / ${artworks.length}`
+    : null
 
   return (
     <div
@@ -32,8 +133,45 @@ export default function ArtworkModal({ artwork, onClose }) {
       aria-label={hasTitle ? undefined : '作品詳細'}
       className={['ui-artwork-modal', !hasDetail && 'ui-artwork-modal--media-only'].filter(Boolean).join(' ')}
     >
-      <div className="ui-artwork-modal-bar">
-        <div className="ui-artwork-modal-eyebrow">ARTWORK</div>
+      <div
+        className={[
+          'ui-artwork-modal-bar',
+          !hasMultiple && 'ui-artwork-modal-bar--solo',
+        ].filter(Boolean).join(' ')}
+      >
+        {hasMultiple && (
+          <button
+            type="button"
+            className="ui-artwork-modal-nav ui-artwork-modal-nav--prev"
+            onClick={goPrev}
+            disabled={!canGoPrev}
+            aria-label="前の作品"
+          >
+            <ModalNavIcon direction="prev" />
+          </button>
+        )}
+
+        <div className="ui-artwork-modal-bar-center">
+          <div className="ui-artwork-modal-eyebrow">ARTWORK</div>
+          {positionLabel && (
+            <div className="ui-artwork-modal-position" aria-live="polite">
+              {positionLabel}
+            </div>
+          )}
+        </div>
+
+        {hasMultiple && (
+          <button
+            type="button"
+            className="ui-artwork-modal-nav ui-artwork-modal-nav--next"
+            onClick={goNext}
+            disabled={!canGoNext}
+            aria-label="次の作品"
+          >
+            <ModalNavIcon direction="next" />
+          </button>
+        )}
+
         <button
           onClick={onClose}
           className="ui-modal-close ui-artwork-modal-close"
@@ -45,8 +183,9 @@ export default function ArtworkModal({ artwork, onClose }) {
       </div>
 
       <div className="ui-artwork-modal-body">
-        <div className="ui-artwork-modal-viewer">
+        <div ref={viewerRef} className="ui-artwork-modal-viewer">
           <ArtworkMedia
+            key={artwork.id}
             src={getModalImageUrl(artwork.image_url)}
             placeholderSrc={getGalleryThumbnailUrl(artwork.image_url)}
             alt={artwork.title}
