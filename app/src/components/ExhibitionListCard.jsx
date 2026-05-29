@@ -4,6 +4,7 @@ import ExhibitionFeeBadge from './ExhibitionFeeBadge'
 import ArtworkMedia from './ArtworkMedia'
 import { getExhibitionThumbnailUrl } from '../lib/exhibition'
 import { getThumbnailUrl } from '../lib/imageUrl'
+import { getPublisherKindLabel } from '../lib/publisher'
 
 function startOfToday() {
   const d = new Date()
@@ -83,7 +84,7 @@ export default function ExhibitionListCard({ exhibition: exh, org, showOrgName =
           <StatusDot exhibition={exh} />
           <ExhibitionFeeBadge exhibition={exh} className="ui-exhibition-list-card-badge" />
           {showOrgName && org?.name && (
-            <span className="ui-exhibition-list-card-tag">{org.name}</span>
+            <span className="ui-exhibition-list-card-tag">{org.name} / {getPublisherKindLabel(org)}</span>
           )}
         </div>
         <div className="ui-exhibition-list-card-content">

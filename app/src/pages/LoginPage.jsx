@@ -193,8 +193,8 @@ export default function LoginPage() {
       <div className="ui-screen-title" style={{ marginTop: 8 }}>{mode === 'login' ? 'ログイン' : '新規登録'}</div>
       <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>
         {mode === 'login'
-          ? '団体アカウントへログインします。'
-          : 'メールとパスワードでアカウントを作成します。登録後、団体の作成に進めます。'}
+          ? '管理アカウントへログインします。'
+          : 'メールとパスワードでアカウントを作成します。登録後、個人または団体の公開ページ作成に進めます。'}
       </div>
 
       <button

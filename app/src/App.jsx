@@ -14,10 +14,12 @@ const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const DashHome = lazy(() => import('./pages/dashboard/DashHome'))
 const DashSettings = lazy(() => import('./pages/dashboard/DashSettings'))
+const DashMembers = lazy(() => import('./pages/dashboard/DashMembers'))
 const DashExhibitionEdit = lazy(() => import('./pages/dashboard/DashExhibitionEdit'))
 const DashArtworks = lazy(() => import('./pages/dashboard/DashArtworks'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
 const AccountSetup = lazy(() => import('./pages/AccountSetup'))
+const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -155,10 +157,12 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/account/setup" element={<AccountSetup />} />
+            <Route path="/invite/:token" element={<InviteAcceptPage />} />
             <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
             <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             <Route path="/:orgSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
             <Route path="/:orgSlug/dashboard/settings" element={<ProtectedRoute><DashSettings /></ProtectedRoute>} />
+            <Route path="/:orgSlug/dashboard/members" element={<ProtectedRoute><DashMembers /></ProtectedRoute>} />
             <Route path="/:orgSlug/dashboard/exhibitions/new" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
             <Route path="/:orgSlug/dashboard/exhibitions/:exhibitionId/edit" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
             <Route path="/:orgSlug/dashboard/exhibitions/:exhibitionId/artworks" element={<ProtectedRoute><DashArtworks /></ProtectedRoute>} />

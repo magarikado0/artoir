@@ -1,4 +1,4 @@
-/** 団体配下の作品・展覧会・メンバーシップを削除してから団体を削除する */
+/** 公開主体配下の作品・展覧会・メンバーシップを削除してから公開主体を削除する */
 export async function deleteOrganization(client, orgId) {
   const { data: exhibitions, error: listErr } = await client
     .from('exhibitions')

@@ -5,6 +5,7 @@ import DashShell, { DashField } from '../../components/DashShell'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import { deleteOrganization } from '../../lib/deleteOrganization'
+import { getPublisherDescriptionPlaceholder, getPublisherNameLabel, isPersonPublisher } from '../../lib/publisher'
 
 export default function DashSettings() {
   const { orgSlug } = useParams()
@@ -126,7 +127,7 @@ export default function DashSettings() {
   async function handleDeleteOrganization() {
     if (!supabase || !org) return
     if (deleteSlugInput.trim() !== (org.slug || orgSlug)) {
-      window.alert('確認のため、正しい SLUG を入力してください。')
+      window.alert('確認のため、正しいIDを入力してください。')
       return
     }
     setDeleting(true)
@@ -154,6 +155,8 @@ export default function DashSettings() {
   const publicUrl = `artoir.net/${org?.slug || orgSlug}`
   const snsInstagram = buildSnsUrl(instagram, 'instagram.com')
   const snsTwitter = buildSnsUrl(twitter, 'x.com')
+  const nameLabel = getPublisherNameLabel(org)
+  const deleteLabel = isPersonPublisher(org) ? '公開ページ' : '団体'
 
   function SaveActions() {
     return (
@@ -170,17 +173,18 @@ export default function DashSettings() {
 
   function SettingsItem({ id, label, value, mono, editChildren }) {
     const editing = editSection === id
+    const editable = Boolean(editChildren)
     return (
       <section className="ui-settings-item">
         <div className="ui-settings-item-head">
           <div className="ui-settings-item-label">{label}</div>
-          {!editing && (
+          {editable && !editing && (
             <button type="button" onClick={() => setEditSection(id)} className="ui-settings-edit-button">
               編集
             </button>
           )}
         </div>
-        {editing ? editChildren : (
+        {editing && editable ? editChildren : (
           <div className={`ui-settings-item-value ${mono ? 'is-mono' : ''}`}>{value}</div>
         )}
       </section>
@@ -200,11 +204,11 @@ export default function DashSettings() {
     <div className="ui-settings-page">
       <SettingsItem
         id="basic"
-        label="団体名"
+        label={nameLabel}
         value={fieldValue(org?.name)}
         editChildren={(
           <>
-            <DashField label="団体名" value={name} onChange={setName} placeholder="例: 多摩美術大学 日本画研究室" />
+            <DashField label={nameLabel} value={name} onChange={setName} placeholder={isPersonPublisher(org) ? '例: 山田 花' : '例: 多摩美術大学 日本画研究室'} />
             <SaveActions />
           </>
         )}
@@ -216,7 +220,7 @@ export default function DashSettings() {
         value={fieldValue(org?.description)}
         editChildren={(
           <>
-            <DashField label="説明文" value={description} onChange={setDescription} placeholder="団体の説明文を入力..." multiline />
+            <DashField label="説明文" value={description} onChange={setDescription} placeholder={getPublisherDescriptionPlaceholder(org)} multiline />
             <SaveActions />
           </>
         )}
@@ -250,13 +254,13 @@ export default function DashSettings() {
         editChildren={(
           <>
             <DashField
-              label="SLUG"
+              label="ID"
               prefix="artoir.net/"
               value={slug}
               onChange={(v) => { setSlug(v); setSlugChanged(v !== orgSlug) }}
-              placeholder="org-slug"
+              placeholder="tamabi-nihonga"
               mono
-              warning={slugChanged ? 'slug変更時は既存URLが無効になります。' : undefined}
+              warning={slugChanged ? 'ID変更時は既存URLが無効になります。' : undefined}
             />
             <SaveActions />
           </>
@@ -273,9 +277,9 @@ export default function DashSettings() {
         {deleteConfirm ? (
           <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
             <div className="ui-kicker">CONFIRM DELETE</div>
-            <div style={{ marginTop: 8, fontSize: 13 }}>続行するには SLUG「{org?.slug || orgSlug}」を入力してください。</div>
+            <div style={{ marginTop: 8, fontSize: 13 }}>続行するにはID「{org?.slug || orgSlug}」を入力してください。</div>
             <div style={{ marginTop: 12 }}>
-              <div className="ui-form-label">SLUG</div>
+              <div className="ui-form-label">ID</div>
               <div className="ui-input-wrap">
                 <input
                   value={deleteSlugInput}
@@ -308,7 +312,7 @@ export default function DashSettings() {
           </div>
         ) : (
           <button type="button" onClick={() => setDeleteConfirm(true)} className="ui-settings-danger-button">
-            団体を削除
+            {deleteLabel}を削除
           </button>
         )}
       </section>

@@ -5,16 +5,16 @@ import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ArtworkMedia from '../components/ArtworkMedia'
-import { getExhibitionFeeDetail, getExhibitionFeeType } from '../lib/exhibition'
 import { getThumbnailUrl } from '../lib/imageUrl'
 import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
+import { isPersonPublisher } from '../lib/publisher'
 
-function MetaPill({ label, value }) {
+function SummaryItem({ label, value }) {
   if (!value) return null
   return (
-    <div className="ui-app-card" style={{ padding: '10px 12px', boxShadow: 'none' }}>
-      <div style={{ fontFamily: T.mono, fontSize: 9, letterSpacing: '0.1em', color: T.inkMuted }}>{label}</div>
-      <div style={{ marginTop: 3, fontSize: 12, lineHeight: 1.5, color: T.ink }}>{value}</div>
+    <div className="ui-exhibition-summary-item">
+      <div className="ui-exhibition-summary-label">{label}</div>
+      <div className="ui-exhibition-summary-value">{value}</div>
     </div>
   )
 }
@@ -123,8 +123,10 @@ export default function ExhibitionPage() {
     </div>
   )
 
-  const feeType = getExhibitionFeeType(exhibition)
-  const feeDetail = getExhibitionFeeDetail(exhibition)
+  const hostLabel = isPersonPublisher(org) ? '主催者' : '主催団体'
+  const dateText = exhibition.start_date
+    ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}`
+    : ''
 
   return (
     <div className="ui-page-shell">
@@ -139,21 +141,14 @@ export default function ExhibitionPage() {
         </div>
 
         <section>
-          <div className="ui-app-card" style={{ padding: 18 }}>
-            <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{exhibition.title}</h1>
-            {exhibition.description && <p className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>{exhibition.description}</p>}
-          </div>
-          <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
-            <MetaPill label="会期" value={exhibition.start_date ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}` : ''} />
-            <MetaPill label="作品数" value={`${pad2(artworks.length)} `} />
-            <MetaPill label="会場" value={exhibition.location} />
-            <MetaPill label="主催団体" value={org?.name} />
-            <MetaPill label="料金" value={feeType === 'paid' ? (
-              <div style={{ display: 'grid', gap: 3 }}>
-                <div style={{ fontFamily: T.serif, fontSize: 14, lineHeight: 1.45, color: T.ink }}>有料</div>
-                {feeDetail ? <div style={{ fontSize: 11, lineHeight: 1.65, color: T.inkSoft, whiteSpace: 'pre-wrap' }}>{feeDetail}</div> : <div style={{ fontSize: 11, lineHeight: 1.65, color: T.inkMuted }}>料金詳細は未設定です</div>}
-              </div>
-            ) : '無料'} />
+          <div className="ui-app-card ui-exhibition-summary-card">
+            <h1 className="ui-screen-title">{exhibition.title}</h1>
+            {exhibition.description && <p className="ui-screen-subtitle">{exhibition.description}</p>}
+            <div className="ui-exhibition-summary-grid">
+              <SummaryItem label="会期" value={dateText} />
+              <SummaryItem label="会場" value={exhibition.location} />
+              <SummaryItem label={hostLabel} value={org?.name || ''} />
+            </div>
           </div>
         </section>
 

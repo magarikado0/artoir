@@ -9,7 +9,7 @@
 ## データ構造
 
 ```
-organizations
+organizations（公開主体: kind = organization / person）
   └── exhibitions
         └── artworks
 ```

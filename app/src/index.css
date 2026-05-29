@@ -763,6 +763,49 @@ button {
   flex-direction: column;
 }
 
+.ui-exhibition-summary-card {
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.ui-exhibition-summary-card .ui-screen-title {
+  margin-top: 0;
+}
+
+.ui-exhibition-summary-card .ui-screen-subtitle {
+  margin-top: -4px;
+  font-family: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+}
+
+.ui-exhibition-summary-grid {
+  border-top: 1px solid rgba(30,26,22,0.12);
+  padding-top: 12px;
+  display: grid;
+  gap: 9px;
+}
+
+.ui-exhibition-summary-item {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.ui-exhibition-summary-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--color-ink-muted);
+}
+
+.ui-exhibition-summary-value {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+
 .ui-exhibition-gallery-image,
 .ui-exhibition-gallery-image img {
   display: block;
@@ -854,6 +897,30 @@ button {
   white-space: nowrap;
 }
 
+.ui-org-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.ui-publisher-kind-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid rgba(67,54,44,0.16);
+  border-radius: 999px;
+  background: rgba(255,249,237,0.76);
+  color: #746557;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
 .ui-org-description {
   margin-top: 4px;
   color: #887869;
@@ -912,6 +979,44 @@ button {
   background: #FFF9ED;
   color: #211813;
   box-shadow: 0 1px 0 rgba(33,24,19,0.08), inset 0 -2px 0 #D3A842;
+}
+
+.ui-publisher-kind-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 24px;
+}
+
+.ui-publisher-kind-option {
+  min-height: 86px;
+  padding: 14px;
+  border: 1px solid rgba(67,54,44,0.18);
+  border-radius: 8px;
+  background: rgba(255,249,237,0.58);
+  color: #211813;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ui-publisher-kind-option span {
+  display: block;
+  font-family: Georgia, "Shippori Mincho", "Noto Serif JP", serif;
+  font-size: 18px;
+}
+
+.ui-publisher-kind-option small {
+  display: block;
+  margin-top: 8px;
+  color: #746557;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.ui-publisher-kind-option.is-active {
+  border-color: #211813;
+  background: #FFF9ED;
+  box-shadow: inset 0 -3px 0 #D3A842;
 }
 
 .ui-search-input {
@@ -1317,7 +1422,7 @@ button {
   letter-spacing: 0.12em;
 }
 
-/* デスクトップ — 複数団体の選択（アカウント） */
+/* デスクトップ — 所属団体の選択（アカウント） */
 .ui-account-surface.ui-account-org-selector-desktop {
   width: 100%;
   max-width: none;
@@ -1399,11 +1504,46 @@ button.ui-account-org-pick-btn.ui-org-row {
   appearance: none;
 }
 
-.ui-account-org-selector-cta {
-  margin-top: 20px;
-  width: 100%;
-  max-width: 420px;
-  justify-content: space-between;
+.ui-account-floating-actions {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: calc(100vw - 32px);
+}
+
+.ui-account-floating-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid rgba(67, 54, 44, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 249, 237, 0.94);
+  color: #47382D;
+  font-family: "Noto Sans JP", -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(33, 24, 19, 0.08);
+}
+
+.ui-account-floating-action.is-primary {
+  border-color: rgba(190, 85, 61, 0.42);
+  background: #BE553D;
+  color: #FFF9ED;
+  box-shadow: 0 2px 10px rgba(190, 85, 61, 0.16);
+}
+
+.ui-account-floating-action:hover {
+  border-color: rgba(67, 54, 44, 0.38);
 }
 
 .ui-section-label {
@@ -1584,6 +1724,127 @@ button.ui-account-org-pick-btn.ui-org-row {
   border-color: #BE553D;
   color: #BE553D;
   background: transparent;
+}
+
+.ui-settings-members {
+  display: grid;
+  gap: 14px;
+}
+
+.ui-settings-member-list,
+.ui-settings-pending-invites {
+  display: grid;
+  gap: 8px;
+}
+
+.ui-settings-member-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(67,54,44,0.12);
+}
+
+.ui-settings-member-row:last-child {
+  border-bottom: 0;
+}
+
+.ui-settings-member-email {
+  color: #211813;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ui-settings-member-role,
+.ui-settings-member-note,
+.ui-settings-member-message {
+  color: #887869;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  line-height: 1.7;
+}
+
+.ui-settings-member-message {
+  color: #BE553D;
+  overflow-wrap: anywhere;
+}
+
+.ui-settings-member-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ui-settings-member-actions select,
+.ui-settings-member-actions button,
+.ui-settings-invite-grid input,
+.ui-settings-invite-grid select,
+.ui-settings-invite-grid button,
+.ui-settings-invite-result button {
+  min-height: 36px;
+  border: 1px solid rgba(67,54,44,0.2);
+  border-radius: 8px;
+  background: rgba(255,249,237,0.86);
+  color: #211813;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.ui-settings-member-actions button,
+.ui-settings-invite-grid button,
+.ui-settings-invite-result button {
+  cursor: pointer;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+.ui-settings-invite-form {
+  display: grid;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.ui-settings-invite-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px auto;
+  gap: 8px;
+}
+
+.ui-settings-invite-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(67,54,44,0.16);
+  border-radius: 8px;
+  background: rgba(255,249,237,0.58);
+}
+
+.ui-settings-invite-result.is-copied {
+  border-color: rgba(104,112,71,0.44);
+  background: rgba(220,224,196,0.46);
+}
+
+.ui-settings-invite-result-url {
+  color: #47382D;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.ui-settings-invite-copied {
+  grid-column: 1 / -1;
+  color: #687047;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
 }
 
 .ui-exhibition-date-grid {
@@ -1938,6 +2199,21 @@ button.ui-account-org-pick-btn.ui-org-row {
     padding: 0 8px;
   }
 
+  .ui-publisher-kind-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ui-account-floating-actions {
+    right: 16px;
+    bottom: calc(102px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ui-account-floating-action {
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 12px;
+  }
+
   .ui-org-row {
     min-height: 72px;
     grid-template-columns: 32px minmax(0, 1fr) 48px;
@@ -2053,6 +2329,17 @@ button.ui-account-org-pick-btn.ui-org-row {
   .ui-settings-link-value {
     grid-template-columns: minmax(0, 1fr);
     gap: 3px;
+  }
+
+  .ui-settings-member-row,
+  .ui-settings-invite-grid,
+  .ui-settings-invite-result {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ui-settings-member-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .ui-exhibition-date-grid {

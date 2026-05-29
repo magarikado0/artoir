@@ -36,6 +36,22 @@ function matchesFilter(exh, filter) {
   return true
 }
 
+async function fetchExhibitionRows() {
+  const runQuery = (select) => supabase
+    .from('exhibitions')
+    .select(select)
+    .order('start_date', { ascending: false })
+
+  const withKind = await runQuery('*, organizations(id, name, slug, kind), artworks(count)')
+
+  if (!withKind.error) return withKind.data || []
+
+  const withoutKind = await runQuery('*, organizations(id, name, slug), artworks(count)')
+
+  if (withoutKind.error) throw withoutKind.error
+  return withoutKind.data || []
+}
+
 export default function AllExhibitionsPage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -53,10 +69,7 @@ export default function AllExhibitionsPage() {
     async function load() {
       if (!supabase) return setLoading(false)
       try {
-        const { data } = await supabase
-          .from('exhibitions')
-          .select('*, organizations(id, name, slug), artworks(count)')
-          .order('start_date', { ascending: false })
+        const data = await fetchExhibitionRows()
         setRows((data || []).map((exh) => {
           const { organizations: org, artworks, ...exhibition } = exh
           const artworkCount = artworks?.[0]?.count ?? 0

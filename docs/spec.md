@@ -15,7 +15,7 @@
 ## データ構造
 
 ```
-organizations
+organizations（公開主体: kind = organization / person）
   └── exhibitions
         └── artworks
 ```
@@ -25,6 +25,7 @@ organizations
 | カラム | 型 |
 |--------|-----|
 | id | UUID (PK) |
+| kind | string (`organization` / `person`) |
 | name | string |
 | slug | string (unique) |
 | description | text |
@@ -63,7 +64,7 @@ organizations
 ## URL設計
 
 ```
-/{org-slug}/                              # 団体ページ
+/{org-slug}/                              # 公開ページ（個人または団体）
 /{org-slug}/exhibition/{exhibition-slug}  # 展覧会ページ
 ```
 
@@ -71,9 +72,9 @@ organizations
 
 ## 画面仕様
 
-### 団体ページ
+### 公開ページ
 
-- 団体名・説明
+- 表示名または団体名・説明
 - SNSリンク・HPリンク
 - 展覧会一覧（タイトル・会期・場所）→ クリックで展覧会ページへ
 
@@ -91,7 +92,7 @@ organizations
 
 ### 作るもの
 
-- 団体ページ
+- 公開ページ
 - 展覧会ページ（作品一覧・モーダル・背景色カスタム）
 - シェアリンク（認証なしで閲覧可能）
 - ログイン・認証（Supabase Authentication）

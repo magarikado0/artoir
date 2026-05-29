@@ -205,7 +205,7 @@ export default function AdminPage() {
           <p style={{ fontSize: '0.85rem', color: '#c0392b', marginBottom: '1rem' }}>{loadError}</p>
         )}
         {!org && !loadError && (
-          <p style={{ fontSize: '0.85rem', color: '#9a9088', marginBottom: '1rem' }}>団体が見つかりません</p>
+          <p style={{ fontSize: '0.85rem', color: '#9a9088', marginBottom: '1rem' }}>公開ページが見つかりません</p>
         )}
         <div style={{
           fontFamily: 'Cormorant Garamond, serif',

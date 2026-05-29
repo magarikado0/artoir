@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { T, externalHost } from '../lib/tokens'
+import { getPublisherKindLabel } from '../lib/publisher'
 
 export default function OrgPage() {
   const { orgSlug } = useParams()
@@ -44,7 +45,7 @@ export default function OrgPage() {
   )
   if (!org) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <p style={{ color: T.inkMuted, fontSize: 13 }}>団体が見つかりません</p>
+      <p style={{ color: T.inkMuted, fontSize: 13 }}>公開ページが見つかりません</p>
     </div>
   )
 
@@ -59,8 +60,9 @@ export default function OrgPage() {
     <div className="ui-page-shell">
       <Header activeTab="orgs" />
       <main className="ui-app-main">
-        <Link to="/orgs" style={{ display: 'inline-flex', marginBottom: 14, color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 団体一覧</Link>
+        <Link to="/orgs" style={{ display: 'inline-flex', marginBottom: 14, color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 公開ページ一覧</Link>
         <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
+          <span className="ui-publisher-kind-badge">{getPublisherKindLabel(org)}</span>
           <h1 className="ui-screen-title" style={{ marginTop: 7 }}>{org.name}</h1>
           {org.description && <p className="ui-screen-subtitle" style={{ maxWidth: 720 }}>{org.description}</p>}
           {links.length > 0 && (

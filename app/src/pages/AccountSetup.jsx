@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth'
 import DashShell, { DashField, DashSectionLabel } from '../components/DashShell'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
+import { PUBLISHER_KIND, getPublisherDescriptionPlaceholder, getPublisherNameLabel } from '../lib/publisher'
 
 export default function AccountSetup() {
   const { session } = useAuth()
@@ -13,6 +14,7 @@ export default function AccountSetup() {
   const isDesktop = useIsDesktop()
   const cancelTo = typeof location.state?.from === 'string' ? location.state.from : '/account'
 
+  const [kind, setKind] = useState(PUBLISHER_KIND.PERSON)
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
@@ -47,22 +49,29 @@ export default function AccountSetup() {
     try {
       const { data: newOrg, error: orgErr } = await supabase
         .from('organizations')
-        .insert({ name: name.trim(), slug: trimmedSlug, description: description.trim() || null })
+        .insert({ kind, name: name.trim(), slug: trimmedSlug, description: description.trim() || null })
         .select()
         .single()
 
       if (orgErr) {
         if (orgErr.code === '23505') {
-          setError('この SLUG はすでに使われています。別の SLUG を入力してください。')
+          setError('このIDはすでに使われています。別のIDを入力してください。')
         } else {
           setError(orgErr.message)
         }
         return
       }
 
-      const { error: linkErr } = await supabase
+      let { error: linkErr } = await supabase
         .from('user_orgs')
-        .insert({ user_id: session.user.id, org_id: newOrg.id, role: 'owner' })
+        .insert({ user_id: session.user.id, org_id: newOrg.id, role: 'owner', member_email: session.user.email })
+
+      if (linkErr) {
+        const fallback = await supabase
+          .from('user_orgs')
+          .insert({ user_id: session.user.id, org_id: newOrg.id, role: 'owner' })
+        linkErr = fallback.error
+      }
 
       if (linkErr) {
         setError(linkErr.message)
@@ -82,27 +91,47 @@ export default function AccountSetup() {
   const formContent = (
     <form onSubmit={handleSave}>
       <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
+        <DashSectionLabel>公開主体</DashSectionLabel>
+        <div className="ui-publisher-kind-grid" role="radiogroup" aria-label="公開主体の種類">
+          {[
+            [PUBLISHER_KIND.PERSON, '個人', '作家・出展者として展覧会を公開する'],
+            [PUBLISHER_KIND.ORGANIZATION, '団体', '学校・ギャラリー・サークルとして公開する'],
+          ].map(([value, title, copy]) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={kind === value}
+              onClick={() => setKind(value)}
+              className={`ui-publisher-kind-option ${kind === value ? 'is-active' : ''}`}
+            >
+              <span>{title}</span>
+              <small>{copy}</small>
+            </button>
+          ))}
+        </div>
+
         <DashSectionLabel>基本情報</DashSectionLabel>
         <DashField
-          label="団体名"
+          label={getPublisherNameLabel(kind)}
           value={name}
           onChange={handleNameChange}
-          placeholder="例: 多摩美術大学 日本画研究室"
+          placeholder={kind === PUBLISHER_KIND.PERSON ? '例: 山田 花' : '例: 多摩美術大学 日本画研究室'}
         />
         <DashField
-          label="SLUG"
+          label="ID"
           prefix="artoir.net/"
           value={slug}
           onChange={setSlug}
           placeholder="tamabi-nihonga"
           mono
-          help="公開 URL に使われます。英数字とハイフンのみ。"
+          help="公開URLに使われます。英数字とハイフンのみ。"
         />
         <DashField
           label="説明文"
           value={description}
           onChange={setDescription}
-          placeholder="団体の紹介文を入力..."
+          placeholder={getPublisherDescriptionPlaceholder(kind)}
           multiline
           help="任意。公開ページに表示されます。"
         />
@@ -138,11 +167,11 @@ export default function AccountSetup() {
 
   const pageHeader = (
     <div className="ui-hero-screen-heading" style={{ marginBottom: isDesktop ? 14 : 0 }}>
-      <div className="ui-kicker">NEW ORGANIZATION</div>
-      <h1 className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>団体を作成する</h1>
+      <div className="ui-kicker">NEW PAGE</div>
+      <h1 className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>公開ページを作成する</h1>
       <p className="ui-screen-subtitle">
         {isDesktop
-          ? '基本情報を入力すると、公開用の団体ページが作成されます。'
+          ? '個人または団体として、展覧会を公開するためのページを作成します。'
           : '下の項目を入力すると、公開ページが作成されます。'}
       </p>
     </div>
