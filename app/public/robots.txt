@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
+Disallow: /login
+Disallow: /account
+Disallow: /*/admin
+Disallow: /*/dashboard
+
 Sitemap: https://artoir.net/sitemap.xml
