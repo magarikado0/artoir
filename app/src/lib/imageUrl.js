@@ -29,11 +29,18 @@ export function getResizedImageUrl(url, options = {}) {
   return transformCloudinaryUrl(url, params)
 }
 
+/** 一覧・カード用（正方形枠内に収める。縦長も高さが膨らまない） */
 export function getThumbnailUrl(url, size = 400) {
   return getResizedImageUrl(url, {
     width: size,
-    crop: 'fit',
+    height: size,
+    crop: 'limit',
   })
+}
+
+/** 公開ページの作品グリッド（表示 ~150px 想定、Retina 用に 320） */
+export function getGalleryThumbnailUrl(url) {
+  return getThumbnailUrl(url, 320)
 }
 
 export function getHeroImageUrl(url, width = 800) {
@@ -43,7 +50,7 @@ export function getHeroImageUrl(url, width = 800) {
   })
 }
 
-export function getFullImageUrl(url, maxWidth = 1920) {
+export function getFullImageUrl(url, maxWidth = 1400) {
   return getResizedImageUrl(url, {
     width: maxWidth,
     crop: 'fit',

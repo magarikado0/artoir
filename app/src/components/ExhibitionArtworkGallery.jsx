@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import ArtworkMedia from './ArtworkMedia'
-import { getThumbnailUrl } from '../lib/imageUrl'
+import { getGalleryThumbnailUrl } from '../lib/imageUrl'
 
 export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
   const galleryRef = useRef(null)
@@ -17,7 +17,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
     return () => observer.disconnect()
   }, [artworks])
 
-  const items = artworks.filter((a) => getThumbnailUrl(a.image_url))
+  const items = artworks.filter((a) => a.image_url)
   if (items.length === 0) return null
 
   return (
@@ -33,7 +33,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
             aria-label={`${label}の詳細を見る`}
           >
             <ArtworkMedia
-              src={getThumbnailUrl(artwork.image_url)}
+              src={getGalleryThumbnailUrl(artwork.image_url)}
               alt=""
               decorative
               loading="lazy"
