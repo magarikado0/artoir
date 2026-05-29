@@ -148,11 +148,10 @@ export default function ExhibitionPage() {
               alt={exhibition.title}
               label={getExhibitionThumbnailUrl(exhibition) ? exhibition.title : featured?.title || exhibition.title}
               loading="eager"
-              fit={getExhibitionThumbnailUrl(exhibition) ? 'cover' : 'contain'}
+              fit="contain"
               aspectRatio="4 / 3"
-              background={T.ink}
               wrapperStyle={{ borderRadius: 7 }}
-              imageStyle={{ background: T.ink, borderRadius: 7 }}
+              imageStyle={{ borderRadius: 7 }}
             />
           </div>
 
@@ -192,8 +191,8 @@ export default function ExhibitionPage() {
                     decorative
                     loading="lazy"
                     aspectRatio="1 / 1"
+                    fit="contain"
                     wrapperStyle={{ borderRadius: 7 }}
-                    imageStyle={{ borderRadius: 7 }}
                   />
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'baseline' }}>
                     <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</span>

@@ -83,7 +83,15 @@ function ArtworkMediaImage({
   }
 
   return (
-    <div className={className} style={{ ...containerStyle, display: 'block' }}>
+    <div
+      className={className}
+      style={{
+        ...containerStyle,
+        display: fit === 'contain' ? 'flex' : 'block',
+        alignItems: fit === 'contain' ? 'center' : undefined,
+        justifyContent: fit === 'contain' ? 'center' : undefined,
+      }}
+    >
       {status !== 'loaded' && (
         <div
           style={{
@@ -112,12 +120,22 @@ function ArtworkMediaImage({
           onError?.(e)
         }}
         style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
+          ...(fit === 'contain'
+            ? {
+                maxWidth: '100%',
+                maxHeight: '100%',
+                width: 'auto',
+                height: 'auto',
+                objectFit: 'contain',
+              }
+            : {
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: fit,
+              }),
           display: 'block',
-          objectFit: fit,
           opacity: status === 'loaded' ? 1 : 0,
           transition: 'opacity 160ms ease',
           ...imageStyle,
@@ -136,7 +154,7 @@ export default function ArtworkMedia({
   fit = 'cover',
   aspectRatio,
   fillHeight = false,
-  background = T.surfaceMuted,
+  background = 'transparent',
   minHeight,
   className,
   wrapperStyle,

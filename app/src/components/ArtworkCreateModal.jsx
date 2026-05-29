@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Cropper from 'react-easy-crop'
 import 'react-easy-crop/react-easy-crop.css'
+import ReactCrop, { centerCrop, convertToPixelCrop } from 'react-image-crop'
+import 'react-image-crop/dist/ReactCrop.css'
 import { supabase } from '../lib/supabase'
-import { getCroppedBlob } from '../lib/imageCrop'
+import { getCroppedBlob, scaleCropToNaturalSize } from '../lib/imageCrop'
 import { T } from '../lib/tokens'
 import { DashField } from './DashShell'
 
@@ -12,6 +14,7 @@ const ASPECT_OPTIONS = [
   { label: '1:1', value: 1 },
   { label: '9:16', value: 9 / 16 },
   { label: '16:9', value: 16 / 9 },
+  { label: 'カスタム', value: null },
 ]
 
 function uploadToCloudinary(file, fileName, onProgress) {
@@ -47,6 +50,49 @@ function uploadToCloudinary(file, fileName, onProgress) {
 
 function getDefaultCrop() {
   return { x: 0, y: 0 }
+}
+
+function getInitialFreeCrop(width, height) {
+  return centerCrop({ unit: '%', width: 80, height: 80 }, width, height)
+}
+
+function FreeImageCrop({ imageUrl, onCropPixelsChange }) {
+  const imgRef = useRef(null)
+  const [crop, setCrop] = useState()
+
+  function applyPixelCrop(pixelCrop) {
+    const img = imgRef.current
+    if (!img) {
+      onCropPixelsChange(null)
+      return
+    }
+    onCropPixelsChange(scaleCropToNaturalSize(pixelCrop, img))
+  }
+
+  function handleImageLoad(e) {
+    const { width, height } = e.currentTarget
+    const initial = getInitialFreeCrop(width, height)
+    setCrop(initial)
+    applyPixelCrop(convertToPixelCrop(initial, width, height))
+  }
+
+  return (
+    <ReactCrop
+      crop={crop}
+      onChange={(_, percentCrop) => setCrop(percentCrop)}
+      onComplete={applyPixelCrop}
+      ruleOfThirds
+      style={{ maxHeight: '100%', maxWidth: '100%' }}
+    >
+      <img
+        ref={imgRef}
+        src={imageUrl}
+        alt=""
+        onLoad={handleImageLoad}
+        style={{ display: 'block', maxHeight: 'min(62vh, 620px)', maxWidth: '100%', width: 'auto', height: 'auto' }}
+      />
+    </ReactCrop>
+  )
 }
 
 export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder, onClose, onCreated }) {
@@ -134,6 +180,7 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
 
   if (!open || !file) return null
 
+  const isFreeAspect = aspect === null
   const canSave = Boolean(croppedAreaPixels) && !saving
 
   return (
@@ -151,22 +198,44 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
 
         <div className="ui-artwork-create-layout" style={{ gap: 16, padding: 18, overflow: 'auto' }}>
           <div style={{ minWidth: 0 }}>
-            <div className="ui-artwork-create-cropbox" style={{ position: 'relative', width: '100%', minHeight: 380, height: 'min(62vh, 620px)', background: T.ink, borderRadius: 12, overflow: 'hidden' }}>
-              <Cropper
-                image={previewUrl}
-                crop={crop}
-                zoom={zoom}
-                aspect={aspect}
-                cropShape="rect"
-                showGrid
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={(_, areaPixels) => setCroppedAreaPixels(areaPixels)}
-              />
+            <div
+              className="ui-artwork-create-cropbox"
+              style={{
+                position: 'relative',
+                width: '100%',
+                minHeight: 380,
+                height: 'min(62vh, 620px)',
+                background: T.ink,
+                borderRadius: 12,
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {isFreeAspect ? (
+                <FreeImageCrop
+                  key={previewUrl}
+                  imageUrl={previewUrl}
+                  onCropPixelsChange={setCroppedAreaPixels}
+                />
+              ) : (
+                <Cropper
+                  image={previewUrl}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={aspect}
+                  cropShape="rect"
+                  showGrid
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={(_, areaPixels) => setCroppedAreaPixels(areaPixels)}
+                />
+              )}
             </div>
             <div style={{ marginTop: 14 }}>
               <div className="ui-form-label">ASPECT</div>
-              <div className="ui-segment" style={{ marginTop: 8, width: '100%', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+              <div className="ui-segment" style={{ marginTop: 8, width: '100%', display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
                 {ASPECT_OPTIONS.map((option) => (
                   <button
                     key={option.label}
@@ -174,6 +243,7 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
                     onClick={() => {
                       setAspect(option.value)
                       setCrop(getDefaultCrop())
+                      setZoom(1)
                       setCroppedAreaPixels(null)
                     }}
                     className={aspect === option.value ? 'is-active' : ''}
@@ -183,20 +253,24 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
                 ))}
               </div>
             </div>
-            <div style={{ marginTop: 14 }}>
-              <div className="ui-form-label">ZOOM</div>
-              <input
-                type="range"
-                min="1"
-                max="3"
-                step="0.01"
-                value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
-                style={{ width: '100%', marginTop: 8 }}
-              />
-            </div>
+            {!isFreeAspect && (
+              <div style={{ marginTop: 14 }}>
+                <div className="ui-form-label">ZOOM</div>
+                <input
+                  type="range"
+                  min="1"
+                  max="3"
+                  step="0.01"
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  style={{ width: '100%', marginTop: 8 }}
+                />
+              </div>
+            )}
             <div style={{ marginTop: 10, fontSize: 12, color: T.inkMuted, lineHeight: 1.7 }}>
-              画像をドラッグして位置を調整し、ズームで切り抜き範囲を決めます。
+              {isFreeAspect
+                ? '切り抜き枠をドラッグして移動し、角や辺をドラッグしてサイズを調整します。'
+                : '画像をドラッグして位置を調整し、ズームで切り抜き範囲を決めます。'}
             </div>
           </div>
 

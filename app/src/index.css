@@ -1467,6 +1467,173 @@ button.ui-account-org-pick-btn.ui-org-row {
   gap: 10px;
 }
 
+.ui-artwork-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  min-width: 0;
+  height: 100svh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background:
+    linear-gradient(180deg, rgba(255,249,237,0.98), rgba(244,233,214,0.96)),
+    #F4E9D6;
+  color: #211813;
+  animation: modalSlideUp 260ms cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes modalSlideUp {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ui-artwork-modal-bar {
+  min-width: 0;
+  min-height: calc(60px + env(safe-area-inset-top, 0px));
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 3px solid #D3A842;
+  background: #FFF9ED;
+  box-shadow: 0 1px 0 rgba(67,54,44,0.08);
+}
+
+.ui-artwork-modal-eyebrow,
+.ui-artwork-modal-detail-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+}
+
+.ui-artwork-modal-eyebrow {
+  min-width: 0;
+  color: #887869;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-artwork-modal-close {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1.5px solid #43362C;
+  border-radius: 7px;
+  background: #F4E9D6;
+  color: #211813;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.ui-artwork-modal-close:hover {
+  background: #FFF9ED;
+  border-color: #211813;
+}
+
+.ui-artwork-modal-body {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  overflow: hidden;
+}
+
+.ui-artwork-modal--media-only .ui-artwork-modal-body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ui-artwork-modal-viewer {
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(12px, 2vw, 24px);
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 42%, rgba(255,249,237,0.95), transparent 72%),
+    linear-gradient(180deg, #F4E9D6 0%, #E4D3B8 100%);
+}
+
+.ui-artwork-modal-media {
+  width: 100%;
+  max-width: min(100%, 1320px);
+  height: 100%;
+  max-height: 100%;
+  background: rgba(255,249,237,0.55);
+  box-shadow:
+    0 0 0 1px rgba(67,54,44,0.1),
+    0 12px 36px rgba(33,24,19,0.08);
+}
+
+.ui-artwork-modal-detail {
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(18px, 3vw, 34px) clamp(16px, 2.4vw, 28px) calc(28px + env(safe-area-inset-bottom, 0px));
+  border-left: 1px solid rgba(67,54,44,0.14);
+  background:
+    linear-gradient(180deg, rgba(255,249,237,0.98), rgba(244,233,214,0.94)),
+    #FFF9ED;
+  color: #211813;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ui-artwork-modal-detail-label {
+  margin-bottom: 8px;
+  color: #887869;
+}
+
+.ui-artwork-modal-title {
+  min-width: 0;
+  margin: 0;
+  color: #211813;
+  font-family: Georgia, "Shippori Mincho", "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: clamp(24px, 3.2vw, 36px);
+  font-weight: 500;
+  line-height: 1.22;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.ui-artwork-modal-description-wrap {
+  margin-top: clamp(22px, 4vw, 44px);
+  padding-top: 18px;
+  border-top: 1px solid rgba(67,54,44,0.16);
+}
+
+.ui-artwork-modal-description {
+  max-width: 62ch;
+  color: #47382D;
+  font-family: "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-size: 14px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ui-artwork-modal-description.is-empty {
+  color: #887869;
+}
+
 @media (min-width: 820px) {
   .ui-exhibition-gallery {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1740,5 +1907,33 @@ button.ui-account-org-pick-btn.ui-org-row {
 
   .ui-exhibition-date-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ui-artwork-modal {
+    overflow: hidden;
+  }
+
+  .ui-artwork-modal-body {
+    display: block;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ui-artwork-modal-viewer {
+    min-height: clamp(280px, 58svh, 620px);
+    padding: 12px;
+  }
+
+  .ui-artwork-modal-media {
+    height: clamp(280px, 58svh, 620px);
+  }
+
+  .ui-artwork-modal-detail {
+    border-top: 3px solid #211813;
+    border-left: 0;
+  }
+
+  .ui-artwork-modal-title {
+    font-size: 26px;
   }
 }

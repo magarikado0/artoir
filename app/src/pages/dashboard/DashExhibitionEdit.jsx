@@ -320,7 +320,7 @@ export default function DashExhibitionEdit() {
               alt={title || '展覧会サムネイル'}
               label={title || '展覧会サムネイル'}
               loading="eager"
-              fit="cover"
+              fit="contain"
               aspectRatio="1 / 1"
               wrapperStyle={{ width: 'min(220px, 100%)', borderRadius: 7 }}
               imageStyle={{ borderRadius: 7 }}
@@ -501,7 +501,7 @@ export default function DashExhibitionEdit() {
             alt={title || '展覧会サムネイル'}
             label={title || '展覧会サムネイル'}
             loading="eager"
-            fit="cover"
+            fit="contain"
             aspectRatio="1 / 1"
             wrapperStyle={{ width: 'min(180px, 100%)', borderRadius: 7 }}
             imageStyle={{ borderRadius: 7 }}
@@ -516,7 +516,7 @@ export default function DashExhibitionEdit() {
                   alt={title || '展覧会サムネイル'}
                   label={title || '展覧会サムネイル'}
                   loading="eager"
-                  fit="cover"
+                  fit="contain"
                   aspectRatio="1 / 1"
                   wrapperStyle={{ width: 'min(220px, 100%)', borderRadius: 7 }}
                   imageStyle={{ borderRadius: 7 }}

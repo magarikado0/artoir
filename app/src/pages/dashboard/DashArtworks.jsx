@@ -140,6 +140,7 @@ export default function DashArtworks() {
                   loading="lazy"
                   fillHeight
                   aspectRatio="1 / 1"
+                  fit="contain"
                   wrapperStyle={{ borderRadius: 7 }}
                   imageStyle={{ borderRadius: 7 }}
                 />
@@ -189,7 +190,7 @@ export default function DashArtworks() {
                 loading="eager"
                 fit="contain"
                 minHeight={160}
-                wrapperStyle={{ borderRadius: 8, background: T.surfaceMuted }}
+                wrapperStyle={{ borderRadius: 8 }}
                 imageStyle={{ borderRadius: 8, maxHeight: 280, objectFit: 'contain' }}
               />
             </div>

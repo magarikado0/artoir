@@ -27,9 +27,8 @@ function DashExhibitionCard({ exh, orgSlug, navigate, onDelete }) {
           decorative
           loading="lazy"
           aspectRatio="1 / 1"
-          fit="cover"
-          wrapperStyle={{ width: 96, borderRadius: 7, boxShadow: `inset 0 -3px 0 ${T.gold}` }}
-          imageStyle={{ borderRadius: 7 }}
+          fit="contain"
+          wrapperStyle={{ width: 96, borderRadius: 7 }}
         />
       ) : (
         <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>

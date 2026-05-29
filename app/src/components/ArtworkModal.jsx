@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { T } from '../lib/tokens'
 import ArtworkMedia from './ArtworkMedia'
 import { getFullImageUrl } from '../lib/imageUrl'
 
@@ -19,71 +18,65 @@ export default function ArtworkModal({ artwork, onClose }) {
 
   if (!open) return null
 
-  return (
-    <div role="dialog" aria-modal="true" aria-labelledby="artwork-modal-title" style={{
-      position: 'fixed', inset: 0, zIndex: 500,
-      background: T.ink, color: T.paper, display: 'flex', flexDirection: 'column',
-      animation: 'modalSlideUp 260ms cubic-bezier(.2,.8,.2,1)',
-    }}>
-      <style>{`@keyframes modalSlideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
+  const title = artwork.title?.trim() ?? ''
+  const description = artwork.description?.trim() ?? ''
+  const hasTitle = Boolean(title)
+  const hasDescription = Boolean(description)
+  const hasDetail = hasTitle || hasDescription
 
-      <div style={{
-        padding: '14px 16px 12px', display: 'flex', justifyContent: 'space-between',
-        alignItems: 'center', borderBottom: `3px solid ${T.gold}`,
-        position: 'sticky', top: 0, background: T.ink, zIndex: 2,
-      }}>
-        <div style={{
-          fontFamily: T.mono, fontSize: 10, letterSpacing: '0.16em', color: 'rgba(255,249,233,0.72)',
-        }}>
-        </div>
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={hasTitle ? 'artwork-modal-title' : undefined}
+      aria-label={hasTitle ? undefined : '作品詳細'}
+      className={['ui-artwork-modal', !hasDetail && 'ui-artwork-modal--media-only'].filter(Boolean).join(' ')}
+    >
+      <div className="ui-artwork-modal-bar">
+        <div className="ui-artwork-modal-eyebrow">ARTWORK</div>
         <button
           onClick={onClose}
-          className="ui-modal-close"
-          aria-label="作品写真を閉じる"
+          className="ui-modal-close ui-artwork-modal-close"
+          aria-label="作品詳細を閉じる"
           type="button"
-          style={{
-            minWidth: 44, minHeight: 44, padding: 0, borderRadius: 6,
-            border: `1.5px solid ${T.paper}`,
-            background: 'transparent', color: T.paper, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: T.mono, fontSize: 22, lineHeight: 1, fontWeight: 600,
-          }}
         >
           ×
         </button>
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <div style={{ display: 'grid', placeItems: 'center', padding: 16, background: '#1A1410' }}>
+      <div className="ui-artwork-modal-body">
+        <div className="ui-artwork-modal-viewer">
           <ArtworkMedia
             src={getFullImageUrl(artwork.image_url)}
             alt={artwork.title}
             label={artwork.title}
             loading="eager"
             fit="contain"
-            background="#1A1410"
-            wrapperStyle={{ width: '100%', height: 'min(72vh, calc(100vh - 220px))', maxWidth: 'min(100%, 1280px)', borderRadius: 8 }}
-            imageStyle={{ background: '#D9D6CE', borderRadius: 8 }}
+            className="ui-artwork-modal-media"
+            wrapperStyle={{ borderRadius: 8 }}
+            imageStyle={{ borderRadius: 8 }}
           />
         </div>
 
-        <div style={{ padding: '22px 16px 48px', background: T.card, color: T.ink, borderTop: `3px solid ${T.ink}` }}>
-          <div id="artwork-modal-title" style={{
-            fontFamily: T.serif, fontSize: 26, letterSpacing: '0.02em', lineHeight: 1.25,
-            color: T.ink,
-          }}>
-            {artwork.title}
-          </div>
+        {hasDetail && (
+          <aside className="ui-artwork-modal-detail">
+            {hasTitle && (
+              <div>
+                <div className="ui-artwork-modal-detail-label">TITLE</div>
+                <h2 id="artwork-modal-title" className="ui-artwork-modal-title">
+                  {title}
+                </h2>
+              </div>
+            )}
 
-          {artwork.description && (
-            <div style={{
-              marginTop: 20, fontSize: 13, lineHeight: 1.9, color: T.inkSoft,
-              fontFamily: T.serifBody,
-            }}>
-              {artwork.description}
-            </div>
-          )}
-        </div>
+            {hasDescription && (
+              <div className={hasTitle ? 'ui-artwork-modal-description-wrap' : undefined}>
+                <div className="ui-artwork-modal-detail-label">DESCRIPTION</div>
+                <div className="ui-artwork-modal-description">{description}</div>
+              </div>
+            )}
+          </aside>
+        )}
       </div>
     </div>
   )

@@ -32,8 +32,7 @@ export function getResizedImageUrl(url, options = {}) {
 export function getThumbnailUrl(url, size = 400) {
   return getResizedImageUrl(url, {
     width: size,
-    height: size,
-    crop: 'fill',
+    crop: 'fit',
   })
 }
 

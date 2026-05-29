@@ -330,8 +330,8 @@ export default function AdminPage() {
                   decorative
                   loading="lazy"
                   fillHeight
+                  fit="contain"
                   wrapperStyle={{ width: '100%', height: '100%' }}
-                  imageStyle={{ objectFit: 'cover' }}
                 />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>

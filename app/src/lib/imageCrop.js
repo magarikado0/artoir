@@ -10,6 +10,21 @@ function loadImage(src) {
   })
 }
 
+/** 画面上の crop（表示サイズ基準）を原画像のピクセル座標に変換する */
+export function scaleCropToNaturalSize(pixelCrop, image) {
+  if (!pixelCrop?.width || !pixelCrop?.height || !image?.naturalWidth) {
+    return null
+  }
+  const scaleX = image.naturalWidth / image.width
+  const scaleY = image.naturalHeight / image.height
+  return {
+    x: Math.round(pixelCrop.x * scaleX),
+    y: Math.round(pixelCrop.y * scaleY),
+    width: Math.round(pixelCrop.width * scaleX),
+    height: Math.round(pixelCrop.height * scaleY),
+  }
+}
+
 export async function getCroppedBlob(imageSrc, cropPixels, mimeType = 'image/jpeg', maxWidth = 1920) {
   if (!cropPixels) throw new Error('クロップ範囲が未設定です')
 
