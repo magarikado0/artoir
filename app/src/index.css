@@ -756,12 +756,6 @@ button {
   box-shadow: 0 10px 24px rgba(33,24,19,0.1), inset 0 2px 0 rgba(190,85,61,0.36);
 }
 
-.ui-exhibition-gallery-item {
-  padding: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
 
 .ui-exhibition-summary-card {
   padding: 18px;
@@ -804,12 +798,6 @@ button {
   font-size: 12px;
   line-height: 1.55;
   color: var(--color-ink);
-}
-
-.ui-exhibition-gallery-image,
-.ui-exhibition-gallery-image img {
-  display: block;
-  width: 100%;
 }
 
 .ui-exhibition-list-grid {
@@ -1880,10 +1868,45 @@ button.ui-account-org-pick-btn.ui-org-row {
   transform: translateY(0);
 }
 
-.ui-exhibition-gallery {
+.ui-exhibition-artwork-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 10px;
+}
+
+.ui-exhibition-artwork-card {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ui-exhibition-artwork-card.ui-list-card {
+  background:
+    linear-gradient(165deg, rgba(244, 233, 214, 0.35), rgba(228, 211, 184, 0.22)),
+    transparent;
+  border-color: rgba(67, 54, 44, 0.1);
+  box-shadow:
+    0 4px 12px rgba(33, 24, 19, 0.035),
+    inset 0 1px 0 rgba(211, 168, 66, 0.08);
+}
+
+.ui-exhibition-artwork-card.ui-list-card:hover {
+  background:
+    linear-gradient(165deg, rgba(244, 233, 214, 0.48), rgba(228, 211, 184, 0.32)),
+    transparent;
+  border-color: rgba(67, 54, 44, 0.18);
+  box-shadow:
+    0 6px 16px rgba(33, 24, 19, 0.055),
+    inset 0 1px 0 rgba(190, 85, 61, 0.14);
+}
+
+.ui-exhibition-artwork-card:focus-visible {
+  outline: 2px solid rgba(190, 85, 61, 0.55);
+  outline-offset: 3px;
 }
 
 .ui-artwork-modal {
@@ -2051,19 +2074,6 @@ button.ui-account-org-pick-btn.ui-org-row {
 
 .ui-artwork-modal-description.is-empty {
   color: #887869;
-}
-
-@media (min-width: 820px) {
-  .ui-exhibition-gallery {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-  }
-}
-
-@media (min-width: 1280px) {
-  .ui-exhibition-gallery {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
 }
 
 .ui-modal-close:hover,
