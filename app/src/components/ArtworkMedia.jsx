@@ -54,8 +54,38 @@ function ArtworkMediaPlaceholder({
   )
 }
 
+function imageContainStyle(fit, intrinsic, layered = false) {
+  if (intrinsic) return { width: '100%', height: 'auto' }
+  if (fit === 'contain') {
+    const base = {
+      maxWidth: '100%',
+      maxHeight: '100%',
+      width: 'auto',
+      height: 'auto',
+      objectFit: 'contain',
+    }
+    if (layered) {
+      return {
+        ...base,
+        position: 'absolute',
+        inset: 0,
+        margin: 'auto',
+      }
+    }
+    return base
+  }
+  return {
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: fit,
+  }
+}
+
 function ArtworkMediaImage({
   src,
+  placeholderSrc,
   alt,
   label,
   decorative,
@@ -71,6 +101,9 @@ function ArtworkMediaImage({
   const [status, setStatus] = useState('loading')
   const title = label || alt || '画像'
   const intrinsic = fit === 'contain' && naturalSize
+  const showPlaceholder = Boolean(placeholderSrc) && status !== 'loaded'
+  const layered = Boolean(placeholderSrc)
+  const containStyle = imageContainStyle(fit, intrinsic, layered)
 
   if (status === 'error') {
     return (
@@ -89,13 +122,27 @@ function ArtworkMediaImage({
       className={className}
       style={{
         ...containerStyle,
-        display: intrinsic ? 'block' : fit === 'contain' ? 'flex' : 'block',
-        alignItems: !intrinsic && fit === 'contain' ? 'center' : undefined,
-        justifyContent: !intrinsic && fit === 'contain' ? 'center' : undefined,
+        display: intrinsic ? 'block' : fit === 'contain' && !layered ? 'flex' : 'block',
+        alignItems: !intrinsic && fit === 'contain' && !layered ? 'center' : undefined,
+        justifyContent: !intrinsic && fit === 'contain' && !layered ? 'center' : undefined,
         lineHeight: intrinsic ? 0 : undefined,
       }}
     >
-      {status !== 'loaded' && (
+      {showPlaceholder && (
+        <img
+          src={placeholderSrc}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          className="ui-artwork-media-placeholder"
+          style={{
+            ...containStyle,
+            display: 'block',
+            ...imageStyle,
+          }}
+        />
+      )}
+      {status !== 'loaded' && !placeholderSrc && (
         <div
           style={{
             position: 'absolute',
@@ -114,6 +161,7 @@ function ArtworkMediaImage({
         alt={decorative ? '' : alt || label || ''}
         loading={loading}
         decoding="async"
+        fetchPriority={loading === 'eager' ? 'high' : undefined}
         onLoad={(e) => {
           setStatus('loaded')
           onLoad?.(e)
@@ -123,29 +171,10 @@ function ArtworkMediaImage({
           onError?.(e)
         }}
         style={{
-          ...(intrinsic
-            ? {
-                width: '100%',
-                height: 'auto',
-              }
-            : fit === 'contain'
-            ? {
-                maxWidth: '100%',
-                maxHeight: '100%',
-                width: 'auto',
-                height: 'auto',
-                objectFit: 'contain',
-              }
-            : {
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: fit,
-              }),
+          ...containStyle,
           display: 'block',
           opacity: status === 'loaded' ? 1 : 0,
-          transition: 'opacity 160ms ease',
+          transition: 'opacity 200ms ease',
           ...imageStyle,
         }}
       />
@@ -155,6 +184,7 @@ function ArtworkMediaImage({
 
 export default function ArtworkMedia({
   src,
+  placeholderSrc,
   alt = '',
   label,
   decorative = false,
@@ -200,6 +230,7 @@ export default function ArtworkMedia({
     <ArtworkMediaImage
       key={src}
       src={src}
+      placeholderSrc={placeholderSrc}
       alt={alt}
       label={label}
       decorative={decorative}

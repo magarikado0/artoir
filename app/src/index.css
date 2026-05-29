@@ -2024,6 +2024,12 @@ button.ui-account-org-pick-btn.ui-org-row {
     0 12px 36px rgba(33,24,19,0.08);
 }
 
+.ui-artwork-media-placeholder {
+  filter: blur(10px);
+  transform: scale(1.04);
+  opacity: 0.92;
+}
+
 .ui-artwork-modal-detail {
   min-width: 0;
   min-height: 0;

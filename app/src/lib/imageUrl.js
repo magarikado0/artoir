@@ -56,3 +56,22 @@ export function getFullImageUrl(url, maxWidth = 1400) {
     crop: 'fit',
   })
 }
+
+/** 作品モーダル用（ビューア最大 ~1320×620px 想定、縦長もファイルサイズを抑える） */
+export function getModalImageUrl(url) {
+  return getResizedImageUrl(url, {
+    width: 1200,
+    height: 900,
+    crop: 'limit',
+  })
+}
+
+const preloadedUrls = new Set()
+
+export function preloadImageUrl(url) {
+  if (!url || preloadedUrls.has(url)) return
+  preloadedUrls.add(url)
+  const img = new Image()
+  img.decoding = 'async'
+  img.src = url
+}

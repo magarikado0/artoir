@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import ArtworkMedia from './ArtworkMedia'
-import { getGalleryThumbnailUrl } from '../lib/imageUrl'
+import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
 
 export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
   const galleryRef = useRef(null)
@@ -29,6 +29,8 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
             key={artwork.id}
             type="button"
             className="gallery-item ui-list-card ui-exhibition-artwork-card"
+            onPointerEnter={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
+            onFocus={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
             onClick={() => onOpenArtwork(artwork)}
             aria-label={`${label}の詳細を見る`}
           >

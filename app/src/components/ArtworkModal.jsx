@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import ArtworkMedia from './ArtworkMedia'
-import { getFullImageUrl } from '../lib/imageUrl'
+import { getGalleryThumbnailUrl, getModalImageUrl } from '../lib/imageUrl'
 
 export default function ArtworkModal({ artwork, onClose }) {
   const open = !!artwork
@@ -47,11 +47,13 @@ export default function ArtworkModal({ artwork, onClose }) {
       <div className="ui-artwork-modal-body">
         <div className="ui-artwork-modal-viewer">
           <ArtworkMedia
-            src={getFullImageUrl(artwork.image_url)}
+            src={getModalImageUrl(artwork.image_url)}
+            placeholderSrc={getGalleryThumbnailUrl(artwork.image_url)}
             alt={artwork.title}
             label={artwork.title}
             loading="eager"
             fit="contain"
+            fillHeight
             className="ui-artwork-modal-media"
             wrapperStyle={{ borderRadius: 8 }}
             imageStyle={{ borderRadius: 8 }}
