@@ -44,6 +44,42 @@ async function generateUniqueSlug(orgId, title) {
   return `${base}-${n}`
 }
 
+function fieldValue(value, fallback = '未設定') {
+  return value || fallback
+}
+
+function ExhibitionSaveActions({ onCancel, onSave, saving, deleting }) {
+  return (
+    <div className="ui-settings-edit-actions">
+      <button type="button" onClick={onCancel} disabled={saving} className="ui-settings-secondary-button">
+        キャンセル
+      </button>
+      <button type="button" onClick={onSave} disabled={saving || deleting} className="ui-settings-primary-button">
+        {saving ? '保存中...' : '保存'}
+      </button>
+    </div>
+  )
+}
+
+function ExhibitionItem({ id, label, value, mono, editChildren, editSection, onBeginEdit }) {
+  const editing = editSection === id
+  return (
+    <section className="ui-settings-item">
+      <div className="ui-settings-item-head">
+        <div className="ui-settings-item-label">{label}</div>
+        {!editing && editChildren && (
+          <button type="button" onClick={() => onBeginEdit(id)} className="ui-settings-edit-button">
+            編集
+          </button>
+        )}
+      </div>
+      {editing ? editChildren : (
+        <div className={`ui-settings-item-value ${mono ? 'is-mono' : ''}`}>{value}</div>
+      )}
+    </section>
+  )
+}
+
 export default function DashExhibitionEdit() {
   const { orgSlug, exhibitionId } = useParams()
   const navigate = useNavigate()
@@ -225,43 +261,10 @@ export default function DashExhibitionEdit() {
     </div>
   )
 
-  const fieldValue = (value, fallback = '未設定') => value || fallback
   const savedPublicUrl = `artoir.net/${orgSlug}/exhibition/${exhibition?.slug || '(未保存)'}`
   const savedPeriodText = getExhibitionPeriodText(exhibition)
   const savedFeeText = getExhibitionFeeSummary(exhibition)
   const savedThumbnailUrl = getExhibitionThumbnailUrlFromRecord(exhibition)
-
-  function SaveActions() {
-    return (
-      <div className="ui-settings-edit-actions">
-        <button type="button" onClick={handleCancelEdit} disabled={saving} className="ui-settings-secondary-button">
-          キャンセル
-        </button>
-        <button type="button" onClick={handleSave} disabled={saving || deleting} className="ui-settings-primary-button">
-          {saving ? '保存中...' : '保存'}
-        </button>
-      </div>
-    )
-  }
-
-  function ExhibitionItem({ id, label, value, mono, editChildren }) {
-    const editing = editSection === id
-    return (
-      <section className="ui-settings-item">
-        <div className="ui-settings-item-head">
-          <div className="ui-settings-item-label">{label}</div>
-          {!editing && editChildren && (
-            <button type="button" onClick={() => beginEditSection(id)} className="ui-settings-edit-button">
-              編集
-            </button>
-          )}
-        </div>
-        {editing ? editChildren : (
-          <div className={`ui-settings-item-value ${mono ? 'is-mono' : ''}`}>{value}</div>
-        )}
-      </section>
-    )
-  }
 
   const formContent = (
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
@@ -410,18 +413,22 @@ export default function DashExhibitionEdit() {
       </div>
 
       <ExhibitionItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="title"
         label="タイトル"
         value={fieldValue(exhibition?.title)}
         editChildren={(
           <>
             <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
-            <SaveActions />
+            <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
           </>
         )}
       />
 
       <ExhibitionItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="period"
         label="会期"
         value={savedPeriodText}
@@ -434,24 +441,28 @@ export default function DashExhibitionEdit() {
               <DashField label="END" value={endDate} onChange={onEndDateChange} placeholder="YYYY-MM-DD" mono type="date" min={startDate || undefined} />
               <DashField label="END TIME" value={endTime} onChange={setEndTime} placeholder="--:--" mono type="time" />
             </div>
-            <SaveActions />
+            <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
           </>
         )}
       />
 
       <ExhibitionItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="location"
         label="会場"
         value={fieldValue(exhibition?.location)}
         editChildren={(
           <>
             <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
-            <SaveActions />
+            <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
           </>
         )}
       />
 
       <ExhibitionItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="fee"
         label="料金"
         value={savedFeeText}
@@ -474,12 +485,14 @@ export default function DashExhibitionEdit() {
                 <div className="ui-field-help">無料の展覧会として表示されます。</div>
               )}
             </div>
-            <SaveActions />
+            <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
           </>
         )}
       />
 
       <ExhibitionItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="description"
         label="説明文"
         value={fieldValue(exhibition?.description)}
@@ -492,12 +505,14 @@ export default function DashExhibitionEdit() {
               multiline
               placeholder="展覧会の説明文を入力..."
             />
-            <SaveActions />
+            <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
           </>
         )}
       />
 
       <ExhibitionItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="thumbnail"
         label="サムネイル"
         value={savedThumbnailUrl ? (
@@ -541,7 +556,7 @@ export default function DashExhibitionEdit() {
                 </ImageUploader>
               </>
             )}
-            <SaveActions />
+            <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
           </div>
         )}
       />

@@ -7,6 +7,52 @@ import { useIsDesktop } from '../../lib/useIsDesktop'
 import { deleteOrganization } from '../../lib/deleteOrganization'
 import { getPublisherDescriptionPlaceholder, getPublisherNameLabel, isPersonPublisher } from '../../lib/publisher'
 
+function fieldValue(value, fallback = '未設定') {
+  return value || fallback
+}
+
+function SettingsSaveActions({ onCancel, onSave, saving, deleting, saved }) {
+  return (
+    <div className="ui-settings-edit-actions">
+      <button type="button" onClick={onCancel} disabled={saving} className="ui-settings-secondary-button">
+        キャンセル
+      </button>
+      <button type="button" onClick={onSave} disabled={saving || deleting} className="ui-settings-primary-button">
+        {saved ? '保存済み' : saving ? '保存中...' : '保存'}
+      </button>
+    </div>
+  )
+}
+
+function SettingsItem({ id, label, value, mono, editChildren, editSection, onBeginEdit }) {
+  const editing = editSection === id
+  const editable = Boolean(editChildren)
+  return (
+    <section className="ui-settings-item">
+      <div className="ui-settings-item-head">
+        <div className="ui-settings-item-label">{label}</div>
+        {editable && !editing && (
+          <button type="button" onClick={() => onBeginEdit(id)} className="ui-settings-edit-button">
+            編集
+          </button>
+        )}
+      </div>
+      {editing && editable ? editChildren : (
+        <div className={`ui-settings-item-value ${mono ? 'is-mono' : ''}`}>{value}</div>
+      )}
+    </section>
+  )
+}
+
+function LinkValue({ label, value }) {
+  return (
+    <div className="ui-settings-link-value">
+      <span>{label}</span>
+      <strong>{fieldValue(value)}</strong>
+    </div>
+  )
+}
+
 export default function DashSettings() {
   const { orgSlug } = useParams()
   const navigate = useNavigate()
@@ -156,80 +202,43 @@ export default function DashSettings() {
     </div>
   )
 
-  const fieldValue = (value, fallback = '未設定') => value || fallback
   const publicUrl = `artoir.net/${org?.slug || orgSlug}`
   const nameLabel = getPublisherNameLabel(org)
   const deleteLabel = isPersonPublisher(org) ? '公開ページ' : '団体'
 
-  function SaveActions() {
-    return (
-      <div className="ui-settings-edit-actions">
-        <button type="button" onClick={handleCancelEdit} disabled={saving} className="ui-settings-secondary-button">
-          キャンセル
-        </button>
-        <button type="button" onClick={handleSave} disabled={saving || deleting} className="ui-settings-primary-button">
-          {saved ? '保存済み' : saving ? '保存中...' : '保存'}
-        </button>
-      </div>
-    )
-  }
-
-  function SettingsItem({ id, label, value, mono, editChildren }) {
-    const editing = editSection === id
-    const editable = Boolean(editChildren)
-    return (
-      <section className="ui-settings-item">
-        <div className="ui-settings-item-head">
-          <div className="ui-settings-item-label">{label}</div>
-          {editable && !editing && (
-            <button type="button" onClick={() => beginEditSection(id)} className="ui-settings-edit-button">
-              編集
-            </button>
-          )}
-        </div>
-        {editing && editable ? editChildren : (
-          <div className={`ui-settings-item-value ${mono ? 'is-mono' : ''}`}>{value}</div>
-        )}
-      </section>
-    )
-  }
-
-  function LinkValue({ label, value }) {
-    return (
-      <div className="ui-settings-link-value">
-        <span>{label}</span>
-        <strong>{fieldValue(value)}</strong>
-      </div>
-    )
-  }
-
   const settingsContent = (
     <div className="ui-settings-page">
       <SettingsItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="basic"
         label={nameLabel}
         value={fieldValue(org?.name)}
         editChildren={(
           <>
             <DashField label={nameLabel} value={name} onChange={setName} placeholder={isPersonPublisher(org) ? '例: 山田 花' : '例: 多摩美術大学 日本画研究室'} />
-            <SaveActions />
+            <SettingsSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} saved={saved} />
           </>
         )}
       />
 
       <SettingsItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="description"
         label="説明文"
         value={fieldValue(org?.description)}
         editChildren={(
           <>
             <DashField label="説明文" value={description} onChange={setDescription} placeholder={getPublisherDescriptionPlaceholder(org)} multiline />
-            <SaveActions />
+            <SettingsSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} saved={saved} />
           </>
         )}
       />
 
       <SettingsItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="links"
         label="各種リンク"
         value={(
@@ -244,12 +253,14 @@ export default function DashSettings() {
             <DashField label="INSTAGRAM" prefix="instagram.com/" value={instagram} onChange={setInstagram} placeholder="username" mono />
             <DashField label="X (TWITTER)" prefix="x.com/" value={twitter} onChange={setTwitter} placeholder="username" mono />
             <DashField label="WEBSITE" value={homepageUrl} onChange={setHomepageUrl} placeholder="https://example.com" mono />
-            <SaveActions />
+            <SettingsSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} saved={saved} />
           </>
         )}
       />
 
       <SettingsItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
         id="url"
         label="公開URL"
         value={publicUrl}
@@ -265,7 +276,7 @@ export default function DashSettings() {
               mono
               warning={slugChanged ? 'ID変更時は既存URLが無効になります。' : undefined}
             />
-            <SaveActions />
+            <SettingsSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} saved={saved} />
           </>
         )}
       />
