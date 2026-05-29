@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { useAuth } from '../lib/auth'
+import { useResolvedSession } from '../lib/useResolvedSession'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { T, pad2 } from '../lib/tokens'
@@ -157,16 +157,28 @@ function OrgSelector({ orgs, onSelect, isDesktop }) {
 }
 
 export default function AccountPage() {
-  const { session } = useAuth()
+  const { session, ready } = useResolvedSession()
   const isDesktop = useIsDesktop()
   const navigate = useNavigate()
   const [orgs, setOrgs] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!session || !supabase) return setLoading(false)
+    if (!ready) return undefined
+    if (!supabase) {
+      setLoading(false)
+      return undefined
+    }
+    if (!session) {
+      setLoading(false)
+      return undefined
+    }
+
     let cancelled = false
+    setLoading(true)
+
     async function load() {
+      let redirected = false
       try {
         const { data: userOrgs } = await supabase
           .from('user_orgs')
@@ -177,16 +189,18 @@ export default function AccountPage() {
         const orgList = (userOrgs || []).map((uo) => uo.organizations).filter(Boolean)
         setOrgs(orgList)
 
-        // auto-redirect if only one org
         if (orgList.length === 1) {
+          redirected = true
           navigate(`/${orgList[0].slug}/dashboard`, { replace: true })
           return
         }
-      } catch { /* unavailable */ } finally { if (!cancelled) setLoading(false) }
+      } catch { /* unavailable */ } finally {
+        if (!cancelled && !redirected) setLoading(false)
+      }
     }
     load()
     return () => { cancelled = true }
-  }, [session, navigate])
+  }, [session, ready, navigate])
 
   function handleSelectOrg(org) {
     navigate(`/${org.slug}/dashboard`)
@@ -198,11 +212,7 @@ export default function AccountPage() {
     navigate('/')
   }
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
-    </div>
-  )
+  const showLoading = !ready || loading
 
   const signOutButton = session && (
     <button onClick={handleSignOut} style={{ background: 'none', border: 'none', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.ink, cursor: 'pointer', padding: 0 }}>
@@ -213,23 +223,32 @@ export default function AccountPage() {
   const topBar = !isDesktop && session && <div style={{ display: 'none' }}>{signOutButton}</div>
 
   function renderContent() {
-    if (!session) return <LoggedOut isDesktop={isDesktop} />
-    if (orgs.length > 1) return <OrgSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} />
-    // logged in but no org linked yet
-    return (
-      <div style={{ padding: isDesktop ? '60px 0' : '32px 16px', maxWidth: isDesktop ? 480 : undefined, margin: isDesktop ? '0 auto' : undefined }}>
-        <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>SIGNED IN</div>
-        <div style={{ fontFamily: T.serif, fontSize: isDesktop ? 32 : 24, color: T.ink, marginBottom: 8 }}>{session.user.email}</div>
-        <div style={{ fontSize: 12, color: T.inkSoft, lineHeight: 1.7, marginBottom: 24 }}>まだ団体がありません。団体を作成してArtoirを始めましょう。</div>
-        <Link to="/account/setup" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: T.ink, color: T.paper, padding: '16px 20px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', textDecoration: 'none', marginBottom: 12 }}>
-          <span>＋ 新しい団体を作成</span>
-          <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
-        </Link>
-        <button onClick={handleSignOut} style={{ background: 'transparent', color: T.inkMuted, border: `0.5px solid ${T.line}`, padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
-          SIGN OUT
-        </button>
-      </div>
-    )
+    if (showLoading) {
+      return (
+        <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
+          <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+        </div>
+      )
+    }
+
+    if (session) {
+      if (orgs.length > 1) return <OrgSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} />
+      return (
+        <div style={{ padding: isDesktop ? '60px 0' : '32px 16px', maxWidth: isDesktop ? 480 : undefined, margin: isDesktop ? '0 auto' : undefined }}>
+          <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.inkMuted, marginBottom: 8 }}>SIGNED IN</div>
+          <div style={{ fontFamily: T.serif, fontSize: isDesktop ? 32 : 24, color: T.ink, marginBottom: 8 }}>{session.user.email}</div>
+          <div style={{ fontSize: 12, color: T.inkSoft, lineHeight: 1.7, marginBottom: 24 }}>まだ団体がありません。団体を作成してArtoirを始めましょう。</div>
+          <Link to="/account/setup" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: T.ink, color: T.paper, padding: '16px 20px', fontFamily: T.sans, fontWeight: 500, fontSize: 13, letterSpacing: '0.14em', textDecoration: 'none', marginBottom: 12 }}>
+            <span>＋ 新しい団体を作成</span>
+            <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
+          </Link>
+          <button onClick={handleSignOut} style={{ background: 'transparent', color: T.inkMuted, border: `0.5px solid ${T.line}`, padding: '12px 20px', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+            SIGN OUT
+          </button>
+        </div>
+      )
+    }
+    return <LoggedOut isDesktop={isDesktop} />
   }
 
   if (isDesktop) return (

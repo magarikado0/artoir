@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useResolvedSession } from '../lib/useResolvedSession'
 import BrandMark from '../components/BrandMark'
 import Header from '../components/Header'
 import {
@@ -73,6 +74,7 @@ function Field({ label, value, onChange, type = 'text', placeholder, required, a
 
 export default function LoginPage() {
   const isDesktop = useIsDesktop()
+  const { session, ready } = useResolvedSession()
   const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -93,6 +95,19 @@ export default function LoginPage() {
   const oauthReturnPath = normalizeOAuthReturnPath(from)
   const oauthCallbackUrl =
     typeof window !== 'undefined' ? `${window.location.origin}/` : '/'
+
+  if (ready && session) {
+    clearOAuthReturnState()
+    return <Navigate to={normalizeOAuthReturnPath(from)} replace />
+  }
+
+  if (!ready) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: T.paper }}>
+        <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+      </div>
+    )
+  }
 
   async function handleGoogleAuth() {
     if (!supabase) { setError('Supabase が未設定です'); return }

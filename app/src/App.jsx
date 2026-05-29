@@ -91,9 +91,10 @@ export default function App() {
   useEffect(() => {
     if (!supabase) return undefined
     let isMounted = true
+    let authSettled = false
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-      if (!isMounted) return
+      if (!isMounted || !authSettled) return
       setSession(s ?? null)
     })
 
@@ -102,11 +103,15 @@ export default function App() {
       if (error) {
         console.warn('[supabase auth]', error.message)
         setSession(null)
-        return
+      } else {
+        setSession(data.session ?? null)
       }
-      setSession(data.session ?? null)
+      authSettled = true
     }).catch(() => {
-      if (isMounted) setSession(null)
+      if (isMounted) {
+        setSession(null)
+        authSettled = true
+      }
     })
 
     return () => {
