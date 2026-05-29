@@ -43,6 +43,18 @@ export function fmtDateRange(start, end) {
   return end ? `${fmtDateDot(start)} — ${fmtDateDot(end)}` : fmtDateDot(start)
 }
 
+export function fmtDateShort(str) {
+  if (!str) return ''
+  const d = new Date(str)
+  return `${d.getMonth() + 1}/${d.getDate()}`
+}
+
+export function fmtDateRangeShort(start, end) {
+  if (!start) return ''
+  if (!end || start === end) return fmtDateShort(start)
+  return `${fmtDateShort(start)} - ${fmtDateShort(end)}`
+}
+
 export function fmtTime(str) {
   if (!str) return ''
   return str

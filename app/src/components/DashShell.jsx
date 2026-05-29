@@ -162,7 +162,7 @@ export function DashSectionLabel({ children }) {
   return <div className="ui-section-label">{children}</div>
 }
 
-export function StatusBadge({ kind }) {
+export function StatusBadge({ kind, className = 'ui-status-badge' }) {
   const map = {
     live: { label: '開催中', color: T.paper, bg: T.accent },
     upcoming: { label: '予定', color: T.ink, bg: T.gold },
@@ -170,7 +170,7 @@ export function StatusBadge({ kind }) {
   }
   const m = map[kind] || map.ended
   return (
-    <span className="ui-status-badge" style={{ color: m.color, background: m.bg, borderColor: m.border ? T.lineSoft : 'transparent' }}>
+    <span className={className} style={{ color: m.color, background: m.bg, borderColor: m.border ? T.lineSoft : 'transparent' }}>
       {m.label}
     </span>
   )

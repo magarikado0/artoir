@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { T, fmtDateDot, pad2 } from '../lib/tokens'
+import { T, fmtDateRangeShort, pad2 } from '../lib/tokens'
 import ExhibitionFeeBadge from './ExhibitionFeeBadge'
 import ArtworkMedia from './ArtworkMedia'
 import { getExhibitionThumbnailUrl } from '../lib/exhibition'
@@ -34,45 +34,74 @@ function StatusDot({ exhibition }) {
   const text = live ? '開催中' : upcoming ? '予定' : '終了'
   const bg = live ? T.accent : upcoming ? T.gold : T.paperAlt
   const color = live ? T.paper : T.ink
-  return <span className="ui-status-badge" style={{ background: bg, color }}>{text}</span>
+  return <span className="ui-exhibition-list-card-badge" style={{ background: bg, color }}>{text}</span>
 }
 
-export default function ExhibitionListCard({ exhibition: exh, org, showOrgName = true }) {
+function LocationPin() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" className="ui-exhibition-list-card-pin">
+      <path
+        d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle cx="12" cy="10" r="2.2" fill="#FFF9ED" />
+    </svg>
+  )
+}
+
+export function ExhibitionCardMedia({ thumbnailUrl, title }) {
   const placeholderBg = `linear-gradient(135deg, ${T.surfaceMuted}, ${T.mint} 58%, ${T.blush})`
+  if (thumbnailUrl) {
+    return (
+      <ArtworkMedia
+        src={getThumbnailUrl(thumbnailUrl, 176)}
+        alt=""
+        decorative
+        loading="lazy"
+        fit="contain"
+        fillHeight
+        background={T.paperAlt}
+        className="ui-exhibition-list-card-thumb"
+      />
+    )
+  }
+  return (
+    <div className="ui-exhibition-list-card-thumb is-placeholder" style={{ background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}` }}>
+      <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((title || '').length || 1)}</span>
+    </div>
+  )
+}
+
+export default function ExhibitionListCard({ exhibition: exh, org, showOrgName = true, artworkCount }) {
   const thumbnailUrl = getExhibitionThumbnailUrl(exh)
   return (
-    <Link to={`/${org?.slug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card" style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10 }}>
-      {thumbnailUrl ? (
-        <ArtworkMedia
-          src={getThumbnailUrl(thumbnailUrl, 96)}
-          alt=""
-          decorative
-          loading="lazy"
-          aspectRatio="1 / 1"
-          fit="contain"
-          wrapperStyle={{ width: 96, borderRadius: 7 }}
-        />
-      ) : (
-        <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-          <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
-        </div>
-      )}
-      <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
-            <StatusDot exhibition={exh} />
-            <ExhibitionFeeBadge exhibition={exh} />
-            <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{fmtDateDot(exh.start_date)}</span>
-          </div>
-          <div style={{ fontFamily: T.serif, fontSize: 18, lineHeight: 1.35, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
+    <Link to={`/${org?.slug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card">
+      <div className="ui-exhibition-list-card-body">
+        <div className="ui-exhibition-list-card-meta">
+          <StatusDot exhibition={exh} />
+          <ExhibitionFeeBadge exhibition={exh} className="ui-exhibition-list-card-badge" />
           {showOrgName && org?.name && (
-            <div style={{ marginTop: 4, fontSize: 12, color: T.inkMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{org.name}</div>
+            <span className="ui-exhibition-list-card-tag">{org.name}</span>
           )}
         </div>
-        <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 11, color: T.inkSoft }}>
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exh.location || '会場未設定'}</span>
-          <span style={{ fontFamily: T.mono, flexShrink: 0 }}>→</span>
+        <div className="ui-exhibition-list-card-content">
+          <div className="ui-exhibition-list-card-title">{exh.title}</div>
+          <div className="ui-exhibition-list-card-location">
+            <LocationPin />
+            <span>{exh.location || '会場未設定'}</span>
+          </div>
         </div>
+        <div className="ui-exhibition-list-card-footer">
+          <span className="ui-exhibition-list-card-date">{fmtDateRangeShort(exh.start_date, exh.end_date)}</span>
+          {artworkCount != null && (
+            <span className="ui-exhibition-list-card-count">作品 {artworkCount}点</span>
+          )}
+        </div>
+      </div>
+      <div className="ui-exhibition-list-card-media">
+        <ExhibitionCardMedia thumbnailUrl={thumbnailUrl} title={exh.title} />
       </div>
     </Link>
   )

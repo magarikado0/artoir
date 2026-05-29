@@ -2,61 +2,55 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { StatusBadge } from '../../components/DashShell'
-import ArtworkMedia from '../../components/ArtworkMedia'
 import { exhStatus, getExhibitionThumbnailUrl } from '../../lib/exhibition'
-import { getThumbnailUrl } from '../../lib/imageUrl'
 import ExhibitionFeeBadge from '../../components/ExhibitionFeeBadge'
-import { T, fmtDateDot, pad2 } from '../../lib/tokens'
+import { ExhibitionCardMedia } from '../../components/ExhibitionListCard'
+import { T, fmtDateRangeShort } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 import { deleteExhibition } from '../../lib/deleteExhibition'
 
-function DashExhibitionCard({ exh, orgSlug, navigate, onDelete }) {
+function DashExhibitionCard({ exh, orgSlug, navigate, onDelete, artworkCount }) {
   const status = exhStatus(exh)
-  const placeholderBg = `linear-gradient(135deg, ${T.surfaceMuted}, ${T.mint} 58%, ${T.blush})`
   const thumbnailUrl = getExhibitionThumbnailUrl(exh)
   return (
     <div
       onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`)}
       className="ui-list-card ui-exhibition-list-card"
-      style={{ display: 'grid', gridTemplateColumns: '96px 1fr', gap: 12, padding: 10, cursor: 'pointer' }}
+      style={{ cursor: 'pointer' }}
     >
-      {thumbnailUrl ? (
-        <ArtworkMedia
-          src={getThumbnailUrl(thumbnailUrl, 96)}
-          alt=""
-          decorative
-          loading="lazy"
-          aspectRatio="1 / 1"
-          fit="contain"
-          wrapperStyle={{ width: 96, borderRadius: 7 }}
-        />
-      ) : (
-        <div style={{ width: 96, aspectRatio: '1 / 1', borderRadius: 7, background: placeholderBg, boxShadow: `inset 0 -3px 0 ${T.gold}`, display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-          <span style={{ fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>{pad2((exh.title || '').length || 1)}</span>
+      <div className="ui-exhibition-list-card-body">
+        <div className="ui-exhibition-list-card-meta">
+          <StatusBadge kind={status} className="ui-exhibition-list-card-badge" />
+          <ExhibitionFeeBadge exhibition={exh} className="ui-exhibition-list-card-badge" />
         </div>
-      )}
-      <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7, flexWrap: 'wrap' }}>
-            <StatusBadge kind={status} />
-            <ExhibitionFeeBadge exhibition={exh} />
-            <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{fmtDateDot(exh.start_date)}</span>
+        <div className="ui-exhibition-list-card-content">
+          <div className="ui-exhibition-list-card-title">{exh.title}</div>
+          <div className="ui-exhibition-list-card-location">
+            <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true" className="ui-exhibition-list-card-pin">
+              <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" />
+              <circle cx="12" cy="10" r="2.2" fill="#FFF9ED" />
+            </svg>
+            <span>{exh.location || '会場未設定'}</span>
           </div>
-          <div style={{ fontFamily: T.serif, fontSize: 18, lineHeight: 1.35, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis' }}>{exh.title}</div>
         </div>
-        <div style={{ marginTop: 10, display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 11, color: T.inkSoft, alignItems: 'center' }}>
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exh.location || '会場未設定'}</span>
+        <div className="ui-exhibition-list-card-footer">
+          <span className="ui-exhibition-list-card-date">{fmtDateRangeShort(exh.start_date, exh.end_date)}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {artworkCount != null && (
+              <span className="ui-exhibition-list-card-count">作品 {artworkCount}点</span>
+            )}
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onDelete(exh) }}
-              style={{ border: 0, background: 'transparent', color: T.inkMuted, cursor: 'pointer', padding: '4px 6px', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em' }}
+              style={{ border: 0, background: 'transparent', color: T.inkMuted, cursor: 'pointer', padding: '2px 4px', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em' }}
             >
               削除
             </button>
-            <span style={{ fontFamily: T.mono }}>→</span>
           </div>
         </div>
+      </div>
+      <div className="ui-exhibition-list-card-media">
+        <ExhibitionCardMedia thumbnailUrl={thumbnailUrl} title={exh.title} />
       </div>
     </div>
   )
@@ -78,8 +72,15 @@ export default function DashHome() {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
         if (!orgData) return
         setOrg(orgData)
-        const { data: exhData } = await supabase.from('exhibitions').select('*').eq('org_id', orgData.id).order('start_date', { ascending: false })
-        setExhibitions(exhData || [])
+        const { data: exhData } = await supabase
+          .from('exhibitions')
+          .select('*, artworks(count)')
+          .eq('org_id', orgData.id)
+          .order('start_date', { ascending: false })
+        setExhibitions((exhData || []).map(({ artworks, ...exhibition }) => ({
+          ...exhibition,
+          artworkCount: artworks?.[0]?.count ?? 0,
+        })))
       } catch {
         /* unavailable */
       } finally {
@@ -141,9 +142,16 @@ export default function DashHome() {
 
       <div className="ui-exhibition-list-grid">
         {exhibitions.map((exh) => (
-          <DashExhibitionCard key={exh.id} exh={exh} orgSlug={orgSlug} navigate={navigate} onDelete={setDeleteTarget} />
+          <DashExhibitionCard
+            key={exh.id}
+            exh={exh}
+            orgSlug={orgSlug}
+            navigate={navigate}
+            onDelete={setDeleteTarget}
+            artworkCount={exh.artworkCount}
+          />
         ))}
-        {exhibitions.length === 0 && <div className="ui-panel" style={{ gridColumn: '1 / -1', padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>展覧会がまだありません</div>}
+        {exhibitions.length === 0 && <div className="ui-panel" style={{ padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>展覧会がまだありません</div>}
       </div>
     </DashShell>
   )

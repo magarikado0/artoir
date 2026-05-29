@@ -5,8 +5,8 @@ import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ArtworkMedia from '../components/ArtworkMedia'
-import { getExhibitionFeeDetail, getExhibitionFeeType, getExhibitionThumbnailUrl } from '../lib/exhibition'
-import { getThumbnailUrl, getHeroImageUrl } from '../lib/imageUrl'
+import { getExhibitionFeeDetail, getExhibitionFeeType } from '../lib/exhibition'
+import { getThumbnailUrl } from '../lib/imageUrl'
 import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
 
 function MetaPill({ label, value }) {
@@ -123,11 +123,8 @@ export default function ExhibitionPage() {
     </div>
   )
 
-  const featured = artworks[0]
   const feeType = getExhibitionFeeType(exhibition)
   const feeDetail = getExhibitionFeeDetail(exhibition)
-  const heroImage = getExhibitionThumbnailUrl(exhibition) || featured?.image_url
-  const heroThumbnail = heroImage ? getHeroImageUrl(heroImage) : null
 
   return (
     <div className="ui-page-shell">
@@ -141,37 +138,22 @@ export default function ExhibitionPage() {
           </button>
         </div>
 
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, alignItems: 'start' }}>
-          <div className="ui-app-card" style={{ padding: 8, overflow: 'hidden' }}>
-            <ArtworkMedia
-              src={heroThumbnail}
-              alt={exhibition.title}
-              label={getExhibitionThumbnailUrl(exhibition) ? exhibition.title : featured?.title || exhibition.title}
-              loading="eager"
-              fit="contain"
-              aspectRatio="4 / 3"
-              wrapperStyle={{ borderRadius: 7 }}
-              imageStyle={{ borderRadius: 7 }}
-            />
+        <section>
+          <div className="ui-app-card" style={{ padding: 18 }}>
+            <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{exhibition.title}</h1>
+            {exhibition.description && <p className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>{exhibition.description}</p>}
           </div>
-
-          <div>
-            <div className="ui-app-card" style={{ padding: 18 }}>
-              <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{exhibition.title}</h1>
-              {exhibition.description && <p className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>{exhibition.description}</p>}
-            </div>
-            <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
-              <MetaPill label="会期" value={exhibition.start_date ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}` : ''} />
-              <MetaPill label="作品数" value={`${pad2(artworks.length)} `} />
-              <MetaPill label="会場" value={exhibition.location} />
-              <MetaPill label="主催団体" value={org?.name} />
-              <MetaPill label="料金" value={feeType === 'paid' ? (
-                <div style={{ display: 'grid', gap: 3 }}>
-                  <div style={{ fontFamily: T.serif, fontSize: 14, lineHeight: 1.45, color: T.ink }}>有料</div>
-                  {feeDetail ? <div style={{ fontSize: 11, lineHeight: 1.65, color: T.inkSoft, whiteSpace: 'pre-wrap' }}>{feeDetail}</div> : <div style={{ fontSize: 11, lineHeight: 1.65, color: T.inkMuted }}>料金詳細は未設定です</div>}
-                </div>
-              ) : '無料'} />
-            </div>
+          <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
+            <MetaPill label="会期" value={exhibition.start_date ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}` : ''} />
+            <MetaPill label="作品数" value={`${pad2(artworks.length)} `} />
+            <MetaPill label="会場" value={exhibition.location} />
+            <MetaPill label="主催団体" value={org?.name} />
+            <MetaPill label="料金" value={feeType === 'paid' ? (
+              <div style={{ display: 'grid', gap: 3 }}>
+                <div style={{ fontFamily: T.serif, fontSize: 14, lineHeight: 1.45, color: T.ink }}>有料</div>
+                {feeDetail ? <div style={{ fontSize: 11, lineHeight: 1.65, color: T.inkSoft, whiteSpace: 'pre-wrap' }}>{feeDetail}</div> : <div style={{ fontSize: 11, lineHeight: 1.65, color: T.inkMuted }}>料金詳細は未設定です</div>}
+              </div>
+            ) : '無料'} />
           </div>
         </section>
 
@@ -184,17 +166,17 @@ export default function ExhibitionPage() {
           {artworks.length > 0 ? (
             <div ref={galleryRef} className="ui-exhibition-gallery">
               {artworks.map((w, i) => (
-                <button key={w.id} type="button" className="gallery-item ui-list-card" onClick={() => openArtwork(w)} style={{ padding: 8, textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
+                <button key={w.id} type="button" className="gallery-item ui-list-card ui-exhibition-gallery-item" onClick={() => openArtwork(w)} style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
                   <ArtworkMedia
                     src={getThumbnailUrl(w.image_url)}
                     alt=""
                     decorative
                     loading="lazy"
-                    aspectRatio="1 / 1"
                     fit="contain"
-                    wrapperStyle={{ borderRadius: 7 }}
+                    naturalSize
+                    className="ui-exhibition-gallery-image"
                   />
-                  <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'baseline' }}>
+                  <div className="ui-exhibition-gallery-caption">
                     <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</span>
                     <span style={{ fontFamily: T.serif, fontSize: 14, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '-'}</span>
                   </div>

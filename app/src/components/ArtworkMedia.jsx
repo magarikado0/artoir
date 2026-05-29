@@ -61,6 +61,7 @@ function ArtworkMediaImage({
   decorative,
   loading,
   fit,
+  naturalSize,
   className,
   containerStyle,
   imageStyle,
@@ -69,6 +70,7 @@ function ArtworkMediaImage({
 }) {
   const [status, setStatus] = useState('loading')
   const title = label || alt || '画像'
+  const intrinsic = fit === 'contain' && naturalSize
 
   if (status === 'error') {
     return (
@@ -87,9 +89,10 @@ function ArtworkMediaImage({
       className={className}
       style={{
         ...containerStyle,
-        display: fit === 'contain' ? 'flex' : 'block',
-        alignItems: fit === 'contain' ? 'center' : undefined,
-        justifyContent: fit === 'contain' ? 'center' : undefined,
+        display: intrinsic ? 'block' : fit === 'contain' ? 'flex' : 'block',
+        alignItems: !intrinsic && fit === 'contain' ? 'center' : undefined,
+        justifyContent: !intrinsic && fit === 'contain' ? 'center' : undefined,
+        lineHeight: intrinsic ? 0 : undefined,
       }}
     >
       {status !== 'loaded' && (
@@ -120,7 +123,12 @@ function ArtworkMediaImage({
           onError?.(e)
         }}
         style={{
-          ...(fit === 'contain'
+          ...(intrinsic
+            ? {
+                width: '100%',
+                height: 'auto',
+              }
+            : fit === 'contain'
             ? {
                 maxWidth: '100%',
                 maxHeight: '100%',
@@ -154,6 +162,7 @@ export default function ArtworkMedia({
   fit = 'cover',
   aspectRatio,
   fillHeight = false,
+  naturalSize = false,
   background = 'transparent',
   minHeight,
   className,
@@ -196,6 +205,7 @@ export default function ArtworkMedia({
       decorative={decorative}
       loading={loading}
       fit={fit}
+      naturalSize={naturalSize}
       className={className}
       containerStyle={containerStyle}
       imageStyle={imageStyle}

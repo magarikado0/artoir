@@ -53,10 +53,14 @@ export default function AllExhibitionsPage() {
     async function load() {
       if (!supabase) return setLoading(false)
       try {
-        const { data } = await supabase.from('exhibitions').select('*, organizations(id, name, slug)').order('start_date', { ascending: false })
+        const { data } = await supabase
+          .from('exhibitions')
+          .select('*, organizations(id, name, slug), artworks(count)')
+          .order('start_date', { ascending: false })
         setRows((data || []).map((exh) => {
-          const { organizations: org, ...exhibition } = exh
-          return { exhibition, org }
+          const { organizations: org, artworks, ...exhibition } = exh
+          const artworkCount = artworks?.[0]?.count ?? 0
+          return { exhibition, org, artworkCount }
         }))
       } catch {
         /* unavailable */
@@ -111,7 +115,12 @@ export default function AllExhibitionsPage() {
 
         <div className="ui-exhibition-list-grid">
           {filteredRows.map((row) => (
-            <ExhibitionListCard key={row.exhibition.id} exhibition={row.exhibition} org={row.org} />
+            <ExhibitionListCard
+              key={row.exhibition.id}
+              exhibition={row.exhibition}
+              org={row.org}
+              artworkCount={row.artworkCount}
+            />
           ))}
         </div>
 

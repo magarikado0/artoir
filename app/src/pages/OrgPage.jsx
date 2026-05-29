@@ -19,8 +19,15 @@ export default function OrgPage() {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
         if (!orgData) return setLoading(false)
         setOrg(orgData)
-        const { data: exhData } = await supabase.from('exhibitions').select('*').eq('org_id', orgData.id).order('start_date', { ascending: false })
-        setExhibitions(exhData || [])
+        const { data: exhData } = await supabase
+          .from('exhibitions')
+          .select('*, artworks(count)')
+          .eq('org_id', orgData.id)
+          .order('start_date', { ascending: false })
+        setExhibitions((exhData || []).map(({ artworks, ...exhibition }) => ({
+          ...exhibition,
+          artworkCount: artworks?.[0]?.count ?? 0,
+        })))
       } catch {
         /* unavailable */
       } finally {
@@ -77,7 +84,13 @@ export default function OrgPage() {
 
         <div className="ui-exhibition-list-grid">
           {exhibitions.map((exh) => (
-            <ExhibitionListCard key={exh.id} exhibition={exh} org={org} showOrgName={false} />
+            <ExhibitionListCard
+              key={exh.id}
+              exhibition={exh}
+              org={org}
+              showOrgName={false}
+              artworkCount={exh.artworkCount}
+            />
           ))}
         </div>
       </main>
