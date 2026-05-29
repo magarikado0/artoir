@@ -812,13 +812,6 @@ button {
   width: 100%;
 }
 
-.ui-exhibition-gallery-caption {
-  padding: 8px;
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-}
-
 .ui-exhibition-list-grid {
   display: flex;
   flex-direction: column;
@@ -1728,21 +1721,31 @@ button.ui-account-org-pick-btn.ui-org-row {
 
 .ui-settings-members {
   display: grid;
-  gap: 14px;
+  gap: 18px;
+}
+
+.ui-settings-members .ui-form-label {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: #47382D;
 }
 
 .ui-settings-member-list,
 .ui-settings-pending-invites {
   display: grid;
-  gap: 8px;
+  gap: 10px;
+}
+
+.ui-settings-pending-invites {
+  margin-top: 4px;
 }
 
 .ui-settings-member-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  padding: 11px 0;
+  gap: 12px;
+  padding: 13px 0;
   border-bottom: 1px solid rgba(67,54,44,0.12);
 }
 
@@ -1752,7 +1755,7 @@ button.ui-account-org-pick-btn.ui-org-row {
 
 .ui-settings-member-email {
   color: #211813;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
@@ -1762,9 +1765,9 @@ button.ui-account-org-pick-btn.ui-org-row {
 .ui-settings-member-message {
   color: #887869;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  line-height: 1.7;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  line-height: 1.6;
 }
 
 .ui-settings-member-message {
@@ -1784,14 +1787,14 @@ button.ui-account-org-pick-btn.ui-org-row {
 .ui-settings-invite-grid select,
 .ui-settings-invite-grid button,
 .ui-settings-invite-result button {
-  min-height: 36px;
+  min-height: 42px;
   border: 1px solid rgba(67,54,44,0.2);
   border-radius: 8px;
   background: rgba(255,249,237,0.86);
   color: #211813;
-  padding: 0 10px;
+  padding: 0 12px;
   font: inherit;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .ui-settings-member-actions button,
@@ -1799,28 +1802,33 @@ button.ui-account-org-pick-btn.ui-org-row {
 .ui-settings-invite-result button {
   cursor: pointer;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 10px;
-  letter-spacing: 0.04em;
+  font-size: 13px;
+  letter-spacing: 0.02em;
 }
 
 .ui-settings-invite-form {
   display: grid;
-  gap: 10px;
-  padding-top: 4px;
+  gap: 12px;
+  padding-top: 6px;
 }
 
 .ui-settings-invite-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 104px auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 124px auto;
+  gap: 10px;
+}
+
+.ui-settings-invite-grid button[type="submit"] {
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .ui-settings-invite-result {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid rgba(67,54,44,0.16);
   border-radius: 8px;
   background: rgba(255,249,237,0.58);
@@ -1834,7 +1842,7 @@ button.ui-account-org-pick-btn.ui-org-row {
 .ui-settings-invite-result-url {
   color: #47382D;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
@@ -1843,8 +1851,8 @@ button.ui-account-org-pick-btn.ui-org-row {
   grid-column: 1 / -1;
   color: #687047;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 10px;
-  letter-spacing: 0.04em;
+  font-size: 12px;
+  letter-spacing: 0.02em;
 }
 
 .ui-exhibition-date-grid {

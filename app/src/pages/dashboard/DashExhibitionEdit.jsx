@@ -303,7 +303,7 @@ export default function DashExhibitionEdit() {
 
       <DashSectionLabel>説明文</DashSectionLabel>
       <DashField
-        label="DESCRIPTION"
+        label="説明文"
         value={description}
         onChange={setDescription}
         multiline
@@ -481,7 +481,7 @@ export default function DashExhibitionEdit() {
         editChildren={(
           <>
             <DashField
-              label="DESCRIPTION"
+              label="説明文"
               value={description}
               onChange={setDescription}
               multiline

@@ -195,16 +195,14 @@ export default function DashArtworks() {
               />
             </div>
             <div style={{ marginTop: 14 }}>
-              <div className="ui-form-label">TITLE</div>
-              <div className="ui-input-wrap"><input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} /></div>
+              <div className="ui-input-wrap"><input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="作品名を入力" /></div>
             </div>
             <div style={{ marginTop: 12 }}>
-              <div className="ui-form-label">DESCRIPTION</div>
-              <div className="ui-input-wrap" data-multiline="true"><textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} /></div>
+              <div className="ui-input-wrap" data-multiline="true"><textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} placeholder="説明文を入力" /></div>
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button type="button" onClick={() => setEditTarget(null)} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
-              <button type="button" onClick={handleEditSave} className="ui-pill-action" style={{ flex: 1, background: T.accent }}>SAVE</button>
+              <button type="button" onClick={() => setEditTarget(null)} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>キャンセル</button>
+              <button type="button" onClick={handleEditSave} className="ui-pill-action" style={{ flex: 1, background: T.accent }}>保存する</button>
             </div>
             <button
               type="button"

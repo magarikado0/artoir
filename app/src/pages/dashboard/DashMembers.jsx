@@ -7,6 +7,12 @@ import { supabase } from '../../lib/supabase'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 
+function roleLabel(role) {
+  if (role === 'owner') return 'オーナー'
+  if (role === 'admin') return '管理者'
+  return role
+}
+
 export default function DashMembers() {
   const { orgSlug } = useParams()
   const { session } = useAuth()
@@ -233,7 +239,7 @@ export default function DashMembers() {
                   <div key={`${member.org_id}-${member.user_id}`} className="ui-settings-member-row">
                     <div>
                       <div className="ui-settings-member-email">{memberEmail(member)}</div>
-                      <div className="ui-settings-member-role">{member.role}</div>
+                      <div className="ui-settings-member-role">{roleLabel(member.role)}</div>
                     </div>
                     {canManageMembers ? (
                       <div className="ui-settings-member-actions">
@@ -243,8 +249,8 @@ export default function DashMembers() {
                           disabled={saving}
                           aria-label={`${memberEmail(member)} の権限`}
                         >
-                          <option value="owner">owner</option>
-                          <option value="admin">admin</option>
+                          <option value="owner">オーナー</option>
+                          <option value="admin">管理者</option>
                         </select>
                         <button type="button" onClick={() => handleRemoveMember(member)} disabled={saving}>
                           削除
@@ -269,8 +275,8 @@ export default function DashMembers() {
                     disabled={saving}
                   />
                   <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} disabled={saving}>
-                    <option value="admin">admin</option>
-                    <option value="owner">owner</option>
+                    <option value="admin">管理者</option>
+                    <option value="owner">オーナー</option>
                   </select>
                   <button type="submit" disabled={saving || !inviteEmail.trim()}>
                     招待リンクを作成
@@ -299,7 +305,7 @@ export default function DashMembers() {
                     <div key={invite.id} className="ui-settings-member-row">
                       <div>
                         <div className="ui-settings-member-email">{invite.email}</div>
-                        <div className="ui-settings-member-role">{invite.role} / {new Date(invite.expires_at).toLocaleDateString()}</div>
+                        <div className="ui-settings-member-role">{roleLabel(invite.role)} / {new Date(invite.expires_at).toLocaleDateString()}</div>
                       </div>
                       {canManageMembers && (
                         <div className="ui-settings-member-actions">

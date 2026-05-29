@@ -149,7 +149,7 @@ export default function AccountSetup() {
             className="ui-icon-button"
             style={{ padding: '14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}
           >
-            CANCEL
+            キャンセル
           </button>
           <button
             type="submit"
@@ -157,7 +157,7 @@ export default function AccountSetup() {
             className="ui-action"
             style={{ padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: (saving || !name.trim() || !slug.trim()) ? 0.6 : 1 }}
           >
-            {saving ? 'SAVING...' : 'SAVE ↩'}
+            {saving ? '保存中...' : '保存する'}
           </button>
         </div>
         <div style={{ height: 40 }} />

@@ -6,7 +6,7 @@ import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ArtworkMedia from '../components/ArtworkMedia'
 import { getThumbnailUrl } from '../lib/imageUrl'
-import { T, fmtDateDot, fmtTime, pad2 } from '../lib/tokens'
+import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { isPersonPublisher } from '../lib/publisher'
 
 function SummaryItem({ label, value }) {
@@ -160,23 +160,29 @@ export default function ExhibitionPage() {
           </div>
           {artworks.length > 0 ? (
             <div ref={galleryRef} className="ui-exhibition-gallery">
-              {artworks.map((w, i) => (
-                <button key={w.id} type="button" className="gallery-item ui-list-card ui-exhibition-gallery-item" onClick={() => openArtwork(w)} style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}>
-                  <ArtworkMedia
-                    src={getThumbnailUrl(w.image_url)}
-                    alt=""
-                    decorative
-                    loading="lazy"
-                    fit="contain"
-                    naturalSize
-                    className="ui-exhibition-gallery-image"
-                  />
-                  <div className="ui-exhibition-gallery-caption">
-                    <span style={{ fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{pad2(i + 1)}</span>
-                    <span style={{ fontFamily: T.serif, fontSize: 14, color: T.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.title || '-'}</span>
-                  </div>
-                </button>
-              ))}
+              {artworks.map((w, i) => {
+                const label = w.title?.trim() || `作品 ${i + 1}`
+                return (
+                  <button
+                    key={w.id}
+                    type="button"
+                    className="gallery-item ui-list-card ui-exhibition-gallery-item"
+                    onClick={() => openArtwork(w)}
+                    aria-label={`${label}の詳細を見る`}
+                    style={{ textAlign: 'left', cursor: 'pointer', border: '1px solid rgba(30,26,22,0.12)' }}
+                  >
+                    <ArtworkMedia
+                      src={getThumbnailUrl(w.image_url)}
+                      alt=""
+                      decorative
+                      loading="lazy"
+                      fit="contain"
+                      naturalSize
+                      className="ui-exhibition-gallery-image"
+                    />
+                  </button>
+                )
+              })}
             </div>
           ) : (
             <div className="ui-app-card" style={{ padding: 32, textAlign: 'center' }}>

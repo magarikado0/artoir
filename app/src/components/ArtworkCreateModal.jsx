@@ -6,7 +6,6 @@ import 'react-image-crop/dist/ReactCrop.css'
 import { supabase } from '../lib/supabase'
 import { getCroppedBlob, scaleCropToNaturalSize } from '../lib/imageCrop'
 import { T } from '../lib/tokens'
-import { DashField } from './DashShell'
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
@@ -275,19 +274,23 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
           </div>
 
           <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <DashField
-              label="TITLE"
-              value={title}
-              onChange={setTitle}
-              placeholder="作品名を入力"
-            />
-            <DashField
-              label="DESCRIPTION"
-              value={description}
-              onChange={setDescription}
-              placeholder="説明文を入力"
-              multiline
-            />
+            <div className="ui-input-wrap">
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="作品名を入力"
+                style={{ fontFamily: T.sans }}
+              />
+            </div>
+            <div className="ui-input-wrap" data-multiline="true">
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="説明文を入力"
+                rows={4}
+                style={{ fontFamily: T.sans }}
+              />
+            </div>
 
             {error && <div style={{ padding: '10px 12px', border: `1px solid ${T.accent}`, color: T.accent, background: 'rgba(190,85,61,0.06)', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.06em' }}>{error}</div>}
 
@@ -301,8 +304,8 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
             )}
 
             <div style={{ marginTop: 'auto', display: 'flex', gap: 8 }}>
-              <button onClick={onClose} disabled={saving} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
-              <button onClick={handleSave} disabled={!canSave} className="ui-pill-action" style={{ flex: 1, background: canSave ? T.accent : T.inkMuted }}>SAVE</button>
+              <button onClick={onClose} disabled={saving} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>閉じる</button>
+              <button onClick={handleSave} disabled={!canSave} className="ui-pill-action" style={{ flex: 1, background: canSave ? T.accent : T.inkMuted }}>保存する</button>
             </div>
           </div>
         </div>

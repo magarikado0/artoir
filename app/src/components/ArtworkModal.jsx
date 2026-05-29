@@ -61,17 +61,13 @@ export default function ArtworkModal({ artwork, onClose }) {
         {hasDetail && (
           <aside className="ui-artwork-modal-detail">
             {hasTitle && (
-              <div>
-                <div className="ui-artwork-modal-detail-label">TITLE</div>
-                <h2 id="artwork-modal-title" className="ui-artwork-modal-title">
-                  {title}
-                </h2>
-              </div>
+              <h2 id="artwork-modal-title" className="ui-artwork-modal-title">
+                {title}
+              </h2>
             )}
 
             {hasDescription && (
               <div className={hasTitle ? 'ui-artwork-modal-description-wrap' : undefined}>
-                <div className="ui-artwork-modal-detail-label">DESCRIPTION</div>
                 <div className="ui-artwork-modal-description">{description}</div>
               </div>
             )}
