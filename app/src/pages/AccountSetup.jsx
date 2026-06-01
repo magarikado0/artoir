@@ -17,6 +17,7 @@ export default function AccountSetup() {
   const [kind, setKind] = useState(PUBLISHER_KIND.PERSON)
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
+  const [fallbackSlug, setFallbackSlug] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -33,7 +34,19 @@ export default function AccountSetup() {
       .replace(/[^\w-]/g, '')
       .replace(/--+/g, '-')
       .replace(/^-|-$/g, '')
-    setSlug(generated)
+    if (generated) {
+      setSlug(generated)
+      return
+    }
+    let fb = fallbackSlug
+    if (!fb) {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+      let r = ''
+      for (let i = 0; i < 6; i++) r += chars[Math.floor(Math.random() * chars.length)]
+      fb = `user-${r}`
+      setFallbackSlug(fb)
+    }
+    setSlug(fb)
   }
 
   if (!session) return <Navigate to="/login" state={{ from: '/account/setup' }} replace />
@@ -46,6 +59,7 @@ export default function AccountSetup() {
     setError('')
     const trimmedSlug = slug.trim()
     let nextPath = null
+    let nextState = null
     try {
       const { data: newOrg, error: orgErr } = await supabase
         .from('organizations')
@@ -78,14 +92,15 @@ export default function AccountSetup() {
         return
       }
 
-      nextPath = `/${newOrg.slug || trimmedSlug}/dashboard`
+      nextPath = '/account/setup/links'
+      nextState = { orgSlug: newOrg.slug || trimmedSlug, orgId: newOrg.id }
     } catch {
       setError('通信に失敗しました。時間をおいて再度お試しください。')
     } finally {
       setSaving(false)
     }
 
-    if (nextPath) navigate(nextPath, { replace: true })
+    if (nextPath) navigate(nextPath, { replace: true, state: nextState })
   }
 
   const formContent = (

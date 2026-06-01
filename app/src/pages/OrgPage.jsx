@@ -77,7 +77,6 @@ export default function OrgPage() {
 
         <div className="ui-app-topline">
           <div>
-            <div className="ui-kicker">EXHIBITIONS</div>
             <div className="ui-screen-title" style={{ fontSize: 22 }}>展覧会</div>
           </div>
         </div>

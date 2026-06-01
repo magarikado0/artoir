@@ -254,7 +254,7 @@ export default function DashExhibitionEdit() {
   const formContent = (
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
       <DashSectionLabel>基本情報</DashSectionLabel>
-      <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
+      <DashField label="タイトル" value={title} onChange={setTitle} placeholder="" />
       <DashField
         label="URL"
         prefix={`artoir.net/${orgSlug}/exhibition/`}
@@ -272,7 +272,7 @@ export default function DashExhibitionEdit() {
         <DashField label="END" value={endDate} onChange={onEndDateChange} placeholder="YYYY-MM-DD" mono type="date" min={startDate || undefined} />
         <DashField label="END TIME" value={endTime} onChange={setEndTime} placeholder="--:--" mono type="time" />
       </div>
-      <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
+      <DashField label="会場" value={location} onChange={setLocation} placeholder="美術館、ギャラリー名等" />
 
       <DashSectionLabel>説明文</DashSectionLabel>
       <DashField
@@ -332,7 +332,6 @@ export default function DashExhibitionEdit() {
 
       {!isNew && (
         <div style={{ marginTop: 36, paddingTop: 24, borderTop: `1px solid ${T.ink}` }}>
-          <DashSectionLabel>危険な操作</DashSectionLabel>
           <p style={{ margin: '0 0 14px', fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>
             この展覧会と登録済みの作品をすべて削除します。公開 URL は無効になります。
           </p>
@@ -500,7 +499,6 @@ export default function DashExhibitionEdit() {
 
       <section className="ui-settings-section is-danger">
         <div className="ui-settings-section-head">
-          <div className="ui-section-label">危険な操作</div>
         </div>
         <p className="ui-settings-danger-copy">
           この展覧会と登録済みの作品をすべて削除します。公開 URL は無効になります。

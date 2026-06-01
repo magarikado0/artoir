@@ -283,7 +283,6 @@ export default function DashSettings() {
 
       <section className="ui-settings-section is-danger">
         <div className="ui-settings-section-head">
-          <div className="ui-section-label">危険な操作</div>
         </div>
         <p className="ui-settings-danger-copy">
           「{org?.name || orgSlug}」と配下の展覧会・作品をすべて削除します。復元できません。
