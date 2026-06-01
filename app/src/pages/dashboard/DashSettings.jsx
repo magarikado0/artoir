@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { DashField } from '../../components/DashShell'
+import LoadingFrames from '../../components/LoadingFrames'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import { deleteOrganization } from '../../lib/deleteOrganization'
@@ -198,7 +199,7 @@ export default function DashSettings() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
 

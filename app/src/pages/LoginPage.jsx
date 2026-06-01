@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useResolvedSession } from '../lib/useResolvedSession'
 import BrandMark from '../components/BrandMark'
 import Header from '../components/Header'
+import LoadingFrames from '../components/LoadingFrames'
 import {
   normalizeOAuthReturnPath,
   markOAuthRedirectPending,
@@ -104,7 +105,7 @@ export default function LoginPage() {
   if (!ready) {
     return (
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: T.paper }}>
-        <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+        <LoadingFrames />
       </div>
     )
   }
@@ -293,7 +294,7 @@ export default function LoginPage() {
           borderRadius: 8, minHeight: 48, padding: '0 16px', fontFamily: T.sans, fontSize: 13,
           fontWeight: 500, letterSpacing: '0.16em', cursor: loading ? 'wait' : 'pointer',
         }}>
-          {loading ? '...' : (mode === 'login' ? 'ログイン  →' : 'アカウント作成  →')}
+          {loading ? <LoadingFrames color={T.paper} /> : (mode === 'login' ? 'ログイン  →' : 'アカウント作成  →')}
         </button>
       </form>
 

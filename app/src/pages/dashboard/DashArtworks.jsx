@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell from '../../components/DashShell'
+import LoadingFrames from '../../components/LoadingFrames'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkCreateModal from '../../components/ArtworkCreateModal'
 import ArtworkMedia from '../../components/ArtworkMedia'
@@ -167,7 +168,7 @@ export default function DashArtworks() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
+import LoadingFrames from '../../components/LoadingFrames'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
@@ -243,7 +244,7 @@ export default function DashExhibitionEdit() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
 

@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import LoadingFrames from '../components/LoadingFrames'
 import { T, pad2 } from '../lib/tokens'
 import { getPublisherKindLabel } from '../lib/publisher'
 
@@ -43,7 +44,7 @@ export default function OrgsPage() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, letterSpacing: '0.2em', fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
 

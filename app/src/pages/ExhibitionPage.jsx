@@ -5,6 +5,7 @@ import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
+import LoadingFrames from '../components/LoadingFrames'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { isPersonPublisher } from '../lib/publisher'
 
@@ -115,7 +116,7 @@ export default function ExhibitionPage() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, letterSpacing: '0.2em', fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
   if (!exhibition) return (

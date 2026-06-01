@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import DashShell from '../../components/DashShell'
+import LoadingFrames from '../../components/LoadingFrames'
 import { useAuth } from '../../lib/auth'
 import { isPersonPublisher } from '../../lib/publisher'
 import { supabase } from '../../lib/supabase'
@@ -216,7 +217,7 @@ export default function DashMembers() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
 

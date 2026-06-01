@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ExhibitionListCard from '../components/ExhibitionListCard'
+import LoadingFrames from '../components/LoadingFrames'
 import { T, externalHost } from '../lib/tokens'
 import { getPublisherKindLabel } from '../lib/publisher'
 import { mapExhibitionListRow } from '../lib/exhibition'
@@ -38,7 +39,7 @@ export default function OrgPage() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, letterSpacing: '0.2em', fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
   if (!org) return (

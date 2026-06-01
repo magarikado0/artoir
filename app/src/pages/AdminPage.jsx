@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import ImageUploader from '../components/ImageUploader'
+import LoadingFrames from '../components/LoadingFrames'
 import ArtworkMedia from '../components/ArtworkMedia'
 import { getThumbnailUrl } from '../lib/imageUrl'
 
@@ -192,7 +193,7 @@ export default function AdminPage() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f0e8' }}>
-      <span style={{ fontFamily: 'Cormorant Garamond, serif', color: '#9a9088', letterSpacing: '0.2em', fontSize: '0.8rem' }}>...</span>
+      <LoadingFrames />
     </div>
   )
 

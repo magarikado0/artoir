@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useResolvedSession } from '../lib/useResolvedSession'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import LoadingFrames from '../components/LoadingFrames'
 import { T, pad2 } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { getPublisherKindLabel } from '../lib/publisher'
@@ -217,7 +218,7 @@ export default function AccountPage() {
     if (showLoading) {
       return (
         <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
-          <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+          <LoadingFrames />
         </div>
       )
     }

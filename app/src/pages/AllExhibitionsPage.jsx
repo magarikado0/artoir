@@ -6,6 +6,7 @@ import BottomNav from '../components/BottomNav'
 import { T } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
 import ExhibitionListCard from '../components/ExhibitionListCard'
+import LoadingFrames from '../components/LoadingFrames'
 import { mapExhibitionListRow } from '../lib/exhibition'
 import { isPersonPublisher, PUBLISHER_KIND } from '../lib/publisher'
 
@@ -82,7 +83,7 @@ export default function AllExhibitionsPage() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, letterSpacing: '0.2em', fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
 
