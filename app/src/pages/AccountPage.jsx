@@ -19,7 +19,6 @@ function LoggedOut({ isDesktop }) {
   if (isDesktop) return (
     <div className="ui-account-surface ui-account-surface-desktop">
       <div>
-        <div className="ui-kicker">GUEST</div>
         <div className="ui-screen-title" style={{ marginTop: 8 }}>アカウント</div>
         <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody, marginBottom: 22 }}>
           ログインすると、個人または団体として展覧会を作成・編集できます。
@@ -46,7 +45,6 @@ function LoggedOut({ isDesktop }) {
 
   return (
     <div className="ui-account-surface">
-      <div className="ui-kicker">GUEST</div>
       <div className="ui-screen-title" style={{ marginTop: 6 }}>アカウント</div>
       <div className="ui-screen-subtitle">ログインすると、個人または団体として展覧会を作成・編集できます。</div>
       <button onClick={() => navigate('/login')} className="ui-pill-action" style={{ marginTop: 22, width: '100%', justifyContent: 'space-between' }}>

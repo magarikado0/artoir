@@ -185,11 +185,8 @@ export default function LoginPage() {
     }
   }
 
-  const year = new Date().getFullYear()
-
   const formBody = (
     <>
-      <div className="ui-kicker">{mode === 'login' ? 'AUTH / LOGIN' : 'AUTH / SIGN UP'}</div>
       <div className="ui-screen-title" style={{ marginTop: 8 }}>{mode === 'login' ? 'ログイン' : '新規登録'}</div>
       <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>
         {mode === 'login'
@@ -311,13 +308,15 @@ export default function LoginPage() {
       <section className="ui-auth-login-surface">
         {isDesktop && (
           <div className="ui-auth-login-top">
-            <Link to="/" className="ui-auth-mark" style={{ textDecoration: 'none' }} aria-label="Artoir home">
-              <BrandMark size="auth" />
+            <Link to="/" className="ui-auth-brand-link" style={{ textDecoration: 'none' }} aria-label="Artoir home">
+              <span className="ui-auth-mark">
+                <BrandMark size="auth" />
+              </span>
+              <span className="ui-brand-lockup-word">Artoir<span className="ui-brand-lockup-dot">.</span></span>
             </Link>
             <div>
               <div className="ui-auth-masthead-title">展示を作る入口</div>
             </div>
-            <span>{year}</span>
           </div>
         )}
         {formBody}
