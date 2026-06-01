@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { T } from '../lib/tokens'
+import frame1 from '../assets/frame1.png'
+import frame2 from '../assets/frame2.png'
+import frame3 from '../assets/frame3.png'
+import frame4 from '../assets/frame4.png'
 
-// PLACEHOLDER FRAMES — replace with real コマ送り images later.
-// To swap to images:
-//   1. 画像を app/src/assets/loading/ などに置く
-//   2. import frame1 from '../assets/loading/frame1.svg' のように読み込む
-//   3. DEFAULT_FRAMES = [frame1, frame2, frame3, ...] に置き換える
-const DEFAULT_FRAMES = ['.  ', '.. ', '...', ' ..', '  .']
+const DEFAULT_FRAMES = [frame1, frame2, frame3, frame4]
 const DEFAULT_INTERVAL = 180
+const DEFAULT_WIDTH = 80
 
 function isImageSrc(value) {
   return typeof value === 'string' && /\.(svg|png|jpe?g|webp|gif|avif)(\?.*)?$/i.test(value)
@@ -16,7 +16,7 @@ function isImageSrc(value) {
 export default function LoadingFrames({
   frames = DEFAULT_FRAMES,
   interval = DEFAULT_INTERVAL,
-  size = 32,
+  size = DEFAULT_WIDTH,
   color,
   fontSize = 11,
   alt = '',
@@ -37,7 +37,7 @@ export default function LoadingFrames({
         src={frame}
         alt={alt}
         aria-hidden={alt ? undefined : 'true'}
-        style={{ width: size, height: size, display: 'block' }}
+        style={{ width: size, height: 'auto', display: 'inline-block', verticalAlign: 'middle' }}
       />
     )
   }
