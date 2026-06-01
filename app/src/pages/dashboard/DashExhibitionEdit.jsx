@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
 import LoadingFrames from '../../components/LoadingFrames'
+import { useDelayedLoading } from '../../lib/useDelayedLoading'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
@@ -87,6 +88,7 @@ export default function DashExhibitionEdit() {
 
   const [org, setOrg] = useState(null)
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
   const [saving, setSaving] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -242,7 +244,7 @@ export default function DashExhibitionEdit() {
     }
   }
 
-  if (loading) return (
+  if (showLoader) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
       <LoadingFrames />
     </div>

@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import LoadingFrames from '../components/LoadingFrames'
+import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, externalHost } from '../lib/tokens'
 import { getPublisherKindLabel } from '../lib/publisher'
 import { mapExhibitionListRow } from '../lib/exhibition'
@@ -14,6 +15,7 @@ export default function OrgPage() {
   const [org, setOrg] = useState(null)
   const [exhibitions, setExhibitions] = useState([])
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
 
   useEffect(() => {
     async function load() {
@@ -37,7 +39,7 @@ export default function OrgPage() {
     load()
   }, [orgSlug])
 
-  if (loading) return (
+  if (showLoader) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <LoadingFrames />
     </div>

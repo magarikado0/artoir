@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { DashField } from '../../components/DashShell'
 import LoadingFrames from '../../components/LoadingFrames'
+import { useDelayedLoading } from '../../lib/useDelayedLoading'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import { deleteOrganization } from '../../lib/deleteOrganization'
@@ -60,6 +61,7 @@ export default function DashSettings() {
   const isDesktop = useIsDesktop()
   const [org, setOrg] = useState(null)
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -197,7 +199,7 @@ export default function DashSettings() {
     }
   }
 
-  if (loading) return (
+  if (showLoader) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
       <LoadingFrames />
     </div>

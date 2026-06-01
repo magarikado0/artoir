@@ -7,6 +7,7 @@ import { T } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import LoadingFrames from '../components/LoadingFrames'
+import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { mapExhibitionListRow } from '../lib/exhibition'
 import { isPersonPublisher, PUBLISHER_KIND } from '../lib/publisher'
 
@@ -42,6 +43,7 @@ async function fetchExhibitionRows() {
 export default function AllExhibitionsPage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
   const [filter, setFilter] = useState('ALL')
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
@@ -81,7 +83,7 @@ export default function AllExhibitionsPage() {
       })
   }, [rows, filter, query])
 
-  if (loading) return (
+  if (showLoader) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <LoadingFrames />
     </div>

@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import LoadingFrames from '../components/LoadingFrames'
+import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, pad2 } from '../lib/tokens'
 import { getPublisherKindLabel } from '../lib/publisher'
 
@@ -14,6 +15,7 @@ export default function OrgsPage() {
   const { session } = useAuth()
   const [orgs, setOrgs] = useState([])
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
   const [query, setQuery] = useState('')
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function OrgsPage() {
     return orgs.filter((o) => [o.name, o.description].filter(Boolean).join(' ').toLowerCase().includes(q))
   }, [orgs, query])
 
-  if (loading) return (
+  if (showLoader) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <LoadingFrames />
     </div>

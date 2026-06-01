@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import ImageUploader from '../components/ImageUploader'
 import LoadingFrames from '../components/LoadingFrames'
+import { useDelayedLoading } from '../lib/useDelayedLoading'
 import ArtworkMedia from '../components/ArtworkMedia'
 import { getThumbnailUrl } from '../lib/imageUrl'
 
@@ -18,6 +19,7 @@ export default function AdminPage() {
   const [form, setForm] = useState({ title: '', description: '', image_url: '' })
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
   const [loadError, setLoadError] = useState('')
   const [message, setMessage] = useState('')
 
@@ -191,7 +193,7 @@ export default function AdminPage() {
     setMessage('削除しました')
   }
 
-  if (loading) return (
+  if (showLoader) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f0e8' }}>
       <LoadingFrames />
     </div>

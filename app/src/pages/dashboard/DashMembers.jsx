@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import DashShell from '../../components/DashShell'
 import LoadingFrames from '../../components/LoadingFrames'
+import { useDelayedLoading } from '../../lib/useDelayedLoading'
 import { useAuth } from '../../lib/auth'
 import { isPersonPublisher } from '../../lib/publisher'
 import { supabase } from '../../lib/supabase'
@@ -20,6 +21,7 @@ export default function DashMembers() {
   const isDesktop = useIsDesktop()
   const [org, setOrg] = useState(null)
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
   const [members, setMembers] = useState([])
   const [invites, setInvites] = useState([])
   const [inviteEmail, setInviteEmail] = useState('')
@@ -215,7 +217,7 @@ export default function DashMembers() {
     }
   }
 
-  if (loading) return (
+  if (showLoader) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
       <LoadingFrames />
     </div>

@@ -5,6 +5,7 @@ import { useResolvedSession } from '../lib/useResolvedSession'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import LoadingFrames from '../components/LoadingFrames'
+import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, pad2 } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { getPublisherKindLabel } from '../lib/publisher'
@@ -204,7 +205,7 @@ export default function AccountPage() {
     navigate('/')
   }
 
-  const showLoading = !ready || loading
+  const showLoading = useDelayedLoading(!ready || loading)
 
   const signOutButton = session && (
     <button onClick={handleSignOut} style={{ background: 'none', border: 'none', fontFamily: T.mono, fontSize: 10, letterSpacing: '0.12em', color: T.ink, cursor: 'pointer', padding: 0 }}>

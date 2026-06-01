@@ -5,6 +5,7 @@ import { useResolvedSession } from '../lib/useResolvedSession'
 import BrandMark from '../components/BrandMark'
 import Header from '../components/Header'
 import LoadingFrames from '../components/LoadingFrames'
+import { useDelayedLoading } from '../lib/useDelayedLoading'
 import {
   normalizeOAuthReturnPath,
   markOAuthRedirectPending,
@@ -83,6 +84,7 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const showLoader = useDelayedLoading(!ready)
   const navigate = useNavigate()
   const location = useLocation()
   const rawFrom = location.state?.from
@@ -102,7 +104,7 @@ export default function LoginPage() {
     return <Navigate to={normalizeOAuthReturnPath(from)} replace />
   }
 
-  if (!ready) {
+  if (showLoader) {
     return (
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: T.paper }}>
         <LoadingFrames />
