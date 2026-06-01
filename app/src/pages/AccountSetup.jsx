@@ -116,14 +116,14 @@ export default function AccountSetup() {
           label={getPublisherNameLabel(kind)}
           value={name}
           onChange={handleNameChange}
-          placeholder={kind === PUBLISHER_KIND.PERSON ? '例: 山田 花' : '例: 多摩美術大学 日本画研究室'}
+          placeholder={kind === PUBLISHER_KIND.PERSON ? 'ニックネーム' : '団体名・通称'}
         />
         <DashField
           label="ID"
           prefix="artoir.net/"
           value={slug}
           onChange={setSlug}
-          placeholder="tamabi-nihonga"
+          placeholder=""
           mono
           help="公開URLに使われます。英数字とハイフンのみ。"
         />
@@ -167,7 +167,6 @@ export default function AccountSetup() {
 
   const pageHeader = (
     <div className="ui-hero-screen-heading" style={{ marginBottom: isDesktop ? 14 : 0 }}>
-      <div className="ui-kicker">NEW PAGE</div>
       <h1 className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>公開ページを作成する</h1>
       <p className="ui-screen-subtitle">
         {isDesktop
