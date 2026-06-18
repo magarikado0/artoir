@@ -1016,7 +1016,7 @@ a {
 .ui-exhibition-list-card {
   display: flex;
   align-items: stretch;
-  min-height: 136px;
+  min-height: 112px;
   padding: 0;
   overflow: hidden;
   border-radius: 12px;
@@ -1024,11 +1024,11 @@ a {
 
 .ui-exhibition-list-card-media {
   order: 2;
-  flex: 0 0 clamp(120px, 28%, 184px);
+  flex: 0 0 clamp(96px, 22%, 128px);
   position: relative;
   align-self: stretch;
   aspect-ratio: 1 / 1;
-  max-height: 184px;
+  max-height: 128px;
   background: #ECE5D9;
   overflow: hidden;
 }
@@ -1054,11 +1054,11 @@ a {
   order: 1;
   flex: 1 1 auto;
   min-width: 0;
-  padding: 18px 18px 20px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
 .ui-exhibition-list-card-meta {
@@ -1106,7 +1106,7 @@ a {
 
 .ui-exhibition-list-card-title {
   font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 500;
   line-height: 1.35;
   letter-spacing: -0.005em;
@@ -1144,7 +1144,7 @@ a {
   gap: 10px;
   min-width: 0;
   margin-top: 2px;
-  padding-top: 12px;
+  padding-top: 8px;
   border-top: 1px solid #ECE5D9;
 }
 
@@ -2746,6 +2746,10 @@ button.ui-account-org-pick-btn.ui-org-row {
 }
 
 @media (min-width: 1024px) {
+  .ui-exhibition-list-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .ui-topbar-nav {
     display: flex;
   }
