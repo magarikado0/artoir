@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
+:root {
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.10 0 0 0 0 0.09 0 0 0 0.038 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 @theme {
-  --color-paper:      #F5F1EB;
+  --color-paper:      #F3EEE5;
   --color-paper-alt:  #ECE5D9;
   --color-card:       #FBF8F3;
   --color-ink:        #1F1B17;
@@ -29,7 +33,8 @@ html {
 }
 
 body {
-  background: #F5F1EB;
+  background-color: #F3EEE5;
+  background-image: var(--paper-grain);
   color: #1F1B17;
   font-family: 'Noto Sans JP', -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
   font-feature-settings: "palt" 1;
@@ -84,7 +89,8 @@ a {
 
 .ui-page-shell {
   min-height: 100svh;
-  background: #F5F1EB;
+  background-color: #F3EEE5;
+  background-image: var(--paper-grain);
 }
 
 .ui-app-main {

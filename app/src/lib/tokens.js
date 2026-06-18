@@ -1,5 +1,5 @@
 export const T = {
-  paper:     '#F5F1EB',
+  paper:     '#F3EEE5',
   paperAlt:  '#ECE5D9',
   card:      '#FBF8F3',
   ink:       '#1F1B17',
