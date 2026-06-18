@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useResolvedSession } from '../lib/useResolvedSession'
-import Header from '../components/Header'
+import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkMedia from '../components/ArtworkMedia'
 import ArtworkModal from '../components/ArtworkModal'
@@ -31,15 +31,15 @@ function LoggedOut({ isDesktop }) {
       <div className="ui-screen-subtitle" style={{ fontFamily: isDesktop ? T.serifBody : undefined, marginBottom: isDesktop ? 22 : undefined }}>
         ログインすると、プロフィールと団体の展示を管理できます。
       </div>
-      <button onClick={() => navigate('/login')} className="ui-pill-action" style={{ marginTop: isDesktop ? 0 : 22, width: '100%', justifyContent: 'space-between' }}>
+      <button onClick={() => navigate('/login')} className="ui-btn ui-btn--primary ui-btn-block" style={{ marginTop: isDesktop ? 0 : 22, justifyContent: 'space-between' }}>
         <span>ログイン / 新規登録</span>
-        <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
+        <span aria-hidden="true">→</span>
       </button>
       <div className="ui-account-benefits" style={{ marginTop: isDesktop ? undefined : 32 }}>
-        <div style={{ paddingBottom: 8, borderBottom: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.ink }}>ログインでできること</div>
+        <div className="ui-section-label" style={{ margin: '0 0 8px', paddingBottom: 8, borderBottom: `1px solid ${T.lineSoft}` }}>ログインでできること</div>
         {benefits.map(([n, title, desc]) => (
           <div key={n} className="ui-account-row" style={{ display: 'grid', gridTemplateColumns: '32px 1fr', gap: 10 }}>
-            <div style={{ fontFamily: T.mono, fontSize: 11, color: isDesktop ? T.inkMuted : T.accent }}>{n}</div>
+            <div style={{ fontSize: 12, color: isDesktop ? T.inkMuted : T.accent }}>{n}</div>
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 15, color: T.ink }}>{title}</div>
               <div style={{ marginTop: 4, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{desc}</div>
@@ -53,30 +53,16 @@ function LoggedOut({ isDesktop }) {
   return <div className={`ui-account-surface ${isDesktop ? 'ui-account-surface-desktop' : ''}`}>{content}</div>
 }
 
-function ProfileSummary({ profile, onAddWork, preparingWork }) {
+function ProfileSummary({ profile }) {
   return (
-    <section className="ui-app-card ui-profile-summary-card">
-      <div className="ui-kicker">プロフィール</div>
-      <div className="ui-profile-summary-row">
-        <div className="ui-profile-summary-main">
-          <div className="ui-screen-title" style={{ fontSize: 28 }}>{profile.display_name}</div>
-          <div style={{ marginTop: 4, fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>@{profile.slug}</div>
-          {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 10, maxWidth: 620 }}>{profile.bio}</p>}
-        </div>
-        <div className="ui-profile-summary-actions">
-          <Link to="/account/setup" className="ui-pill-action" style={{ background: T.paperAlt, color: T.ink }}>
-            <span>プロフィール編集</span>
-          </Link>
-          <ImageUploader
-            variant="button"
-            buttonClassName="ui-pill-action--accent"
-            buttonLabel="作品を追加"
-            onFileSelected={onAddWork}
-          >
-            <span>{preparingWork ? '準備中...' : '作品を追加'}</span>
-          </ImageUploader>
-        </div>
+    <section className="ui-account-section">
+      <div className="ui-account-section-head">
+        <div className="ui-kicker">プロフィール</div>
+        <Link to="/account/setup" className="ui-btn ui-btn--ghost">プロフィール編集</Link>
       </div>
+      <div className="ui-screen-title" style={{ fontSize: 28 }}>{profile.display_name}</div>
+      <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
+      {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 10 }}>{profile.bio}</p>}
     </section>
   )
 }
@@ -90,27 +76,35 @@ function AccountArtworkCard({ artwork, onOpen, onEdit }) {
 
   return (
     <div className="ui-list-card ui-profile-artwork-card">
-      <button type="button" onClick={() => onOpen(artwork)} className="ui-account-artwork-preview">
-        <ArtworkMedia
-          src={getGalleryThumbnailUrl(artwork.image_url)}
-          alt=""
-          decorative
-          loading="lazy"
-          aspectRatio="1 / 1"
-          fit="contain"
-          className="ui-profile-artwork-media"
-          wrapperStyle={{ borderRadius: 7, background: 'rgba(228, 211, 184, 0.12)' }}
-          imageStyle={{ borderRadius: 7 }}
-        />
-      </button>
-      <div className="ui-profile-artwork-card-body">
-        {hasTitle && <div className="ui-profile-artwork-title">{artwork.title}</div>}
+      <div className="ui-account-artwork-media">
+        <button type="button" onClick={() => onOpen(artwork)} className="ui-account-artwork-preview">
+          <ArtworkMedia
+            src={getGalleryThumbnailUrl(artwork.image_url)}
+            alt=""
+            decorative
+            loading="lazy"
+            aspectRatio="1 / 1"
+            fit="contain"
+            className="ui-profile-artwork-media"
+            wrapperStyle={{ background: T.surfaceMuted }}
+          />
+        </button>
         {isOwnProfileWork && (
-          <button type="button" onClick={() => onEdit(artwork)} className="ui-account-artwork-edit">
-            編集
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onEdit(artwork) }}
+            className="ui-account-artwork-edit"
+            aria-label="作品を編集"
+          >
+            <Icon name="edit" size={15} />
           </button>
         )}
       </div>
+      {hasTitle && (
+        <div className="ui-profile-artwork-card-body">
+          <div className="ui-profile-artwork-title">{artwork.title}</div>
+        </div>
+      )}
     </div>
   )
 }
@@ -118,7 +112,7 @@ function AccountArtworkCard({ artwork, onOpen, onEdit }) {
 function AccountArtworkEditModal({ artwork, title, description, saving, deleting, error, onTitleChange, onDescriptionChange, onSave, onDelete, onClose }) {
   if (!artwork) return null
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="account-artwork-edit-title" style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(17,17,16,0.5)', display: 'grid', placeItems: 'center', padding: 16 }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="account-artwork-edit-title" style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(31,27,23,0.5)', display: 'grid', placeItems: 'center', padding: 16 }}>
       <div className="ui-app-card" style={{ width: 'min(100%, 520px)', maxHeight: 'calc(100vh - 32px)', overflowY: 'auto', padding: 18 }}>
         <div id="account-artwork-edit-title" className="ui-screen-title" style={{ fontSize: 22 }}>作品を編集</div>
         <div style={{ marginTop: 14 }}>
@@ -144,76 +138,59 @@ function AccountArtworkEditModal({ artwork, title, description, saving, deleting
             {error}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-          <button type="button" onClick={onClose} disabled={saving || deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>閉じる</button>
-          <button type="button" onClick={onSave} disabled={saving || deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: saving ? 0.6 : 1 }}>{saving ? '保存中...' : '保存する'}</button>
+        <div className="ui-btn-row" style={{ marginTop: 16 }}>
+          <button type="button" onClick={onClose} disabled={saving || deleting} className="ui-btn ui-btn--ghost">閉じる</button>
+          <button type="button" onClick={onSave} disabled={saving || deleting} className="ui-btn ui-btn--accent">{saving ? '保存中…' : '保存する'}</button>
         </div>
-        <button type="button" onClick={onDelete} disabled={saving || deleting} className="ui-icon-button" style={{ marginTop: 12, width: '100%', padding: '12px', background: 'transparent', color: T.accent, border: `1px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer', opacity: deleting ? 0.6 : 1 }}>
-          {deleting ? '削除中...' : '作品を削除'}
+        <button type="button" onClick={onDelete} disabled={saving || deleting} className="ui-btn ui-btn--danger ui-btn-block" style={{ marginTop: 12 }}>
+          {deleting ? '削除中…' : '作品を削除'}
         </button>
       </div>
     </div>
   )
 }
 
-function OrganizationSelector({ orgs, onSelect, onSignOut, isDesktop }) {
-  const actions = (
-    <div className="ui-account-floating-actions">
-      <Link to="/account/organizations/new" className="ui-account-floating-action is-primary">
-        <span>＋ 団体を作成</span>
-      </Link>
-      <button type="button" onClick={onSignOut} className="ui-account-floating-action">
-        ログアウト
-      </button>
-    </div>
-  )
-
-  if (orgs.length === 0) {
-    return (
-      <div className="ui-account-surface">
-        <div className="ui-kicker">団体</div>
-        <div style={{ marginTop: 8, fontFamily: T.serif, fontSize: 22, color: T.ink }}>管理している団体はまだありません</div>
-        <div style={{ marginTop: 8, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>団体を作成すると、展示と作品を管理できます。</div>
-        {actions}
-      </div>
-    )
-  }
-
-  const list = (
-    <div className="ui-org-table ui-account-org-picker-table">
-      <div className="ui-org-table-head" aria-hidden="true">
-        <span>No.</span>
-        <span>団体</span>
-        <span className="ui-account-org-picker-head-go" />
-      </div>
-      <div className="ui-org-list">
-        {orgs.map((org, i) => (
-          <button key={org.id} type="button" onClick={() => onSelect(org)} className="ui-org-row ui-account-org-pick-btn">
-            <div className="ui-org-index">{pad2(i + 1)}</div>
-            <div style={{ minWidth: 0 }}>
-              <div className="ui-org-name-row">
-                <span className="ui-org-name">{org.name}</span>
-              </div>
-              {org.description && (
-                <div className="ui-org-description">
-                  {org.description.slice(0, isDesktop ? 120 : 50)}
-                  {org.description.length > (isDesktop ? 120 : 50) ? '…' : ''}
-                </div>
-              )}
-            </div>
-            <div className="ui-account-org-pick-go" aria-hidden="true">→</div>
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-
+function OrganizationSelector({ orgs, onSelect, isDesktop }) {
   return (
-    <div className={`ui-account-surface ${isDesktop ? 'ui-account-org-selector-desktop' : ''}`}>
-      <div className="ui-kicker" style={{ marginBottom: 12 }}>団体</div>
-      {list}
-      {actions}
-    </div>
+    <section className="ui-account-section">
+      <div className="ui-account-section-head">
+        <div className="ui-kicker">団体</div>
+        <Link to="/account/organizations/new" className="ui-btn ui-btn--accent">
+          <Icon name="plus" size={15} />
+          <span>団体を作成</span>
+        </Link>
+      </div>
+      {orgs.length === 0 ? (
+        <p className="ui-panel" style={{ color: T.inkMuted, fontSize: 13 }}>管理している団体はまだありません</p>
+      ) : (
+        <div className="ui-org-table ui-account-org-picker-table">
+          <div className="ui-org-table-head" aria-hidden="true">
+            <span>No.</span>
+            <span>団体</span>
+            <span className="ui-account-org-picker-head-go" />
+          </div>
+          <div className="ui-org-list">
+            {orgs.map((org, i) => (
+              <button key={org.id} type="button" onClick={() => onSelect(org)} className="ui-org-row ui-account-org-pick-btn">
+                <div className="ui-org-index">{pad2(i + 1)}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div className="ui-org-name-row">
+                    <span className="ui-org-name">{org.name}</span>
+                  </div>
+                  {org.description && (
+                    <div className="ui-org-description">
+                      {org.description.slice(0, isDesktop ? 120 : 50)}
+                      {org.description.length > (isDesktop ? 120 : 50) ? '…' : ''}
+                    </div>
+                  )}
+                </div>
+                <div className="ui-account-org-pick-go" aria-hidden="true">→</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
   )
 }
 
@@ -373,11 +350,11 @@ export default function AccountPage() {
     setEditTarget(null)
   }
 
-  const showLoading = useDelayedLoading(!ready || loading)
-  if (!showLoading && session && profileMissing) return <Navigate to="/account/setup" replace />
+  const showSessionLoading = useDelayedLoading(!ready)
+  if (!showSessionLoading && !loading && session && profileMissing) return <Navigate to="/account/setup" replace />
 
   function renderContent() {
-    if (showLoading) {
+    if (showSessionLoading) {
       return (
         <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
           <LoadingFrames />
@@ -387,13 +364,21 @@ export default function AccountPage() {
 
     if (!session) return <LoggedOut isDesktop={isDesktop} />
 
+    if (loading) {
+      return (
+        <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
+          <LoadingFrames />
+        </div>
+      )
+    }
+
     if (!profile) {
       return (
         <div className="ui-account-surface">
           <div className="ui-kicker">プロフィール</div>
           <div style={{ marginTop: 8, fontFamily: T.serif, fontSize: 22, color: T.ink }}>プロフィールを読み込めませんでした</div>
           <div style={{ marginTop: 8, fontSize: 12, color: T.accent, lineHeight: 1.7 }}>{loadError || '時間をおいて再度お試しください。'}</div>
-          <button type="button" onClick={handleSignOut} className="ui-pill-action" style={{ marginTop: 18, background: T.paperAlt, color: T.ink }}>
+          <button type="button" onClick={handleSignOut} className="ui-btn ui-btn--ghost" style={{ marginTop: 18 }}>
             ログアウト
           </button>
         </div>
@@ -402,27 +387,39 @@ export default function AccountPage() {
 
     return (
       <>
-        <ProfileSummary profile={profile} onAddWork={handleAddWork} preparingWork={preparingWork} />
+        <ProfileSummary profile={profile} />
         {loadError && (
-          <div className="ui-app-card" style={{ padding: 14, marginBottom: 14, borderColor: T.accent, color: T.accent, fontSize: 12 }}>
-            {loadError}
-          </div>
+          <div className="ui-alert ui-alert--error" style={{ marginBottom: 16 }}>{loadError}</div>
         )}
-        <OrganizationSelector orgs={orgs} onSelect={handleSelectOrg} onSignOut={handleSignOut} isDesktop={isDesktop} />
-        {artworks.length > 0 && (
-          <>
-            <div className="ui-app-topline" style={{ marginTop: 18 }}>
-              <div>
-                <div className="ui-screen-title" style={{ fontSize: 22 }}>作品</div>
-              </div>
-            </div>
+        <OrganizationSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} />
+
+        <section className="ui-account-section">
+          <div className="ui-account-section-head">
+            <div className="ui-kicker">作品</div>
+            <ImageUploader
+              variant="button"
+              buttonClassName="ui-pill-action--accent"
+              buttonLabel="作品を追加"
+              onFileSelected={handleAddWork}
+            >
+              <Icon name="plus" size={15} />
+              <span>{preparingWork ? '準備中…' : '作品を追加'}</span>
+            </ImageUploader>
+          </div>
+          {artworks.length > 0 ? (
             <div className="ui-profile-artwork-grid ui-account-artwork-grid">
               {artworks.map((artwork) => (
                 <AccountArtworkCard key={artwork.id} artwork={artwork} onOpen={setSelectedArtwork} onEdit={openEditArtwork} />
               ))}
             </div>
-          </>
-        )}
+          ) : (
+            <p className="ui-panel" style={{ color: T.inkMuted, fontSize: 13 }}>作品がまだありません</p>
+          )}
+        </section>
+
+        <button type="button" onClick={handleSignOut} className="ui-btn ui-btn--ghost" style={{ marginTop: 20 }}>
+          ログアウト
+        </button>
       </>
     )
   }
@@ -471,9 +468,9 @@ export default function AccountPage() {
   )
 
   return (
-    <div className="ui-page-shell" style={{ paddingBottom: 92 }}>
+    <div className="ui-page-shell">
       <Header activeTab="account" />
-      {renderContent()}
+      <main className="ui-app-main">{renderContent()}</main>
       <ArtworkModal
         artwork={selectedArtwork}
         artworks={artworks}

@@ -5,7 +5,6 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import LoadingFrames from '../components/LoadingFrames'
-import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, externalHost } from '../lib/tokens'
 import { mapExhibitionListRow } from '../lib/exhibition'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
@@ -17,7 +16,6 @@ export default function OrgPage() {
   const [org, setOrg] = useState(null)
   const [exhibitions, setExhibitions] = useState([])
   const [loading, setLoading] = useState(true)
-  const showLoader = useDelayedLoading(loading)
 
   useEffect(() => {
     async function load() {
@@ -45,14 +43,14 @@ export default function OrgPage() {
     load()
   }, [legacyProfileSlug, navigate, orgSlug])
 
-  if (showLoader) return (
+  if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <LoadingFrames />
     </div>
   )
   if (!org) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <p style={{ color: T.inkMuted, fontSize: 13 }}>公開ページが見つかりません</p>
+      <p style={{ color: T.inkMuted, fontSize: 14 }}>公開ページが見つかりません</p>
     </div>
   )
 
@@ -62,10 +60,11 @@ export default function OrgPage() {
     <div className="ui-page-shell">
       <Header activeTab="orgs" />
       <main className="ui-app-main">
-        <Link to="/orgs" style={{ display: 'inline-flex', marginBottom: 14, color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 公開ページ一覧</Link>
-        <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
-          <h1 className="ui-screen-title" style={{ marginTop: 7 }}>{org.name}</h1>
-          {org.description && <p className="ui-screen-subtitle" style={{ maxWidth: 720 }}>{org.description}</p>}
+        <Link to="/orgs" className="ui-back-link" style={{ marginBottom: 20 }}>← 公開ページ一覧</Link>
+        <section style={{ marginBottom: 48 }}>
+          <div className="ui-kicker">{org.kind === 'person' ? '作家' : '団体'}</div>
+          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{org.name}</h1>
+          {org.description && <p className="ui-screen-subtitle">{org.description}</p>}
           {(sns.instagram || sns.x || org.homepage_url) && (
             <div className="ui-public-link-row">
               {sns.instagram && (
@@ -88,11 +87,7 @@ export default function OrgPage() {
           )}
         </section>
 
-        <div className="ui-app-topline">
-          <div>
-            <div className="ui-screen-title" style={{ fontSize: 22 }}>展覧会</div>
-          </div>
-        </div>
+        <div className="ui-section-label">展覧会</div>
 
         <div className="ui-exhibition-list-grid">
           {exhibitions.map((exh) => (

@@ -5,6 +5,7 @@ import { peekSupabaseAuthUrlErrorFromWindow, isGoogleExchangeExternalCodeError, 
 import { AuthContext } from './lib/auth'
 import ProtectedRoute from './components/ProtectedRoute'
 import OAuthReturnRedirect from './components/OAuthReturnRedirect'
+import LoadingFrames from './components/LoadingFrames'
 
 const AllExhibitionsPage = lazy(() => import('./pages/AllExhibitionsPage'))
 const OrgsPage = lazy(() => import('./pages/OrgsPage'))
@@ -44,12 +45,12 @@ function SupabaseOAuthErrorBanner() {
       style={{
         margin: 0,
         padding: '12px 20px',
-        background: 'rgba(180,69,44,0.09)',
-        borderBottom: '0.5px solid #b4452c',
+        background: 'rgba(190,85,61,0.08)',
+        borderBottom: '1px solid #BE553D',
         fontFamily: 'ui-monospace, monospace',
         fontSize: 12,
         lineHeight: 1.65,
-        color: '#b4452c',
+        color: '#BE553D',
         letterSpacing: '0.04em',
       }}
     >
@@ -59,12 +60,12 @@ function SupabaseOAuthErrorBanner() {
           style={{
             marginTop: 12,
             paddingTop: 12,
-            borderTop: '0.5px solid rgba(180,69,44,0.35)',
+            borderTop: '1px solid rgba(190,85,61,0.3)',
             fontFamily: '"Noto Sans JP", system-ui, sans-serif',
             fontSize: 12,
             letterSpacing: '0.02em',
             lineHeight: 1.75,
-            color: '#3d342c',
+            color: '#4A413A',
           }}
         >
           <div style={{ fontWeight: 600, marginBottom: 6 }}>このエラーは「Google が返したコードを、Supabase 側でトークンに交換できない」ときに出ます。次を確認してください。</div>
@@ -73,7 +74,7 @@ function SupabaseOAuthErrorBanner() {
             <li>同画面の<strong>承認済みのリダイレクト URI</strong>に、次を<strong>一字一句同じ</strong>で追加していること（ローカル URL ではなく Supabase のコールバックです）。</li>
           </ul>
           {supabaseCallback ? (
-            <div style={{ wordBreak: 'break-all', fontFamily: 'ui-monospace, monospace', fontSize: 11, background: 'rgba(255,255,255,0.6)', padding: '8px 10px' }}>
+            <div style={{ wordBreak: 'break-all', fontFamily: 'ui-monospace, monospace', fontSize: 11, background: 'rgba(251,248,243,0.8)', padding: '8px 10px' }}>
               {supabaseCallback}
             </div>
           ) : (
@@ -81,7 +82,7 @@ function SupabaseOAuthErrorBanner() {
           )}
           <div style={{ marginTop: 10, fontSize: 11 }}>
             Supabase ダッシュボード → Authentication → Providers → Google の <strong>Client ID / Client Secret</strong> が、上記 Google クライアントと一致していること（Secret を再発行したあと Supabase に未反映のことが多いです）。手順は{' '}
-            <a href="https://supabase.com/docs/guides/auth/social-login/auth-google" target="_blank" rel="noreferrer" style={{ color: '#b4452c' }}>Login with Google（Supabase）</a>
+            <a href="https://supabase.com/docs/guides/auth/social-login/auth-google" target="_blank" rel="noreferrer" style={{ color: '#BE553D' }}>Login with Google（Supabase）</a>
             を参照してください。
           </div>
         </div>
@@ -129,16 +130,12 @@ export default function App() {
     return (
       <div style={{
         minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: 'grid',
+        placeItems: 'center',
         margin: 0,
         padding: '24px',
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: 14,
-        color: '#524a42',
       }}>
-        読み込み中…
+        <LoadingFrames />
       </div>
     )
   }
@@ -150,8 +147,8 @@ export default function App() {
         <OAuthReturnRedirect />
         <ScrollToTop />
         <Suspense fallback={(
-          <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', fontFamily: 'system-ui, sans-serif', fontSize: 14, color: '#524a42' }}>
-            読み込み中…
+          <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+            <LoadingFrames />
           </div>
         )}>
           <Routes>

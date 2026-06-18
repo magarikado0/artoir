@@ -153,12 +153,12 @@ export default function ImageUploader({
           cursor: hasUploadConfig ? 'pointer' : 'not-allowed',
           opacity: hasUploadConfig ? 1 : 0.65,
         } : {
-          border: `2px dashed ${dragging ? '#1a1612' : 'rgba(26,22,18,0.2)'}`,
-          borderRadius: '2px',
+          border: `1px dashed ${dragging ? '#1F1B17' : '#D8CFC3'}`,
+          borderRadius: 8,
           padding: '2rem',
           textAlign: 'center',
           cursor: hasUploadConfig ? 'pointer' : 'not-allowed',
-          background: dragging ? 'rgba(26,22,18,0.04)' : 'transparent',
+          background: dragging ? '#FBF8F3' : 'transparent',
           transition: 'all 0.2s',
           opacity: hasUploadConfig ? 1 : 0.65,
         }}
@@ -167,8 +167,8 @@ export default function ImageUploader({
         {!isCompactTrigger && progress !== null ? (
           <div>
             <div style={{
-              height: '2px',
-              background: 'rgba(26,22,18,0.1)',
+              height: '3px',
+              background: '#ECE5D9',
               borderRadius: '1px',
               overflow: 'hidden',
               marginBottom: '0.75rem',
@@ -176,28 +176,26 @@ export default function ImageUploader({
               <div style={{
                 height: '100%',
                 width: `${progress}%`,
-                background: '#1a1612',
+                background: '#BE553D',
                 transition: 'width 0.2s',
               }} />
             </div>
-            <span style={{ fontSize: '0.75rem', color: '#9a9088' }}>{progress}%</span>
+            <span style={{ fontSize: '0.75rem', color: '#8A8178' }}>{progress}%</span>
           </div>
         ) : !isCompactTrigger && !children ? (
           <span style={{
-            fontFamily: 'Cormorant Garamond, serif',
             fontSize: '0.8rem',
-            letterSpacing: '0.1em',
-            color: '#9a9088',
+            color: '#8A8178',
           }}>
             クリックまたはドラッグ&ドロップで画像を選択
           </span>
         ) : null}
       </div>
       {error && !isFab && (
-        <p style={{ fontSize: '0.75rem', color: '#c0392b', marginTop: '0.5rem' }}>{error}</p>
+        <p style={{ fontSize: '0.75rem', color: '#BE553D', marginTop: '0.5rem' }}>{error}</p>
       )}
       {!hasUploadConfig && !isFab && (
-        <p style={{ fontSize: '0.75rem', color: '#9a9088', marginTop: '0.5rem' }}>
+        <p style={{ fontSize: '0.75rem', color: '#8A8178', marginTop: '0.5rem' }}>
           Cloudinary 側の unsigned preset はアップロード先フォルダ・形式・サイズ制限を必ず設定してください。
         </p>
       )}

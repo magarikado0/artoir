@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import DashShell from '../../components/DashShell'
@@ -59,6 +59,7 @@ function CreatorPicker({ profiles, selectedIds, onToggle, visible, onVisibleChan
 
 export default function DashArtworks() {
   const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionId } = useParams()
+  const location = useLocation()
   const { session } = useAuth()
   const profileSlug = routeProfileSlug || legacyProfileSlugFromOwnerSlug(routeOrgSlug)
   const orgSlug = profileSlug ? undefined : routeOrgSlug
@@ -68,7 +69,9 @@ export default function DashArtworks() {
   const [defaultCreatorIds, setDefaultCreatorIds] = useState([])
   const [forbidden, setForbidden] = useState(false)
   const [loading, setLoading] = useState(true)
-  const showLoader = useDelayedLoading(loading)
+  const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
+  const showDelayedLoader = useDelayedLoading(isExhibitionListNavigation && loading)
+  const showLoader = showDelayedLoader || (!isExhibitionListNavigation && loading)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')
@@ -285,9 +288,10 @@ export default function DashArtworks() {
   return (
     <>
       <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
-        <div className="ui-artworks-heading-block" style={{ marginBottom: 14 }}>
-          <section className="ui-app-card" style={{ padding: 18, marginBottom: 8 }}>
-            <h1 className="ui-screen-title" style={{ marginTop: 7 }}>{exhibition?.title || '展覧会'}</h1>
+        <div className="ui-artworks-heading-block" style={{ marginBottom: 20 }}>
+          <section style={{ marginBottom: 10 }}>
+            <div className="ui-kicker">展覧会</div>
+            <h1 className="ui-screen-title" style={{ marginTop: 6 }}>{exhibition?.title || '展覧会'}</h1>
           </section>
           <div className="ui-artworks-header-actions">
             {exhibitionId && exhibitionId !== 'undefined' && (
@@ -307,19 +311,19 @@ export default function DashArtworks() {
               onBeforeUpload={handleBeforeUpload}
               onFileSelected={handleCreateFile}
             >
-              <Icon name="plus" size={17} />
+              <Icon name="plus" size={16} />
               <span>作品追加</span>
             </ImageUploader>
           </div>
         </div>
 
         {deleteTarget && (
-          <div className="ui-app-card" style={{ padding: 14, marginBottom: 14, borderColor: T.accent }}>
-            <div className="ui-kicker">CONFIRM DELETE</div>
-            <div style={{ marginTop: 8, fontSize: 13 }}>「{deleteTarget.title || '（タイトルなし）'}」を削除します。</div>
-            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-              <button type="button" onClick={() => setDeleteTarget(null)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
-              <button type="button" onClick={handleDelete} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? 'DELETING...' : 'DELETE'}</button>
+          <div className="ui-confirm" style={{ marginBottom: 16 }}>
+            <div className="ui-kicker">削除の確認</div>
+            <div className="ui-confirm-msg">「{deleteTarget.title || '（タイトルなし）'}」を削除します。</div>
+            <div className="ui-btn-row" style={{ marginTop: 16 }}>
+              <button type="button" onClick={() => setDeleteTarget(null)} disabled={deleting} className="ui-btn ui-btn--ghost">キャンセル</button>
+              <button type="button" onClick={handleDelete} disabled={deleting} className="ui-btn ui-btn--danger">{deleting ? '削除中…' : '削除する'}</button>
             </div>
           </div>
         )}
@@ -382,7 +386,7 @@ export default function DashArtworks() {
             )
           })}
         </div>
-        {artworks.length === 0 && <div className="ui-panel" style={{ padding: 24, color: T.inkMuted, fontFamily: T.mono, fontSize: 11 }}>作品がまだありません</div>}
+        {artworks.length === 0 && <div className="ui-panel" style={{ color: T.inkMuted, fontSize: 13 }}>作品がまだありません</div>}
       </DashShell>
 
       <ImageUploader
@@ -411,10 +415,10 @@ export default function DashArtworks() {
       />
 
       {editTarget && (
-        <div role="dialog" aria-modal="true" aria-labelledby="edit-work-title" style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(17,17,16,0.44)', display: 'grid', placeItems: 'center', padding: 16 }}>
-          <div className="ui-app-card" style={{ width: 'min(100%, 480px)', maxHeight: 'calc(100vh - 32px)', overflowY: 'auto', padding: 18 }}>
-            <div id="edit-work-title" className="ui-kicker">EDIT WORK</div>
-            <div style={{ marginTop: 12 }}>
+        <div role="dialog" aria-modal="true" aria-labelledby="edit-work-title" style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(31,27,23,0.5)', display: 'grid', placeItems: 'center', padding: 16 }}>
+          <div className="ui-app-card" style={{ width: 'min(100%, 480px)', maxHeight: 'calc(100vh - 32px)', overflowY: 'auto', padding: 24 }}>
+            <div id="edit-work-title" className="ui-kicker">作品を編集</div>
+            <div style={{ marginTop: 14 }}>
               <ArtworkMedia
                 src={editTarget.image_url}
                 alt=""
@@ -422,11 +426,11 @@ export default function DashArtworks() {
                 loading="eager"
                 fit="contain"
                 minHeight={160}
-                wrapperStyle={{ borderRadius: 8 }}
-                imageStyle={{ borderRadius: 8, maxHeight: 280, objectFit: 'contain' }}
+                wrapperStyle={{ borderRadius: 6 }}
+                imageStyle={{ borderRadius: 6, maxHeight: 280, objectFit: 'contain' }}
               />
             </div>
-            <div style={{ marginTop: 14 }}>
+            <div style={{ marginTop: 16 }}>
               <div className="ui-input-wrap"><input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="作品名を入力" /></div>
             </div>
             <div style={{ marginTop: 12 }}>
@@ -441,15 +445,15 @@ export default function DashArtworks() {
                 onVisibleChange={setEditCreatorsVisible}
               />
             </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button type="button" onClick={() => setEditTarget(null)} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>キャンセル</button>
-              <button type="button" onClick={handleEditSave} className="ui-pill-action" style={{ flex: 1, background: T.accent }}>保存する</button>
+            <div className="ui-btn-row" style={{ marginTop: 18 }}>
+              <button type="button" onClick={() => setEditTarget(null)} className="ui-btn ui-btn--ghost">キャンセル</button>
+              <button type="button" onClick={handleEditSave} className="ui-btn ui-btn--accent">保存する</button>
             </div>
             <button
               type="button"
               onClick={() => requestDelete(editTarget)}
-              className="ui-icon-button"
-              style={{ marginTop: 12, width: '100%', padding: '12px', background: 'transparent', color: T.accent, border: `1px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer' }}
+              className="ui-btn ui-btn--danger ui-btn-block"
+              style={{ marginTop: 12 }}
             >
               作品を削除
             </button>

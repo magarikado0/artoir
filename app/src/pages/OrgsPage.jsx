@@ -5,7 +5,6 @@ import { supabase } from '../lib/supabase'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import LoadingFrames from '../components/LoadingFrames'
-import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, pad2 } from '../lib/tokens'
 
 const loginForSetupState = { from: '/account/organizations/new' }
@@ -14,7 +13,6 @@ export default function OrgsPage() {
   const { session } = useAuth()
   const [orgs, setOrgs] = useState([])
   const [loading, setLoading] = useState(true)
-  const showLoader = useDelayedLoading(loading)
   const [query, setQuery] = useState('')
 
   useEffect(() => {
@@ -43,7 +41,7 @@ export default function OrgsPage() {
     return orgs.filter((o) => [o.name, o.description].filter(Boolean).join(' ').toLowerCase().includes(q))
   }, [orgs, query])
 
-  if (showLoader) return (
+  if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <LoadingFrames />
     </div>
@@ -57,8 +55,8 @@ export default function OrgsPage() {
 
         <div className="ui-toolbar-grid">
           <input className="ui-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="名前を検索" />
-          <Link to={session ? '/account/organizations/new' : '/login'} state={session ? undefined : loginForSetupState} className="ui-floating-action ui-create-action">
-            <Icon name="plus" size={17} />
+          <Link to={session ? '/account/organizations/new' : '/login'} state={session ? undefined : loginForSetupState} className="ui-pill-action ui-pill-action--accent">
+            <Icon name="plus" size={16} />
             <span>団体を作成</span>
           </Link>
         </div>
@@ -88,7 +86,7 @@ export default function OrgsPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>団体が見つかりません</div>
+          <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>団体が見つかりません</div>
         )}
       </main>
       <BottomNav active="orgs" />

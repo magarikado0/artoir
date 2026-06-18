@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import DashShell, { DashField, DashSectionLabel } from '../components/DashShell'
+import LoadingFrames from '../components/LoadingFrames'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { normalizeProfile, slugifyProfileId } from '../lib/profile'
@@ -111,7 +112,7 @@ export default function AccountSetup() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
 
@@ -167,27 +168,25 @@ export default function AccountSetup() {
         />
 
         {error && (
-          <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(180,69,44,0.06)', border: `0.5px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, color: T.accent, letterSpacing: '0.06em' }}>
+          <div className="ui-alert ui-alert--error" style={{ marginBottom: 16 }}>
             {error}
           </div>
         )}
 
-        <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div className="ui-btn-row" style={{ marginTop: 28 }}>
           <button
             type="button"
             onClick={() => navigate(cancelTo)}
-            className="ui-icon-button"
-            style={{ padding: '14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}
+            className="ui-btn ui-btn--ghost"
           >
             キャンセル
           </button>
           <button
             type="submit"
             disabled={saving || !displayName.trim() || !slug.trim()}
-            className="ui-action"
-            style={{ padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: (saving || !displayName.trim() || !slug.trim()) ? 0.6 : 1 }}
+            className="ui-btn ui-btn--accent"
           >
-            {saving ? '保存中...' : '保存する'}
+            {saving ? '保存中…' : '保存する'}
           </button>
         </div>
         <div style={{ height: 40 }} />

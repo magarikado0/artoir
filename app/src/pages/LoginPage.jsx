@@ -219,45 +219,14 @@ export default function LoginPage() {
         disabled={googleLoading || loading}
         onClick={handleGoogleAuth}
         aria-label="Google で続ける"
-        style={{
-          width: '100%',
-          marginTop: 20,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          minHeight: 48,
-          padding: '0 16px',
-          background: T.card,
-          color: T.ink,
-          border: `1px solid ${T.lineSoft}`,
-          borderRadius: 8,
-          fontFamily: T.sans,
-          fontSize: 13,
-          fontWeight: 500,
-          letterSpacing: '0.06em',
-          cursor: googleLoading || loading ? 'wait' : 'pointer',
-          opacity: googleLoading || loading ? 0.65 : 1,
-        }}
+        className="ui-btn ui-btn--ghost ui-btn-block"
+        style={{ marginTop: 20, gap: 10, cursor: googleLoading || loading ? 'wait' : 'pointer' }}
       >
         <GoogleMark />
         {googleLoading ? 'リダイレクト中…' : 'Google で続ける'}
       </button>
 
-      <div style={{
-        marginTop: 16,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        fontFamily: T.mono,
-        fontSize: 9,
-        letterSpacing: '0.14em',
-        color: T.inkMuted,
-      }}>
-        <div style={{ flex: 1, height: 1, background: T.lineSoft }} aria-hidden />
-        <span>または</span>
-        <div style={{ flex: 1, height: 1, background: T.lineSoft }} aria-hidden />
-      </div>
+      <div className="ui-divider"><span>または</span></div>
 
       <div className="ui-auth-tabs">
         <button type="button" className={mode === 'login' ? 'is-active' : ''} onClick={() => switchMode('login')}>
@@ -289,20 +258,12 @@ export default function LoginPage() {
         />
 
         {error && (
-          <div style={{
-            marginBottom: 12, padding: '10px 14px',
-            background: 'rgba(180,69,44,0.06)', border: `0.5px solid ${T.accent}`,
-            fontFamily: T.mono, fontSize: 11, color: T.accent, letterSpacing: '0.06em',
-          }}>
+          <div className="ui-alert ui-alert--error" style={{ marginBottom: 12 }}>
             {error}
           </div>
         )}
         {success && (
-          <div style={{
-            marginBottom: 12, padding: '10px 14px',
-            background: 'rgba(0,128,0,0.05)', border: '0.5px solid #2d8a4e',
-            fontFamily: T.mono, fontSize: 11, color: '#2d8a4e', letterSpacing: '0.06em',
-          }}>
+          <div className="ui-alert ui-alert--success" style={{ marginBottom: 12 }}>
             {success}
           </div>
         )}

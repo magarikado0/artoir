@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
@@ -23,6 +23,7 @@ function SummaryItem({ label, value }) {
 
 export default function ExhibitionPage() {
   const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionSlug } = useParams()
+  const location = useLocation()
   const profileSlug = routeProfileSlug || legacyProfileSlugFromOwnerSlug(routeOrgSlug)
   const orgSlug = profileSlug ? undefined : routeOrgSlug
   const [owner, setOwner] = useState(null)
@@ -31,7 +32,9 @@ export default function ExhibitionPage() {
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
-  const showLoader = useDelayedLoading(loading)
+  const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
+  const showDelayedLoader = useDelayedLoading(isExhibitionListNavigation && loading)
+  const showLoader = showDelayedLoader || (!isExhibitionListNavigation && loading)
 
   useEffect(() => {
     async function load() {
@@ -162,15 +165,19 @@ export default function ExhibitionPage() {
       <Header activeTab="top" />
       <main className="ui-app-main">
         <div className="ui-app-topline">
-          <Link to={ownerBase} style={{ color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← {ownerPageLabel}</Link>
-          <button onClick={copyLink} className="ui-pill-action" style={{ background: copied ? T.accent : T.ink }}>
-            <Icon name="list" size={17} />
+          <Link to={ownerBase} className="ui-back-link">← {ownerPageLabel}</Link>
+          <button
+            onClick={copyLink}
+            type="button"
+            className={`ui-pill-action ${copied ? 'ui-pill-action--accent' : ''}`}
+          >
+            <Icon name={copied ? 'check' : 'share'} size={16} />
             <span>{copied ? 'コピー済み' : 'リンクを共有'}</span>
           </button>
         </div>
 
         <section>
-          <div className="ui-app-card ui-exhibition-summary-card">
+          <div className="ui-exhibition-summary-card">
             <h1 className="ui-screen-title">{exhibition.title}</h1>
             {exhibition.description && <p className="ui-screen-subtitle">{exhibition.description}</p>}
             <div className="ui-exhibition-summary-grid">
@@ -181,17 +188,13 @@ export default function ExhibitionPage() {
           </div>
         </section>
 
-        <section style={{ marginTop: 22 }}>
-          <div className="ui-app-topline">
-            <div>
-              <div className="ui-screen-title" style={{ fontSize: 22 }}>作品</div>
-            </div>
-          </div>
+        <section style={{ marginTop: 64 }}>
+          <div className="ui-section-label">作品</div>
           {artworks.length > 0 ? (
             <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={openArtwork} />
           ) : (
-            <div className="ui-app-card" style={{ padding: 32, textAlign: 'center' }}>
-              <p style={{ fontFamily: T.mono, fontSize: 12, color: T.inkMuted, letterSpacing: '0.05em' }}>作品がまだありません</p>
+            <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>
+              作品がまだありません
             </div>
           )}
         </section>
