@@ -31,15 +31,15 @@ function LoggedOut({ isDesktop }) {
       <div className="ui-screen-subtitle" style={{ fontFamily: isDesktop ? T.serifBody : undefined, marginBottom: isDesktop ? 22 : undefined }}>
         ログインすると、プロフィールと団体の展示を管理できます。
       </div>
-      <button onClick={() => navigate('/login')} className="ui-pill-action" style={{ marginTop: isDesktop ? 0 : 22, width: '100%', justifyContent: 'space-between' }}>
+      <button onClick={() => navigate('/login')} className="ui-btn ui-btn--primary ui-btn-block" style={{ marginTop: isDesktop ? 0 : 22, justifyContent: 'space-between' }}>
         <span>ログイン / 新規登録</span>
-        <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span>
+        <span aria-hidden="true">→</span>
       </button>
       <div className="ui-account-benefits" style={{ marginTop: isDesktop ? undefined : 32 }}>
-        <div style={{ paddingBottom: 8, borderBottom: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 10, letterSpacing: '0.18em', color: T.ink }}>ログインでできること</div>
+        <div className="ui-section-label" style={{ margin: '0 0 8px', paddingBottom: 8, borderBottom: `1px solid ${T.lineSoft}` }}>ログインでできること</div>
         {benefits.map(([n, title, desc]) => (
           <div key={n} className="ui-account-row" style={{ display: 'grid', gridTemplateColumns: '32px 1fr', gap: 10 }}>
-            <div style={{ fontFamily: T.mono, fontSize: 11, color: isDesktop ? T.inkMuted : T.accent }}>{n}</div>
+            <div style={{ fontSize: 12, color: isDesktop ? T.inkMuted : T.accent }}>{n}</div>
             <div>
               <div style={{ fontFamily: T.serif, fontSize: 15, color: T.ink }}>{title}</div>
               <div style={{ marginTop: 4, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{desc}</div>
@@ -60,11 +60,11 @@ function ProfileSummary({ profile, onAddWork, preparingWork }) {
       <div className="ui-profile-summary-row">
         <div className="ui-profile-summary-main">
           <div className="ui-screen-title" style={{ fontSize: 28 }}>{profile.display_name}</div>
-          <div style={{ marginTop: 4, fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>@{profile.slug}</div>
+          <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
           {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 10, maxWidth: 620 }}>{profile.bio}</p>}
         </div>
         <div className="ui-profile-summary-actions">
-          <Link to="/account/setup" className="ui-pill-action" style={{ background: T.paperAlt, color: T.ink }}>
+          <Link to="/account/setup" className="ui-btn ui-btn--ghost">
             <span>プロフィール編集</span>
           </Link>
           <ImageUploader
@@ -99,8 +99,8 @@ function AccountArtworkCard({ artwork, onOpen, onEdit }) {
           aspectRatio="1 / 1"
           fit="contain"
           className="ui-profile-artwork-media"
-          wrapperStyle={{ borderRadius: 7, background: 'rgba(228, 211, 184, 0.12)' }}
-          imageStyle={{ borderRadius: 7 }}
+          wrapperStyle={{ borderRadius: 4, background: T.surfaceMuted }}
+          imageStyle={{ borderRadius: 4 }}
         />
       </button>
       <div className="ui-profile-artwork-card-body">
@@ -144,12 +144,12 @@ function AccountArtworkEditModal({ artwork, title, description, saving, deleting
             {error}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-          <button type="button" onClick={onClose} disabled={saving || deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>閉じる</button>
-          <button type="button" onClick={onSave} disabled={saving || deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: saving ? 0.6 : 1 }}>{saving ? '保存中...' : '保存する'}</button>
+        <div className="ui-btn-row" style={{ marginTop: 16 }}>
+          <button type="button" onClick={onClose} disabled={saving || deleting} className="ui-btn ui-btn--ghost">閉じる</button>
+          <button type="button" onClick={onSave} disabled={saving || deleting} className="ui-btn ui-btn--accent">{saving ? '保存中…' : '保存する'}</button>
         </div>
-        <button type="button" onClick={onDelete} disabled={saving || deleting} className="ui-icon-button" style={{ marginTop: 12, width: '100%', padding: '12px', background: 'transparent', color: T.accent, border: `1px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer', opacity: deleting ? 0.6 : 1 }}>
-          {deleting ? '削除中...' : '作品を削除'}
+        <button type="button" onClick={onDelete} disabled={saving || deleting} className="ui-btn ui-btn--danger ui-btn-block" style={{ marginTop: 12 }}>
+          {deleting ? '削除中…' : '作品を削除'}
         </button>
       </div>
     </div>
@@ -393,7 +393,7 @@ export default function AccountPage() {
           <div className="ui-kicker">プロフィール</div>
           <div style={{ marginTop: 8, fontFamily: T.serif, fontSize: 22, color: T.ink }}>プロフィールを読み込めませんでした</div>
           <div style={{ marginTop: 8, fontSize: 12, color: T.accent, lineHeight: 1.7 }}>{loadError || '時間をおいて再度お試しください。'}</div>
-          <button type="button" onClick={handleSignOut} className="ui-pill-action" style={{ marginTop: 18, background: T.paperAlt, color: T.ink }}>
+          <button type="button" onClick={handleSignOut} className="ui-btn ui-btn--ghost" style={{ marginTop: 18 }}>
             ログアウト
           </button>
         </div>

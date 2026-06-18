@@ -90,7 +90,7 @@ export default function OrganizationCreatePage() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+      <span style={{ color: T.inkMuted, fontSize: 13 }}>読み込み中…</span>
     </div>
   )
 
@@ -118,17 +118,17 @@ export default function OrganizationCreatePage() {
             <DashField label="説明文" value={description} onChange={setDescription} placeholder="団体の説明文を入力..." multiline help="任意。団体ページに表示されます。" />
 
             {error && (
-              <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(180,69,44,0.06)', border: `0.5px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, color: T.accent, letterSpacing: '0.06em' }}>
+              <div className="ui-alert ui-alert--error" style={{ marginBottom: 16 }}>
                 {error}
               </div>
             )}
 
-            <div style={{ marginTop: 28, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <button type="button" onClick={() => navigate('/account')} className="ui-icon-button" style={{ padding: '14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+            <div className="ui-btn-row" style={{ marginTop: 28 }}>
+              <button type="button" onClick={() => navigate('/account')} className="ui-btn ui-btn--ghost">
                 キャンセル
               </button>
-              <button type="submit" disabled={saving || !name.trim() || !slug.trim()} className="ui-action" style={{ padding: '14px', background: T.accent, color: T.paper, border: 'none', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: (saving || !name.trim() || !slug.trim()) ? 0.6 : 1 }}>
-                {saving ? '作成中...' : '作成する'}
+              <button type="submit" disabled={saving || !name.trim() || !slug.trim()} className="ui-btn ui-btn--accent">
+                {saving ? '作成中…' : '作成する'}
               </button>
             </div>
             <div style={{ height: 40 }} />

@@ -3,16 +3,12 @@ import { T } from '../lib/tokens'
 
 function PlaceholderBadge({ label, caption }) {
   return (
-    <div style={{ display: 'grid', placeItems: 'center', gap: 6, padding: 16, textAlign: 'center' }}>
+    <div style={{ display: 'grid', placeItems: 'center', gap: 8, padding: 16, textAlign: 'center' }}>
       <span style={{
         fontFamily: T.serif,
-        fontSize: 12,
+        fontSize: 13,
         lineHeight: 1.4,
-        color: T.ink,
-        background: T.gold,
-        border: `1px solid ${T.ink}`,
-        padding: '4px 10px',
-        borderRadius: 999,
+        color: T.inkSoft,
         maxWidth: '100%',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -21,7 +17,7 @@ function PlaceholderBadge({ label, caption }) {
         {label}
       </span>
       {caption && (
-        <span style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>
+        <span style={{ fontSize: 11, letterSpacing: '0.02em', color: T.inkMuted }}>
           {caption}
         </span>
       )}

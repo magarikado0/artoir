@@ -57,8 +57,8 @@ export default function OrgsPage() {
 
         <div className="ui-toolbar-grid">
           <input className="ui-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="名前を検索" />
-          <Link to={session ? '/account/organizations/new' : '/login'} state={session ? undefined : loginForSetupState} className="ui-floating-action ui-create-action">
-            <Icon name="plus" size={17} />
+          <Link to={session ? '/account/organizations/new' : '/login'} state={session ? undefined : loginForSetupState} className="ui-pill-action ui-pill-action--accent">
+            <Icon name="plus" size={16} />
             <span>団体を作成</span>
           </Link>
         </div>
@@ -88,7 +88,7 @@ export default function OrgsPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>団体が見つかりません</div>
+          <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>団体が見つかりません</div>
         )}
       </main>
       <BottomNav active="orgs" />

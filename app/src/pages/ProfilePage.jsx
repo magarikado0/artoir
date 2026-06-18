@@ -47,13 +47,13 @@ export default function ProfilePage() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, letterSpacing: '0.2em', fontSize: 11 }}>...</span>
+      <span style={{ color: T.inkMuted, fontSize: 13 }}>読み込み中…</span>
     </div>
   )
 
   if (!profile) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <p style={{ color: T.inkMuted, fontSize: 13 }}>プロフィールが見つかりません</p>
+      <p style={{ color: T.inkMuted, fontSize: 14 }}>プロフィールが見つかりません</p>
     </div>
   )
 
@@ -63,12 +63,12 @@ export default function ProfilePage() {
     <div className="ui-page-shell">
       <Header />
       <main className="ui-app-main">
-        <Link to="/" style={{ display: 'inline-flex', marginBottom: 14, color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 展覧会</Link>
-        <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
+        <Link to="/" className="ui-back-link" style={{ marginBottom: 20 }}>← 展覧会</Link>
+        <section style={{ marginBottom: 48 }}>
           <div className="ui-kicker">プロフィール</div>
-          <h1 className="ui-screen-title" style={{ marginTop: 7 }}>{profile.display_name}</h1>
-          <div style={{ marginTop: 4, fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>@{profile.slug}</div>
-          {profile.bio && <p className="ui-screen-subtitle" style={{ maxWidth: 720, marginTop: 12 }}>{profile.bio}</p>}
+          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
+          <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
+          {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 16 }}>{profile.bio}</p>}
           {(sns.instagram || sns.x || profile.homepage_url) && (
             <div className="ui-public-link-row">
               {sns.instagram && (
@@ -104,9 +104,12 @@ export default function ProfilePage() {
         </section>
 
         {artworks.length > 0 ? (
-          <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={setSelectedArtwork} />
+          <>
+            <div className="ui-section-label">作品</div>
+            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={setSelectedArtwork} />
+          </>
         ) : (
-          <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>公開中の作品はまだありません</div>
+          <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>公開中の作品はまだありません</div>
         )}
       </main>
       <ArtworkModal

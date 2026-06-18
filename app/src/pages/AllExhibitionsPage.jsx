@@ -79,9 +79,9 @@ export default function AllExhibitionsPage() {
           <button
             type="button"
             onClick={() => navigate(session ? '/account' : '/login')}
-            className="ui-floating-action ui-create-action"
+            className="ui-pill-action ui-pill-action--accent"
           >
-            <Icon name="plus" size={18} />
+            <Icon name="plus" size={16} />
             <span>展覧会を作成</span>
           </button>
         </div>
@@ -99,7 +99,7 @@ export default function AllExhibitionsPage() {
         </div>
 
         {filteredRows.length === 0 && (
-          <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>展覧会がまだありません</div>
+          <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>展覧会がまだありません</div>
         )}
       </main>
       <BottomNav active="top" />

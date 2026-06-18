@@ -294,15 +294,15 @@ export default function DashExhibitionEdit() {
 
   if (forbidden) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <p style={{ color: T.inkMuted, fontSize: 13 }}>このプロフィールの展示は管理できません</p>
+      <p style={{ color: T.inkMuted, fontSize: 14 }}>このプロフィールの展示は管理できません</p>
     </div>
   )
 
   if (loadError && !owner) return (
     <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
-      <div className="ui-app-card" style={{ padding: 18, borderColor: T.accent, color: T.accent }}>
+      <div className="ui-alert ui-alert--error">
         <div className="ui-kicker">読み込みエラー</div>
-        <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.7 }}>{loadError}</div>
+        <div className="ui-confirm-msg">{loadError}</div>
       </div>
     </DashShell>
   )
@@ -317,7 +317,7 @@ export default function DashExhibitionEdit() {
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
       <DashSectionLabel>基本情報</DashSectionLabel>
       {saveError && (
-        <div className="ui-app-card" style={{ padding: 14, marginBottom: 14, borderColor: T.accent, color: T.accent, fontSize: 12, lineHeight: 1.7 }}>
+        <div className="ui-alert ui-alert--error" style={{ marginBottom: 16 }}>
           {saveError}
         </div>
       )}
@@ -352,9 +352,9 @@ export default function DashExhibitionEdit() {
       />
 
       <DashSectionLabel>サムネイル</DashSectionLabel>
-      <div style={{ display: 'grid', gap: 10 }}>
+      <div style={{ display: 'grid', gap: 12 }}>
         {thumbnailUrl ? (
-          <div style={{ display: 'grid', gap: 8 }}>
+          <div style={{ display: 'grid', gap: 10 }}>
             <ArtworkMedia
               src={getThumbnailUrl(thumbnailUrl, 220)}
               alt={title || '展覧会サムネイル'}
@@ -362,10 +362,10 @@ export default function DashExhibitionEdit() {
               loading="eager"
               fit="contain"
               aspectRatio="1 / 1"
-              wrapperStyle={{ width: 'min(220px, 100%)', borderRadius: 7 }}
-              imageStyle={{ borderRadius: 7 }}
+              wrapperStyle={{ width: 'min(220px, 100%)', borderRadius: 6 }}
+              imageStyle={{ borderRadius: 6 }}
             />
-            <button type="button" onClick={() => setThumbnailUrl('')} className="ui-icon-button" style={{ width: 'fit-content', padding: '10px 14px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+            <button type="button" onClick={() => setThumbnailUrl('')} className="ui-btn ui-btn--ghost" style={{ width: 'fit-content' }}>
               サムネイルを削除
             </button>
           </div>
@@ -373,18 +373,18 @@ export default function DashExhibitionEdit() {
           <>
             <div className="ui-field-help">公開ページと一覧の先頭で使う画像です。設定しない場合は作品画像の先頭を使います。</div>
             <ImageUploader compressMaxDimension={1200} onUploaded={(url) => setThumbnailUrl(url)}>
-              <div style={{ display: 'grid', gap: 6 }}>
-                <div style={{ fontFamily: T.serif, fontSize: 14, color: T.ink }}>画像をアップロード</div>
-                <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>クリックまたはドラッグ&ドロップ</div>
+              <div style={{ display: 'grid', gap: 4 }}>
+                <div style={{ fontSize: 14, color: T.ink }}>画像をアップロード</div>
+                <div style={{ fontSize: 12, color: T.inkMuted }}>クリックまたはドラッグ&ドロップ</div>
               </div>
             </ImageUploader>
           </>
         )}
       </div>
 
-      <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
+      <div className="ui-btn-row" style={{ marginTop: 32 }}>
         {!isNew && (
-          <button type="button" onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/artworks`)} className="ui-icon-button" style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+          <button type="button" onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/artworks`)} className="ui-btn ui-btn--ghost">
             作品を管理 →
           </button>
         )}
@@ -392,31 +392,31 @@ export default function DashExhibitionEdit() {
           type="button"
           onClick={handleSave}
           disabled={saving || deleting}
-          className="ui-action"
-          style={{ flex: 1, padding: '14px', background: T.accent, color: T.paper, border: `1px solid ${T.paper}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer', opacity: saving || deleting ? 0.6 : 1 }}
-        >{saving ? 'SAVING...' : 'SAVE ↩'}</button>
+          className="ui-btn ui-btn--accent"
+          style={{ flex: 1 }}
+        >{saving ? '保存中…' : '保存'}</button>
       </div>
 
       {!isNew && (
-        <div style={{ marginTop: 36, paddingTop: 24, borderTop: `1px solid ${T.ink}` }}>
-          <p style={{ margin: '0 0 14px', fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>
+        <div style={{ marginTop: 40, paddingTop: 28, borderTop: '1px solid #E4DDD2' }}>
+          <DashSectionLabel>危険な操作</DashSectionLabel>
+          <p className="ui-settings-danger-copy">
             この展覧会と登録済みの作品をすべて削除します。公開 URL は無効になります。
           </p>
           {deleteConfirm ? (
-            <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
-              <div className="ui-kicker">CONFIRM DELETE</div>
-              <div style={{ marginTop: 8, fontSize: 13 }}>{exhibition?.title?.trim() ? `「${exhibition.title}」を削除します。` : 'この展覧会を削除します。'}</div>
-              <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
-                <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? 'DELETING...' : 'DELETE'}</button>
+            <div className="ui-confirm">
+              <div className="ui-kicker">削除の確認</div>
+              <div className="ui-confirm-msg">{exhibition?.title?.trim() ? `「${exhibition.title}」を削除します。` : 'この展覧会を削除します。'}</div>
+              <div className="ui-btn-row" style={{ marginTop: 16 }}>
+                <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-btn ui-btn--ghost">キャンセル</button>
+                <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-btn ui-btn--danger">{deleting ? '削除中…' : '削除する'}</button>
               </div>
             </div>
           ) : (
             <button
               type="button"
               onClick={() => setDeleteConfirm(true)}
-              className="ui-icon-button"
-              style={{ padding: '12px 16px', background: 'transparent', color: T.accent, border: `1px solid ${T.accent}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.12em', cursor: 'pointer' }}
+              className="ui-btn ui-btn--danger"
             >
               展覧会を削除
             </button>
@@ -552,7 +552,7 @@ export default function DashExhibitionEdit() {
                 <ImageUploader compressMaxDimension={1200} onUploaded={(url) => setThumbnailUrl(url)}>
                   <div style={{ display: 'grid', gap: 6 }}>
                     <div style={{ fontFamily: T.serif, fontSize: 14, color: T.ink }}>画像をアップロード</div>
-                    <div style={{ fontFamily: T.mono, fontSize: 10, letterSpacing: '0.08em', color: T.inkMuted }}>クリックまたはドラッグ&ドロップ</div>
+                    <div style={{ fontSize: 12, color: T.inkMuted }}>クリックまたはドラッグ&ドロップ</div>
                   </div>
                 </ImageUploader>
               </>
@@ -571,16 +571,16 @@ export default function DashExhibitionEdit() {
           この展覧会と登録済みの作品をすべて削除します。公開 URL は無効になります。
         </p>
         {deleteConfirm ? (
-          <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
-            <div className="ui-kicker">CONFIRM DELETE</div>
-            <div style={{ marginTop: 8, fontSize: 13 }}>{exhibition?.title?.trim() ? `「${exhibition.title}」を削除します。` : 'この展覧会を削除します。'}</div>
-            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-              <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>キャンセル</button>
-              <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? '削除中...' : '削除する'}</button>
+          <div className="ui-confirm">
+            <div className="ui-kicker">削除の確認</div>
+            <div className="ui-confirm-msg">{exhibition?.title?.trim() ? `「${exhibition.title}」を削除します。` : 'この展覧会を削除します。'}</div>
+            <div className="ui-btn-row" style={{ marginTop: 16 }}>
+              <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-btn ui-btn--ghost">キャンセル</button>
+              <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-btn ui-btn--danger">{deleting ? '削除中…' : '削除する'}</button>
             </div>
           </div>
         ) : (
-          <button type="button" onClick={() => setDeleteConfirm(true)} className="ui-settings-danger-button">
+          <button type="button" onClick={() => setDeleteConfirm(true)} className="ui-btn ui-btn--danger">
             展覧会を削除
           </button>
         )}

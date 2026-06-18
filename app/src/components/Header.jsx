@@ -1,8 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
-import { useIsDesktop } from '../lib/useIsDesktop'
-import BrandMark, { BrandLockup } from './BrandMark'
+import { BrandLockup } from './BrandMark'
 
 const TABS = [
   { key: 'top', label: '展覧会', path: '/', icon: 'list' },
@@ -11,7 +10,7 @@ const TABS = [
 ]
 
 export function Icon({ name, size = 20 }) {
-  const s = { stroke: 'currentColor', strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' }
+  const s = { stroke: 'currentColor', strokeWidth: 1.6, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' }
   if (name === 'org') return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M4 21V8l8-4 8 4v13" {...s} />
@@ -50,6 +49,19 @@ export function Icon({ name, size = 20 }) {
       <path d="M15 18l-6-6 6-6M9 12h11" {...s} />
     </svg>
   )
+  if (name === 'share') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="6" cy="12" r="2.4" {...s} />
+      <circle cx="18" cy="6" r="2.4" {...s} />
+      <circle cx="18" cy="18" r="2.4" {...s} />
+      <path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6" {...s} />
+    </svg>
+  )
+  if (name === 'check') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 12.5l4.5 4.5L19 7" {...s} />
+    </svg>
+  )
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M5 7h14M5 12h14M5 17h9" {...s} />
@@ -58,7 +70,6 @@ export function Icon({ name, size = 20 }) {
 }
 
 export default function Header({ activeTab }) {
-  const isDesktop = useIsDesktop()
   const { session } = useAuth()
   const navigate = useNavigate()
 
@@ -68,48 +79,33 @@ export default function Header({ activeTab }) {
     navigate('/')
   }
 
-  if (isDesktop) {
-    return (
-      <aside className="ui-side-rail">
-        <Link to="/" className="ui-rail-brand" aria-label="Artoir home">
-          <BrandMark size="rail" />
-        </Link>
-        <nav className="ui-rail-nav" aria-label="メインメニュー">
-          {TABS.map((t) => {
-            const on = activeTab === t.key
-            return (
-              <Link key={t.key} to={t.path} className={`ui-rail-item ${on ? 'is-active' : ''}`} aria-label={t.label}>
-                <Icon name={t.icon} size={21} />
-                <span>{t.label}</span>
-              </Link>
-            )
-          })}
-        </nav>
-        <div className="ui-rail-bottom">
-          {session ? (
-            <button onClick={handleLogout} className="ui-rail-mini" aria-label="ログアウト">
-              <Icon name="logout" size={17} />
-            </button>
-          ) : (
-            <Link to="/login" className="ui-rail-mini" aria-label="ログイン">
-              <Icon name="login" size={17} />
-            </Link>
-          )}
-        </div>
-      </aside>
-    )
-  }
-
   return (
-    <div className="ui-mobile-topbar">
-      <Link to="/" className="ui-mobile-brand" aria-label="Artoir home">
+    <header className="ui-topbar">
+      <Link to="/" className="ui-topbar-brand" aria-label="Artoir home">
         <BrandLockup />
       </Link>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Link to="/account" className={`ui-top-icon ${activeTab === 'account' ? 'is-active' : ''}`} aria-label="アカウント">
-          <Icon name="user" size={18} />
-        </Link>
+      <nav className="ui-topbar-nav" aria-label="メインメニュー">
+        {TABS.map((t) => (
+          <Link
+            key={t.key}
+            to={t.path}
+            className={`ui-topbar-link ${activeTab === t.key ? 'is-active' : ''}`}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </nav>
+      <div className="ui-topbar-actions">
+        {session ? (
+          <button onClick={handleLogout} className="ui-topbar-icon" aria-label="ログアウト" type="button">
+            <Icon name="logout" size={18} />
+          </button>
+        ) : (
+          <Link to="/login" className="ui-topbar-icon" aria-label="ログイン">
+            <Icon name="login" size={18} />
+          </Link>
+        )}
       </div>
-    </div>
+    </header>
   )
 }

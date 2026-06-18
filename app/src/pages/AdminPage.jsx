@@ -227,7 +227,7 @@ export default function AdminPage() {
 
         {/* 展覧会選択 */}
         <div style={{ marginBottom: '2rem' }}>
-          <label style={{ fontSize: '0.75rem', letterSpacing: '0.1em', color: '#9a9088', display: 'block', marginBottom: '0.5rem' }}>
+          <label style={{ fontSize: '0.8rem', color: '#8A8178', display: 'block', marginBottom: '0.5rem' }}>
             展覧会
           </label>
           <select
@@ -296,19 +296,10 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={saving}
-              style={{
-                padding: '0.75rem',
-                background: '#1a1612',
-                color: '#f5f0e8',
-                border: 'none',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                fontFamily: 'Cormorant Garamond, serif',
-                fontSize: '0.8rem',
-                letterSpacing: '0.2em',
-                opacity: saving ? 0.6 : 1,
-              }}
+              className="ui-btn ui-btn--primary ui-btn-block"
+              style={{ cursor: saving ? 'not-allowed' : 'pointer' }}
             >
-              {saving ? '保存中...' : '保存する'}
+              {saving ? '保存中…' : '保存する'}
             </button>
           </div>
         </form>

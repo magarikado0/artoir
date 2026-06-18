@@ -288,9 +288,9 @@ export default function DashSettings() {
           「{org?.name || orgSlug}」と配下の展覧会・作品をすべて削除します。復元できません。
         </p>
         {deleteConfirm ? (
-          <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
-            <div className="ui-kicker">CONFIRM DELETE</div>
-            <div style={{ marginTop: 8, fontSize: 13 }}>続行するにはID「{org?.slug || orgSlug}」を入力してください。</div>
+          <div className="ui-confirm">
+            <div className="ui-kicker">削除の確認</div>
+            <div className="ui-confirm-msg">続行するにはID「{org?.slug || orgSlug}」を入力してください。</div>
             <div style={{ marginTop: 12 }}>
               <div className="ui-form-label">ID</div>
               <div className="ui-input-wrap">
@@ -302,13 +302,12 @@ export default function DashSettings() {
                 />
               </div>
             </div>
-            <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+            <div className="ui-btn-row" style={{ marginTop: 16 }}>
               <button
                 type="button"
                 onClick={() => { setDeleteConfirm(false); setDeleteSlugInput('') }}
                 disabled={deleting}
-                className="ui-pill-action"
-                style={{ flex: 1, background: T.paperAlt, color: T.ink }}
+                className="ui-btn ui-btn--ghost"
               >
                 キャンセル
               </button>
@@ -316,10 +315,9 @@ export default function DashSettings() {
                 type="button"
                 onClick={handleDeleteOrganization}
                 disabled={deleting || deleteSlugInput.trim() !== (org?.slug || orgSlug)}
-                className="ui-pill-action"
-                style={{ flex: 1, background: T.accent, opacity: deleting || deleteSlugInput.trim() !== (org?.slug || orgSlug) ? 0.5 : 1 }}
+                className="ui-btn ui-btn--danger"
               >
-                {deleting ? '削除中...' : '削除する'}
+                {deleting ? '削除中…' : '削除する'}
               </button>
             </div>
           </div>

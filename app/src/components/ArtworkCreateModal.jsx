@@ -244,12 +244,12 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="artwork-create-title" style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(17,17,16,0.6)', display: 'grid', placeItems: 'center', padding: 16 }}>
       <div className="ui-app-card" style={{ width: 'min(100%, 1080px)', maxHeight: 'calc(100vh - 32px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '16px 18px 14px', borderBottom: `1px solid ${T.lineSoft}`, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
+        <div style={{ padding: '18px 20px 16px', borderBottom: `1px solid ${T.lineSoft}`, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
           <div>
-            <div className="ui-kicker">NEW WORK</div>
+            <div className="ui-kicker">作品</div>
             <div id="artwork-create-title" className="ui-screen-title" style={{ fontSize: 22, marginTop: 6 }}>作品を追加</div>
           </div>
-          <button onClick={onClose} disabled={saving} className="ui-modal-close" type="button" style={{ minWidth: 44, minHeight: 44, padding: 0, borderRadius: 6, border: `1.5px solid ${T.ink}`, background: T.paper, color: T.ink, cursor: saving ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.mono, fontSize: 22, lineHeight: 1, fontWeight: 600 }}>
+          <button onClick={onClose} disabled={saving} className="ui-modal-close" type="button">
             ×
           </button>
         </div>
@@ -359,20 +359,20 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
               onVisibleChange={setCreatorsVisible}
             />
 
-            {error && <div style={{ padding: '10px 12px', border: `1px solid ${T.accent}`, color: T.accent, background: 'rgba(190,85,61,0.06)', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.06em' }}>{error}</div>}
+            {error && <div className="ui-alert ui-alert--error">{error}</div>}
 
             {progress !== null && (
               <div style={{ padding: '10px 12px', border: `1px solid ${T.lineSoft}`, background: T.card }}>
                 <div style={{ height: 4, borderRadius: 999, background: T.paperAlt, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${progress}%`, background: T.accent }} />
                 </div>
-                <div style={{ marginTop: 8, fontFamily: T.mono, fontSize: 10, color: T.inkMuted }}>{progress}%</div>
+                <div style={{ marginTop: 8, fontSize: 12, color: T.inkMuted }}>{progress}%</div>
               </div>
             )}
 
-            <div style={{ marginTop: 'auto', display: 'flex', gap: 8 }}>
-              <button onClick={onClose} disabled={saving} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>閉じる</button>
-              <button onClick={handleSave} disabled={!canSave} className="ui-pill-action" style={{ flex: 1, background: canSave ? T.accent : T.inkMuted }}>保存する</button>
+            <div className="ui-btn-row" style={{ marginTop: 'auto' }}>
+              <button onClick={onClose} disabled={saving} className="ui-btn ui-btn--ghost">閉じる</button>
+              <button onClick={handleSave} disabled={!canSave} className="ui-btn ui-btn--accent">保存する</button>
             </div>
           </div>
         </div>

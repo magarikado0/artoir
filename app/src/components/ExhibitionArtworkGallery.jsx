@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import ArtworkMedia from './ArtworkMedia'
 import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
+import { T } from '../lib/tokens'
 
 export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
   const galleryRef = useRef(null)
@@ -42,8 +43,8 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
               fillHeight
               aspectRatio="1 / 1"
               fit="contain"
-              wrapperStyle={{ borderRadius: 7, background: 'rgba(228, 211, 184, 0.12)' }}
-              imageStyle={{ borderRadius: 7 }}
+              wrapperStyle={{ borderRadius: 4, background: T.surfaceMuted }}
+              imageStyle={{ borderRadius: 4 }}
             />
           </button>
         )
