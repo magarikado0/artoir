@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import DashShell from '../../components/DashShell'
@@ -59,6 +59,7 @@ function CreatorPicker({ profiles, selectedIds, onToggle, visible, onVisibleChan
 
 export default function DashArtworks() {
   const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionId } = useParams()
+  const location = useLocation()
   const { session } = useAuth()
   const profileSlug = routeProfileSlug || legacyProfileSlugFromOwnerSlug(routeOrgSlug)
   const orgSlug = profileSlug ? undefined : routeOrgSlug
@@ -68,7 +69,9 @@ export default function DashArtworks() {
   const [defaultCreatorIds, setDefaultCreatorIds] = useState([])
   const [forbidden, setForbidden] = useState(false)
   const [loading, setLoading] = useState(true)
-  const showLoader = useDelayedLoading(loading)
+  const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
+  const showDelayedLoader = useDelayedLoading(isExhibitionListNavigation && loading)
+  const showLoader = showDelayedLoader || (!isExhibitionListNavigation && loading)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')

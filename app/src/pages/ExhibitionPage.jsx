@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
@@ -23,6 +23,7 @@ function SummaryItem({ label, value }) {
 
 export default function ExhibitionPage() {
   const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionSlug } = useParams()
+  const location = useLocation()
   const profileSlug = routeProfileSlug || legacyProfileSlugFromOwnerSlug(routeOrgSlug)
   const orgSlug = profileSlug ? undefined : routeOrgSlug
   const [owner, setOwner] = useState(null)
@@ -31,7 +32,9 @@ export default function ExhibitionPage() {
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
-  const showLoader = useDelayedLoading(loading)
+  const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
+  const showDelayedLoader = useDelayedLoading(isExhibitionListNavigation && loading)
+  const showLoader = showDelayedLoader || (!isExhibitionListNavigation && loading)
 
   useEffect(() => {
     async function load() {

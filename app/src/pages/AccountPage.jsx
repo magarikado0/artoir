@@ -350,11 +350,11 @@ export default function AccountPage() {
     setEditTarget(null)
   }
 
-  const showLoading = useDelayedLoading(!ready || loading)
-  if (!showLoading && session && profileMissing) return <Navigate to="/account/setup" replace />
+  const showSessionLoading = useDelayedLoading(!ready)
+  if (!showSessionLoading && !loading && session && profileMissing) return <Navigate to="/account/setup" replace />
 
   function renderContent() {
-    if (showLoading) {
+    if (showSessionLoading) {
       return (
         <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
           <LoadingFrames />
@@ -363,6 +363,14 @@ export default function AccountPage() {
     }
 
     if (!session) return <LoggedOut isDesktop={isDesktop} />
+
+    if (loading) {
+      return (
+        <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
+          <LoadingFrames />
+        </div>
+      )
+    }
 
     if (!profile) {
       return (

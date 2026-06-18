@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import DashShell, { DashField, DashSectionLabel } from '../components/DashShell'
+import LoadingFrames from '../components/LoadingFrames'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { slugifyProfileId } from '../lib/profile'
@@ -90,7 +91,7 @@ export default function OrganizationCreatePage() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ color: T.inkMuted, fontSize: 13 }}>読み込み中…</span>
+      <LoadingFrames />
     </div>
   )
 

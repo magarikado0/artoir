@@ -63,7 +63,11 @@ export default function ExhibitionListCard({ exhibition: exh, org, profile, show
   const exhibitionHref = profile?.slug ? profileExhibitionPath(profile.slug, exh.slug) : `/${org?.slug || ''}/exhibition/${exh.slug}`
   const ownerName = org?.name || profile?.display_name
   return (
-    <Link to={exhibitionHref} className="ui-list-card ui-exhibition-list-card">
+    <Link
+      to={exhibitionHref}
+      state={{ showExhibitionPageLoading: true }}
+      className="ui-list-card ui-exhibition-list-card"
+    >
       <div className="ui-exhibition-list-card-media">
         <ExhibitionCardMedia thumbnailUrl={thumbnailUrl} title={exh.title} />
       </div>

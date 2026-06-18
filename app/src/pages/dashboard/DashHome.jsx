@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import DashShell, { StatusBadge } from '../../components/DashShell'
 import LoadingFrames from '../../components/LoadingFrames'
-import { useDelayedLoading } from '../../lib/useDelayedLoading'
 import { exhStatus, getExhibitionThumbnailUrl, mapExhibitionListRow } from '../../lib/exhibition'
 import { ExhibitionCardMedia } from '../../components/ExhibitionListCard'
 import { T, fmtDateRangeShort } from '../../lib/tokens'
@@ -18,7 +17,7 @@ function DashExhibitionCard({ exh, dashboardBase, navigate, onDelete, artworkCou
   const thumbnailUrl = getExhibitionThumbnailUrl(exh)
   return (
     <div
-      onClick={() => navigate(`${dashboardBase}/dashboard/exhibitions/${exh.id}/artworks`)}
+      onClick={() => navigate(`${dashboardBase}/dashboard/exhibitions/${exh.id}/artworks`, { state: { showExhibitionPageLoading: true } })}
       className="ui-list-card ui-exhibition-list-card"
       style={{ cursor: 'pointer' }}
     >
@@ -73,7 +72,6 @@ export default function DashHome() {
   const [loadError, setLoadError] = useState('')
   const [exhibitions, setExhibitions] = useState([])
   const [loading, setLoading] = useState(true)
-  const showLoader = useDelayedLoading(loading)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -111,12 +109,6 @@ export default function DashHome() {
     load()
   }, [dashboardBase, navigate, orgSlug, profileSlug, session])
 
-  if (showLoader) return (
-    <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <LoadingFrames />
-    </div>
-  )
-
   if (forbidden) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <p style={{ color: T.inkMuted, fontSize: 13 }}>このプロフィールの展示は管理できません</p>
@@ -128,6 +120,14 @@ export default function DashHome() {
       <div className="ui-alert ui-alert--error">
         <div className="ui-kicker">読み込みエラー</div>
         <div className="ui-confirm-msg">{loadError}</div>
+      </div>
+    </DashShell>
+  )
+
+  if (loading) return (
+    <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
+      <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
+        <LoadingFrames />
       </div>
     </DashShell>
   )

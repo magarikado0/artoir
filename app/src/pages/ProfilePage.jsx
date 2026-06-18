@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
+import LoadingFrames from '../components/LoadingFrames'
 import { T, externalHost } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 
@@ -47,7 +48,7 @@ export default function ProfilePage() {
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ color: T.inkMuted, fontSize: 13 }}>読み込み中…</span>
+      <LoadingFrames />
     </div>
   )
 

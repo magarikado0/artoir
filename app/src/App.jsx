@@ -5,6 +5,7 @@ import { peekSupabaseAuthUrlErrorFromWindow, isGoogleExchangeExternalCodeError, 
 import { AuthContext } from './lib/auth'
 import ProtectedRoute from './components/ProtectedRoute'
 import OAuthReturnRedirect from './components/OAuthReturnRedirect'
+import LoadingFrames from './components/LoadingFrames'
 
 const AllExhibitionsPage = lazy(() => import('./pages/AllExhibitionsPage'))
 const OrgsPage = lazy(() => import('./pages/OrgsPage'))
@@ -129,16 +130,12 @@ export default function App() {
     return (
       <div style={{
         minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: 'grid',
+        placeItems: 'center',
         margin: 0,
         padding: '24px',
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: 14,
-        color: '#524a42',
       }}>
-        読み込み中…
+        <LoadingFrames />
       </div>
     )
   }
@@ -150,8 +147,8 @@ export default function App() {
         <OAuthReturnRedirect />
         <ScrollToTop />
         <Suspense fallback={(
-          <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', fontFamily: 'system-ui, sans-serif', fontSize: 14, color: '#524a42' }}>
-            読み込み中…
+          <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+            <LoadingFrames />
           </div>
         )}>
           <Routes>
