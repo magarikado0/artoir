@@ -274,7 +274,7 @@ export default function LoginPage() {
           borderRadius: 8, minHeight: 48, padding: '0 16px', fontFamily: T.sans, fontSize: 13,
           fontWeight: 500, letterSpacing: '0.16em', cursor: loading ? 'wait' : 'pointer',
         }}>
-          {loading ? <LoadingFrames size={48} /> : (mode === 'login' ? 'ログイン  →' : 'アカウント作成  →')}
+          {loading ? '処理中…' : (mode === 'login' ? 'ログイン  →' : 'アカウント作成  →')}
         </button>
       </form>
 

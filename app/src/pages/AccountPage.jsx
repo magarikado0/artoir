@@ -366,9 +366,7 @@ export default function AccountPage() {
 
     if (loading) {
       return (
-        <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
-          <LoadingFrames />
-        </div>
+        <div style={{ minHeight: 240 }} />
       )
     }
 

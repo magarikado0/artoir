@@ -33,8 +33,7 @@ export default function ExhibitionPage() {
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
-  const showDelayedLoader = useDelayedLoading(isExhibitionListNavigation && loading)
-  const showLoader = showDelayedLoader || (!isExhibitionListNavigation && loading)
+  const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
 
   useEffect(() => {
     async function load() {
@@ -147,6 +146,7 @@ export default function ExhibitionPage() {
       <LoadingFrames />
     </div>
   )
+  if (loading) return <div className="ui-page-shell" />
   if (!exhibition) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <p style={{ color: T.inkMuted, fontSize: 13 }}>展覧会が見つかりません</p>

@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import ImageUploader from '../components/ImageUploader'
 import ArtworkMedia from '../components/ArtworkMedia'
-import LoadingFrames from '../components/LoadingFrames'
 import { T } from '../lib/tokens'
 import { getThumbnailUrl } from '../lib/imageUrl'
 
@@ -191,9 +190,7 @@ export default function AdminPage() {
   }
 
   if (loading) return (
-    <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <LoadingFrames />
-    </div>
+    <div className="ui-page-shell" />
   )
 
   return (

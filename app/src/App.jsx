@@ -146,11 +146,7 @@ export default function App() {
         <SupabaseOAuthErrorBanner />
         <OAuthReturnRedirect />
         <ScrollToTop />
-        <Suspense fallback={(
-          <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
-            <LoadingFrames />
-          </div>
-        )}>
+        <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<AllExhibitionsPage />} />
             <Route path="/orgs" element={<OrgsPage />} />

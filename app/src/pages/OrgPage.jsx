@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ExhibitionListCard from '../components/ExhibitionListCard'
-import LoadingFrames from '../components/LoadingFrames'
 import { T, externalHost } from '../lib/tokens'
 import { mapExhibitionListRow } from '../lib/exhibition'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
@@ -44,9 +43,7 @@ export default function OrgPage() {
   }, [legacyProfileSlug, navigate, orgSlug])
 
   if (loading) return (
-    <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <LoadingFrames />
-    </div>
+    <div className="ui-page-shell" />
   )
   if (!org) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>

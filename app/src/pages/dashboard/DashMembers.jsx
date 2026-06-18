@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import DashShell from '../../components/DashShell'
-import LoadingFrames from '../../components/LoadingFrames'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 import { T } from '../../lib/tokens'
@@ -233,11 +232,7 @@ export default function DashMembers() {
   }
 
   if (loading) return (
-    <DashShell orgSlug={orgSlug}>
-      <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
-        <LoadingFrames />
-      </div>
-    </DashShell>
+    <DashShell orgSlug={orgSlug} />
   )
 
   const canManageMembers = currentMembership()?.role === 'owner'

@@ -1014,16 +1014,21 @@ a {
 }
 
 .ui-exhibition-list-card {
-  display: block;
+  display: flex;
+  align-items: stretch;
+  min-height: 136px;
   padding: 0;
   overflow: hidden;
   border-radius: 12px;
 }
 
 .ui-exhibition-list-card-media {
+  order: 2;
+  flex: 0 0 clamp(120px, 28%, 184px);
   position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 5;
+  align-self: stretch;
+  aspect-ratio: 1 / 1;
+  max-height: 184px;
   background: #ECE5D9;
   overflow: hidden;
 }
@@ -1046,9 +1051,13 @@ a {
 }
 
 .ui-exhibition-list-card-body {
+  order: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   padding: 18px 18px 20px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 10px;
 }
 
@@ -1154,8 +1163,8 @@ a {
 
 .ui-exhibition-list-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 28px 24px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
 }
 
 .ui-exhibition-summary-card {
@@ -2827,6 +2836,60 @@ button.ui-account-org-pick-btn.ui-org-row {
   .ui-exhibition-summary-item {
     grid-template-columns: 84px minmax(0, 1fr);
     gap: 12px;
+  }
+
+  .ui-profile-artwork-grid,
+  .ui-exhibition-artwork-grid,
+  .ui-artworks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ui-exhibition-list-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .ui-exhibition-list-card {
+    min-height: 116px;
+  }
+
+  .ui-exhibition-list-card-media {
+    flex-basis: clamp(92px, 31%, 128px);
+    max-height: 128px;
+  }
+
+  .ui-exhibition-list-card-body {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .ui-exhibition-list-card-title {
+    font-size: 15px;
+  }
+
+  .ui-exhibition-list-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 8px;
+  }
+
+  .ui-exhibition-list-card-date,
+  .ui-exhibition-list-card-count {
+    font-size: 11px;
+  }
+
+  .ui-profile-artwork-grid {
+    gap: 14px 10px;
+  }
+
+  .ui-exhibition-artwork-grid,
+  .ui-artworks-grid {
+    gap: 12px 10px;
+  }
+
+  .ui-artwork-sort-card {
+    padding: 6px;
   }
 
   .ui-floating-action.ui-create-action {

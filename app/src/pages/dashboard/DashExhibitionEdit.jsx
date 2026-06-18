@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
-import LoadingFrames from '../../components/LoadingFrames'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
@@ -285,11 +284,7 @@ export default function DashExhibitionEdit() {
   }
 
   if (loading) return (
-    <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
-      <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
-        <LoadingFrames />
-      </div>
-    </DashShell>
+    <DashShell orgSlug={orgSlug} profileSlug={profileSlug} />
   )
 
   if (forbidden) return (

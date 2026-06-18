@@ -5,7 +5,6 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
-import LoadingFrames from '../components/LoadingFrames'
 import { T, externalHost } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 
@@ -47,9 +46,7 @@ export default function ProfilePage() {
   }, [profileSlug])
 
   if (loading) return (
-    <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <LoadingFrames />
-    </div>
+    <div className="ui-page-shell" />
   )
 
   if (!profile) return (

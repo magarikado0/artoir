@@ -44,7 +44,7 @@ export function ExhibitionCardMedia({ thumbnailUrl, title }) {
         alt=""
         decorative
         loading="lazy"
-        fit="cover"
+        fit="contain"
         fillHeight
         background={T.paperAlt}
         className="ui-exhibition-list-card-thumb"

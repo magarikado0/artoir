@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import DashShell, { StatusBadge } from '../../components/DashShell'
-import LoadingFrames from '../../components/LoadingFrames'
 import { exhStatus, getExhibitionThumbnailUrl, mapExhibitionListRow } from '../../lib/exhibition'
 import { ExhibitionCardMedia } from '../../components/ExhibitionListCard'
 import { T, fmtDateRangeShort } from '../../lib/tokens'
@@ -125,11 +124,7 @@ export default function DashHome() {
   )
 
   if (loading) return (
-    <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
-      <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
-        <LoadingFrames />
-      </div>
-    </DashShell>
+    <DashShell orgSlug={orgSlug} profileSlug={profileSlug} />
   )
 
   async function handleDeleteExhibition() {

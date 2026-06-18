@@ -70,8 +70,7 @@ export default function DashArtworks() {
   const [forbidden, setForbidden] = useState(false)
   const [loading, setLoading] = useState(true)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
-  const showDelayedLoader = useDelayedLoading(isExhibitionListNavigation && loading)
-  const showLoader = showDelayedLoader || (!isExhibitionListNavigation && loading)
+  const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')
@@ -268,6 +267,8 @@ export default function DashArtworks() {
       <LoadingFrames />
     </div>
   )
+
+  if (loading) return <DashShell orgSlug={orgSlug} profileSlug={profileSlug} />
 
   if (forbidden) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>

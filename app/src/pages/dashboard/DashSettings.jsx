@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashShell, { DashField } from '../../components/DashShell'
-import LoadingFrames from '../../components/LoadingFrames'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import { deleteOrganization } from '../../lib/deleteOrganization'
@@ -197,11 +196,7 @@ export default function DashSettings() {
   }
 
   if (loading) return (
-    <DashShell orgSlug={orgSlug}>
-      <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
-        <LoadingFrames />
-      </div>
-    </DashShell>
+    <DashShell orgSlug={orgSlug} />
   )
 
   const nameLabel = '団体名'

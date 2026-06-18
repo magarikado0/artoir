@@ -6,7 +6,6 @@ import BottomNav from '../components/BottomNav'
 import { T } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
 import ExhibitionListCard from '../components/ExhibitionListCard'
-import LoadingFrames from '../components/LoadingFrames'
 import { mapExhibitionListRow } from '../lib/exhibition'
 import { isProfileWorksExhibition } from '../lib/profileWorks'
 
@@ -60,9 +59,7 @@ export default function AllExhibitionsPage() {
   }, [rows, query])
 
   if (loading) return (
-    <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <LoadingFrames />
-    </div>
+    <div className="ui-page-shell" />
   )
 
   return (
