@@ -180,7 +180,7 @@ export default function ImageUploader({
                 transition: 'width 0.2s',
               }} />
             </div>
-            <span style={{ fontSize: '0.75rem', color: '#9a9088' }}>{progress}%</span>
+            <span style={{ fontSize: '0.75rem', color: '#8A8178' }}>{progress}%</span>
           </div>
         ) : !isCompactTrigger && !children ? (
           <span style={{
@@ -192,10 +192,10 @@ export default function ImageUploader({
         ) : null}
       </div>
       {error && !isFab && (
-        <p style={{ fontSize: '0.75rem', color: '#c0392b', marginTop: '0.5rem' }}>{error}</p>
+        <p style={{ fontSize: '0.75rem', color: '#BE553D', marginTop: '0.5rem' }}>{error}</p>
       )}
       {!hasUploadConfig && !isFab && (
-        <p style={{ fontSize: '0.75rem', color: '#9a9088', marginTop: '0.5rem' }}>
+        <p style={{ fontSize: '0.75rem', color: '#8A8178', marginTop: '0.5rem' }}>
           Cloudinary 側の unsigned preset はアップロード先フォルダ・形式・サイズ制限を必ず設定してください。
         </p>
       )}

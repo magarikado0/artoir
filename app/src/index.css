@@ -1232,6 +1232,10 @@ a {
   text-align: right;
 }
 
+.ui-org-list {
+  display: contents;
+}
+
 .ui-org-row {
   min-height: 76px;
   padding: 18px 20px;
@@ -1395,6 +1399,10 @@ a {
   margin-bottom: 16px;
 }
 
+.ui-account-artwork-media {
+  position: relative;
+}
+
 .ui-account-artwork-preview {
   display: block;
   width: 100%;
@@ -1405,41 +1413,41 @@ a {
 }
 
 .ui-account-artwork-edit {
-  width: fit-content;
-  margin-top: 6px;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 0;
-  background: transparent;
-  color: #BE553D;
-  font-size: 12px;
-  letter-spacing: 0.01em;
+  border-radius: 999px;
+  background: rgba(251, 248, 243, 0.9);
+  color: #1F1B17;
   cursor: pointer;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.ui-account-artwork-edit:hover {
+  background: #FBF8F3;
+  color: #BE553D;
 }
 
 .ui-profile-artwork-card {
-  display: grid;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
   padding: 0;
   color: #1F1B17;
   text-decoration: none;
 }
 
 .ui-profile-artwork-media {
-  display: block !important;
+  display: block;
   aspect-ratio: 1 / 1;
-}
-
-.ui-profile-artwork-media img {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  max-width: 100%;
-  max-height: 100%;
-  width: auto !important;
-  height: auto !important;
-  transform: translate(-50%, -50%);
-  object-fit: contain;
-  object-position: center center;
 }
 
 .ui-profile-artwork-button {
@@ -1493,8 +1501,7 @@ a {
 
 .ui-profile-artwork-card-body {
   min-width: 0;
-  display: grid;
-  gap: 4px;
+  padding: 8px 10px 10px;
 }
 
 .ui-profile-artwork-title {
@@ -2226,6 +2233,22 @@ a {
   margin: 56px auto;
 }
 
+.ui-account-section {
+  margin-bottom: 44px;
+}
+
+.ui-account-section:last-child {
+  margin-bottom: 0;
+}
+
+.ui-account-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
 .ui-account-surface-desktop {
   width: min(100%, 560px);
   margin: 80px 0 0 28px;
@@ -2915,8 +2938,8 @@ button.ui-account-org-pick-btn.ui-org-row {
   }
 
   .ui-account-surface {
-    width: auto;
-    margin: 24px 16px 110px;
+    width: 100%;
+    margin: 0;
   }
 
   .ui-profile-summary-row {
@@ -2925,6 +2948,21 @@ button.ui-account-org-pick-btn.ui-org-row {
 
   .ui-profile-summary-actions {
     justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .ui-account-floating-actions {
+    position: static;
+    right: auto;
+    bottom: auto;
+    align-items: stretch;
+    max-width: none;
+    margin-top: 20px;
+  }
+
+  .ui-account-floating-action {
+    width: 100%;
+    justify-content: center;
   }
 
   .ui-account-topline {
