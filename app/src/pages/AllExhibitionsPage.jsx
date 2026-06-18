@@ -95,7 +95,7 @@ export default function AllExhibitionsPage() {
         </div>
 
         {filteredRows.length === 0 && (
-          <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>NO EXHIBITIONS</div>
+          <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>展覧会がまだありません</div>
         )}
       </main>
       <BottomNav active="top" />

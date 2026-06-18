@@ -243,14 +243,14 @@ export default function DashSettings() {
           <div className="ui-settings-link-list">
             <LinkValue label="Instagram" value={org?.sns_links?.instagram} />
             <LinkValue label="X" value={org?.sns_links?.x} />
-            <LinkValue label="Website" value={org?.homepage_url} />
+            <LinkValue label="Webサイト" value={org?.homepage_url} />
           </div>
         )}
         editChildren={(
           <>
-            <DashField label="INSTAGRAM" prefix="instagram.com/" value={instagram} onChange={setInstagram} placeholder="username" mono />
-            <DashField label="X (TWITTER)" prefix="x.com/" value={twitter} onChange={setTwitter} placeholder="username" mono />
-            <DashField label="WEBSITE" value={homepageUrl} onChange={setHomepageUrl} placeholder="https://example.com" mono />
+            <DashField label="Instagram" prefix="instagram.com/" value={instagram} onChange={setInstagram} placeholder="username" mono />
+            <DashField label="X" prefix="x.com/" value={twitter} onChange={setTwitter} placeholder="username" mono />
+            <DashField label="Webサイト" value={homepageUrl} onChange={setHomepageUrl} placeholder="https://example.com" mono />
             <SettingsSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} saved={saved} />
           </>
         )}

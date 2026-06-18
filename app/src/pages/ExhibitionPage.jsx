@@ -7,6 +7,7 @@ import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
+import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
 
 function SummaryItem({ label, value }) {
   if (!value) return null
@@ -20,7 +21,7 @@ function SummaryItem({ label, value }) {
 
 export default function ExhibitionPage() {
   const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionSlug } = useParams()
-  const profileSlug = routeProfileSlug || (routeOrgSlug?.startsWith('@') ? routeOrgSlug.slice(1) : undefined)
+  const profileSlug = routeProfileSlug || legacyProfileSlugFromOwnerSlug(routeOrgSlug)
   const orgSlug = profileSlug ? undefined : routeOrgSlug
   const [owner, setOwner] = useState(null)
   const [exhibition, setExhibition] = useState(null)
@@ -146,7 +147,7 @@ export default function ExhibitionPage() {
     </div>
   )
 
-  const ownerBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
+  const ownerBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
   const ownerPageLabel = profileSlug ? 'プロフィール' : '団体ページ'
   const hostLabel = profileSlug ? '作家' : '主催団体'
   const dateText = exhibition.start_date

@@ -13,6 +13,7 @@ import {
 } from '../../lib/exhibition'
 import { getThumbnailUrl } from '../../lib/imageUrl'
 import { deleteExhibition } from '../../lib/deleteExhibition'
+import { legacyProfileSlugFromOwnerSlug, profilePath } from '../../lib/profileRoutes'
 
 function slugifyAscii(s) {
   return String(s || '')
@@ -85,7 +86,7 @@ export default function DashExhibitionEdit() {
   const { session } = useAuth()
   const isDesktop = useIsDesktop()
   const isNew = !exhibitionId || exhibitionId === 'undefined'
-  const profileSlug = routeProfileSlug || (routeOrgSlug?.startsWith('@') ? routeOrgSlug.slice(1) : undefined)
+  const profileSlug = routeProfileSlug || legacyProfileSlugFromOwnerSlug(routeOrgSlug)
   const orgSlug = profileSlug ? undefined : routeOrgSlug
 
   const [owner, setOwner] = useState(null)
@@ -193,7 +194,7 @@ export default function DashExhibitionEdit() {
     setSaving(true)
     let nextPath = null
     const ownerColumn = profileSlug ? 'profile_id' : 'organization_id'
-    const dashboardBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
+    const dashboardBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
     try {
       const finalSlug = (isNew || !slug) ? await generateUniqueSlug(ownerColumn, owner.id, title) : slug
       const payload = {
@@ -273,7 +274,7 @@ export default function DashExhibitionEdit() {
         window.alert(error.message ? `削除に失敗しました: ${error.message}` : '削除に失敗しました。')
         return
       }
-      navigate(`${profileSlug ? `/@${profileSlug}` : `/${orgSlug}`}/dashboard`, { replace: true })
+      navigate(`${profileSlug ? profilePath(profileSlug) : `/${orgSlug}`}/dashboard`, { replace: true })
     } catch (error) {
       window.alert(error?.message ? `削除に失敗しました: ${error.message}` : '削除に失敗しました。')
     } finally {
@@ -303,8 +304,8 @@ export default function DashExhibitionEdit() {
     </DashShell>
   )
 
-  const dashboardBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
-  const publicBase = profileSlug ? `artoir.net/@${profileSlug}` : `artoir.net/${orgSlug}`
+  const dashboardBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
+  const publicBase = profileSlug ? `artoir.net/profile/${profileSlug}` : `artoir.net/${orgSlug}`
   const savedPublicUrl = `${publicBase}/exhibition/${exhibition?.slug || '(未保存)'}`
   const savedPeriodText = getExhibitionPeriodText(exhibition)
   const savedThumbnailUrl = getExhibitionThumbnailUrlFromRecord(exhibition)

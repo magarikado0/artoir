@@ -19,8 +19,30 @@ export default function AccountSetup() {
   const [displayName, setDisplayName] = useState('')
   const [slug, setSlug] = useState('')
   const [bio, setBio] = useState('')
+  const [instagram, setInstagram] = useState('')
+  const [twitter, setTwitter] = useState('')
+  const [homepageUrl, setHomepageUrl] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+
+  function normalizeSnsValue(value, host) {
+    if (!value) return ''
+    let normalized = value
+      .replace(/^https?:\/\//i, '')
+      .replace(/^www\./i, '')
+      .replace(/^@/, '')
+      .replace(/^\/+|\/+$/g, '')
+    const hostPrefix = `${host.toLowerCase()}/`
+    const lower = normalized.toLowerCase()
+    if (lower.startsWith(hostPrefix)) normalized = normalized.slice(host.length + 1)
+    else if (lower === host.toLowerCase()) normalized = ''
+    return normalized
+  }
+
+  function buildSnsUrl(value, host) {
+    const normalized = normalizeSnsValue(value, host)
+    return normalized ? `https://${host}/${normalized}` : ''
+  }
 
   useEffect(() => {
     if (!session || !supabase) {
@@ -36,6 +58,9 @@ export default function AccountSetup() {
       setDisplayName(nextProfile?.display_name || '')
       setSlug(nextProfile?.slug || '')
       setBio(nextProfile?.bio || '')
+      setInstagram(normalizeSnsValue(nextProfile?.sns_links?.instagram || '', 'instagram.com'))
+      setTwitter(normalizeSnsValue(nextProfile?.sns_links?.x || '', 'x.com'))
+      setHomepageUrl(nextProfile?.homepage_url || '')
       setLoading(false)
     }
     loadProfile()
@@ -61,6 +86,11 @@ export default function AccountSetup() {
         display_name: displayName.trim(),
         slug: slugifyProfileId(slug) || slug.trim(),
         bio: bio.trim() || null,
+        sns_links: {
+          instagram: buildSnsUrl(instagram, 'instagram.com'),
+          x: buildSnsUrl(twitter, 'x.com'),
+        },
+        homepage_url: homepageUrl.trim() || null,
       }
       const { error: saveError } = await supabase.from('profiles').upsert(payload, { onConflict: 'id' })
       if (saveError) {
@@ -110,6 +140,30 @@ export default function AccountSetup() {
           placeholder="活動や作品について入力..."
           multiline
           help="任意。作品の作者表示や将来のプロフィール公開で使います。"
+        />
+        <DashSectionLabel>各種リンク</DashSectionLabel>
+        <DashField
+          label="Instagram"
+          prefix="instagram.com/"
+          value={instagram}
+          onChange={setInstagram}
+          placeholder="username"
+          mono
+        />
+        <DashField
+          label="X"
+          prefix="x.com/"
+          value={twitter}
+          onChange={setTwitter}
+          placeholder="username"
+          mono
+        />
+        <DashField
+          label="Webサイト"
+          value={homepageUrl}
+          onChange={setHomepageUrl}
+          placeholder="https://example.com"
+          mono
         />
 
         {error && (

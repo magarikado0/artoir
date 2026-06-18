@@ -9,6 +9,7 @@ import { T, fmtDateRangeShort } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 import { deleteExhibition } from '../../lib/deleteExhibition'
 import { ensureProfileWorksExhibition } from '../../lib/profileWorks'
+import { legacyProfileSlugFromOwnerSlug, profilePath } from '../../lib/profileRoutes'
 
 function DashExhibitionCard({ exh, dashboardBase, navigate, onDelete, artworkCount }) {
   const status = exhStatus(exh)
@@ -62,9 +63,9 @@ export default function DashHome() {
   const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug } = useParams()
   const navigate = useNavigate()
   const { session } = useAuth()
-  const profileSlug = routeProfileSlug || (routeOrgSlug?.startsWith('@') ? routeOrgSlug.slice(1) : undefined)
+  const profileSlug = routeProfileSlug || legacyProfileSlugFromOwnerSlug(routeOrgSlug)
   const orgSlug = profileSlug ? undefined : routeOrgSlug
-  const dashboardBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
+  const dashboardBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
   const [owner, setOwner] = useState(null)
   const [forbidden, setForbidden] = useState(false)
   const [loadError, setLoadError] = useState('')

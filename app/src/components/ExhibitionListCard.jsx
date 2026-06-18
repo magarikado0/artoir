@@ -3,6 +3,7 @@ import { T, fmtDateRangeShort, pad2 } from '../lib/tokens'
 import ArtworkMedia from './ArtworkMedia'
 import { getExhibitionThumbnailUrl } from '../lib/exhibition'
 import { getThumbnailUrl } from '../lib/imageUrl'
+import { profileExhibitionPath } from '../lib/profileRoutes'
 
 function LocationPin() {
   return (
@@ -43,10 +44,10 @@ export function ExhibitionCardMedia({ thumbnailUrl, title }) {
 
 export default function ExhibitionListCard({ exhibition: exh, org, profile, showOrgName = true, artworkCount }) {
   const thumbnailUrl = getExhibitionThumbnailUrl(exh)
-  const ownerSlug = org?.slug || (profile?.slug ? `@${profile.slug}` : '')
+  const exhibitionHref = profile?.slug ? profileExhibitionPath(profile.slug, exh.slug) : `/${org?.slug || ''}/exhibition/${exh.slug}`
   const ownerName = org?.name || profile?.display_name
   return (
-    <Link to={`/${ownerSlug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card">
+    <Link to={exhibitionHref} className="ui-list-card ui-exhibition-list-card">
       <div className="ui-exhibition-list-card-body">
         {showOrgName && ownerName && (
           <div className="ui-exhibition-list-card-meta">

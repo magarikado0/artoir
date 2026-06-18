@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { supabase } from '../lib/supabase'
+import { profilePath } from '../lib/profileRoutes'
 import { BrandLockup } from './BrandMark'
 import BottomNav from './BottomNav'
 import Header, { Icon } from './Header'
@@ -58,7 +59,7 @@ function DashOrgBar({ dashboardBase, ownerName }) {
 export default function DashShell({ children, orgSlug, profileSlug, crumbs = [] }) {
   const isDesktop = useIsDesktop()
   const [owner, setOwner] = useState(null)
-  const dashboardBase = profileSlug ? `/@${profileSlug}` : orgSlug ? `/${orgSlug}` : ''
+  const dashboardBase = profileSlug ? profilePath(profileSlug) : orgSlug ? `/${orgSlug}` : ''
   const isProfile = Boolean(profileSlug)
   const hasDashboardContext = Boolean(dashboardBase)
 

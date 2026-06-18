@@ -6,7 +6,9 @@ import {
   peekOAuthRedirectPending,
   normalizeOAuthReturnPath,
   clearOAuthReturnState,
+  resolvePostLoginPath,
 } from '../lib/oauthReturn'
+import { supabase } from '../lib/supabase'
 
 /**
  * 「Google で続ける」復帰先が /login 以外でも、セッション確立後に意図したパスへ飛ばす。
@@ -19,15 +21,23 @@ export default function OAuthReturnRedirect() {
   useEffect(() => {
     if (!session) return
     if (!peekOAuthRedirectPending()) return
+    let cancelled = false
 
-    let target = '/account'
-    try {
-      const stored = sessionStorage.getItem(OAUTH_RETURN_KEY)
-      if (stored) target = normalizeOAuthReturnPath(stored)
-    } catch { /* ignore */ }
+    async function redirect() {
+      let target = '/account'
+      try {
+        const stored = sessionStorage.getItem(OAUTH_RETURN_KEY)
+        if (stored) target = normalizeOAuthReturnPath(stored)
+      } catch { /* ignore */ }
 
-    clearOAuthReturnState()
-    navigate(target, { replace: true })
+      target = await resolvePostLoginPath(supabase, session.user?.id, target)
+      if (cancelled) return
+      clearOAuthReturnState()
+      navigate(target, { replace: true })
+    }
+
+    redirect()
+    return () => { cancelled = true }
   }, [session, navigate])
 
   return null

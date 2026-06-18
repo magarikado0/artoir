@@ -81,10 +81,10 @@ function ProfileSummary({ profile, onAddWork, preparingWork }) {
 
 function AccountArtworkCard({ artwork, onOpen, onEdit }) {
   const exhibition = artwork?.exhibitions
-  const ownerSlug = exhibition?.organizations?.slug || (exhibition?.profiles?.slug ? `@${exhibition.profiles.slug}` : null)
+  const hasOwner = Boolean(exhibition?.organizations?.slug || exhibition?.profiles?.slug)
   const isOwnProfileWork = Boolean(exhibition?.profile_id)
   const hasTitle = Boolean(artwork.title?.trim())
-  if (!artwork?.image_url || !exhibition || !ownerSlug) return null
+  if (!artwork?.image_url || !exhibition || !hasOwner) return null
 
   return (
     <div className="ui-list-card ui-profile-artwork-card">
@@ -94,9 +94,9 @@ function AccountArtworkCard({ artwork, onOpen, onEdit }) {
           alt=""
           decorative
           loading="lazy"
-          fillHeight
           aspectRatio="1 / 1"
           fit="contain"
+          className="ui-profile-artwork-media"
           wrapperStyle={{ borderRadius: 7, background: 'rgba(228, 211, 184, 0.12)' }}
           imageStyle={{ borderRadius: 7 }}
         />
@@ -401,19 +401,26 @@ export default function AccountPage() {
     return (
       <>
         <ProfileSummary profile={profile} onAddWork={handleAddWork} preparingWork={preparingWork} />
-        {artworks.length > 0 && (
-          <div className="ui-profile-artwork-grid ui-account-artwork-grid">
-            {artworks.map((artwork) => (
-              <AccountArtworkCard key={artwork.id} artwork={artwork} onOpen={setSelectedArtwork} onEdit={openEditArtwork} />
-            ))}
-          </div>
-        )}
         {loadError && (
           <div className="ui-app-card" style={{ padding: 14, marginBottom: 14, borderColor: T.accent, color: T.accent, fontSize: 12 }}>
             {loadError}
           </div>
         )}
         <OrganizationSelector orgs={orgs} onSelect={handleSelectOrg} onSignOut={handleSignOut} isDesktop={isDesktop} />
+        {artworks.length > 0 && (
+          <>
+            <div className="ui-app-topline" style={{ marginTop: 18 }}>
+              <div>
+                <div className="ui-screen-title" style={{ fontSize: 22 }}>作品</div>
+              </div>
+            </div>
+            <div className="ui-profile-artwork-grid ui-account-artwork-grid">
+              {artworks.map((artwork) => (
+                <AccountArtworkCard key={artwork.id} artwork={artwork} onOpen={setSelectedArtwork} onEdit={openEditArtwork} />
+              ))}
+            </div>
+          </>
+        )}
       </>
     )
   }

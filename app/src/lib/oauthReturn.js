@@ -63,3 +63,19 @@ export function stashOAuthReturnPath(returnPathname) {
     sessionStorage.setItem(OAUTH_RETURN_KEY, normalizeOAuthReturnPath(returnPathname))
   } catch { /* ignore */ }
 }
+
+export async function resolvePostLoginPath(client, userId, path) {
+  const target = normalizeOAuthReturnPath(path)
+  if (target !== '/account/setup' || !client || !userId) return target
+
+  try {
+    const { data, error } = await client
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle()
+    if (!error && data?.id) return '/account'
+  } catch { /* ignore */ }
+
+  return target
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useLocation, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useResolvedSession } from '../lib/useResolvedSession'
@@ -9,6 +9,7 @@ import {
   markOAuthRedirectPending,
   clearOAuthReturnState,
   stashOAuthReturnPath,
+  resolvePostLoginPath,
 } from '../lib/oauthReturn'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
@@ -82,6 +83,7 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [sessionRedirectTo, setSessionRedirectTo] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
   const rawFrom = location.state?.from
@@ -96,12 +98,24 @@ export default function LoginPage() {
   const oauthCallbackUrl =
     typeof window !== 'undefined' ? `${window.location.origin}/` : '/'
 
-  if (ready && session) {
-    clearOAuthReturnState()
-    return <Navigate to={normalizeOAuthReturnPath(from)} replace />
+  useEffect(() => {
+    if (!ready || !session) return undefined
+    let cancelled = false
+    async function resolveRedirect() {
+      const target = await resolvePostLoginPath(supabase, session.user?.id, from)
+      if (cancelled) return
+      clearOAuthReturnState()
+      setSessionRedirectTo(target)
+    }
+    resolveRedirect()
+    return () => { cancelled = true }
+  }, [from, ready, session])
+
+  if (ready && session && sessionRedirectTo) {
+    return <Navigate to={sessionRedirectTo} replace />
   }
 
-  if (!ready) {
+  if (!ready || (ready && session)) {
     return (
       <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: T.paper }}>
         <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
@@ -153,12 +167,13 @@ export default function LoginPage() {
     setSuccess('')
     try {
       if (mode === 'login') {
-        const { error: signErr } = await supabase.auth.signInWithPassword({ email, password })
+        const { data, error: signErr } = await supabase.auth.signInWithPassword({ email, password })
         if (signErr) {
           setError(signErr.message)
         } else {
           clearOAuthReturnState()
-          navigate(from, { replace: true })
+          const target = await resolvePostLoginPath(supabase, data.user?.id, from)
+          navigate(target, { replace: true })
         }
       } else {
         const { data, error: signErr } = await supabase.auth.signUp({
@@ -170,7 +185,8 @@ export default function LoginPage() {
           setError(signErr.message)
         } else if (data.session) {
           clearOAuthReturnState()
-          navigate(from, { replace: true })
+          const target = await resolvePostLoginPath(supabase, data.user?.id, from)
+          navigate(target, { replace: true })
         } else {
           clearOAuthReturnState()
           setSuccess('確認メールを送信しました。メール内のリンクから登録を完了してください。')

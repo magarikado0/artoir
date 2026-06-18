@@ -18,6 +18,7 @@ export function normalizeProfile(raw) {
     slug: raw.slug || '',
     bio: raw.bio || '',
     sns_links: raw.sns_links || {},
+    homepage_url: raw.homepage_url || '',
   }
 }
 

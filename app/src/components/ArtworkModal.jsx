@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ArtworkMedia from './ArtworkMedia'
 import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
+import { profileExhibitionPath, profilePath } from '../lib/profileRoutes'
 
 const SWIPE_THRESHOLD_PX = 48
 
@@ -128,10 +129,15 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
   const exhibition = artwork.exhibitions
   const ownerOrg = exhibition?.organizations
   const ownerProfile = exhibition?.profiles
-  const exhibitionOwnerSlug = ownerOrg?.slug || (ownerProfile?.slug ? `@${ownerProfile.slug}` : '')
-  const exhibitionHref = exhibitionOwnerSlug && exhibition?.slug ? `/${exhibitionOwnerSlug}/exhibition/${exhibition.slug}` : ''
+  const exhibitionHref = exhibition?.slug
+    ? ownerProfile?.slug
+      ? profileExhibitionPath(ownerProfile.slug, exhibition.slug)
+      : ownerOrg?.slug
+        ? `/${ownerOrg.slug}/exhibition/${exhibition.slug}`
+        : ''
+    : ''
   const exhibitionTitle = exhibition?.title?.trim() || '展示を見る'
-  const ownerHref = exhibitionOwnerSlug ? `/${exhibitionOwnerSlug}` : ''
+  const ownerHref = ownerProfile?.slug ? profilePath(ownerProfile.slug) : ownerOrg?.slug ? `/${ownerOrg.slug}` : ''
   const ownerName = ownerOrg?.name || ownerProfile?.display_name || ''
   const ownerLabel = ownerOrg ? '団体ページ' : 'プロフィール'
   const hasTitle = Boolean(title)
@@ -171,7 +177,7 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
         )}
 
         <div className="ui-artwork-modal-bar-center">
-          <div className="ui-artwork-modal-eyebrow">ARTWORK</div>
+          <div className="ui-artwork-modal-eyebrow">作品</div>
           {positionLabel && (
             <div className="ui-artwork-modal-position" aria-live="polite">
               {positionLabel}
@@ -234,8 +240,9 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
                   if (!creatorSlug) {
                     return <span key={creator.profile_id || creator.profile.id}>@{creatorName}</span>
                   }
+                  const creatorHref = profilePath(creatorSlug)
                   return (
-                    <Link key={creator.profile_id || creator.profile.id} to={`/@${creatorSlug}`} onClick={() => closeIfCurrentPath(`/@${creatorSlug}`)}>
+                    <Link key={creator.profile_id || creator.profile.id} to={creatorHref} onClick={() => closeIfCurrentPath(creatorHref)}>
                       @{creatorName}
                     </Link>
                   )

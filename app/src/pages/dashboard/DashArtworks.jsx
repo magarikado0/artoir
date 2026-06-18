@@ -11,6 +11,7 @@ import { Icon } from '../../components/Header'
 import { getThumbnailUrl } from '../../lib/imageUrl'
 import { persistArtworkOrder, reorderArtworksById } from '../../lib/reorderArtworks'
 import { attachNormalizedCreators } from '../../lib/profile'
+import { legacyProfileSlugFromOwnerSlug, profilePath } from '../../lib/profileRoutes'
 
 function DragHandleIcon() {
   const s = { stroke: 'currentColor', strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round' }
@@ -57,7 +58,7 @@ function CreatorPicker({ profiles, selectedIds, onToggle, visible, onVisibleChan
 export default function DashArtworks() {
   const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionId } = useParams()
   const { session } = useAuth()
-  const profileSlug = routeProfileSlug || (routeOrgSlug?.startsWith('@') ? routeOrgSlug.slice(1) : undefined)
+  const profileSlug = routeProfileSlug || legacyProfileSlugFromOwnerSlug(routeOrgSlug)
   const orgSlug = profileSlug ? undefined : routeOrgSlug
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
@@ -276,7 +277,7 @@ export default function DashArtworks() {
     setEditCreatorsVisible((w.creators || []).every((creator) => creator.is_visible !== false))
   }
 
-  const dashboardBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
+  const dashboardBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
 
   return (
     <>

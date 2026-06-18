@@ -161,11 +161,17 @@ export default function App() {
             <Route path="/account/setup" element={<AccountSetup />} />
             <Route path="/account/organizations/new" element={<OrganizationCreatePage />} />
             <Route path="/invite/:token" element={<InviteAcceptPage />} />
+            <Route path="/profile/:profileSlug" element={<ProfilePage />} />
             <Route path="/@:profileSlug" element={<ProfilePage />} />
+            <Route path="/profile/:profileSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
             <Route path="/@:profileSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
+            <Route path="/profile/:profileSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
             <Route path="/@:profileSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
+            <Route path="/profile/:profileSlug/dashboard/exhibitions/new" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
             <Route path="/@:profileSlug/dashboard/exhibitions/new" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
+            <Route path="/profile/:profileSlug/dashboard/exhibitions/:exhibitionId/edit" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
             <Route path="/@:profileSlug/dashboard/exhibitions/:exhibitionId/edit" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
+            <Route path="/profile/:profileSlug/dashboard/exhibitions/:exhibitionId/artworks" element={<ProtectedRoute><DashArtworks /></ProtectedRoute>} />
             <Route path="/@:profileSlug/dashboard/exhibitions/:exhibitionId/artworks" element={<ProtectedRoute><DashArtworks /></ProtectedRoute>} />
             <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
             <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />

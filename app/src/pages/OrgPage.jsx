@@ -1,20 +1,27 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { T, externalHost } from '../lib/tokens'
 import { mapExhibitionListRow } from '../lib/exhibition'
+import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
 
 export default function OrgPage() {
   const { orgSlug } = useParams()
+  const navigate = useNavigate()
+  const legacyProfileSlug = legacyProfileSlugFromOwnerSlug(orgSlug)
   const [org, setOrg] = useState(null)
   const [exhibitions, setExhibitions] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
+      if (legacyProfileSlug) {
+        navigate(profilePath(legacyProfileSlug), { replace: true })
+        return
+      }
       if (!supabase) return setLoading(false)
       try {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
@@ -33,7 +40,7 @@ export default function OrgPage() {
       }
     }
     load()
-  }, [orgSlug])
+  }, [legacyProfileSlug, navigate, orgSlug])
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
@@ -80,7 +87,6 @@ export default function OrgPage() {
 
         <div className="ui-app-topline">
           <div>
-            <div className="ui-kicker">EXHIBITIONS</div>
             <div className="ui-screen-title" style={{ fontSize: 22 }}>展覧会</div>
           </div>
         </div>
