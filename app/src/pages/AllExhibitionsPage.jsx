@@ -7,41 +7,19 @@ import { T } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { mapExhibitionListRow } from '../lib/exhibition'
-import { isPersonPublisher, PUBLISHER_KIND } from '../lib/publisher'
-
-const FILTERS = [
-  { label: 'すべて', value: 'ALL' },
-  { label: '団体', value: PUBLISHER_KIND.ORGANIZATION },
-  { label: '個人', value: PUBLISHER_KIND.PERSON },
-]
-
-function matchesPublisherFilter(org, filter) {
-  if (filter === 'ALL') return true
-  if (filter === PUBLISHER_KIND.PERSON) return isPersonPublisher(org)
-  if (filter === PUBLISHER_KIND.ORGANIZATION) return !isPersonPublisher(org)
-  return true
-}
 
 async function fetchExhibitionRows() {
-  const runQuery = (select) => supabase
+  const { data, error } = await supabase
     .from('exhibitions')
-    .select(select)
+    .select('*, organizations(id, name, slug), artworks(image_url, order)')
     .order('start_date', { ascending: false })
-
-  const withKind = await runQuery('*, organizations(id, name, slug, kind), artworks(image_url, order)')
-
-  if (!withKind.error) return withKind.data || []
-
-  const withoutKind = await runQuery('*, organizations(id, name, slug), artworks(image_url, order)')
-
-  if (withoutKind.error) throw withoutKind.error
-  return withoutKind.data || []
+  if (error) throw error
+  return data || []
 }
 
 export default function AllExhibitionsPage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('ALL')
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
   const { session } = useAuth()
@@ -73,12 +51,11 @@ export default function AllExhibitionsPage() {
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase()
     return rows
-      .filter(({ org }) => matchesPublisherFilter(org, filter))
       .filter(({ exhibition, org }) => {
         if (!q) return true
         return [exhibition.title, exhibition.location, org?.name].filter(Boolean).join(' ').toLowerCase().includes(q)
       })
-  }, [rows, filter, query])
+  }, [rows, query])
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
@@ -102,14 +79,6 @@ export default function AllExhibitionsPage() {
             <Icon name="plus" size={18} />
             <span>展覧会を作成</span>
           </button>
-        </div>
-
-        <div className="ui-segment" style={{ marginBottom: 14 }}>
-          {FILTERS.map((f) => (
-            <button key={f.value} type="button" onClick={() => setFilter(f.value)} className={filter === f.value ? 'is-active' : ''}>
-              {f.label}
-            </button>
-          ))}
         </div>
 
         <div className="ui-exhibition-list-grid">

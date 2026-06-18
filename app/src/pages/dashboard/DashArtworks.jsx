@@ -9,6 +9,7 @@ import { T } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 import { getThumbnailUrl } from '../../lib/imageUrl'
 import { persistArtworkOrder, reorderArtworksById } from '../../lib/reorderArtworks'
+import { attachNormalizedCreators } from '../../lib/profile'
 
 function DragHandleIcon() {
   const s = { stroke: 'currentColor', strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round' }
@@ -25,15 +26,45 @@ function DragHandleIcon() {
   )
 }
 
+function CreatorPicker({ profiles, selectedIds, onToggle, visible, onVisibleChange }) {
+  if (!profiles.length) {
+    return <div className="ui-field-help">団体メンバーを追加すると、作者プロフィールを紐づけられます。</div>
+  }
+  return (
+    <div style={{ display: 'grid', gap: 10 }}>
+      <div className="ui-form-label">作者</div>
+      <div className="ui-creator-choice-list">
+        {profiles.map((profile) => {
+          const checked = selectedIds.includes(profile.id)
+          return (
+            <label key={profile.id} className={`ui-creator-choice ${checked ? 'is-selected' : ''}`}>
+              <input type="checkbox" checked={checked} onChange={() => onToggle(profile.id)} />
+              <span>{profile.display_name}</span>
+              <small>@{profile.slug}</small>
+            </label>
+          )
+        })}
+      </div>
+      <label className="ui-creator-visible-toggle">
+        <input type="checkbox" checked={visible} onChange={(e) => onVisibleChange(e.target.checked)} />
+        <span>公開画面に作者を表示する</span>
+      </label>
+    </div>
+  )
+}
+
 export default function DashArtworks() {
   const { orgSlug, exhibitionId } = useParams()
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
+  const [memberProfiles, setMemberProfiles] = useState([])
   const [loading, setLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')
   const [editDesc, setEditDesc] = useState('')
+  const [editCreatorIds, setEditCreatorIds] = useState([])
+  const [editCreatorsVisible, setEditCreatorsVisible] = useState(true)
   const [createFile, setCreateFile] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [draggingId, setDraggingId] = useState(null)
@@ -50,10 +81,22 @@ export default function DashArtworks() {
     if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
     async function load() {
       try {
+        const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
+        if (orgData?.id) {
+          const { data: memberRows } = await supabase
+            .from('organization_members')
+            .select('profiles(id, display_name, slug)')
+            .eq('organization_id', orgData.id)
+          setMemberProfiles((memberRows || []).map((row) => row.profiles).filter(Boolean))
+        }
         const { data: exh } = await supabase.from('exhibitions').select('*').eq('id', exhibitionId).single()
         setExhibition(exh)
-        const { data: works } = await supabase.from('artworks').select('*').eq('exhibition_id', exhibitionId).order('order')
-        setArtworks(works || [])
+        const { data: works } = await supabase
+          .from('artworks')
+          .select('*, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name))')
+          .eq('exhibition_id', exhibitionId)
+          .order('order')
+        setArtworks((works || []).map(attachNormalizedCreators))
       } catch {
         /* unavailable */
       } finally {
@@ -61,7 +104,7 @@ export default function DashArtworks() {
       }
     }
     load()
-  }, [exhibitionId])
+  }, [orgSlug, exhibitionId])
 
   function handleBeforeUpload(file) {
     const dup = artworks.find((a) => a.file_name === file.name && Number(a.file_size) === file.size)
@@ -161,8 +204,37 @@ export default function DashArtworks() {
   async function handleEditSave() {
     if (!editTarget || !supabase) return
     await supabase.from('artworks').update({ title: editTitle, description: editDesc }).eq('id', editTarget.id)
-    setArtworks((prev) => prev.map((a) => a.id === editTarget.id ? { ...a, title: editTitle, description: editDesc } : a))
+    await saveArtworkCreators(editTarget.id, editCreatorIds, editCreatorsVisible)
+    const creators = editCreatorIds.map((profileId, index) => ({
+      profile_id: profileId,
+      display_order: index,
+      is_visible: editCreatorsVisible,
+      profile: memberProfiles.find((profile) => profile.id === profileId),
+    })).filter((creator) => creator.profile)
+    setArtworks((prev) => prev.map((a) => a.id === editTarget.id ? { ...a, title: editTitle, description: editDesc, creators } : a))
     setEditTarget(null)
+  }
+
+  async function saveArtworkCreators(artworkId, profileIds, isVisible) {
+    const { error: deleteError } = await supabase.from('artwork_creators').delete().eq('artwork_id', artworkId)
+    if (deleteError) throw deleteError
+    const rows = profileIds.map((profileId, index) => ({
+      artwork_id: artworkId,
+      profile_id: profileId,
+      display_order: index,
+      is_visible: isVisible,
+    }))
+    if (rows.length === 0) return
+    const { error } = await supabase.from('artwork_creators').insert(rows)
+    if (error) throw error
+  }
+
+  function toggleEditCreator(profileId) {
+    setEditCreatorIds((prev) => (
+      prev.includes(profileId)
+        ? prev.filter((id) => id !== profileId)
+        : [...prev, profileId]
+    ))
   }
 
   if (loading) return (
@@ -175,6 +247,8 @@ export default function DashArtworks() {
     setEditTarget(w)
     setEditTitle(w.title || '')
     setEditDesc(w.description || '')
+    setEditCreatorIds((w.creators || []).map((creator) => creator.profile_id))
+    setEditCreatorsVisible((w.creators || []).every((creator) => creator.is_visible !== false))
   }
 
   return (
@@ -295,6 +369,7 @@ export default function DashArtworks() {
         file={createFile}
         exhibitionId={exhibitionId}
         nextOrder={artworks.length > 0 ? Math.max(...artworks.map((a) => a.order ?? 0)) + 1 : 1}
+        creatorOptions={memberProfiles}
         onClose={() => setCreateFile(null)}
         onCreated={(newWork) => {
           if (!newWork) return
@@ -324,6 +399,15 @@ export default function DashArtworks() {
             </div>
             <div style={{ marginTop: 12 }}>
               <div className="ui-input-wrap" data-multiline="true"><textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} placeholder="説明文を入力" /></div>
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <CreatorPicker
+                profiles={memberProfiles}
+                selectedIds={editCreatorIds}
+                onToggle={toggleEditCreator}
+                visible={editCreatorsVisible}
+                onVisibleChange={setEditCreatorsVisible}
+              />
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
               <button type="button" onClick={() => setEditTarget(null)} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>キャンセル</button>

@@ -15,6 +15,7 @@ export default function InviteAcceptPage() {
   const { session } = useAuth()
   const navigate = useNavigate()
   const [invite, setInvite] = useState(null)
+  const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [accepting, setAccepting] = useState(false)
   const [error, setError] = useState('')
@@ -26,17 +27,23 @@ export default function InviteAcceptPage() {
         return
       }
       try {
-        const { data, error: inviteError } = await supabase
+        const [{ data, error: inviteError }, { data: profileData }] = await Promise.all([
+          supabase
           .from('organization_invites')
-          .select('*, organizations(id, name, slug, kind)')
+          .select('*, organizations(id, name, slug)')
           .eq('token', token)
-          .single()
+          .single(),
+          session
+            ? supabase.from('profiles').select('id').eq('id', session.user.id).maybeSingle()
+            : Promise.resolve({ data: null }),
+        ])
 
         if (inviteError) {
           setError('招待が見つかりません。')
         } else {
           setInvite(data)
         }
+        setProfile(profileData || null)
       } catch {
         setError('招待の読み込みに失敗しました。')
       } finally {
@@ -44,9 +51,10 @@ export default function InviteAcceptPage() {
       }
     }
     load()
-  }, [token])
+  }, [token, session])
 
   if (!session) return <Navigate to="/login" state={{ from: `/invite/${token}` }} replace />
+  if (!loading && !profile) return <Navigate to="/account/setup" state={{ from: `/invite/${token}` }} replace />
 
   const expired = invite?.expires_at ? new Date(invite.expires_at).getTime() < Date.now() : false
   const accepted = Boolean(invite?.accepted_at)
@@ -59,20 +67,19 @@ export default function InviteAcceptPage() {
     setError('')
     try {
       let { error: linkError } = await supabase
-        .from('user_orgs')
+        .from('organization_members')
         .upsert({
-          user_id: session.user.id,
-          org_id: invite.org_id,
+          profile_id: session.user.id,
+          organization_id: invite.organization_id,
           role: invite.role || 'admin',
-          member_email: session.user.email,
-        }, { onConflict: 'user_id,org_id' })
+        }, { onConflict: 'organization_id,profile_id' })
 
       if (linkError) {
         const fallback = await supabase
-          .from('user_orgs')
+          .from('organization_members')
           .insert({
-            user_id: session.user.id,
-            org_id: invite.org_id,
+            profile_id: session.user.id,
+            organization_id: invite.organization_id,
             role: invite.role || 'admin',
           })
         linkError = fallback.error

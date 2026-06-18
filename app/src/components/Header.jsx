@@ -7,7 +7,7 @@ import BrandMark, { BrandLockup } from './BrandMark'
 const TABS = [
   { key: 'top', label: '展覧会', path: '/', icon: 'list' },
   { key: 'orgs', label: '個人・団体', path: '/orgs', icon: 'org' },
-  { key: 'account', label: '管理', path: '/account', icon: 'user' },
+  { key: 'account', label: 'アカウント', path: '/account', icon: 'user' },
 ]
 
 export function Icon({ name, size = 20 }) {
@@ -43,6 +43,11 @@ export function Icon({ name, size = 20 }) {
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M4 20h5l10.5-10.5a2.1 2.1 0 0 0-3-3L6 17v3Z" {...s} />
       <path d="M14.5 8.5l3 3" {...s} />
+    </svg>
+  )
+  if (name === 'back') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M15 18l-6-6 6-6M9 12h11" {...s} />
     </svg>
   )
   return (

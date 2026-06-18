@@ -5,7 +5,6 @@ import DashShell, { DashField } from '../../components/DashShell'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import { deleteOrganization } from '../../lib/deleteOrganization'
-import { getPublisherDescriptionPlaceholder, getPublisherNameLabel, isPersonPublisher } from '../../lib/publisher'
 
 function fieldValue(value, fallback = '未設定') {
   return value || fallback
@@ -202,9 +201,8 @@ export default function DashSettings() {
     </div>
   )
 
-  const publicUrl = `artoir.net/${org?.slug || orgSlug}`
-  const nameLabel = getPublisherNameLabel(org)
-  const deleteLabel = isPersonPublisher(org) ? '公開ページ' : '団体'
+  const nameLabel = '団体名'
+  const deleteLabel = '団体'
 
   const settingsContent = (
     <div className="ui-settings-page">
@@ -216,7 +214,7 @@ export default function DashSettings() {
         value={fieldValue(org?.name)}
         editChildren={(
           <>
-            <DashField label={nameLabel} value={name} onChange={setName} placeholder={isPersonPublisher(org) ? '例: 山田 花' : '例: 多摩美術大学 日本画研究室'} />
+            <DashField label={nameLabel} value={name} onChange={setName} placeholder="例: 多摩美術大学 書道部" />
             <SettingsSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} saved={saved} />
           </>
         )}
@@ -230,7 +228,7 @@ export default function DashSettings() {
         value={fieldValue(org?.description)}
         editChildren={(
           <>
-            <DashField label="説明文" value={description} onChange={setDescription} placeholder={getPublisherDescriptionPlaceholder(org)} multiline />
+            <DashField label="説明文" value={description} onChange={setDescription} placeholder="団体の説明文を入力..." multiline />
             <SettingsSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} saved={saved} />
           </>
         )}
@@ -262,19 +260,18 @@ export default function DashSettings() {
         editSection={editSection}
         onBeginEdit={beginEditSection}
         id="url"
-        label="公開URL"
-        value={publicUrl}
+        label="ID"
+        value={fieldValue(org?.slug || orgSlug)}
         mono
         editChildren={(
           <>
             <DashField
               label="ID"
-              prefix="artoir.net/"
               value={slug}
               onChange={(v) => { setSlug(v); setSlugChanged(v !== orgSlug) }}
               placeholder="tamabi-nihonga"
               mono
-              warning={slugChanged ? 'ID変更時は既存URLが無効になります。' : undefined}
+              warning={slugChanged ? 'ID変更時は以前のIDが使えなくなります。' : undefined}
             />
             <SettingsSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} saved={saved} />
           </>

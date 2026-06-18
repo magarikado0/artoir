@@ -59,7 +59,7 @@ export default function AdminPage() {
         const { data: exhData, error: exhError } = await supabase
           .from('exhibitions')
           .select('*')
-          .eq('org_id', orgData.id)
+          .eq('organization_id', orgData.id)
           .order('start_date', { ascending: false })
         if (exhError) throw exhError
         if (isCancelled) return

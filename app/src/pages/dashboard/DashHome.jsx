@@ -75,7 +75,7 @@ export default function DashHome() {
         const { data: exhData } = await supabase
           .from('exhibitions')
           .select('*, artworks(image_url, order)')
-          .eq('org_id', orgData.id)
+          .eq('organization_id', orgData.id)
           .order('start_date', { ascending: false })
         setExhibitions((exhData || []).map(mapExhibitionListRow))
       } catch {

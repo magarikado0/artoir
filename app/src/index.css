@@ -460,13 +460,36 @@ button {
 }
 
 .ui-dash-org-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 18px;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(67, 54, 44, 0.12);
 }
 
+.ui-dash-account-back {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #43362c;
+  border: 1px solid rgba(67, 54, 44, 0.18);
+  border-radius: 999px;
+  text-decoration: none;
+  background: rgba(246, 242, 235, 0.7);
+}
+
+.ui-dash-account-back:hover {
+  color: #BE553D;
+  border-color: rgba(190, 85, 61, 0.36);
+}
+
 .ui-dash-org-bar-link {
-  display: inline-block;
+  display: block;
+  min-width: 0;
   max-width: 100%;
   font-family: Georgia, "Shippori Mincho", "Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", serif;
   font-size: clamp(22px, 2.4vw, 30px);
@@ -481,6 +504,14 @@ button {
 
 .ui-dash-org-bar-link:hover {
   color: #BE553D;
+}
+
+.ui-dash-mobile-org-context {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .ui-dash-mobile-org-title {
@@ -991,22 +1022,6 @@ button {
   flex-wrap: wrap;
 }
 
-.ui-publisher-kind-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 22px;
-  padding: 0 8px;
-  border: 1px solid rgba(67,54,44,0.16);
-  border-radius: 999px;
-  background: rgba(255,249,237,0.76);
-  color: #746557;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-}
-
 .ui-org-description {
   margin-top: 4px;
   color: #887869;
@@ -1067,42 +1082,93 @@ button {
   box-shadow: 0 1px 0 rgba(33,24,19,0.08), inset 0 -2px 0 #D3A842;
 }
 
-.ui-publisher-kind-grid {
+.ui-creator-choice-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin: 0 0 24px;
+  gap: 7px;
 }
 
-.ui-publisher-kind-option {
-  min-height: 86px;
-  padding: 14px;
+.ui-creator-choice {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
   border: 1px solid rgba(67,54,44,0.18);
-  border-radius: 8px;
-  background: rgba(255,249,237,0.58);
+  border-radius: 7px;
+  background: rgba(255,249,237,0.62);
   color: #211813;
-  text-align: left;
   cursor: pointer;
 }
 
-.ui-publisher-kind-option span {
-  display: block;
-  font-family: Georgia, "Shippori Mincho", "Noto Serif JP", serif;
-  font-size: 18px;
-}
-
-.ui-publisher-kind-option small {
-  display: block;
-  margin-top: 8px;
-  color: #746557;
-  font-size: 11px;
-  line-height: 1.55;
-}
-
-.ui-publisher-kind-option.is-active {
+.ui-creator-choice.is-selected {
   border-color: #211813;
   background: #FFF9ED;
-  box-shadow: inset 0 -3px 0 #D3A842;
+  box-shadow: inset 0 -2px 0 #D3A842;
+}
+
+.ui-creator-choice span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.ui-creator-choice small {
+  min-width: 0;
+  color: #746557;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+}
+
+.ui-creator-visible-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  color: #6c6258;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ui-profile-artwork-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 12px;
+}
+
+.ui-profile-artwork-card {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  color: #211813;
+  text-decoration: none;
+}
+
+.ui-profile-artwork-card-body {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.ui-profile-artwork-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: Georgia, "Shippori Mincho", "Noto Serif JP", serif;
+  font-size: 15px;
+  color: #211813;
+}
+
+.ui-profile-artwork-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #746557;
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .ui-search-input {
@@ -2215,6 +2281,29 @@ button.ui-account-org-pick-btn.ui-org-row {
   word-break: normal;
 }
 
+.ui-artwork-modal-creators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.ui-artwork-modal-creators span {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid rgba(67,54,44,0.14);
+  border-radius: 999px;
+  background: rgba(255,249,237,0.72);
+  color: #746557;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .ui-artwork-modal-description-wrap {
   margin-top: clamp(22px, 4vw, 44px);
   padding-top: 18px;
@@ -2374,10 +2463,6 @@ button.ui-account-org-pick-btn.ui-org-row {
   .ui-segment button {
     flex: 1;
     padding: 0 8px;
-  }
-
-  .ui-publisher-kind-grid {
-    grid-template-columns: 1fr;
   }
 
   .ui-account-floating-actions {

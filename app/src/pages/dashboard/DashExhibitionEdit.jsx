@@ -32,7 +32,7 @@ async function generateUniqueSlug(orgId, title) {
   const { data, error } = await supabase
     .from('exhibitions')
     .select('slug')
-    .eq('org_id', orgId)
+    .eq('organization_id', orgId)
     .like('slug', `${base}%`)
   if (error) throw error
   const existing = new Set((data || []).map((r) => r.slug))
@@ -166,7 +166,7 @@ export default function DashExhibitionEdit() {
         location,
         description,
         thumbnail_url: thumbnailUrl || null,
-        org_id: org.id,
+        organization_id: org.id,
       }
       if (isNew) {
         const { data, error } = await supabase.from('exhibitions').insert(payload).select().single()

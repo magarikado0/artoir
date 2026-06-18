@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import DashShell from '../../components/DashShell'
 import { useAuth } from '../../lib/auth'
-import { isPersonPublisher } from '../../lib/publisher'
 import { supabase } from '../../lib/supabase'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
@@ -47,16 +46,16 @@ export default function DashMembers() {
   }, [orgSlug])
 
   useEffect(() => {
-    if (org && !isPersonPublisher(org)) loadMembers(org)
+    if (org) loadMembers(org)
   }, [org])
 
   async function loadMembers(nextOrg = org) {
-    if (!supabase || !nextOrg || isPersonPublisher(nextOrg)) return
+    if (!supabase || !nextOrg) return
     setMembersLoading(true)
     try {
       const [{ data: memberRows, error: memberError }, { data: inviteRows }] = await Promise.all([
-        supabase.from('user_orgs').select('*').eq('org_id', nextOrg.id),
-        supabase.from('organization_invites').select('*').eq('org_id', nextOrg.id).is('accepted_at', null).order('created_at', { ascending: false }),
+        supabase.from('organization_members').select('*, profiles(id, display_name, slug)').eq('organization_id', nextOrg.id),
+        supabase.from('organization_invites').select('*').eq('organization_id', nextOrg.id).is('accepted_at', null).order('created_at', { ascending: false }),
       ])
       if (memberError) {
         setMessage(memberError.message)
@@ -70,7 +69,7 @@ export default function DashMembers() {
   }
 
   function currentMembership() {
-    return members.find((member) => member.user_id === session?.user?.id)
+    return members.find((member) => member.profile_id === session?.user?.id)
   }
 
   function ownerCount() {
@@ -78,9 +77,9 @@ export default function DashMembers() {
   }
 
   function memberEmail(member) {
-    if (member.member_email) return member.member_email
-    if (member.user_id === session?.user?.id) return session.user.email
-    return member.user_id
+    if (member.profiles?.display_name) return `${member.profiles.display_name} (@${member.profiles.slug})`
+    if (member.profile_id === session?.user?.id) return session.user.email
+    return member.profile_id
   }
 
   async function copyText(text) {
@@ -132,7 +131,7 @@ export default function DashMembers() {
       const { data, error } = await supabase
         .from('organization_invites')
         .insert({
-          org_id: org.id,
+          organization_id: org.id,
           email: inviteEmail.trim().toLowerCase(),
           role: inviteRole,
           token,
@@ -160,19 +159,28 @@ export default function DashMembers() {
   async function handleRoleChange(member, role) {
     if (!supabase || !org || member.role === role) return
     if (member.role === 'owner' && role !== 'owner' && ownerCount() <= 1) {
-      setMessage('owner は最低1人必要です。')
+      setMessage('オーナーは最低1人必要です。')
       return
     }
     setSaving(true)
     setMessage('')
     try {
-      const { error } = await supabase
-        .from('user_orgs')
+      const { data, error } = await supabase
+        .from('organization_members')
         .update({ role })
-        .eq('user_id', member.user_id)
-        .eq('org_id', org.id)
-      if (error) setMessage(error.message)
-      else await loadMembers(org)
+        .eq('profile_id', member.profile_id)
+        .eq('organization_id', org.id)
+        .select('role')
+        .maybeSingle()
+      if (error) {
+        setMessage(error.message)
+        return
+      }
+      if (!data || data.role !== role) {
+        setMessage('権限の変更に失敗しました。オーナー権限があるか確認してください。')
+        return
+      }
+      await loadMembers(org)
     } finally {
       setSaving(false)
     }
@@ -181,7 +189,7 @@ export default function DashMembers() {
   async function handleRemoveMember(member) {
     if (!supabase || !org) return
     if (member.role === 'owner' && ownerCount() <= 1) {
-      setMessage('owner は最低1人必要です。')
+      setMessage('オーナーは最低1人必要です。')
       return
     }
     const ok = window.confirm(`${memberEmail(member)} をメンバーから外しますか？`)
@@ -189,13 +197,22 @@ export default function DashMembers() {
     setSaving(true)
     setMessage('')
     try {
-      const { error } = await supabase
-        .from('user_orgs')
+      const { data, error } = await supabase
+        .from('organization_members')
         .delete()
-        .eq('user_id', member.user_id)
-        .eq('org_id', org.id)
-      if (error) setMessage(error.message)
-      else await loadMembers(org)
+        .eq('profile_id', member.profile_id)
+        .eq('organization_id', org.id)
+        .select('profile_id')
+        .maybeSingle()
+      if (error) {
+        setMessage(error.message)
+        return
+      }
+      if (!data) {
+        setMessage('メンバーの削除に失敗しました。オーナー権限があるか確認してください。')
+        return
+      }
+      await loadMembers(org)
     } finally {
       setSaving(false)
     }
@@ -224,19 +241,14 @@ export default function DashMembers() {
 
   const content = (
     <div className="ui-settings-page">
-      {isPersonPublisher(org) ? (
-        <section className="ui-settings-section">
-          <div className="ui-settings-member-note">個人ページにはメンバー管理はありません。</div>
-        </section>
-      ) : (
-        <section className="ui-settings-section">
+      <section className="ui-settings-section">
           <div className="ui-settings-members">
             {membersLoading ? (
               <div className="ui-settings-member-note">読み込み中...</div>
             ) : (
               <div className="ui-settings-member-list">
                 {members.map((member) => (
-                  <div key={`${member.org_id}-${member.user_id}`} className="ui-settings-member-row">
+                  <div key={`${member.organization_id}-${member.profile_id}`} className="ui-settings-member-row">
                     <div>
                       <div className="ui-settings-member-email">{memberEmail(member)}</div>
                       <div className="ui-settings-member-role">{roleLabel(member.role)}</div>
@@ -293,7 +305,7 @@ export default function DashMembers() {
                 )}
               </form>
             ) : (
-              <div className="ui-settings-member-note">メンバーの招待・権限変更は owner のみ操作できます。</div>
+              <div className="ui-settings-member-note">メンバーの招待・権限変更はオーナーのみ操作できます。</div>
             )}
 
             {invites.length > 0 && (
@@ -321,8 +333,7 @@ export default function DashMembers() {
 
             {message && <div className="ui-settings-member-message">{message}</div>}
           </div>
-        </section>
-      )}
+      </section>
     </div>
   )
 

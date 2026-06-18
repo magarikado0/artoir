@@ -14,17 +14,16 @@ function getRailActive(pathname, orgSlug) {
   return null
 }
 
-function DashboardSubNav({ orgSlug, org }) {
+function DashboardSubNav({ orgSlug }) {
   const { pathname } = useLocation()
   const active = getRailActive(pathname, orgSlug)
-  const showMembers = org?.kind !== 'person'
   const items = [
     { key: 'home', to: `/${orgSlug}/dashboard`, label: '展覧会', icon: 'list' },
     { key: 'settings', to: `/${orgSlug}/dashboard/settings`, label: '設定', icon: 'user' },
-    ...(showMembers ? [{ key: 'members', to: `/${orgSlug}/dashboard/members`, label: 'メンバー', icon: 'org' }] : []),
+    { key: 'members', to: `/${orgSlug}/dashboard/members`, label: 'メンバー', icon: 'org' },
   ]
   return (
-    <nav className="ui-dashboard-subnav" aria-label="Dashboard">
+    <nav className="ui-dashboard-subnav" aria-label="団体メニュー">
       {items.map(({ key, to, label, icon }) => (
         <Link
           key={key}
@@ -44,6 +43,9 @@ function DashboardSubNav({ orgSlug, org }) {
 function DashOrgBar({ orgSlug, orgName }) {
   return (
     <div className="ui-dash-org-bar">
+      <Link to="/account" className="ui-dash-account-back" aria-label="アカウントへ戻る">
+        <Icon name="back" size={16} />
+      </Link>
       <Link to={`/${orgSlug}/dashboard`} className="ui-dash-org-bar-link ui-dashboard-header-title">
         {orgName || orgSlug}
       </Link>
@@ -59,11 +61,7 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
     if (!orgSlug || !supabase) return
     let cancelled = false
     async function load() {
-      let { data, error } = await supabase.from('organizations').select('name, slug, kind').eq('slug', orgSlug).single()
-      if (error) {
-        const fallback = await supabase.from('organizations').select('name, slug').eq('slug', orgSlug).single()
-        data = fallback.data
-      }
+      const { data } = await supabase.from('organizations').select('name, slug').eq('slug', orgSlug).single()
       if (!cancelled && data) setOrg(data)
     }
     load()
@@ -84,7 +82,7 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
       <Header activeTab="account" />
       <main className="ui-app-main">
         {orgContext}
-        {orgSlug && <DashboardSubNav orgSlug={orgSlug} org={org} />}
+        {orgSlug && <DashboardSubNav orgSlug={orgSlug} />}
         {children}
       </main>
     </div>
@@ -94,30 +92,37 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
     <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans, paddingBottom: 92 }}>
       <div className="ui-mobile-topbar">
         {orgSlug ? (
-          <Link
-            to={`/${orgSlug}/dashboard`}
-            className="ui-dash-mobile-org-title ui-dashboard-header-title"
-            aria-label={`${orgName} のダッシュボード`}
-          >
-            {orgName}
-          </Link>
+          <div className="ui-dash-mobile-org-context">
+            <Link to="/account" className="ui-dash-account-back" aria-label="アカウントへ戻る">
+              <Icon name="back" size={16} />
+            </Link>
+            <Link
+              to={`/${orgSlug}/dashboard`}
+              className="ui-dash-mobile-org-title ui-dashboard-header-title"
+              aria-label={`${orgName} のダッシュボード`}
+            >
+              {orgName}
+            </Link>
+          </div>
         ) : (
           <Link to="/" className="ui-mobile-brand" aria-label="Artoir home">
             <BrandLockup />
           </Link>
         )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Link to="/account" className="ui-top-icon" aria-label="アカウント">
-            <Icon name="user" size={18} />
-          </Link>
-        </div>
+        {!orgSlug && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Link to="/account" className="ui-top-icon" aria-label="アカウント">
+              <Icon name="user" size={18} />
+            </Link>
+          </div>
+        )}
       </div>
       {showSetupCrumbs && (
         <div className="ui-mobile-crumbs">
           {crumbs.map((c, i) => <span key={i}>{i > 0 ? ' / ' : ''}{c}</span>)}
         </div>
       )}
-      {orgSlug && <DashboardSubNav orgSlug={orgSlug} org={org} />}
+      {orgSlug && <DashboardSubNav orgSlug={orgSlug} />}
       <main className="ui-app-main ui-dashboard-mobile-main">
         {children}
       </main>

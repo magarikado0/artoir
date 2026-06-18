@@ -1,9 +1,9 @@
-/** 公開主体配下の作品・展覧会・メンバーシップを削除してから公開主体を削除する */
+/** 団体配下の作品・展覧会・メンバーシップを削除してから団体を削除する */
 export async function deleteOrganization(client, orgId) {
   const { data: exhibitions, error: listErr } = await client
     .from('exhibitions')
     .select('id')
-    .eq('org_id', orgId)
+    .eq('organization_id', orgId)
   if (listErr) return { error: listErr }
 
   const exhIds = (exhibitions || []).map((e) => e.id)
@@ -12,10 +12,10 @@ export async function deleteOrganization(client, orgId) {
     if (artErr) return { error: artErr }
   }
 
-  const { error: exhErr } = await client.from('exhibitions').delete().eq('org_id', orgId)
+  const { error: exhErr } = await client.from('exhibitions').delete().eq('organization_id', orgId)
   if (exhErr) return { error: exhErr }
 
-  const { error: linkErr } = await client.from('user_orgs').delete().eq('org_id', orgId)
+  const { error: linkErr } = await client.from('organization_members').delete().eq('organization_id', orgId)
   if (linkErr) return { error: linkErr }
 
   const { error: orgErr } = await client.from('organizations').delete().eq('id', orgId)

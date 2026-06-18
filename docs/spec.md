@@ -1,43 +1,66 @@
 # Artoir — MVP 実装仕様
 
-> 最終更新: 2026-04-10
-
----
+> 最終更新: 2026-06-01
 
 ## 技術スタック
 
 - React + Vite + Tailwind CSS
 - Supabase（DB + Auth + Storage）
-- Vercel（Root Directory: `app/`）
-
----
+- Vercel / Cloudflare Workers
 
 ## データ構造
 
 ```
-organizations（公開主体: kind = organization / person）
-  └── exhibitions
-        └── artworks
+auth.users（認証）
+  └── profiles（プロフィール）
+
+profiles
+  └── organization_members
+        └── organizations
+              └── exhibitions
+                    └── artworks
+                          └── artwork_creators
+                                └── profiles
 ```
+
+### profiles
+
+| カラム | 型 |
+|--------|-----|
+| id | UUID (PK, auth.users.id) |
+| slug | string unique |
+| display_name | string |
+| bio | text |
+| avatar_url | string |
+| sns_links | JSONB |
+| homepage_url | string |
 
 ### organizations
 
 | カラム | 型 |
 |--------|-----|
 | id | UUID (PK) |
-| kind | string (`organization` / `person`) |
 | name | string |
-| slug | string (unique) |
+| slug | string unique |
 | description | text |
-| sns_links | JSONB `{instagram, x, ...}` |
+| sns_links | JSONB |
 | homepage_url | string |
+| created_by | UUID (profiles.id) |
+
+### organization_members
+
+| カラム | 型 |
+|--------|-----|
+| organization_id | UUID (organizations.id) |
+| profile_id | UUID (profiles.id) |
+| role | string (`owner` / `admin`) |
 
 ### exhibitions
 
 | カラム | 型 |
 |--------|-----|
 | id | UUID (PK) |
-| org_id | UUID (FK) |
+| organization_id | UUID (organizations.id) |
 | title | string |
 | slug | string |
 | start_date | date |
@@ -51,68 +74,51 @@ organizations（公開主体: kind = organization / person）
 | カラム | 型 |
 |--------|-----|
 | id | UUID (PK) |
-| exhibition_id | UUID (FK) |
+| exhibition_id | UUID (exhibitions.id) |
 | title | string |
 | description | text |
 | image_url | string |
 | order | integer |
 
-> 作者名は持たない（プライバシー配慮）
+### artwork_creators
 
----
+| カラム | 型 |
+|--------|-----|
+| artwork_id | UUID (artworks.id) |
+| profile_id | UUID (profiles.id) |
+| display_order | integer |
+| is_visible | boolean |
+
+作者名は `artworks` に直接持たず、`artwork_creators` でプロフィールに紐づける。団体展示では、作者候補は団体メンバーに限定する。
 
 ## URL設計
 
 ```
-/{org-slug}/                              # 公開ページ（個人または団体）
+/{org-slug}/                              # 団体ページ
 /{org-slug}/exhibition/{exhibition-slug}  # 展覧会ページ
 ```
 
----
+プロフィール公開URLは将来の `@profileSlug` を想定するが、現時点では主導線にしない。
 
 ## 画面仕様
 
-### 公開ページ
+### アカウント
 
-- 表示名または団体名・説明
+- プロフィール設定・編集
+- 管理している団体一覧
+- 団体作成
+- ログアウト
+
+### 団体ページ
+
+- 団体名・説明
 - SNSリンク・HPリンク
-- 展覧会一覧（タイトル・会期・場所）→ クリックで展覧会ページへ
+- 展覧会一覧（タイトル・会期・場所・サムネイル）
 
 ### 展覧会ページ
 
 - タイトル・会期・場所・説明
-- サムネイル（あれば一覧・先頭画像として表示）
-- 作品グリッド（3カラム）
-- 作品クリック → モーダル（画像・タイトル・説明）
-- シェアボタン（URLコピー）
-
----
-
-## MVP スコープ
-
-### 作るもの
-
-- 公開ページ
-- 展覧会ページ（作品一覧・モーダル・背景色カスタム）
-- シェアリンク（認証なしで閲覧可能）
-- ログイン・認証（Supabase Authentication）
-
-### 作らないもの
-
-- 管理ダッシュボード（CMS）
-- アナリティクス
-- 有料プラン
-
----
-
-## デザイン
-
-| 項目 | 値 |
-|------|----|
-| 背景色 | `#f5f0e8`（用紙） |
-| テキスト色 | `#1a1612`（墨） |
-| アクセント色 | `#c0392b`（朱） |
-| 見出しフォント | Noto Serif JP / Cormorant Garamond |
-
-- モバイルファースト・レスポンシブ
-- インタラクティブモックアップ: `docs/design/mockups/Artoir-exhibition.html`
+- 団体ページへの戻り導線
+- 作品グリッド
+- 作品クリック → モーダル（画像・タイトル・説明・表示ONの作者）
+- シェアボタン

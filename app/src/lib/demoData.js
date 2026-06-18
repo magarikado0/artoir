@@ -25,7 +25,7 @@ export const demoOrgs = [
 export const demoExhibitions = [
   {
     id: 'demo-exh-1',
-    org_id: 'demo-org-1',
+    organization_id: 'demo-org-1',
     slug: 'spring-2025',
     title: '春の芽吹き展',
     description: '春をテーマに集めた、色とりどりの作品たち。',
@@ -37,7 +37,7 @@ export const demoExhibitions = [
   },
   {
     id: 'demo-exh-2',
-    org_id: 'demo-org-1',
+    organization_id: 'demo-org-1',
     slug: 'winter-2024',
     title: '静寂と余白',
     description: '冬の静けさをモノクロームで表現した作品展。',
@@ -49,7 +49,7 @@ export const demoExhibitions = [
   },
   {
     id: 'demo-exh-3',
-    org_id: 'demo-org-1',
+    organization_id: 'demo-org-1',
     slug: 'summer-2024',
     title: '熱量と影',
     description: '夏の強い光と影のコントラストをテーマにした作品展。',
@@ -61,7 +61,7 @@ export const demoExhibitions = [
   },
   {
     id: 'demo-exh-4',
-    org_id: 'demo-org-1',
+    organization_id: 'demo-org-1',
     slug: 'autumn-2023',
     title: '重なりと透明',
     description: '素材の重なりと透明感を追求した、インスタレーション中心の展覧会。',
@@ -73,7 +73,7 @@ export const demoExhibitions = [
   },
   {
     id: 'demo-exh-5',
-    org_id: 'demo-org-2',
+    organization_id: 'demo-org-2',
     slug: 'distance-2025',
     title: '距離と眼差し',
     description: '日常の中にある「遠さ」を写真で切り取った作品展。',
@@ -85,7 +85,7 @@ export const demoExhibitions = [
   },
   {
     id: 'demo-exh-6',
-    org_id: 'demo-org-2',
+    organization_id: 'demo-org-2',
     slug: 'loop-2024',
     title: 'LOOP',
     description: '映像と音が循環するインスタレーション。',

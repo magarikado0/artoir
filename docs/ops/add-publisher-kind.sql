@@ -1,5 +1,5 @@
--- Add personal publisher support while keeping the existing organizations -> exhibitions model.
--- Run this in Supabase SQL editor before enabling personal page creation in production.
+-- DEPRECATED: replaced by docs/ops/rebuild-profiles-organizations.sql.
+-- Kept only as historical context for the older organizations.kind model.
 
 alter table public.organizations
   add column if not exists kind text not null default 'organization';

@@ -5,37 +5,57 @@ import { supabase } from './supabase'
 /** Context の session が一瞬 null でも、Supabase 側のセッションを確認してから表示を決める */
 export function useResolvedSession() {
   const { session } = useAuth()
-  const [resolvedSession, setResolvedSession] = useState(session ?? null)
-  const [ready, setReady] = useState(Boolean(session))
+  const [resolvedSession, setResolvedSession] = useState(null)
+  const [resolvedReady, setResolvedReady] = useState(false)
+  const [checkingFallback, setCheckingFallback] = useState(false)
 
   useEffect(() => {
+    let cancelled = false
+
     if (session) {
-      setResolvedSession(session)
-      setReady(true)
-      return undefined
+      Promise.resolve().then(() => {
+        if (cancelled) return
+        setResolvedSession(null)
+        setResolvedReady(false)
+        setCheckingFallback(false)
+      })
+      return () => { cancelled = true }
     }
 
     if (!supabase) {
-      setResolvedSession(null)
-      setReady(true)
-      return undefined
+      Promise.resolve().then(() => {
+        if (cancelled) return
+        setResolvedSession(null)
+        setResolvedReady(true)
+        setCheckingFallback(false)
+      })
+      return () => { cancelled = true }
     }
 
-    let cancelled = false
-    setReady(false)
+    Promise.resolve().then(() => {
+      if (cancelled) return
+      setResolvedSession(null)
+      setResolvedReady(false)
+      setCheckingFallback(true)
+    })
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return
       setResolvedSession(data.session ?? null)
-      setReady(true)
+      setResolvedReady(true)
+      setCheckingFallback(false)
     }).catch(() => {
       if (!cancelled) {
         setResolvedSession(null)
-        setReady(true)
+        setResolvedReady(true)
+        setCheckingFallback(false)
       }
     })
 
     return () => { cancelled = true }
   }, [session])
 
-  return { session: resolvedSession, ready }
+  return {
+    session: session ?? resolvedSession,
+    ready: Boolean(session) || (!checkingFallback && resolvedReady),
+  }
 }

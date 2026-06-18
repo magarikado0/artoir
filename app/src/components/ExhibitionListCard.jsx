@@ -3,7 +3,6 @@ import { T, fmtDateRangeShort, pad2 } from '../lib/tokens'
 import ArtworkMedia from './ArtworkMedia'
 import { getExhibitionThumbnailUrl } from '../lib/exhibition'
 import { getThumbnailUrl } from '../lib/imageUrl'
-import { getPublisherKindLabel } from '../lib/publisher'
 
 function LocationPin() {
   return (
@@ -49,7 +48,6 @@ export default function ExhibitionListCard({ exhibition: exh, org, showOrgName =
       <div className="ui-exhibition-list-card-body">
         {showOrgName && org && (
           <div className="ui-exhibition-list-card-meta">
-            <span className="ui-publisher-kind-badge">{getPublisherKindLabel(org)}</span>
             {org.name && (
               <span className="ui-exhibition-list-card-tag">{org.name}</span>
             )}

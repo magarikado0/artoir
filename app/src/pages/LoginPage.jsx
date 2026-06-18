@@ -189,12 +189,12 @@ export default function LoginPage() {
 
   const formBody = (
     <>
-      <div className="ui-kicker">{mode === 'login' ? 'AUTH / LOGIN' : 'AUTH / SIGN UP'}</div>
+      <div className="ui-kicker">{mode === 'login' ? 'ログイン' : '新規登録'}</div>
       <div className="ui-screen-title" style={{ marginTop: 8 }}>{mode === 'login' ? 'ログイン' : '新規登録'}</div>
       <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>
         {mode === 'login'
-          ? '管理アカウントへログインします。'
-          : 'メールとパスワードでアカウントを作成します。登録後、個人または団体の公開ページ作成に進めます。'}
+          ? 'アカウントへログインします。'
+          : 'メールとパスワードでアカウントを作成します。登録後、プロフィール設定に進めます。'}
       </div>
 
       <button

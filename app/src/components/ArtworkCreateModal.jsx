@@ -94,9 +94,39 @@ function FreeImageCrop({ imageUrl, onCropPixelsChange }) {
   )
 }
 
-export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder, onClose, onCreated }) {
+function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator, creatorsVisible, onVisibleChange }) {
+  if (!creatorOptions?.length) {
+    return <div className="ui-field-help">団体メンバーを追加すると、作者プロフィールを紐づけられます。</div>
+  }
+
+  return (
+    <div style={{ display: 'grid', gap: 10 }}>
+      <div className="ui-form-label">作者</div>
+      <div className="ui-creator-choice-list">
+        {creatorOptions.map((profile) => {
+          const checked = selectedCreatorIds.includes(profile.id)
+          return (
+            <label key={profile.id} className={`ui-creator-choice ${checked ? 'is-selected' : ''}`}>
+              <input type="checkbox" checked={checked} onChange={() => onToggleCreator(profile.id)} />
+              <span>{profile.display_name}</span>
+              <small>@{profile.slug}</small>
+            </label>
+          )
+        })}
+      </div>
+      <label className="ui-creator-visible-toggle">
+        <input type="checkbox" checked={creatorsVisible} onChange={(e) => onVisibleChange(e.target.checked)} />
+        <span>公開画面に作者を表示する</span>
+      </label>
+    </div>
+  )
+}
+
+export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder, creatorOptions = [], onClose, onCreated }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [selectedCreatorIds, setSelectedCreatorIds] = useState([])
+  const [creatorsVisible, setCreatorsVisible] = useState(true)
   const [crop, setCrop] = useState(getDefaultCrop)
   const [zoom, setZoom] = useState(1)
   const [aspect, setAspect] = useState(1)
@@ -110,6 +140,8 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
     if (!open || !file) {
       setTitle('')
       setDescription('')
+      setSelectedCreatorIds([])
+      setCreatorsVisible(true)
       setCrop(getDefaultCrop())
       setZoom(1)
       setAspect(1)
@@ -167,7 +199,25 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
       const { data: newWork, error: insertError } = await supabase.from('artworks').insert(payload).select().single()
       if (insertError) throw insertError
 
-      onCreated?.(newWork)
+      const creatorRows = selectedCreatorIds.map((profileId, index) => ({
+        artwork_id: newWork.id,
+        profile_id: profileId,
+        display_order: index,
+        is_visible: creatorsVisible,
+      }))
+      if (creatorRows.length > 0) {
+        const { error: creatorError } = await supabase.from('artwork_creators').insert(creatorRows)
+        if (creatorError) throw creatorError
+      }
+
+      const creators = selectedCreatorIds.map((profileId, index) => ({
+        profile_id: profileId,
+        display_order: index,
+        is_visible: creatorsVisible,
+        profile: creatorOptions.find((profile) => profile.id === profileId),
+      })).filter((creator) => creator.profile)
+
+      onCreated?.({ ...newWork, creators })
       onClose()
     } catch (err) {
       setError(err?.message || '作品の作成に失敗しました')
@@ -181,6 +231,14 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
 
   const isFreeAspect = aspect === null
   const canSave = Boolean(croppedAreaPixels) && !saving
+
+  function toggleCreator(profileId) {
+    setSelectedCreatorIds((prev) => (
+      prev.includes(profileId)
+        ? prev.filter((id) => id !== profileId)
+        : [...prev, profileId]
+    ))
+  }
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="artwork-create-title" style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(17,17,16,0.6)', display: 'grid', placeItems: 'center', padding: 16 }}>
@@ -291,6 +349,14 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
                 style={{ fontFamily: T.sans }}
               />
             </div>
+
+            <CreatorPicker
+              creatorOptions={creatorOptions}
+              selectedCreatorIds={selectedCreatorIds}
+              onToggleCreator={toggleCreator}
+              creatorsVisible={creatorsVisible}
+              onVisibleChange={setCreatorsVisible}
+            />
 
             {error && <div style={{ padding: '10px 12px', border: `1px solid ${T.accent}`, color: T.accent, background: 'rgba(190,85,61,0.06)', fontFamily: T.mono, fontSize: 11, letterSpacing: '0.06em' }}>{error}</div>}
 

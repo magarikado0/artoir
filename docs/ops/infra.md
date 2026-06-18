@@ -1,37 +1,26 @@
-# インフラ構成
+# Infra Notes
 
-## Tech Stack
+## Supabase model
 
-- **Frontend**: React + Vite + Tailwind CSS
-- **Backend**: Supabase（DB + Auth + Storage）
-- **Hosting**: Vercel（Root Directory: `app`）
+Current development schema is defined by:
 
-## データ構造
+- `docs/ops/rebuild-profiles-organizations.sql`
+- `docs/ops/apply-all-table-rls.sql`
 
-```
-organizations（公開主体: kind = organization / person）
-  └── exhibitions
-        └── artworks
-```
+The active model separates:
 
-## URL設計
+- `auth.users`: authentication only
+- `profiles`: artoir user profile
+- `organizations`: groups/teams
+- `organization_members`: profile membership and role
+- `artwork_creators`: artwork to profile authorship
 
-```
-artoir.net/{org-slug}/exhibition/{exhibition-slug}
-```
+Older helper scripts for `organizations.kind` and `user_orgs` are deprecated and should not be used for new development.
 
-例：`artoir.net/kyodai-shodo/exhibition/2026-spring`
+## RLS expectations
 
-## Vercel設定
-
-Root Directoryは `app` に設定する。
-
-## 現在の開発状況
-
-- モックアップHTML作成済み（`docs/design/mockups/`）
-- Supabaseスキーマ：未設計
-- 認証：未実装
-
-## Supabase RLS（削除）
-
-ダッシュボードの削除機能（団体・展覧会・作品）を使うには、`user_orgs` に紐づくメンバーが自分の org 配下の `organizations` / `exhibitions` / `artworks` / `user_orgs` を **DELETE** できる RLS ポリシーが必要。FK が `RESTRICT` の場合はアプリ側で子→親の順に削除しているが、`ON DELETE CASCADE` の追加を推奨。
+- Public visitors can read organizations, exhibitions, artworks, profiles, and visible artwork creator rows.
+- Logged-in profiles can create organizations and become the first owner.
+- Organization members can manage exhibitions and artworks for that organization.
+- Organization owners can manage members and invites.
+- Artwork creator rows can only reference profiles that belong to the same organization as the artwork's exhibition.

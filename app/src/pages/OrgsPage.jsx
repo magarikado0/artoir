@@ -5,9 +5,8 @@ import { supabase } from '../lib/supabase'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import { T, pad2 } from '../lib/tokens'
-import { getPublisherKindLabel } from '../lib/publisher'
 
-const loginForSetupState = { from: '/account/setup' }
+const loginForSetupState = { from: '/account/organizations/new' }
 
 export default function OrgsPage() {
   const { session } = useAuth()
@@ -55,16 +54,16 @@ export default function OrgsPage() {
 
         <div className="ui-toolbar-grid">
           <input className="ui-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="名前を検索" />
-          <Link to={session ? '/account/setup' : '/login'} state={session ? undefined : loginForSetupState} className="ui-floating-action ui-create-action">
+          <Link to={session ? '/account/organizations/new' : '/login'} state={session ? undefined : loginForSetupState} className="ui-floating-action ui-create-action">
             <Icon name="plus" size={17} />
-            <span>公開ページを作成</span>
+            <span>団体を作成</span>
           </Link>
         </div>
 
         <div className="ui-org-table">
           <div className="ui-org-table-head" aria-hidden="true">
             <span>No.</span>
-            <span>公開主体</span>
+            <span>団体</span>
             <span>展示</span>
           </div>
           <div className="ui-org-list">
@@ -74,7 +73,6 @@ export default function OrgsPage() {
                 <div style={{ minWidth: 0 }}>
                   <div className="ui-org-name-row">
                     <span className="ui-org-name">{o.name}</span>
-                    <span className="ui-publisher-kind-badge">{getPublisherKindLabel(o)}</span>
                   </div>
                   {o.description && <div className="ui-org-description">{o.description}</div>}
                 </div>
@@ -87,7 +85,7 @@ export default function OrgsPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>NO ORGANIZATIONS</div>
+          <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>団体が見つかりません</div>
         )}
       </main>
       <BottomNav active="orgs" />

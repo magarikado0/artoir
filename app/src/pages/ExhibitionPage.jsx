@@ -6,7 +6,7 @@ import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
-import { isPersonPublisher } from '../lib/publisher'
+import { attachNormalizedCreators } from '../lib/profile'
 
 function SummaryItem({ label, value }) {
   if (!value) return null
@@ -34,11 +34,15 @@ export default function ExhibitionPage() {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
         if (!orgData) return setLoading(false)
         setOrg(orgData)
-        const { data: exhData } = await supabase.from('exhibitions').select('*').eq('slug', exhibitionSlug).eq('org_id', orgData.id).single()
+        const { data: exhData } = await supabase.from('exhibitions').select('*').eq('slug', exhibitionSlug).eq('organization_id', orgData.id).single()
         if (!exhData) return setLoading(false)
         setExhibition(exhData)
-        const { data: awData } = await supabase.from('artworks').select('*').eq('exhibition_id', exhData.id).order('order')
-        setArtworks(awData || [])
+        const { data: awData } = await supabase
+          .from('artworks')
+          .select('*, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name))')
+          .eq('exhibition_id', exhData.id)
+          .order('order')
+        setArtworks((awData || []).map(attachNormalizedCreators))
       } catch {
         /* unavailable */
       } finally {
@@ -124,7 +128,7 @@ export default function ExhibitionPage() {
     </div>
   )
 
-  const hostLabel = isPersonPublisher(org) ? '主催者' : '主催団体'
+  const hostLabel = '主催団体'
   const dateText = exhibition.start_date
     ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}`
     : ''
@@ -134,7 +138,7 @@ export default function ExhibitionPage() {
       <Header activeTab="top" />
       <main className="ui-app-main">
         <div className="ui-app-topline">
-          <Link to="/" style={{ color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 展覧会</Link>
+          <Link to={`/${orgSlug}`} style={{ color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 団体ページ</Link>
           <button onClick={copyLink} className="ui-pill-action" style={{ background: copied ? T.accent : T.ink }}>
             <Icon name="list" size={17} />
             <span>{copied ? 'コピー済み' : 'リンクを共有'}</span>

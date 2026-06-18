@@ -9,6 +9,7 @@ import OAuthReturnRedirect from './components/OAuthReturnRedirect'
 const AllExhibitionsPage = lazy(() => import('./pages/AllExhibitionsPage'))
 const OrgsPage = lazy(() => import('./pages/OrgsPage'))
 const OrgPage = lazy(() => import('./pages/OrgPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const ExhibitionPage = lazy(() => import('./pages/ExhibitionPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
@@ -19,6 +20,7 @@ const DashExhibitionEdit = lazy(() => import('./pages/dashboard/DashExhibitionEd
 const DashArtworks = lazy(() => import('./pages/dashboard/DashArtworks'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
 const AccountSetup = lazy(() => import('./pages/AccountSetup'))
+const OrganizationCreatePage = lazy(() => import('./pages/OrganizationCreatePage'))
 const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage'))
 
 function ScrollToTop() {
@@ -157,7 +159,9 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/account/setup" element={<AccountSetup />} />
+            <Route path="/account/organizations/new" element={<OrganizationCreatePage />} />
             <Route path="/invite/:token" element={<InviteAcceptPage />} />
+            <Route path="/@:profileSlug" element={<ProfilePage />} />
             <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
             <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             <Route path="/:orgSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />

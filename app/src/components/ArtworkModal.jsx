@@ -118,9 +118,11 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
 
   const title = artwork.title?.trim() ?? ''
   const description = artwork.description?.trim() ?? ''
+  const visibleCreators = (artwork.creators || []).filter((creator) => creator.is_visible && creator.profile?.display_name)
   const hasTitle = Boolean(title)
   const hasDescription = Boolean(description)
-  const hasDetail = hasTitle || hasDescription
+  const hasCreators = visibleCreators.length > 0
+  const hasDetail = hasTitle || hasDescription || hasCreators
   const positionLabel = hasMultiple && currentIndex >= 0
     ? `${currentIndex + 1} / ${artworks.length}`
     : null
@@ -205,6 +207,14 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
               <h2 id="artwork-modal-title" className="ui-artwork-modal-title">
                 {title}
               </h2>
+            )}
+
+            {hasCreators && (
+              <div className="ui-artwork-modal-creators">
+                {visibleCreators.map((creator) => (
+                  <span key={creator.profile_id || creator.profile.id}>@{creator.profile.display_name}</span>
+                ))}
+              </div>
             )}
 
             {hasDescription && (

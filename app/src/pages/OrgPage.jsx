@@ -5,7 +5,6 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { T, externalHost } from '../lib/tokens'
-import { getPublisherKindLabel } from '../lib/publisher'
 import { mapExhibitionListRow } from '../lib/exhibition'
 
 export default function OrgPage() {
@@ -24,7 +23,7 @@ export default function OrgPage() {
         const { data: exhData } = await supabase
           .from('exhibitions')
           .select('*, artworks(image_url, order)')
-          .eq('org_id', orgData.id)
+          .eq('organization_id', orgData.id)
           .order('start_date', { ascending: false })
         setExhibitions((exhData || []).map(mapExhibitionListRow))
       } catch {
@@ -60,7 +59,6 @@ export default function OrgPage() {
       <main className="ui-app-main">
         <Link to="/orgs" style={{ display: 'inline-flex', marginBottom: 14, color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 公開ページ一覧</Link>
         <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
-          <span className="ui-publisher-kind-badge">{getPublisherKindLabel(org)}</span>
           <h1 className="ui-screen-title" style={{ marginTop: 7 }}>{org.name}</h1>
           {org.description && <p className="ui-screen-subtitle" style={{ maxWidth: 720 }}>{org.description}</p>}
           {links.length > 0 && (
