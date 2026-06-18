@@ -8,6 +8,8 @@ import ArtworkMedia from '../components/ArtworkMedia'
 import ArtworkModal from '../components/ArtworkModal'
 import ImageUploader from '../components/ImageUploader'
 import ArtworkCreateModal from '../components/ArtworkCreateModal'
+import LoadingFrames from '../components/LoadingFrames'
+import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, pad2 } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { attachNormalizedCreators, normalizeProfile } from '../lib/profile'
@@ -371,14 +373,14 @@ export default function AccountPage() {
     setEditTarget(null)
   }
 
-  const showLoading = !ready || loading
+  const showLoading = useDelayedLoading(!ready || loading)
   if (!showLoading && session && profileMissing) return <Navigate to="/account/setup" replace />
 
   function renderContent() {
     if (showLoading) {
       return (
         <div style={{ minHeight: 240, display: 'grid', placeItems: 'center' }}>
-          <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+          <LoadingFrames />
         </div>
       )
     }

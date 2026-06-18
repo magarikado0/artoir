@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
+import LoadingFrames from '../../components/LoadingFrames'
+import { useDelayedLoading } from '../../lib/useDelayedLoading'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
@@ -94,6 +96,7 @@ export default function DashExhibitionEdit() {
   const [loadError, setLoadError] = useState('')
   const [saveError, setSaveError] = useState('')
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
   const [saving, setSaving] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -283,9 +286,9 @@ export default function DashExhibitionEdit() {
     }
   }
 
-  if (loading) return (
+  if (showLoader) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: T.paper }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
 
@@ -336,7 +339,7 @@ export default function DashExhibitionEdit() {
         <DashField label="END" value={endDate} onChange={onEndDateChange} placeholder="YYYY-MM-DD" mono type="date" min={startDate || undefined} />
         <DashField label="END TIME" value={endTime} onChange={setEndTime} placeholder="--:--" mono type="time" />
       </div>
-      <DashField label="会場" value={location} onChange={setLocation} placeholder="例: 東京都・表参道 GALLERY 360°" />
+      <DashField label="会場" value={location} onChange={setLocation} placeholder="美術館、ギャラリー名等" />
 
       <DashSectionLabel>説明文</DashSectionLabel>
       <DashField
@@ -396,7 +399,6 @@ export default function DashExhibitionEdit() {
 
       {!isNew && (
         <div style={{ marginTop: 36, paddingTop: 24, borderTop: `1px solid ${T.ink}` }}>
-          <DashSectionLabel>危険な操作</DashSectionLabel>
           <p style={{ margin: '0 0 14px', fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>
             この展覧会と登録済みの作品をすべて削除します。公開 URL は無効になります。
           </p>
@@ -564,7 +566,6 @@ export default function DashExhibitionEdit() {
 
       <section className="ui-settings-section is-danger">
         <div className="ui-settings-section-head">
-          <div className="ui-section-label">危険な操作</div>
         </div>
         <p className="ui-settings-danger-copy">
           この展覧会と登録済みの作品をすべて削除します。公開 URL は無効になります。

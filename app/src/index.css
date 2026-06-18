@@ -1612,7 +1612,7 @@ button {
   border-bottom: 1px solid rgba(67,54,44,0.2);
   color: #211813;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 12px;
 }
@@ -1620,6 +1620,13 @@ button {
 .ui-auth-login-top .ui-auth-mark {
   background: #FFF9ED;
   border: 1px solid rgba(67,54,44,0.18);
+}
+
+.ui-auth-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #211813;
 }
 
 .ui-auth-login-top > span {

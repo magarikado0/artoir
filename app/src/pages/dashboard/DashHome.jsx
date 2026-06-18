@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import DashShell, { StatusBadge } from '../../components/DashShell'
+import LoadingFrames from '../../components/LoadingFrames'
+import { useDelayedLoading } from '../../lib/useDelayedLoading'
 import { exhStatus, getExhibitionThumbnailUrl, mapExhibitionListRow } from '../../lib/exhibition'
 import { ExhibitionCardMedia } from '../../components/ExhibitionListCard'
 import { T, fmtDateRangeShort } from '../../lib/tokens'
@@ -71,6 +73,7 @@ export default function DashHome() {
   const [loadError, setLoadError] = useState('')
   const [exhibitions, setExhibitions] = useState([])
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -108,9 +111,9 @@ export default function DashHome() {
     load()
   }, [dashboardBase, navigate, orgSlug, profileSlug, session])
 
-  if (loading) return (
+  if (showLoader) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
 

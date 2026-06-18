@@ -5,6 +5,8 @@ import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
+import LoadingFrames from '../components/LoadingFrames'
+import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
@@ -29,6 +31,7 @@ export default function ExhibitionPage() {
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
 
   useEffect(() => {
     async function load() {
@@ -136,9 +139,9 @@ export default function ExhibitionPage() {
     setSelectedArtwork(null)
   }
 
-  if (loading) return (
+  if (showLoader) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
-      <span style={{ fontFamily: T.mono, color: T.inkMuted, letterSpacing: '0.2em', fontSize: 11 }}>...</span>
+      <LoadingFrames />
     </div>
   )
   if (!exhibition) return (

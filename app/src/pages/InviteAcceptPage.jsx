@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import LoadingFrames from '../components/LoadingFrames'
+import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T } from '../lib/tokens'
 
 function normalizeEmail(value) {
@@ -17,6 +19,7 @@ export default function InviteAcceptPage() {
   const [invite, setInvite] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const showLoader = useDelayedLoading(loading)
   const [accepting, setAccepting] = useState(false)
   const [error, setError] = useState('')
 
@@ -109,8 +112,8 @@ export default function InviteAcceptPage() {
       <main className="ui-app-main">
         <div className="ui-account-surface">
           <h1 className="ui-screen-title" style={{ marginTop: 6 }}>招待を確認</h1>
-          {loading ? (
-            <div style={{ minHeight: 180, display: 'grid', placeItems: 'center', fontFamily: T.mono, color: T.inkMuted }}>...</div>
+          {showLoader ? (
+            <div style={{ minHeight: 180, display: 'grid', placeItems: 'center' }}><LoadingFrames /></div>
           ) : (
             <div className="ui-app-card" style={{ padding: 18 }}>
               {invite && (
