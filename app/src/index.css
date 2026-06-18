@@ -1137,12 +1137,46 @@ button {
   gap: 12px;
 }
 
+.ui-account-artwork-grid {
+  margin-bottom: 14px;
+}
+
+.ui-account-artwork-preview {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ui-account-artwork-edit {
+  width: fit-content;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #BE553D;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
 .ui-profile-artwork-card {
   display: grid;
   gap: 10px;
   padding: 10px;
   color: #211813;
   text-decoration: none;
+}
+
+.ui-profile-artwork-button {
+  width: 100%;
+  border: 1px solid rgba(67,54,44,0.12);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
 }
 
 .ui-profile-artwork-card-body {
@@ -1579,6 +1613,31 @@ button {
   width: 100%;
   max-width: none;
   margin: 24px 0 56px;
+}
+
+.ui-profile-summary-card {
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.ui-profile-summary-row {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+}
+
+.ui-profile-summary-main {
+  min-width: 0;
+}
+
+.ui-profile-summary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .ui-account-org-selector-bar {
@@ -2549,6 +2608,14 @@ button.ui-account-org-pick-btn.ui-org-row {
   .ui-account-surface {
     width: auto;
     margin: 18px 14px 104px;
+  }
+
+  .ui-profile-summary-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ui-profile-summary-actions {
+    justify-content: flex-start;
   }
 
   .ui-account-topline {

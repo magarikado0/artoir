@@ -11,7 +11,7 @@ import { mapExhibitionListRow } from '../lib/exhibition'
 async function fetchExhibitionRows() {
   const { data, error } = await supabase
     .from('exhibitions')
-    .select('*, organizations(id, name, slug), artworks(image_url, order)')
+    .select('*, organizations(id, name, slug), profiles(id, display_name, slug), artworks(image_url, order)')
     .order('start_date', { ascending: false })
   if (error) throw error
   return data || []
@@ -34,10 +34,10 @@ export default function AllExhibitionsPage() {
       if (!supabase) return setLoading(false)
       try {
         const data = await fetchExhibitionRows()
-        setRows((data || []).map((exh) => {
-          const { organizations: org, ...rest } = exh
+        setRows((data || []).filter((exh) => !(exh.profile_id && exh.slug === 'works')).map((exh) => {
+          const { organizations: org, profiles: profile, ...rest } = exh
           const exhibition = mapExhibitionListRow(rest)
-          return { exhibition, org, artworkCount: exhibition.artworkCount }
+          return { exhibition, org, profile, artworkCount: exhibition.artworkCount }
         }))
       } catch {
         /* unavailable */
@@ -51,9 +51,9 @@ export default function AllExhibitionsPage() {
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase()
     return rows
-      .filter(({ exhibition, org }) => {
+      .filter(({ exhibition, org, profile }) => {
         if (!q) return true
-        return [exhibition.title, exhibition.location, org?.name].filter(Boolean).join(' ').toLowerCase().includes(q)
+        return [exhibition.title, exhibition.location, org?.name, profile?.display_name].filter(Boolean).join(' ').toLowerCase().includes(q)
       })
   }, [rows, query])
 
@@ -87,6 +87,7 @@ export default function AllExhibitionsPage() {
               key={row.exhibition.id}
               exhibition={row.exhibition}
               org={row.org}
+              profile={row.profile}
               artworkCount={row.artworkCount}
             />
           ))}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/auth'
 import DashShell from '../../components/DashShell'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkCreateModal from '../../components/ArtworkCreateModal'
@@ -28,7 +29,7 @@ function DragHandleIcon() {
 
 function CreatorPicker({ profiles, selectedIds, onToggle, visible, onVisibleChange }) {
   if (!profiles.length) {
-    return <div className="ui-field-help">団体メンバーを追加すると、作者プロフィールを紐づけられます。</div>
+    return <div className="ui-field-help">作者候補がありません。</div>
   }
   return (
     <div style={{ display: 'grid', gap: 10 }}>
@@ -54,10 +55,15 @@ function CreatorPicker({ profiles, selectedIds, onToggle, visible, onVisibleChan
 }
 
 export default function DashArtworks() {
-  const { orgSlug, exhibitionId } = useParams()
+  const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionId } = useParams()
+  const { session } = useAuth()
+  const profileSlug = routeProfileSlug || (routeOrgSlug?.startsWith('@') ? routeOrgSlug.slice(1) : undefined)
+  const orgSlug = profileSlug ? undefined : routeOrgSlug
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
   const [memberProfiles, setMemberProfiles] = useState([])
+  const [defaultCreatorIds, setDefaultCreatorIds] = useState([])
+  const [forbidden, setForbidden] = useState(false)
   const [loading, setLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [editTarget, setEditTarget] = useState(null)
@@ -81,15 +87,28 @@ export default function DashArtworks() {
     if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
     async function load() {
       try {
-        const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
-        if (orgData?.id) {
-          const { data: memberRows } = await supabase
-            .from('organization_members')
-            .select('profiles(id, display_name, slug)')
-            .eq('organization_id', orgData.id)
-          setMemberProfiles((memberRows || []).map((row) => row.profiles).filter(Boolean))
+        if (profileSlug) {
+          const { data: profileData } = await supabase.from('profiles').select('id, display_name, slug').eq('slug', profileSlug).maybeSingle()
+          if (profileData?.id && profileData.id !== session?.user?.id) {
+            setForbidden(true)
+            return
+          }
+          if (profileData?.id) {
+            setMemberProfiles([profileData])
+            setDefaultCreatorIds([profileData.id])
+          }
+        } else {
+          const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).maybeSingle()
+          if (orgData?.id) {
+            const { data: memberRows } = await supabase
+              .from('organization_members')
+              .select('profiles(id, display_name, slug)')
+              .eq('organization_id', orgData.id)
+            setMemberProfiles((memberRows || []).map((row) => row.profiles).filter(Boolean))
+          }
+          setDefaultCreatorIds([])
         }
-        const { data: exh } = await supabase.from('exhibitions').select('*').eq('id', exhibitionId).single()
+        const { data: exh } = await supabase.from('exhibitions').select('*').eq('id', exhibitionId).maybeSingle()
         setExhibition(exh)
         const { data: works } = await supabase
           .from('artworks')
@@ -104,7 +123,7 @@ export default function DashArtworks() {
       }
     }
     load()
-  }, [orgSlug, exhibitionId])
+  }, [orgSlug, profileSlug, exhibitionId, session])
 
   function handleBeforeUpload(file) {
     const dup = artworks.find((a) => a.file_name === file.name && Number(a.file_size) === file.size)
@@ -243,6 +262,12 @@ export default function DashArtworks() {
     </div>
   )
 
+  if (forbidden) return (
+    <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
+      <p style={{ color: T.inkMuted, fontSize: 13 }}>このプロフィールの作品は管理できません</p>
+    </div>
+  )
+
   const editWork = (w) => {
     setEditTarget(w)
     setEditTitle(w.title || '')
@@ -251,9 +276,11 @@ export default function DashArtworks() {
     setEditCreatorsVisible((w.creators || []).every((creator) => creator.is_visible !== false))
   }
 
+  const dashboardBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
+
   return (
     <>
-      <DashShell orgSlug={orgSlug} >
+      <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
         <div className="ui-artworks-heading-block" style={{ marginBottom: 14 }}>
           <section className="ui-app-card" style={{ padding: 18, marginBottom: 8 }}>
             <h1 className="ui-screen-title" style={{ marginTop: 7 }}>{exhibition?.title || '展覧会'}</h1>
@@ -261,7 +288,7 @@ export default function DashArtworks() {
           <div className="ui-artworks-header-actions">
             {exhibitionId && exhibitionId !== 'undefined' && (
               <Link
-                to={`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/edit`}
+                to={`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/edit`}
                 className="ui-inline-edit-action"
                 aria-label="展覧会情報を編集"
               >
@@ -342,7 +369,7 @@ export default function DashArtworks() {
                   />
                 </button>
                 <div className="ui-artwork-sort-card-footer">
-                  <div className="ui-artwork-sort-card-title">{w.title || '（タイトルなし）'}</div>
+                  {w.title?.trim() && <div className="ui-artwork-sort-card-title">{w.title}</div>}
                   <button type="button" onClick={() => requestDelete(w)} className="ui-artwork-sort-card-delete">
                     削除
                   </button>
@@ -370,6 +397,7 @@ export default function DashArtworks() {
         exhibitionId={exhibitionId}
         nextOrder={artworks.length > 0 ? Math.max(...artworks.map((a) => a.order ?? 0)) + 1 : 1}
         creatorOptions={memberProfiles}
+        defaultCreatorIds={defaultCreatorIds}
         onClose={() => setCreateFile(null)}
         onCreated={(newWork) => {
           if (!newWork) return

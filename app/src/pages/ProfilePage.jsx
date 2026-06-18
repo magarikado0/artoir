@@ -1,20 +1,26 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../lib/auth'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkMedia from '../components/ArtworkMedia'
+import ArtworkModal from '../components/ArtworkModal'
 import { T, externalHost, fmtDateRangeShort } from '../lib/tokens'
 import { getGalleryThumbnailUrl } from '../lib/imageUrl'
+import { attachNormalizedCreators } from '../lib/profile'
 
-function ProfileArtworkCard({ creatorRow }) {
-  const artwork = creatorRow.artworks
+function ProfileArtworkCard({ artwork, onOpen }) {
   const exhibition = artwork?.exhibitions
   const org = exhibition?.organizations
-  if (!artwork?.image_url || !exhibition || !org) return null
+  const profile = exhibition?.profiles
+  const ownerSlug = org?.slug || (profile?.slug ? `@${profile.slug}` : null)
+  const ownerName = org?.name || profile?.display_name
+  const hasTitle = Boolean(artwork.title?.trim())
+  if (!artwork?.image_url || !exhibition || !ownerSlug) return null
 
   return (
-    <Link to={`/${org.slug}/exhibition/${exhibition.slug}`} className="ui-list-card ui-profile-artwork-card">
+    <button type="button" onClick={() => onOpen(artwork)} className="ui-list-card ui-profile-artwork-card ui-profile-artwork-button">
       <ArtworkMedia
         src={getGalleryThumbnailUrl(artwork.image_url)}
         alt=""
@@ -27,33 +33,41 @@ function ProfileArtworkCard({ creatorRow }) {
         imageStyle={{ borderRadius: 7 }}
       />
       <div className="ui-profile-artwork-card-body">
-        <div className="ui-profile-artwork-title">{artwork.title || '（タイトルなし）'}</div>
-        <div className="ui-profile-artwork-meta">{exhibition.title}</div>
-        <div className="ui-profile-artwork-meta">{org.name} / {fmtDateRangeShort(exhibition.start_date, exhibition.end_date)}</div>
+        {hasTitle && <div className="ui-profile-artwork-title">{artwork.title}</div>}
+        {org ? (
+          <>
+            <div className="ui-profile-artwork-meta">{exhibition.title}</div>
+            <div className="ui-profile-artwork-meta">{ownerName} / {fmtDateRangeShort(exhibition.start_date, exhibition.end_date)}</div>
+          </>
+        ) : exhibition.title !== '作品' ? (
+          <div className="ui-profile-artwork-meta">{exhibition.title}</div>
+        ) : null}
       </div>
-    </Link>
+    </button>
   )
 }
 
 export default function ProfilePage() {
   const { profileSlug } = useParams()
+  const { session } = useAuth()
   const [profile, setProfile] = useState(null)
-  const [creatorRows, setCreatorRows] = useState([])
+  const [artworks, setArtworks] = useState([])
+  const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
       if (!supabase) return setLoading(false)
       try {
-        const { data: profileData } = await supabase.from('profiles').select('*').eq('slug', profileSlug).single()
+        const { data: profileData } = await supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle()
         if (!profileData) return setLoading(false)
         setProfile(profileData)
         const { data: rows } = await supabase
           .from('artwork_creators')
-          .select('display_order, artworks(id, title, image_url, exhibitions(id, title, slug, start_date, end_date, organizations(id, name, slug)))')
+          .select('display_order, artworks(id, title, description, image_url, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name)), exhibitions(id, title, slug, start_date, end_date, organization_id, profile_id, organizations(id, name, slug), profiles(id, display_name, slug)))')
           .eq('profile_id', profileData.id)
           .eq('is_visible', true)
-        setCreatorRows(rows || [])
+        setArtworks((rows || []).map((row) => attachNormalizedCreators(row.artworks)).filter((artwork) => artwork?.image_url))
       } catch {
         /* unavailable */
       } finally {
@@ -76,6 +90,7 @@ export default function ProfilePage() {
   )
 
   const sns = profile.sns_links || {}
+  const isOwnProfile = session?.user?.id === profile.id
   const links = [
     sns.instagram && ['Instagram', sns.instagram],
     sns.x && ['X', sns.x],
@@ -102,25 +117,31 @@ export default function ProfilePage() {
               ))}
             </div>
           )}
+          {isOwnProfile && (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
+              <Link to={`/@${profile.slug}/dashboard`} className="ui-pill-action" style={{ background: T.ink }}>
+                <span>作品を追加・編集 →</span>
+              </Link>
+            </div>
+          )}
         </section>
 
-        <div className="ui-app-topline">
-          <div>
-            <div className="ui-kicker">WORKS</div>
-            <div className="ui-screen-title" style={{ fontSize: 22 }}>参加作品</div>
-          </div>
-        </div>
-
-        {creatorRows.length > 0 ? (
+        {artworks.length > 0 ? (
           <div className="ui-profile-artwork-grid">
-            {creatorRows.map((row) => (
-              <ProfileArtworkCard key={`${row.artworks?.id}-${row.display_order}`} creatorRow={row} />
+            {artworks.map((artwork) => (
+              <ProfileArtworkCard key={artwork.id} artwork={artwork} onOpen={setSelectedArtwork} />
             ))}
           </div>
         ) : (
           <div className="ui-panel" style={{ padding: 28, textAlign: 'center', fontFamily: T.mono, fontSize: 11, color: T.inkMuted }}>公開中の作品はまだありません</div>
         )}
       </main>
+      <ArtworkModal
+        artwork={selectedArtwork}
+        artworks={artworks}
+        onSelectArtwork={setSelectedArtwork}
+        onClose={() => setSelectedArtwork(null)}
+      />
       <BottomNav active="account" />
     </div>
   )

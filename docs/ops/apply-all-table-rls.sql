@@ -5,6 +5,41 @@
 -- profiles, organizations, organization_members, organization_invites,
 -- exhibitions, artworks, artwork_creators
 
+alter table if exists public.exhibitions
+  drop constraint if exists exhibitions_profile_id_fkey;
+
+alter table if exists public.exhibitions
+  drop constraint if exists exhibitions_owner_xor_check;
+
+alter table if exists public.exhibitions
+  add column if not exists profile_id uuid;
+
+alter table if exists public.exhibitions
+  alter column organization_id drop not null;
+
+alter table if exists public.exhibitions
+  add constraint exhibitions_profile_id_fkey
+  foreign key (profile_id) references public.profiles(id) on delete cascade;
+
+alter table if exists public.exhibitions
+  add constraint exhibitions_owner_xor_check
+  check (
+    (organization_id is not null and profile_id is null)
+    or
+    (organization_id is null and profile_id is not null)
+  );
+
+drop index if exists public.exhibitions_organization_slug_unique;
+drop index if exists public.exhibitions_profile_slug_unique;
+
+create unique index exhibitions_organization_slug_unique
+  on public.exhibitions (organization_id, slug)
+  where organization_id is not null;
+
+create unique index exhibitions_profile_slug_unique
+  on public.exhibitions (profile_id, slug)
+  where profile_id is not null;
+
 create or replace function public.profile_is_org_member(p_organization_id uuid, p_profile_id uuid default auth.uid())
 returns boolean
 language sql
@@ -77,11 +112,85 @@ as $$
   );
 $$;
 
+create or replace function public.profile_owns_exhibition(p_exhibition_id uuid, p_profile_id uuid default auth.uid())
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.exhibitions e
+    where e.id = p_exhibition_id
+      and e.profile_id = p_profile_id
+  );
+$$;
+
+create or replace function public.can_manage_exhibition(p_exhibition_id uuid, p_profile_id uuid default auth.uid())
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.exhibitions e
+    where e.id = p_exhibition_id
+      and (
+        e.profile_id = p_profile_id
+        or public.profile_is_org_member(e.organization_id, p_profile_id)
+      )
+  );
+$$;
+
+create or replace function public.artwork_belongs_to_manageable_exhibition(p_artwork_id uuid, p_profile_id uuid default auth.uid())
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.artworks a
+    where a.id = p_artwork_id
+      and public.can_manage_exhibition(a.exhibition_id, p_profile_id)
+  );
+$$;
+
+create or replace function public.artwork_creator_allowed(p_artwork_id uuid, p_creator_profile_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.artworks a
+    join public.exhibitions e on e.id = a.exhibition_id
+    where a.id = p_artwork_id
+      and (
+        (e.profile_id is not null and e.profile_id = p_creator_profile_id)
+        or (
+          e.organization_id is not null
+          and public.profile_is_org_member(e.organization_id, p_creator_profile_id)
+        )
+      )
+  );
+$$;
+
 grant execute on function public.profile_is_org_member(uuid, uuid) to anon, authenticated;
 grant execute on function public.profile_org_role(uuid, uuid) to authenticated;
 grant execute on function public.profile_is_org_owner(uuid, uuid) to authenticated;
 grant execute on function public.exhibition_belongs_to_member_org(uuid, uuid) to authenticated;
 grant execute on function public.artwork_belongs_to_member_org(uuid, uuid) to anon, authenticated;
+grant execute on function public.profile_owns_exhibition(uuid, uuid) to authenticated;
+grant execute on function public.can_manage_exhibition(uuid, uuid) to authenticated;
+grant execute on function public.artwork_belongs_to_manageable_exhibition(uuid, uuid) to anon, authenticated;
+grant execute on function public.artwork_creator_allowed(uuid, uuid) to authenticated;
 
 alter table public.profiles enable row level security;
 alter table public.organizations enable row level security;
@@ -261,7 +370,7 @@ on public.organization_invites
 for delete
 using (public.profile_is_org_owner(organization_id));
 
--- exhibitions: public read; org members create/edit/delete.
+-- exhibitions: public read; org members or owning profile create/edit/delete.
 drop policy if exists "exhibitions_public_read" on public.exhibitions;
 create policy "exhibitions_public_read"
 on public.exhibitions
@@ -272,22 +381,30 @@ drop policy if exists "exhibitions_member_insert" on public.exhibitions;
 create policy "exhibitions_member_insert"
 on public.exhibitions
 for insert
-with check (public.profile_is_org_member(organization_id));
+with check (
+  (organization_id is not null and profile_id is null and public.profile_is_org_member(organization_id))
+  or
+  (organization_id is null and profile_id = auth.uid())
+);
 
 drop policy if exists "exhibitions_member_update" on public.exhibitions;
 create policy "exhibitions_member_update"
 on public.exhibitions
 for update
-using (public.profile_is_org_member(organization_id))
-with check (public.profile_is_org_member(organization_id));
+using (public.can_manage_exhibition(id))
+with check (
+  (organization_id is not null and profile_id is null and public.profile_is_org_member(organization_id))
+  or
+  (organization_id is null and profile_id = auth.uid())
+);
 
 drop policy if exists "exhibitions_member_delete" on public.exhibitions;
 create policy "exhibitions_member_delete"
 on public.exhibitions
 for delete
-using (public.profile_is_org_member(organization_id));
+using (public.can_manage_exhibition(id));
 
--- artworks: public read; members of the artwork's exhibition org manage.
+-- artworks: public read; managers of the artwork's exhibition manage.
 drop policy if exists "artworks_public_read" on public.artworks;
 create policy "artworks_public_read"
 on public.artworks
@@ -298,23 +415,23 @@ drop policy if exists "artworks_member_insert" on public.artworks;
 create policy "artworks_member_insert"
 on public.artworks
 for insert
-with check (public.exhibition_belongs_to_member_org(exhibition_id));
+with check (public.can_manage_exhibition(exhibition_id));
 
 drop policy if exists "artworks_member_update" on public.artworks;
 create policy "artworks_member_update"
 on public.artworks
 for update
-using (public.exhibition_belongs_to_member_org(exhibition_id))
-with check (public.exhibition_belongs_to_member_org(exhibition_id));
+using (public.can_manage_exhibition(exhibition_id))
+with check (public.can_manage_exhibition(exhibition_id));
 
 drop policy if exists "artworks_member_delete" on public.artworks;
 create policy "artworks_member_delete"
 on public.artworks
 for delete
-using (public.exhibition_belongs_to_member_org(exhibition_id));
+using (public.can_manage_exhibition(exhibition_id));
 
--- artwork_creators: visible creator rows are public; org members can manage
--- creator rows, but only for profiles that are members of the same organization.
+-- artwork_creators: visible creator rows are public; exhibition managers can
+-- manage creator rows, but creator profiles must be valid for that exhibition.
 drop policy if exists "artwork_creators_member_manage" on public.artwork_creators;
 
 drop policy if exists "artwork_creators_public_read_visible" on public.artwork_creators;
@@ -327,29 +444,29 @@ drop policy if exists "artwork_creators_member_read" on public.artwork_creators;
 create policy "artwork_creators_member_read"
 on public.artwork_creators
 for select
-using (public.artwork_belongs_to_member_org(artwork_id));
+using (public.artwork_belongs_to_manageable_exhibition(artwork_id));
 
 drop policy if exists "artwork_creators_member_insert" on public.artwork_creators;
 create policy "artwork_creators_member_insert"
 on public.artwork_creators
 for insert
 with check (
-  public.artwork_belongs_to_member_org(artwork_id)
-  and public.artwork_belongs_to_member_org(artwork_id, profile_id)
+  public.artwork_belongs_to_manageable_exhibition(artwork_id)
+  and public.artwork_creator_allowed(artwork_id, profile_id)
 );
 
 drop policy if exists "artwork_creators_member_update" on public.artwork_creators;
 create policy "artwork_creators_member_update"
 on public.artwork_creators
 for update
-using (public.artwork_belongs_to_member_org(artwork_id))
+using (public.artwork_belongs_to_manageable_exhibition(artwork_id))
 with check (
-  public.artwork_belongs_to_member_org(artwork_id)
-  and public.artwork_belongs_to_member_org(artwork_id, profile_id)
+  public.artwork_belongs_to_manageable_exhibition(artwork_id)
+  and public.artwork_creator_allowed(artwork_id, profile_id)
 );
 
 drop policy if exists "artwork_creators_member_delete" on public.artwork_creators;
 create policy "artwork_creators_member_delete"
 on public.artwork_creators
 for delete
-using (public.artwork_belongs_to_member_org(artwork_id));
+using (public.artwork_belongs_to_manageable_exhibition(artwork_id));

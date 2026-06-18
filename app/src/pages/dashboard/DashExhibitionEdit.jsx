@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/auth'
 import DashShell, { DashField, DashSectionLabel } from '../../components/DashShell'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkMedia from '../../components/ArtworkMedia'
@@ -27,12 +28,12 @@ function fallbackSlug() {
   return 'exh-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
 }
 
-async function generateUniqueSlug(orgId, title) {
+async function generateUniqueSlug(ownerColumn, ownerId, title) {
   const base = slugifyAscii(title) || fallbackSlug()
   const { data, error } = await supabase
     .from('exhibitions')
     .select('slug')
-    .eq('organization_id', orgId)
+    .eq(ownerColumn, ownerId)
     .like('slug', `${base}%`)
   if (error) throw error
   const existing = new Set((data || []).map((r) => r.slug))
@@ -79,12 +80,18 @@ function ExhibitionItem({ id, label, value, mono, editChildren, editSection, onB
 }
 
 export default function DashExhibitionEdit() {
-  const { orgSlug, exhibitionId } = useParams()
+  const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionId } = useParams()
   const navigate = useNavigate()
+  const { session } = useAuth()
   const isDesktop = useIsDesktop()
   const isNew = !exhibitionId || exhibitionId === 'undefined'
+  const profileSlug = routeProfileSlug || (routeOrgSlug?.startsWith('@') ? routeOrgSlug.slice(1) : undefined)
+  const orgSlug = profileSlug ? undefined : routeOrgSlug
 
-  const [org, setOrg] = useState(null)
+  const [owner, setOwner] = useState(null)
+  const [forbidden, setForbidden] = useState(false)
+  const [loadError, setLoadError] = useState('')
+  const [saveError, setSaveError] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
@@ -119,11 +126,29 @@ export default function DashExhibitionEdit() {
     if (!supabase) { setLoading(false); return }
     async function load() {
       try {
-        const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
-        if (!orgData) return
-        setOrg(orgData)
+        const ownerQuery = profileSlug
+          ? supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle()
+          : supabase.from('organizations').select('*').eq('slug', orgSlug).maybeSingle()
+        const { data: ownerData, error: ownerError } = await ownerQuery
+        if (ownerError) {
+          setLoadError(ownerError.message || '管理対象の読み込みに失敗しました。')
+          return
+        }
+        if (!ownerData) {
+          setLoadError(profileSlug ? 'プロフィールが見つかりません。' : '団体が見つかりません。')
+          return
+        }
+        if (profileSlug && ownerData.id !== session?.user?.id) {
+          setForbidden(true)
+          return
+        }
+        setOwner(ownerData)
         if (!isNew && exhibitionId && exhibitionId !== 'undefined') {
-          const { data: exh } = await supabase.from('exhibitions').select('*').eq('id', exhibitionId).single()
+          const { data: exh, error: exhError } = await supabase.from('exhibitions').select('*').eq('id', exhibitionId).maybeSingle()
+          if (exhError) {
+            setLoadError(exhError.message || '展覧会の読み込みに失敗しました。')
+            return
+          }
           if (exh) {
             setExhibition(exh)
             setTitle(exh.title || '')
@@ -140,22 +165,37 @@ export default function DashExhibitionEdit() {
             setThumbnailUrl(getExhibitionThumbnailUrlFromRecord(exh))
           }
         }
-      } catch { /* unavailable */ } finally { setLoading(false) }
+      } catch (error) {
+        setLoadError(error?.message || '読み込みに失敗しました。')
+      } finally { setLoading(false) }
     }
     load()
-  }, [orgSlug, exhibitionId, isNew])
+  }, [orgSlug, profileSlug, exhibitionId, isNew, session])
 
   async function handleSave() {
-    if (!supabase || !org) return
-    if (!isNew && (!exhibitionId || exhibitionId === 'undefined')) return
+    setSaveError('')
+    if (!supabase) {
+      setSaveError('Supabase が未設定です。')
+      return
+    }
+    if (!owner) {
+      setSaveError(loadError || '管理対象を読み込めていないため保存できません。')
+      return
+    }
+    if (!isNew && (!exhibitionId || exhibitionId === 'undefined')) {
+      setSaveError('展覧会IDが不正です。')
+      return
+    }
     if (startDate && endDate && endDate < startDate) {
       window.alert('終了日は開始日以降である必要があります。')
       return
     }
     setSaving(true)
     let nextPath = null
+    const ownerColumn = profileSlug ? 'profile_id' : 'organization_id'
+    const dashboardBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
     try {
-      const finalSlug = (isNew || !slug) ? await generateUniqueSlug(org.id, title) : slug
+      const finalSlug = (isNew || !slug) ? await generateUniqueSlug(ownerColumn, owner.id, title) : slug
       const payload = {
         title,
         slug: finalSlug,
@@ -166,22 +206,23 @@ export default function DashExhibitionEdit() {
         location,
         description,
         thumbnail_url: thumbnailUrl || null,
-        organization_id: org.id,
+        organization_id: profileSlug ? null : owner.id,
+        profile_id: profileSlug ? owner.id : null,
       }
       if (isNew) {
         const { data, error } = await supabase.from('exhibitions').insert(payload).select().single()
         if (error) {
-          window.alert(error.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
+          setSaveError(error.message || '保存に失敗しました。入力内容や接続状況をご確認ください。')
           return
         }
         if (data) {
           setSlug(data.slug)
-          nextPath = `/${orgSlug}/dashboard/exhibitions/${data.id}/edit`
+          nextPath = `${dashboardBase}/dashboard/exhibitions/${data.id}/edit`
         }
       } else {
         const { error } = await supabase.from('exhibitions').update(payload).eq('id', exhibitionId)
         if (error) {
-          window.alert(error.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
+          setSaveError(error.message || '保存に失敗しました。入力内容や接続状況をご確認ください。')
           return
         }
         setSlug(finalSlug)
@@ -189,7 +230,7 @@ export default function DashExhibitionEdit() {
         setEditSection(null)
       }
     } catch (error) {
-      window.alert(error?.message ? `保存に失敗しました: ${error.message}` : '保存に失敗しました。入力内容や接続状況をご確認ください。')
+      setSaveError(error?.message || '保存に失敗しました。入力内容や接続状況をご確認ください。')
     } finally {
       setSaving(false)
     }
@@ -232,7 +273,7 @@ export default function DashExhibitionEdit() {
         window.alert(error.message ? `削除に失敗しました: ${error.message}` : '削除に失敗しました。')
         return
       }
-      navigate(`/${orgSlug}/dashboard`, { replace: true })
+      navigate(`${profileSlug ? `/@${profileSlug}` : `/${orgSlug}`}/dashboard`, { replace: true })
     } catch (error) {
       window.alert(error?.message ? `削除に失敗しました: ${error.message}` : '削除に失敗しました。')
     } finally {
@@ -247,17 +288,39 @@ export default function DashExhibitionEdit() {
     </div>
   )
 
-  const savedPublicUrl = `artoir.net/${orgSlug}/exhibition/${exhibition?.slug || '(未保存)'}`
+  if (forbidden) return (
+    <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
+      <p style={{ color: T.inkMuted, fontSize: 13 }}>このプロフィールの展示は管理できません</p>
+    </div>
+  )
+
+  if (loadError && !owner) return (
+    <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
+      <div className="ui-app-card" style={{ padding: 18, borderColor: T.accent, color: T.accent }}>
+        <div className="ui-kicker">読み込みエラー</div>
+        <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.7 }}>{loadError}</div>
+      </div>
+    </DashShell>
+  )
+
+  const dashboardBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
+  const publicBase = profileSlug ? `artoir.net/@${profileSlug}` : `artoir.net/${orgSlug}`
+  const savedPublicUrl = `${publicBase}/exhibition/${exhibition?.slug || '(未保存)'}`
   const savedPeriodText = getExhibitionPeriodText(exhibition)
   const savedThumbnailUrl = getExhibitionThumbnailUrlFromRecord(exhibition)
 
   const formContent = (
     <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
       <DashSectionLabel>基本情報</DashSectionLabel>
+      {saveError && (
+        <div className="ui-app-card" style={{ padding: 14, marginBottom: 14, borderColor: T.accent, color: T.accent, fontSize: 12, lineHeight: 1.7 }}>
+          {saveError}
+        </div>
+      )}
       <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
       <DashField
         label="URL"
-        prefix={`artoir.net/${orgSlug}/exhibition/`}
+        prefix={`${publicBase}/exhibition/`}
         value={isNew ? (slugifyAscii(title) || '(自動採番)') : slug}
         readOnly
         mono
@@ -317,7 +380,7 @@ export default function DashExhibitionEdit() {
 
       <div style={{ marginTop: 28, display: 'flex', gap: 8 }}>
         {!isNew && (
-          <button type="button" onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)} className="ui-icon-button" style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
+          <button type="button" onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/artworks`)} className="ui-icon-button" style={{ padding: '14px 18px', background: 'transparent', color: T.ink, border: `1px solid ${T.ink}`, fontFamily: T.mono, fontSize: 11, letterSpacing: '0.14em', cursor: 'pointer' }}>
             作品を管理 →
           </button>
         )}
@@ -339,7 +402,7 @@ export default function DashExhibitionEdit() {
           {deleteConfirm ? (
             <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
               <div className="ui-kicker">CONFIRM DELETE</div>
-              <div style={{ marginTop: 8, fontSize: 13 }}>「{exhibition?.title || '（タイトルなし）'}」を削除します。</div>
+              <div style={{ marginTop: 8, fontSize: 13 }}>{exhibition?.title?.trim() ? `「${exhibition.title}」を削除します。` : 'この展覧会を削除します。'}</div>
               <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
                 <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
                 <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? 'DELETING...' : 'DELETE'}</button>
@@ -370,7 +433,7 @@ export default function DashExhibitionEdit() {
         </div>
         <button
           type="button"
-          onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`/${orgSlug}/dashboard/exhibitions/${exhibitionId}/artworks`)}
+          onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/artworks`)}
           className="ui-pill-action"
         >
           作品を管理
@@ -508,7 +571,7 @@ export default function DashExhibitionEdit() {
         {deleteConfirm ? (
           <div className="ui-app-card" style={{ padding: 14, borderColor: T.accent }}>
             <div className="ui-kicker">CONFIRM DELETE</div>
-            <div style={{ marginTop: 8, fontSize: 13 }}>「{exhibition?.title || '（タイトルなし）'}」を削除します。</div>
+            <div style={{ marginTop: 8, fontSize: 13 }}>{exhibition?.title?.trim() ? `「${exhibition.title}」を削除します。` : 'この展覧会を削除します。'}</div>
             <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
               <button type="button" onClick={() => setDeleteConfirm(false)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>キャンセル</button>
               <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? '削除中...' : '削除する'}</button>
@@ -524,7 +587,7 @@ export default function DashExhibitionEdit() {
   )
 
   if (isDesktop) return (
-    <DashShell orgSlug={orgSlug}>
+    <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
         {isNew ? (
           <>
@@ -540,7 +603,7 @@ export default function DashExhibitionEdit() {
   )
 
   return (
-    <DashShell orgSlug={orgSlug}>
+    <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
       {isNew ? (
         <>
           <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>

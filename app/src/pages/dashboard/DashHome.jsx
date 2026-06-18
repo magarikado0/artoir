@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/auth'
 import DashShell, { StatusBadge } from '../../components/DashShell'
 import { exhStatus, getExhibitionThumbnailUrl, mapExhibitionListRow } from '../../lib/exhibition'
 import { ExhibitionCardMedia } from '../../components/ExhibitionListCard'
 import { T, fmtDateRangeShort } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 import { deleteExhibition } from '../../lib/deleteExhibition'
+import { ensureProfileWorksExhibition } from '../../lib/profileWorks'
 
-function DashExhibitionCard({ exh, orgSlug, navigate, onDelete, artworkCount }) {
+function DashExhibitionCard({ exh, dashboardBase, navigate, onDelete, artworkCount }) {
   const status = exhStatus(exh)
   const thumbnailUrl = getExhibitionThumbnailUrl(exh)
   return (
     <div
-      onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/${exh.id}/artworks`)}
+      onClick={() => navigate(`${dashboardBase}/dashboard/exhibitions/${exh.id}/artworks`)}
       className="ui-list-card ui-exhibition-list-card"
       style={{ cursor: 'pointer' }}
     >
@@ -57,9 +59,15 @@ function DashExhibitionCard({ exh, orgSlug, navigate, onDelete, artworkCount }) 
 }
 
 export default function DashHome() {
-  const { orgSlug } = useParams()
+  const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug } = useParams()
   const navigate = useNavigate()
-  const [org, setOrg] = useState(null)
+  const { session } = useAuth()
+  const profileSlug = routeProfileSlug || (routeOrgSlug?.startsWith('@') ? routeOrgSlug.slice(1) : undefined)
+  const orgSlug = profileSlug ? undefined : routeOrgSlug
+  const dashboardBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
+  const [owner, setOwner] = useState(null)
+  const [forbidden, setForbidden] = useState(false)
+  const [loadError, setLoadError] = useState('')
   const [exhibitions, setExhibitions] = useState([])
   const [loading, setLoading] = useState(true)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -69,28 +77,55 @@ export default function DashHome() {
     if (!supabase) return setLoading(false)
     async function load() {
       try {
-        const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
-        if (!orgData) return
-        setOrg(orgData)
+        const ownerQuery = profileSlug
+          ? supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle()
+          : supabase.from('organizations').select('*').eq('slug', orgSlug).maybeSingle()
+        const { data: ownerData } = await ownerQuery
+        if (!ownerData) return
+        if (profileSlug && ownerData.id !== session?.user?.id) {
+          setForbidden(true)
+          return
+        }
+        setOwner(ownerData)
+        if (profileSlug) {
+          const worksExhibition = await ensureProfileWorksExhibition(supabase, ownerData.id)
+          navigate(`${dashboardBase}/dashboard/exhibitions/${worksExhibition.id}/artworks`, { replace: true })
+          return
+        }
         const { data: exhData } = await supabase
           .from('exhibitions')
           .select('*, artworks(image_url, order)')
-          .eq('organization_id', orgData.id)
+          .eq(profileSlug ? 'profile_id' : 'organization_id', ownerData.id)
           .order('start_date', { ascending: false })
         setExhibitions((exhData || []).map(mapExhibitionListRow))
-      } catch {
-        /* unavailable */
+      } catch (error) {
+        setLoadError(error?.message || '作品管理の準備に失敗しました。')
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [orgSlug])
+  }, [dashboardBase, navigate, orgSlug, profileSlug, session])
 
   if (loading) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <span style={{ fontFamily: T.mono, color: T.inkMuted, fontSize: 11 }}>...</span>
     </div>
+  )
+
+  if (forbidden) return (
+    <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
+      <p style={{ color: T.inkMuted, fontSize: 13 }}>このプロフィールの展示は管理できません</p>
+    </div>
+  )
+
+  if (loadError) return (
+    <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
+      <div className="ui-app-card" style={{ padding: 18, borderColor: T.accent, color: T.accent }}>
+        <div className="ui-kicker">読み込みエラー</div>
+        <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.7 }}>{loadError}</div>
+      </div>
+    </DashShell>
   )
 
   async function handleDeleteExhibition() {
@@ -111,16 +146,18 @@ export default function DashHome() {
     }
   }
 
+  const ownerDescription = owner?.description || owner?.bio
+
   return (
-    <DashShell orgSlug={orgSlug} >
+    <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
       <div className="ui-dashboard-list-head">
         <div className="ui-dashboard-list-head-copy">
           <div className="ui-dashboard-list-count">{exhibitions.length}件の展覧会</div>
-          {org?.description && (
-            <p className="ui-screen-subtitle">{org.description.split('。')[0]}</p>
+          {ownerDescription && (
+            <p className="ui-screen-subtitle">{ownerDescription.split('。')[0]}</p>
           )}
         </div>
-        <button onClick={() => navigate(`/${orgSlug}/dashboard/exhibitions/new`)} className="ui-pill-action ui-pill-action--accent">
+        <button onClick={() => navigate(`${dashboardBase}/dashboard/exhibitions/new`)} className="ui-pill-action ui-pill-action--accent">
           <Icon name="plus" size={18} />
           <span>展覧会を作成</span>
         </button>
@@ -129,7 +166,7 @@ export default function DashHome() {
       {deleteTarget && (
         <div className="ui-app-card" style={{ padding: 14, marginBottom: 14, borderColor: T.accent }}>
           <div className="ui-kicker">CONFIRM DELETE</div>
-          <div style={{ marginTop: 8, fontSize: 13 }}>「{deleteTarget.title || '（タイトルなし）'}」と登録済みの作品をすべて削除します。</div>
+          <div style={{ marginTop: 8, fontSize: 13 }}>{deleteTarget.title?.trim() ? `「${deleteTarget.title}」と登録済みの作品をすべて削除します。` : 'この展覧会と登録済みの作品をすべて削除します。'}</div>
           <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
             <button type="button" onClick={() => setDeleteTarget(null)} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.paperAlt, color: T.ink }}>CANCEL</button>
             <button type="button" onClick={handleDeleteExhibition} disabled={deleting} className="ui-pill-action" style={{ flex: 1, background: T.accent, opacity: deleting ? 0.6 : 1 }}>{deleting ? 'DELETING...' : 'DELETE'}</button>
@@ -142,7 +179,7 @@ export default function DashHome() {
           <DashExhibitionCard
             key={exh.id}
             exh={exh}
-            orgSlug={orgSlug}
+            dashboardBase={dashboardBase}
             navigate={navigate}
             onDelete={setDeleteTarget}
             artworkCount={exh.artworkCount}

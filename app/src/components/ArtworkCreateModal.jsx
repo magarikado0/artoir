@@ -96,7 +96,7 @@ function FreeImageCrop({ imageUrl, onCropPixelsChange }) {
 
 function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator, creatorsVisible, onVisibleChange }) {
   if (!creatorOptions?.length) {
-    return <div className="ui-field-help">団体メンバーを追加すると、作者プロフィールを紐づけられます。</div>
+    return <div className="ui-field-help">作者候補がありません。</div>
   }
 
   return (
@@ -122,7 +122,7 @@ function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator, cr
   )
 }
 
-export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder, creatorOptions = [], onClose, onCreated }) {
+export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder, creatorOptions = [], defaultCreatorIds = [], onClose, onCreated }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [selectedCreatorIds, setSelectedCreatorIds] = useState([])
@@ -154,9 +154,10 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
     }
 
     const url = URL.createObjectURL(file)
+    setSelectedCreatorIds(defaultCreatorIds)
     setPreviewUrl(url)
     return () => URL.revokeObjectURL(url)
-  }, [open, file])
+  }, [open, file, defaultCreatorIds])
 
   useEffect(() => {
     if (!open) return undefined

@@ -162,6 +162,11 @@ export default function App() {
             <Route path="/account/organizations/new" element={<OrganizationCreatePage />} />
             <Route path="/invite/:token" element={<InviteAcceptPage />} />
             <Route path="/@:profileSlug" element={<ProfilePage />} />
+            <Route path="/@:profileSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
+            <Route path="/@:profileSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
+            <Route path="/@:profileSlug/dashboard/exhibitions/new" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
+            <Route path="/@:profileSlug/dashboard/exhibitions/:exhibitionId/edit" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
+            <Route path="/@:profileSlug/dashboard/exhibitions/:exhibitionId/artworks" element={<ProtectedRoute><DashArtworks /></ProtectedRoute>} />
             <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
             <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             <Route path="/:orgSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />

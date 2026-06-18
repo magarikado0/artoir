@@ -19,8 +19,10 @@ function SummaryItem({ label, value }) {
 }
 
 export default function ExhibitionPage() {
-  const { orgSlug, exhibitionSlug } = useParams()
-  const [org, setOrg] = useState(null)
+  const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionSlug } = useParams()
+  const profileSlug = routeProfileSlug || (routeOrgSlug?.startsWith('@') ? routeOrgSlug.slice(1) : undefined)
+  const orgSlug = profileSlug ? undefined : routeOrgSlug
+  const [owner, setOwner] = useState(null)
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
@@ -31,10 +33,18 @@ export default function ExhibitionPage() {
     async function load() {
       if (!supabase) return setLoading(false)
       try {
-        const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
-        if (!orgData) return setLoading(false)
-        setOrg(orgData)
-        const { data: exhData } = await supabase.from('exhibitions').select('*').eq('slug', exhibitionSlug).eq('organization_id', orgData.id).single()
+        const ownerQuery = profileSlug
+          ? supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle()
+          : supabase.from('organizations').select('*').eq('slug', orgSlug).maybeSingle()
+        const { data: ownerData } = await ownerQuery
+        if (!ownerData) return setLoading(false)
+        setOwner(ownerData)
+        const { data: exhData } = await supabase
+          .from('exhibitions')
+          .select('*')
+          .eq('slug', exhibitionSlug)
+          .eq(profileSlug ? 'profile_id' : 'organization_id', ownerData.id)
+          .maybeSingle()
         if (!exhData) return setLoading(false)
         setExhibition(exhData)
         const { data: awData } = await supabase
@@ -50,7 +60,7 @@ export default function ExhibitionPage() {
       }
     }
     load()
-  }, [orgSlug, exhibitionSlug])
+  }, [orgSlug, profileSlug, exhibitionSlug])
 
   useEffect(() => {
     const handlePopState = (event) => {
@@ -128,7 +138,9 @@ export default function ExhibitionPage() {
     </div>
   )
 
-  const hostLabel = '主催団体'
+  const ownerBase = profileSlug ? `/@${profileSlug}` : `/${orgSlug}`
+  const ownerPageLabel = profileSlug ? 'プロフィール' : '団体ページ'
+  const hostLabel = profileSlug ? '作家' : '主催団体'
   const dateText = exhibition.start_date
     ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}`
     : ''
@@ -138,7 +150,7 @@ export default function ExhibitionPage() {
       <Header activeTab="top" />
       <main className="ui-app-main">
         <div className="ui-app-topline">
-          <Link to={`/${orgSlug}`} style={{ color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← 団体ページ</Link>
+          <Link to={ownerBase} style={{ color: T.inkMuted, textDecoration: 'none', fontFamily: T.mono, fontSize: 11 }}>← {ownerPageLabel}</Link>
           <button onClick={copyLink} className="ui-pill-action" style={{ background: copied ? T.accent : T.ink }}>
             <Icon name="list" size={17} />
             <span>{copied ? 'コピー済み' : 'リンクを共有'}</span>
@@ -152,7 +164,7 @@ export default function ExhibitionPage() {
             <div className="ui-exhibition-summary-grid">
               <SummaryItem label="会期" value={dateText} />
               <SummaryItem label="会場" value={exhibition.location} />
-              <SummaryItem label={hostLabel} value={org?.name || ''} />
+              <SummaryItem label={hostLabel} value={owner?.display_name || owner?.name || ''} />
             </div>
           </div>
         </section>

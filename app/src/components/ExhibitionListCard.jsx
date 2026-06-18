@@ -41,16 +41,16 @@ export function ExhibitionCardMedia({ thumbnailUrl, title }) {
   )
 }
 
-export default function ExhibitionListCard({ exhibition: exh, org, showOrgName = true, artworkCount }) {
+export default function ExhibitionListCard({ exhibition: exh, org, profile, showOrgName = true, artworkCount }) {
   const thumbnailUrl = getExhibitionThumbnailUrl(exh)
+  const ownerSlug = org?.slug || (profile?.slug ? `@${profile.slug}` : '')
+  const ownerName = org?.name || profile?.display_name
   return (
-    <Link to={`/${org?.slug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card">
+    <Link to={`/${ownerSlug}/exhibition/${exh.slug}`} className="ui-list-card ui-exhibition-list-card">
       <div className="ui-exhibition-list-card-body">
-        {showOrgName && org && (
+        {showOrgName && ownerName && (
           <div className="ui-exhibition-list-card-meta">
-            {org.name && (
-              <span className="ui-exhibition-list-card-tag">{org.name}</span>
-            )}
+            <span className="ui-exhibition-list-card-tag">{ownerName}</span>
           </div>
         )}
         <div className="ui-exhibition-list-card-content">

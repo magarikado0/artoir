@@ -7,20 +7,22 @@ import { BrandLockup } from './BrandMark'
 import BottomNav from './BottomNav'
 import Header, { Icon } from './Header'
 
-function getRailActive(pathname, orgSlug) {
+function getRailActive(pathname, dashboardBase) {
   if (pathname.includes('/dashboard/members')) return 'members'
   if (pathname.includes('/dashboard/settings')) return 'settings'
-  if (pathname.startsWith(`/${orgSlug}/dashboard`)) return 'home'
+  if (pathname.startsWith(`${dashboardBase}/dashboard`)) return 'home'
   return null
 }
 
-function DashboardSubNav({ orgSlug }) {
+function DashboardSubNav({ dashboardBase, isProfile }) {
   const { pathname } = useLocation()
-  const active = getRailActive(pathname, orgSlug)
+  const active = getRailActive(pathname, dashboardBase)
   const items = [
-    { key: 'home', to: `/${orgSlug}/dashboard`, label: '展覧会', icon: 'list' },
-    { key: 'settings', to: `/${orgSlug}/dashboard/settings`, label: '設定', icon: 'user' },
-    { key: 'members', to: `/${orgSlug}/dashboard/members`, label: 'メンバー', icon: 'org' },
+    { key: 'home', to: `${dashboardBase}/dashboard`, label: isProfile ? '作品' : '展覧会', icon: 'list' },
+    ...(!isProfile ? [
+      { key: 'settings', to: `${dashboardBase}/dashboard/settings`, label: '設定', icon: 'user' },
+      { key: 'members', to: `${dashboardBase}/dashboard/members`, label: 'メンバー', icon: 'org' },
+    ] : []),
   ]
   return (
     <nav className="ui-dashboard-subnav" aria-label="団体メニュー">
@@ -40,40 +42,46 @@ function DashboardSubNav({ orgSlug }) {
   )
 }
 
-function DashOrgBar({ orgSlug, orgName }) {
+function DashOrgBar({ dashboardBase, ownerName }) {
   return (
     <div className="ui-dash-org-bar">
       <Link to="/account" className="ui-dash-account-back" aria-label="アカウントへ戻る">
         <Icon name="back" size={16} />
       </Link>
-      <Link to={`/${orgSlug}/dashboard`} className="ui-dash-org-bar-link ui-dashboard-header-title">
-        {orgName || orgSlug}
+      <Link to={`${dashboardBase}/dashboard`} className="ui-dash-org-bar-link ui-dashboard-header-title">
+        {ownerName}
       </Link>
     </div>
   )
 }
 
-export default function DashShell({ children, orgSlug, crumbs = [] }) {
+export default function DashShell({ children, orgSlug, profileSlug, crumbs = [] }) {
   const isDesktop = useIsDesktop()
-  const [org, setOrg] = useState(null)
+  const [owner, setOwner] = useState(null)
+  const dashboardBase = profileSlug ? `/@${profileSlug}` : orgSlug ? `/${orgSlug}` : ''
+  const isProfile = Boolean(profileSlug)
+  const hasDashboardContext = Boolean(dashboardBase)
 
   useEffect(() => {
-    if (!orgSlug || !supabase) return
+    if (!hasDashboardContext || !supabase) return
     let cancelled = false
     async function load() {
-      const { data } = await supabase.from('organizations').select('name, slug').eq('slug', orgSlug).single()
-      if (!cancelled && data) setOrg(data)
+      const query = isProfile
+        ? supabase.from('profiles').select('display_name, slug').eq('slug', profileSlug).maybeSingle()
+        : supabase.from('organizations').select('name, slug').eq('slug', orgSlug).maybeSingle()
+      const { data } = await query
+      if (!cancelled && data) setOwner(data)
     }
     load()
     return () => { cancelled = true }
-  }, [orgSlug])
+  }, [hasDashboardContext, isProfile, orgSlug, profileSlug])
 
-  const orgName = org?.name || orgSlug
-  const showSetupCrumbs = !orgSlug && crumbs.length > 0
+  const ownerName = owner?.display_name || owner?.name || profileSlug || orgSlug
+  const showSetupCrumbs = !hasDashboardContext && crumbs.length > 0
 
-  const orgContext = orgSlug ? (
+  const ownerContext = hasDashboardContext ? (
     isDesktop ? (
-      <DashOrgBar orgSlug={orgSlug} orgName={orgName} />
+      <DashOrgBar dashboardBase={dashboardBase} ownerName={ownerName} />
     ) : null
   ) : null
 
@@ -81,8 +89,8 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
     <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans }}>
       <Header activeTab="account" />
       <main className="ui-app-main">
-        {orgContext}
-        {orgSlug && <DashboardSubNav orgSlug={orgSlug} />}
+        {ownerContext}
+        {hasDashboardContext && <DashboardSubNav dashboardBase={dashboardBase} isProfile={isProfile} />}
         {children}
       </main>
     </div>
@@ -91,17 +99,17 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
   return (
     <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans, paddingBottom: 92 }}>
       <div className="ui-mobile-topbar">
-        {orgSlug ? (
+        {hasDashboardContext ? (
           <div className="ui-dash-mobile-org-context">
             <Link to="/account" className="ui-dash-account-back" aria-label="アカウントへ戻る">
               <Icon name="back" size={16} />
             </Link>
             <Link
-              to={`/${orgSlug}/dashboard`}
+              to={`${dashboardBase}/dashboard`}
               className="ui-dash-mobile-org-title ui-dashboard-header-title"
-              aria-label={`${orgName} のダッシュボード`}
+              aria-label={`${ownerName} のダッシュボード`}
             >
-              {orgName}
+              {ownerName}
             </Link>
           </div>
         ) : (
@@ -109,7 +117,7 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
             <BrandLockup />
           </Link>
         )}
-        {!orgSlug && (
+        {!hasDashboardContext && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Link to="/account" className="ui-top-icon" aria-label="アカウント">
               <Icon name="user" size={18} />
@@ -122,7 +130,7 @@ export default function DashShell({ children, orgSlug, crumbs = [] }) {
           {crumbs.map((c, i) => <span key={i}>{i > 0 ? ' / ' : ''}{c}</span>)}
         </div>
       )}
-      {orgSlug && <DashboardSubNav orgSlug={orgSlug} />}
+      {hasDashboardContext && <DashboardSubNav dashboardBase={dashboardBase} isProfile={isProfile} />}
       <main className="ui-app-main ui-dashboard-mobile-main">
         {children}
       </main>
