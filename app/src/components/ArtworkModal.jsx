@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import ArtworkMedia from './ArtworkMedia'
 import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
 
@@ -74,6 +75,11 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
     onSelectArtwork(artworks[currentIndex + 1])
   }, [artworks, canGoNext, currentIndex, onSelectArtwork])
 
+  const closeIfCurrentPath = useCallback((to) => {
+    if (typeof window === 'undefined') return
+    if (window.location.pathname === to) onClose()
+  }, [onClose])
+
   useArtworkSwipe(viewerRef, {
     onPrev: canGoPrev ? goPrev : undefined,
     onNext: canGoNext ? goNext : undefined,
@@ -119,10 +125,21 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
   const title = artwork.title?.trim() ?? ''
   const description = artwork.description?.trim() ?? ''
   const visibleCreators = (artwork.creators || []).filter((creator) => creator.is_visible && creator.profile?.display_name)
+  const exhibition = artwork.exhibitions
+  const ownerOrg = exhibition?.organizations
+  const ownerProfile = exhibition?.profiles
+  const exhibitionOwnerSlug = ownerOrg?.slug || (ownerProfile?.slug ? `@${ownerProfile.slug}` : '')
+  const exhibitionHref = exhibitionOwnerSlug && exhibition?.slug ? `/${exhibitionOwnerSlug}/exhibition/${exhibition.slug}` : ''
+  const exhibitionTitle = exhibition?.title?.trim() || '展示を見る'
+  const ownerHref = exhibitionOwnerSlug ? `/${exhibitionOwnerSlug}` : ''
+  const ownerName = ownerOrg?.name || ownerProfile?.display_name || ''
+  const ownerLabel = ownerOrg ? '団体ページ' : 'プロフィール'
   const hasTitle = Boolean(title)
   const hasDescription = Boolean(description)
   const hasCreators = visibleCreators.length > 0
-  const hasDetail = hasTitle || hasDescription || hasCreators
+  const hasExhibitionLink = Boolean(exhibitionHref)
+  const hasOwnerLink = Boolean(ownerHref)
+  const hasDetail = hasTitle || hasDescription || hasCreators || hasExhibitionLink || hasOwnerLink
   const positionLabel = hasMultiple && currentIndex >= 0
     ? `${currentIndex + 1} / ${artworks.length}`
     : null
@@ -211,9 +228,35 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
 
             {hasCreators && (
               <div className="ui-artwork-modal-creators">
-                {visibleCreators.map((creator) => (
-                  <span key={creator.profile_id || creator.profile.id}>@{creator.profile.display_name}</span>
-                ))}
+                {visibleCreators.map((creator) => {
+                  const creatorSlug = creator.profile?.slug
+                  const creatorName = creator.profile.display_name
+                  if (!creatorSlug) {
+                    return <span key={creator.profile_id || creator.profile.id}>@{creatorName}</span>
+                  }
+                  return (
+                    <Link key={creator.profile_id || creator.profile.id} to={`/@${creatorSlug}`} onClick={() => closeIfCurrentPath(`/@${creatorSlug}`)}>
+                      @{creatorName}
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+
+            {(hasExhibitionLink || hasOwnerLink) && (
+              <div className="ui-artwork-modal-link-stack">
+                {hasExhibitionLink && (
+                  <Link to={exhibitionHref} onClick={() => closeIfCurrentPath(exhibitionHref)} className="ui-artwork-modal-exhibition-link">
+                    <span>{exhibitionTitle}</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                )}
+                {hasOwnerLink && (
+                  <Link to={ownerHref} onClick={() => closeIfCurrentPath(ownerHref)} className="ui-artwork-modal-owner-link">
+                    <span>{ownerName || ownerLabel}</span>
+                    <span>{ownerLabel}</span>
+                  </Link>
+                )}
               </div>
             )}
 

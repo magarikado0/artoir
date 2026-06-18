@@ -1171,6 +1171,20 @@ button {
   text-decoration: none;
 }
 
+.ui-profile-artwork-media {
+  display: grid !important;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+}
+
+.ui-profile-artwork-media img {
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  object-fit: contain;
+  object-position: center center;
+}
+
 .ui-profile-artwork-button {
   width: 100%;
   border: 1px solid rgba(67,54,44,0.12);
@@ -1317,6 +1331,84 @@ button {
 .ui-pill-action.ui-pill-action--icon {
   width: 44px;
   padding: 0;
+}
+
+.ui-public-link-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.ui-public-icon-link,
+.ui-public-text-link {
+  border: 1px solid rgba(67,54,44,0.18);
+  border-radius: 999px;
+  background: rgba(255,249,237,0.68);
+  color: #211813;
+  text-decoration: none;
+  box-shadow: inset 0 -1px 0 rgba(67,54,44,0.06);
+}
+
+.ui-public-icon-link {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ui-public-icon-link__instagram {
+  position: relative;
+  width: 15px;
+  height: 15px;
+  border: 1.8px solid currentColor;
+  border-radius: 5px;
+}
+
+.ui-public-icon-link__instagram::before {
+  content: "";
+  position: absolute;
+  inset: 3.5px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.ui-public-icon-link__instagram::after {
+  content: "";
+  position: absolute;
+  top: 2.5px;
+  right: 2.5px;
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ui-public-text-link {
+  min-height: 34px;
+  max-width: min(240px, 100%);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.ui-public-text-link span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #BE553D;
 }
 
 .ui-form-field {
@@ -2347,7 +2439,8 @@ button.ui-account-org-pick-btn.ui-org-row {
   margin-top: 12px;
 }
 
-.ui-artwork-modal-creators span {
+.ui-artwork-modal-creators span,
+.ui-artwork-modal-creators a {
   display: inline-flex;
   max-width: 100%;
   padding: 5px 8px;
@@ -2358,6 +2451,54 @@ button.ui-account-org-pick-btn.ui-org-row {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 10px;
   letter-spacing: 0.05em;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-artwork-modal-creators a:hover {
+  color: #211813;
+  border-color: rgba(67,54,44,0.28);
+}
+
+.ui-artwork-modal-link-stack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.ui-artwork-modal-exhibition-link,
+.ui-artwork-modal-owner-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(67,54,44,0.16);
+  border-radius: 999px;
+  background: rgba(255,249,237,0.72);
+  color: #211813;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.ui-artwork-modal-owner-link {
+  color: #746557;
+}
+
+.ui-artwork-modal-owner-link span:last-child {
+  color: #BE553D;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+}
+
+.ui-artwork-modal-exhibition-link span:first-child,
+.ui-artwork-modal-owner-link span:first-child {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

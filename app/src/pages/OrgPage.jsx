@@ -47,11 +47,6 @@ export default function OrgPage() {
   )
 
   const sns = org.sns_links || {}
-  const links = [
-    sns.instagram && ['Instagram', sns.instagram],
-    sns.x && ['X', sns.x],
-    org.homepage_url && ['Web', org.homepage_url],
-  ].filter(Boolean)
 
   return (
     <div className="ui-page-shell">
@@ -61,14 +56,24 @@ export default function OrgPage() {
         <section className="ui-app-card" style={{ padding: 18, marginBottom: 14 }}>
           <h1 className="ui-screen-title" style={{ marginTop: 7 }}>{org.name}</h1>
           {org.description && <p className="ui-screen-subtitle" style={{ maxWidth: 720 }}>{org.description}</p>}
-          {links.length > 0 && (
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
-              {links.map(([label, href]) => (
-                <a key={label} href={href} target="_blank" rel="noreferrer" className="ui-pill-action" style={{ background: T.card, color: T.ink, border: `1px solid ${T.lineSoft}` }}>
-                  <span>{label}</span>
-                  <span style={{ color: T.accent, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{externalHost(href)}</span>
+          {(sns.instagram || sns.x || org.homepage_url) && (
+            <div className="ui-public-link-row">
+              {sns.instagram && (
+                <a href={sns.instagram} target="_blank" rel="noreferrer" className="ui-public-icon-link" aria-label="Instagram">
+                  <span className="ui-public-icon-link__instagram" aria-hidden="true" />
                 </a>
-              ))}
+              )}
+              {sns.x && (
+                <a href={sns.x} target="_blank" rel="noreferrer" className="ui-public-icon-link" aria-label="X">
+                  <span aria-hidden="true">X</span>
+                </a>
+              )}
+              {org.homepage_url && (
+                <a href={org.homepage_url} target="_blank" rel="noreferrer" className="ui-public-text-link">
+                  <span>Web</span>
+                  <span>{externalHost(org.homepage_url)}</span>
+                </a>
+              )}
             </div>
           )}
         </section>

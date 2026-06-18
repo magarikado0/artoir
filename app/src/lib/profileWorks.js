@@ -1,3 +1,8 @@
+export function isProfileWorksExhibition(exhibition) {
+  if (!exhibition?.profile_id) return false
+  return exhibition.slug === 'works' || exhibition.title === '作品'
+}
+
 export async function ensureProfileWorksExhibition(client, profileId) {
   const { data: existing, error: existingError } = await client
     .from('exhibitions')

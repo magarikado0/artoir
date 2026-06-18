@@ -26,9 +26,9 @@ function ProfileArtworkCard({ artwork, onOpen }) {
         alt=""
         decorative
         loading="lazy"
-        fillHeight
         aspectRatio="1 / 1"
         fit="contain"
+        className="ui-profile-artwork-media"
         wrapperStyle={{ borderRadius: 7, background: 'rgba(228, 211, 184, 0.12)' }}
         imageStyle={{ borderRadius: 7 }}
       />

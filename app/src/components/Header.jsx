@@ -6,7 +6,7 @@ import BrandMark, { BrandLockup } from './BrandMark'
 
 const TABS = [
   { key: 'top', label: '展覧会', path: '/', icon: 'list' },
-  { key: 'orgs', label: '個人・団体', path: '/orgs', icon: 'org' },
+  { key: 'orgs', label: '団体', path: '/orgs', icon: 'org' },
   { key: 'account', label: 'アカウント', path: '/account', icon: 'user' },
 ]
 

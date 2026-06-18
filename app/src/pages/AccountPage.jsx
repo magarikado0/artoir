@@ -262,7 +262,7 @@ export default function AccountPage() {
             .eq('profile_id', session.user.id),
           supabase
             .from('artwork_creators')
-            .select('display_order, artworks(id, title, description, image_url, order, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name)), exhibitions(id, slug, organization_id, profile_id, organizations(id, slug), profiles(id, slug)))')
+            .select('display_order, artworks(id, title, description, image_url, order, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name)), exhibitions(id, title, slug, organization_id, profile_id, organizations(id, name, slug), profiles(id, display_name, slug)))')
             .eq('profile_id', session.user.id)
             .order('display_order', { ascending: true }),
         ])
@@ -440,7 +440,7 @@ export default function AccountPage() {
           if (!newWork) return
           setArtworks((prev) => [...prev, {
             ...newWork,
-            exhibitions: { id: worksExhibitionId, slug: 'works', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug } },
+            exhibitions: { id: worksExhibitionId, title: '作品', slug: 'works', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug, display_name: profile.display_name } },
           }])
           setCreateFile(null)
         }}
@@ -483,7 +483,7 @@ export default function AccountPage() {
           if (!newWork) return
           setArtworks((prev) => [...prev, {
             ...newWork,
-            exhibitions: { id: worksExhibitionId, slug: 'works', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug } },
+            exhibitions: { id: worksExhibitionId, title: '作品', slug: 'works', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug, display_name: profile.display_name } },
           }])
           setCreateFile(null)
         }}

@@ -7,6 +7,7 @@ import { T } from '../lib/tokens'
 import { useAuth } from '../lib/auth'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { mapExhibitionListRow } from '../lib/exhibition'
+import { isProfileWorksExhibition } from '../lib/profileWorks'
 
 async function fetchExhibitionRows() {
   const { data, error } = await supabase
@@ -34,7 +35,7 @@ export default function AllExhibitionsPage() {
       if (!supabase) return setLoading(false)
       try {
         const data = await fetchExhibitionRows()
-        setRows((data || []).filter((exh) => !(exh.profile_id && exh.slug === 'works')).map((exh) => {
+        setRows((data || []).filter((exh) => !isProfileWorksExhibition(exh)).map((exh) => {
           const { organizations: org, profiles: profile, ...rest } = exh
           const exhibition = mapExhibitionListRow(rest)
           return { exhibition, org, profile, artworkCount: exhibition.artworkCount }

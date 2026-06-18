@@ -52,7 +52,15 @@ export default function ExhibitionPage() {
           .select('*, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name))')
           .eq('exhibition_id', exhData.id)
           .order('order')
-        setArtworks((awData || []).map(attachNormalizedCreators))
+        const exhibitionForArtwork = {
+          ...exhData,
+          organizations: profileSlug ? null : ownerData,
+          profiles: profileSlug ? ownerData : null,
+        }
+        setArtworks((awData || []).map((artwork) => attachNormalizedCreators({
+          ...artwork,
+          exhibitions: exhibitionForArtwork,
+        })))
       } catch {
         /* unavailable */
       } finally {
