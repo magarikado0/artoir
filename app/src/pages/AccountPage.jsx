@@ -425,7 +425,7 @@ export default function AccountPage() {
   if (isDesktop) return (
     <div className="ui-page-shell">
       <Header activeTab="account" />
-      <main className="ui-app-main">{renderContent()}</main>
+      <main className="ui-app-main ui-account-main">{renderContent()}</main>
       <ArtworkModal
         artwork={selectedArtwork}
         artworks={artworks}
@@ -468,7 +468,7 @@ export default function AccountPage() {
   return (
     <div className="ui-page-shell">
       <Header activeTab="account" />
-      <main className="ui-app-main">{renderContent()}</main>
+      <main className="ui-app-main ui-account-main">{renderContent()}</main>
       <ArtworkModal
         artwork={selectedArtwork}
         artworks={artworks}

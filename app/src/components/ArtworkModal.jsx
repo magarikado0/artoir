@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom'
 import ArtworkMedia from './ArtworkMedia'
 import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
 import { profileExhibitionPath, profilePath } from '../lib/profileRoutes'
-
-const SWIPE_THRESHOLD_PX = 48
+import { useHorizontalSwipe } from '../lib/useHorizontalSwipe'
 
 function ModalNavIcon({ direction }) {
   const s = { stroke: 'currentColor', strokeWidth: 2, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' }
@@ -17,42 +16,6 @@ function ModalNavIcon({ direction }) {
       )}
     </svg>
   )
-}
-
-function useArtworkSwipe(ref, { onPrev, onNext, enabled }) {
-  const startRef = useRef(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el || !enabled) return undefined
-
-    function onTouchStart(e) {
-      const touch = e.changedTouches?.[0]
-      if (!touch) return
-      startRef.current = { x: touch.clientX, y: touch.clientY }
-    }
-
-    function onTouchEnd(e) {
-      const touch = e.changedTouches?.[0]
-      const start = startRef.current
-      startRef.current = null
-      if (!touch || !start) return
-
-      const dx = touch.clientX - start.x
-      const dy = touch.clientY - start.y
-      if (Math.abs(dx) < SWIPE_THRESHOLD_PX || Math.abs(dx) < Math.abs(dy)) return
-
-      if (dx < 0) onNext?.()
-      else onPrev?.()
-    }
-
-    el.addEventListener('touchstart', onTouchStart, { passive: true })
-    el.addEventListener('touchend', onTouchEnd, { passive: true })
-    return () => {
-      el.removeEventListener('touchstart', onTouchStart)
-      el.removeEventListener('touchend', onTouchEnd)
-    }
-  }, [enabled, onPrev, onNext, ref])
 }
 
 export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, onClose }) {
@@ -81,7 +44,7 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
     if (window.location.pathname === to) onClose()
   }, [onClose])
 
-  useArtworkSwipe(viewerRef, {
+  useHorizontalSwipe(viewerRef, {
     onPrev: canGoPrev ? goPrev : undefined,
     onNext: canGoNext ? goNext : undefined,
     enabled: open && hasMultiple,

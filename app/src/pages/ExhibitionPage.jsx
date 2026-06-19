@@ -5,6 +5,7 @@ import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
+import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
 import LoadingFrames from '../components/LoadingFrames'
 import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
@@ -30,6 +31,7 @@ export default function ExhibitionPage() {
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
+  const [viewMode, setViewMode] = useState('grid')
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
@@ -189,7 +191,21 @@ export default function ExhibitionPage() {
         </section>
 
         <section style={{ marginTop: 64 }}>
-          <div className="ui-section-label">作品</div>
+          <div className="ui-exhibition-artworks-head">
+            <div className="ui-section-label">作品</div>
+            {artworks.length > 0 && (
+              <button
+                type="button"
+                className="ui-immersive-launch"
+                onClick={() => setViewMode('ribbon')}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+                </svg>
+                <span>作品を巡る</span>
+              </button>
+            )}
+          </div>
           {artworks.length > 0 ? (
             <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={openArtwork} />
           ) : (
@@ -198,6 +214,9 @@ export default function ExhibitionPage() {
             </div>
           )}
         </section>
+        {viewMode === 'ribbon' && artworks.length > 0 && (
+          <ExhibitionRibbonView artworks={artworks} onClose={() => setViewMode('grid')} />
+        )}
       </main>
       <ArtworkModal
         artwork={selectedArtwork}
