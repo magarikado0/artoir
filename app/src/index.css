@@ -1860,6 +1860,7 @@ a {
   background: rgba(31, 27, 23, 0.5);
   color: #F3EEE5;
   cursor: pointer;
+  opacity: 0.62;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: border-color 140ms ease, opacity 220ms ease, background 140ms ease;
@@ -1868,6 +1869,7 @@ a {
 .ui-ribbon-nav:hover:not(:disabled) {
   border-color: #F3EEE5;
   background: rgba(243, 238, 229, 0.1);
+  opacity: 1;
 }
 
 .ui-ribbon-nav:disabled {
@@ -3433,6 +3435,10 @@ button.ui-account-org-pick-btn.ui-org-row {
 }
 
 @media (max-width: 560px) {
+  .ui-ribbon-nav {
+    display: none;
+  }
+
   .ui-ribbon-description {
     font-size: 13px;
     -webkit-line-clamp: 4;

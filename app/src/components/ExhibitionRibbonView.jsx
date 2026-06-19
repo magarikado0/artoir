@@ -144,7 +144,10 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
       node.style.zIndex = String(Math.round(1000 - a))
     }
     const f = ((Math.round(rot / th) % N) + N) % N
-    if (f !== focusedRef.current) {
+    const settled = !draggingRef.current
+      && modeRef.current === 'idle'
+      && Math.abs(targetRef.current - rot) < 0.8
+    if (settled && f !== focusedRef.current) {
       focusedRef.current = f
       setFocused(f)
     }
@@ -342,9 +345,7 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
         >
           {items.map((artwork, i) => {
             const isFocused = i === focused
-            const src = isFocused
-              ? getModalImageUrl(artwork.image_url)
-              : getGalleryThumbnailUrl(artwork.image_url)
+            const src = getModalImageUrl(artwork.image_url)
             const label = artwork.title?.trim() || `作品 ${i + 1}`
             const ar = aspects[artwork.id] ?? DEFAULT_AR
             const { w, h } = fitCardToBox(ar, maxW, maxH)
