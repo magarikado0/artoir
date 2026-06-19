@@ -43,7 +43,7 @@ function DashExhibitionCard({ exh, dashboardBase, navigate, onDelete, artworkCou
           <span className="ui-exhibition-list-card-date">{fmtDateRangeShort(exh.start_date, exh.end_date)}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
             {artworkCount != null && (
-              <span className="ui-exhibition-list-card-count">{artworkCount} works</span>
+              <span className="ui-exhibition-list-card-count">{artworkCount} 作品</span>
             )}
             <button
               type="button"

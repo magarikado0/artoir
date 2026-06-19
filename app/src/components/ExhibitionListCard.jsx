@@ -89,7 +89,7 @@ export default function ExhibitionListCard({ exhibition: exh, org, profile, show
         <div className="ui-exhibition-list-card-footer">
           <span className="ui-exhibition-list-card-date">{fmtDateRangeShort(exh.start_date, exh.end_date)}</span>
           {artworkCount != null && (
-            <span className="ui-exhibition-list-card-count">{artworkCount} works</span>
+            <span className="ui-exhibition-list-card-count">{artworkCount} 作品</span>
           )}
         </div>
       </div>
