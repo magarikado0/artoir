@@ -3015,6 +3015,14 @@ button.ui-account-org-pick-btn.ui-org-row {
     margin: 0;
   }
 
+  .ui-account-section {
+    margin-bottom: 26px;
+  }
+
+  .ui-account-section-head {
+    margin-bottom: 12px;
+  }
+
   .ui-profile-summary-row {
     grid-template-columns: 1fr;
   }
