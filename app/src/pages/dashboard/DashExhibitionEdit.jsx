@@ -537,9 +537,19 @@ export default function DashExhibitionEdit() {
                   wrapperStyle={{ width: 'min(220px, 100%)', borderRadius: 7 }}
                   imageStyle={{ borderRadius: 7 }}
                 />
-                <button type="button" onClick={() => setThumbnailUrl('')} className="ui-settings-secondary-button" style={{ width: 'fit-content' }}>
-                  サムネイルを削除
-                </button>
+                <div className="ui-settings-edit-actions" style={{ justifyContent: 'flex-start' }}>
+                  <ImageUploader
+                    compressMaxDimension={1200}
+                    onUploaded={(url) => setThumbnailUrl(url)}
+                    variant="button"
+                    buttonLabel="サムネイル画像を変更"
+                  >
+                    画像を変更
+                  </ImageUploader>
+                  <button type="button" onClick={() => setThumbnailUrl('')} className="ui-settings-secondary-button">
+                    削除
+                  </button>
+                </div>
               </>
             ) : (
               <>
