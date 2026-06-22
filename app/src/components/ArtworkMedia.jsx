@@ -81,6 +81,7 @@ function imageContainStyle(fit, intrinsic, layered = false) {
 
 function ArtworkMediaImage({
   src,
+  finalSrc,
   placeholderSrc,
   alt,
   label,
@@ -95,10 +96,11 @@ function ArtworkMediaImage({
   onError,
 }) {
   const [status, setStatus] = useState('loading')
+  const [finalStatus, setFinalStatus] = useState('idle')
   const title = label || alt || '画像'
   const intrinsic = fit === 'contain' && naturalSize
   const showPlaceholder = Boolean(placeholderSrc) && status !== 'loaded'
-  const layered = Boolean(placeholderSrc)
+  const layered = Boolean(placeholderSrc || finalSrc)
   const containStyle = imageContainStyle(fit, intrinsic, layered)
 
   if (status === 'error') {
@@ -174,12 +176,30 @@ function ArtworkMediaImage({
           ...imageStyle,
         }}
       />
+      {finalSrc && finalSrc !== src && status === 'loaded' && (
+        <img
+          src={finalSrc}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          onLoad={() => setFinalStatus('loaded')}
+          onError={() => setFinalStatus('error')}
+          style={{
+            ...containStyle,
+            display: 'block',
+            opacity: finalStatus === 'loaded' ? 1 : 0,
+            transition: 'opacity 240ms ease',
+            ...imageStyle,
+          }}
+        />
+      )}
     </div>
   )
 }
 
 export default function ArtworkMedia({
   src,
+  finalSrc,
   placeholderSrc,
   alt = '',
   label,
@@ -226,6 +246,7 @@ export default function ArtworkMedia({
     <ArtworkMediaImage
       key={src}
       src={src}
+      finalSrc={finalSrc}
       placeholderSrc={placeholderSrc}
       alt={alt}
       label={label}

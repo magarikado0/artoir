@@ -13,6 +13,18 @@ export function calculateDimensions(sourceWidth, sourceHeight, maxDimension) {
   }
 }
 
+export function calculateDimensionsForMaxPixels(sourceWidth, sourceHeight, maxPixels) {
+  const pixels = sourceWidth * sourceHeight
+  if (!maxPixels || pixels <= maxPixels) {
+    return { width: sourceWidth, height: sourceHeight }
+  }
+  const ratio = Math.sqrt(maxPixels / pixels)
+  return {
+    width: Math.floor(sourceWidth * ratio),
+    height: Math.floor(sourceHeight * ratio),
+  }
+}
+
 function loadImageFromFile(file) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)

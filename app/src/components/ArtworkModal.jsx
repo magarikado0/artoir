@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ArtworkMedia from './ArtworkMedia'
-import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
+import { getArtworkHighResolutionUrl, getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
 import { profileExhibitionPath, profilePath } from '../lib/profileRoutes'
 import { useHorizontalSwipe } from '../lib/useHorizontalSwipe'
 
@@ -175,6 +175,7 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
           <ArtworkMedia
             key={artwork.id}
             src={getModalImageUrl(artwork.image_url)}
+            finalSrc={getArtworkHighResolutionUrl(artwork.image_url)}
             placeholderSrc={getGalleryThumbnailUrl(artwork.image_url)}
             alt={artwork.title}
             label={artwork.title}

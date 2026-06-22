@@ -66,6 +66,11 @@ export function getModalImageUrl(url) {
   })
 }
 
+/** 作品詳細で軽量版の後に表示する、アップロード済みの最高解像度画像 */
+export function getArtworkHighResolutionUrl(url) {
+  return url
+}
+
 const preloadedUrls = new Set()
 
 export function preloadImageUrl(url) {
