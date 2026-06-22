@@ -4,7 +4,7 @@ import ArtworkMedia from './ArtworkMedia'
 import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
 import { profilePath } from '../lib/profileRoutes'
 
-const SLOT_BG = 'rgba(243, 238, 229, 0.04)'
+const SLOT_BG = '#F7F8F6'
 const DRAG_SENSITIVITY = 0.34
 const FRICTION = 0.92
 const SNAP_EASE = 0.14

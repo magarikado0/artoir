@@ -10,6 +10,44 @@ function loadImage(src) {
   })
 }
 
+function getRotatedSize(width, height, degrees) {
+  const radians = Math.abs(degrees * Math.PI / 180)
+  return {
+    width: Math.ceil(Math.abs(width * Math.cos(radians)) + Math.abs(height * Math.sin(radians))),
+    height: Math.ceil(Math.abs(width * Math.sin(radians)) + Math.abs(height * Math.cos(radians))),
+  }
+}
+
+/** 元画像全体を中心基準で回転し、切り抜き操作用の画像を生成する */
+export async function getRotatedBlob(imageSrc, degrees, mimeType = 'image/jpeg') {
+  const image = await loadImage(imageSrc)
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
+
+  if (!context) throw new Error('キャンバスを初期化できませんでした')
+
+  const size = getRotatedSize(image.naturalWidth, image.naturalHeight, degrees)
+  canvas.width = size.width
+  canvas.height = size.height
+
+  context.translate(size.width / 2, size.height / 2)
+  context.rotate(degrees * Math.PI / 180)
+  context.drawImage(image, -image.naturalWidth / 2, -image.naturalHeight / 2)
+
+  const targetMimeType = mimeType === 'image/png' ? 'image/png' : 'image/jpeg'
+  const quality = targetMimeType === 'image/jpeg' ? 0.92 : undefined
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('画像の回転に失敗しました'))
+        return
+      }
+      resolve(blob)
+    }, targetMimeType, quality)
+  })
+}
+
 /** 画面上の crop（表示サイズ基準）を原画像のピクセル座標に変換する */
 export function scaleCropToNaturalSize(pixelCrop, image) {
   if (!pixelCrop?.width || !pixelCrop?.height || !image?.naturalWidth) {

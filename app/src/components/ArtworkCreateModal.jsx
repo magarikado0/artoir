@@ -1,21 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import Cropper from 'react-easy-crop'
-import 'react-easy-crop/react-easy-crop.css'
-import ReactCrop, { centerCrop, convertToPixelCrop } from 'react-image-crop'
+import ReactCrop, { convertToPixelCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import { supabase } from '../lib/supabase'
-import { getCroppedBlob, scaleCropToNaturalSize } from '../lib/imageCrop'
+import { getCroppedBlob, getRotatedBlob, scaleCropToNaturalSize } from '../lib/imageCrop'
 import { T } from '../lib/tokens'
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
-const ASPECT_OPTIONS = [
-  { label: '1:1', value: 1 },
-  { label: '9:16', value: 9 / 16 },
-  { label: '16:9', value: 16 / 9 },
-  { label: 'カスタム', value: null },
-]
-
 function uploadToCloudinary(file, fileName, onProgress) {
   return new Promise((resolve, reject) => {
     const formData = new FormData()
@@ -47,12 +38,8 @@ function uploadToCloudinary(file, fileName, onProgress) {
   })
 }
 
-function getDefaultCrop() {
-  return { x: 0, y: 0 }
-}
-
-function getInitialFreeCrop(width, height) {
-  return centerCrop({ unit: '%', width: 80, height: 80 }, width, height)
+function getInitialFreeCrop() {
+  return { unit: '%', x: 0, y: 0, width: 100, height: 100 }
 }
 
 function FreeImageCrop({ imageUrl, onCropPixelsChange }) {
@@ -70,7 +57,7 @@ function FreeImageCrop({ imageUrl, onCropPixelsChange }) {
 
   function handleImageLoad(e) {
     const { width, height } = e.currentTarget
-    const initial = getInitialFreeCrop(width, height)
+    const initial = getInitialFreeCrop()
     setCrop(initial)
     applyPixelCrop(convertToPixelCrop(initial, width, height))
   }
@@ -127,14 +114,16 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
   const [description, setDescription] = useState('')
   const [selectedCreatorIds, setSelectedCreatorIds] = useState([])
   const [creatorsVisible, setCreatorsVisible] = useState(true)
-  const [crop, setCrop] = useState(getDefaultCrop)
-  const [zoom, setZoom] = useState(1)
-  const [aspect, setAspect] = useState(1)
+  const [rotation, setRotation] = useState(0)
+  const [quarterRotation, setQuarterRotation] = useState(0)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
   const [saving, setSaving] = useState(false)
   const [progress, setProgress] = useState(null)
   const [error, setError] = useState('')
   const [previewUrl, setPreviewUrl] = useState('')
+  const [editPreviewUrl, setEditPreviewUrl] = useState('')
+  const [rotationPending, setRotationPending] = useState(false)
+  const appliedRotation = quarterRotation + rotation
 
   useEffect(() => {
     if (!open || !file) {
@@ -142,22 +131,55 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
       setDescription('')
       setSelectedCreatorIds([])
       setCreatorsVisible(true)
-      setCrop(getDefaultCrop())
-      setZoom(1)
-      setAspect(1)
+      setRotation(0)
+      setQuarterRotation(0)
       setCroppedAreaPixels(null)
       setSaving(false)
       setProgress(null)
       setError('')
       setPreviewUrl('')
+      setEditPreviewUrl('')
+      setRotationPending(false)
       return undefined
     }
 
     const url = URL.createObjectURL(file)
     setSelectedCreatorIds(defaultCreatorIds)
     setPreviewUrl(url)
+    setEditPreviewUrl(url)
     return () => URL.revokeObjectURL(url)
   }, [open, file, defaultCreatorIds])
+
+  useEffect(() => {
+    if (!previewUrl || !file) return undefined
+    if (appliedRotation === 0) {
+      setEditPreviewUrl(previewUrl)
+      setRotationPending(false)
+      return undefined
+    }
+
+    let cancelled = false
+    let rotatedUrl = ''
+    setRotationPending(true)
+    const timer = window.setTimeout(async () => {
+      try {
+        const blob = await getRotatedBlob(previewUrl, appliedRotation, file.type)
+        if (cancelled) return
+        rotatedUrl = URL.createObjectURL(blob)
+        setEditPreviewUrl(rotatedUrl)
+      } catch (err) {
+        if (!cancelled) setError(err?.message || '画像の回転に失敗しました')
+      } finally {
+        if (!cancelled) setRotationPending(false)
+      }
+    }, 120)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+      if (rotatedUrl) URL.revokeObjectURL(rotatedUrl)
+    }
+  }, [appliedRotation, file, previewUrl])
 
   useEffect(() => {
     if (!open) return undefined
@@ -167,7 +189,7 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
   }, [open, onClose, saving])
 
   async function handleSave() {
-    if (!open || !file || !previewUrl || !croppedAreaPixels) return
+    if (!open || !file || !editPreviewUrl || !croppedAreaPixels || rotationPending) return
     if (!supabase) {
       setError('Supabase が未設定です')
       return
@@ -182,7 +204,7 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
     setProgress(0)
 
     try {
-      const croppedBlob = await getCroppedBlob(previewUrl, croppedAreaPixels, file.type)
+      const croppedBlob = await getCroppedBlob(editPreviewUrl, croppedAreaPixels, file.type)
       const croppedName = file.name?.replace(/\.[^.]+$/, '') || 'artwork'
       const uploadName = `${croppedName}-crop.${croppedBlob.type === 'image/png' ? 'png' : 'jpg'}`
       const imageUrl = await uploadToCloudinary(croppedBlob, uploadName, setProgress)
@@ -230,8 +252,7 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
 
   if (!open || !file) return null
 
-  const isFreeAspect = aspect === null
-  const canSave = Boolean(croppedAreaPixels) && !saving
+  const canSave = Boolean(croppedAreaPixels) && !saving && !rotationPending
 
   function toggleCreator(profileId) {
     setSelectedCreatorIds((prev) => (
@@ -239,6 +260,15 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
         ? prev.filter((id) => id !== profileId)
         : [...prev, profileId]
     ))
+  }
+
+  function resetCropFrame() {
+    setCroppedAreaPixels(null)
+  }
+
+  function rotateQuarter(degrees) {
+    setQuarterRotation((current) => (current + degrees) % 360)
+    resetCropFrame()
   }
 
   return (
@@ -271,64 +301,57 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
                 justifyContent: 'center',
               }}
             >
-              {isFreeAspect ? (
-                <FreeImageCrop
-                  key={previewUrl}
-                  imageUrl={previewUrl}
-                  onCropPixelsChange={setCroppedAreaPixels}
-                />
-              ) : (
-                <Cropper
-                  image={previewUrl}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={aspect}
-                  cropShape="rect"
-                  showGrid
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={(_, areaPixels) => setCroppedAreaPixels(areaPixels)}
-                />
-              )}
+              <FreeImageCrop
+                key={editPreviewUrl}
+                imageUrl={editPreviewUrl}
+                onCropPixelsChange={setCroppedAreaPixels}
+              />
             </div>
             <div style={{ marginTop: 14 }}>
-              <div className="ui-form-label">ASPECT</div>
-              <div className="ui-segment" style={{ marginTop: 8, width: '100%', display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
-                {ASPECT_OPTIONS.map((option) => (
-                  <button
-                    key={option.label}
-                    type="button"
-                    onClick={() => {
-                      setAspect(option.value)
-                      setCrop(getDefaultCrop())
-                      setZoom(1)
-                      setCroppedAreaPixels(null)
-                    }}
-                    className={aspect === option.value ? 'is-active' : ''}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+              <div className="ui-artwork-rotation-actions" aria-label="画像を90度回転">
+                <button type="button" disabled={saving} onClick={() => rotateQuarter(-90)}>
+                  <span aria-hidden="true">↶</span> 左へ90°
+                </button>
+                <button type="button" disabled={saving} onClick={() => rotateQuarter(90)}>
+                  右へ90° <span aria-hidden="true">↷</span>
+                </button>
               </div>
-            </div>
-            {!isFreeAspect && (
-              <div style={{ marginTop: 14 }}>
-                <div className="ui-form-label">ZOOM</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div className="ui-form-label">傾き</div>
+                <button
+                  type="button"
+                  className="ui-artwork-rotation-reset"
+                  disabled={rotation === 0 || saving}
+                  onClick={() => {
+                    setRotation(0)
+                    resetCropFrame()
+                  }}
+                >
+                  0°に戻す
+                </button>
+              </div>
+              <div className="ui-artwork-rotation-control">
+                <span>−15°</span>
                 <input
                   type="range"
-                  min="1"
-                  max="3"
-                  step="0.01"
-                  value={zoom}
-                  onChange={(e) => setZoom(Number(e.target.value))}
-                  style={{ width: '100%', marginTop: 8 }}
+                  min="-15"
+                  max="15"
+                  step="0.1"
+                  value={rotation}
+                  disabled={saving}
+                  aria-label="画像の傾き"
+                  onChange={(e) => {
+                    setRotation(Number(e.target.value))
+                    resetCropFrame()
+                  }}
                 />
+                <span>+15°</span>
+                <output>{rotation.toFixed(1)}°</output>
               </div>
-            )}
+              {rotationPending && <div className="ui-field-help" style={{ marginTop: 6 }}>傾きを反映しています…</div>}
+            </div>
             <div style={{ marginTop: 10, fontSize: 12, color: T.inkMuted, lineHeight: 1.7 }}>
-              {isFreeAspect
-                ? '切り抜き枠をドラッグして移動し、角や辺をドラッグしてサイズを調整します。'
-                : '画像をドラッグして位置を調整し、ズームで切り抜き範囲を決めます。'}
+              そのまま保存すると画像全体が使われます。切り抜く場合は、枠の角や辺をドラッグして調整します。
             </div>
           </div>
 
