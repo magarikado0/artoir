@@ -5,7 +5,8 @@ import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../li
 import { profilePath } from '../lib/profileRoutes'
 
 const SLOT_BG = '#F7F8F6'
-const DRAG_SENSITIVITY = 0.34
+const DRAG_PX_PER_ITEM = 150
+const MAX_DRAG_SENSITIVITY = 0.34
 const FRICTION = 0.92
 const SNAP_EASE = 0.14
 const MIN_VEL = 0.06
@@ -63,6 +64,14 @@ function norm180(deg) {
   if (d > 180) d -= 360
   else if (d < -180) d += 360
   return d
+}
+
+function dragSensitivity(theta) {
+  return Math.min(MAX_DRAG_SENSITIVITY, theta / DRAG_PX_PER_ITEM)
+}
+
+function maxFlingVelocity(theta) {
+  return Math.max(0.7, Math.min(7, theta * 0.28))
 }
 
 export default function ExhibitionRibbonView({ artworks, onClose }) {
@@ -247,10 +256,12 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
     const now = performance.now()
     const dt = Math.max(1, now - lastTRef.current)
     lastTRef.current = now
-    const delta = -dx * DRAG_SENSITIVITY
+    const th = thetaRef.current
+    const delta = -dx * dragSensitivity(th)
     rotationRef.current += delta
     const v = (delta / dt) * 16
-    velRef.current = Math.max(-42, Math.min(42, v))
+    const maxVel = maxFlingVelocity(th)
+    velRef.current = Math.max(-maxVel, Math.min(maxVel, v))
   }, [])
 
   const endDrag = useCallback(() => {
