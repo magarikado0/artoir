@@ -3019,7 +3019,8 @@ button.ui-account-org-pick-btn.ui-org-row {
   background: rgba(31, 27, 23, 0.55);
 }
 
-.ui-artwork-create-card {
+.ui-artwork-create-card,
+.ui-artwork-edit-card {
   width: min(100%, 1080px);
   max-height: calc(100vh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   max-height: calc(100dvh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
@@ -3351,7 +3352,8 @@ button.ui-account-org-pick-btn.ui-org-row {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .ui-artwork-create-card {
+  .ui-artwork-create-card,
+  .ui-artwork-edit-card {
     width: 100%;
     max-height: calc(100vh - 28px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     max-height: calc(100dvh - 28px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
