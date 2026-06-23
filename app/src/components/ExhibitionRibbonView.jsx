@@ -11,6 +11,9 @@ const FRICTION = 0.92
 const SNAP_EASE = 0.14
 const MIN_VEL = 0.06
 const DEFAULT_AR = 0.8
+const MIN_ZOOM = 1
+const MAX_ZOOM = 4
+const DOUBLE_TAP_MS = 280
 
 function fitCardToBox(ar, maxW, maxH) {
   const safeAr = ar > 0 ? ar : DEFAULT_AR
@@ -74,6 +77,27 @@ function maxFlingVelocity(theta) {
   return Math.max(0.7, Math.min(7, theta * 0.28))
 }
 
+function clampZoom(value) {
+  return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, value))
+}
+
+function clampPan(value, zoom, size) {
+  if (zoom <= 1) return 0
+  const limit = size * (zoom - 1) * 0.5
+  return Math.max(-limit, Math.min(limit, value))
+}
+
+function distance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y)
+}
+
+function center(a, b) {
+  return {
+    x: (a.x + b.x) / 2,
+    y: (a.y + b.y) / 2,
+  }
+}
+
 export default function ExhibitionRibbonView({ artworks, onClose }) {
   const items = useMemo(() => artworks.filter((a) => a.image_url), [artworks])
   const N = items.length
@@ -125,6 +149,11 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
   const focusedRef = useRef(0)
   const thetaRef = useRef(theta)
   const radiusRef = useRef(radius)
+  const pointersRef = useRef(new Map())
+  const gestureRef = useRef(null)
+  const lastTapRef = useRef({ time: 0, index: -1 })
+  const zoomRef = useRef(MIN_ZOOM)
+  const panRef = useRef({ x: 0, y: 0 })
   useEffect(() => {
     thetaRef.current = theta
     radiusRef.current = radius
@@ -132,6 +161,20 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
 
   const [focused, setFocused] = useState(0)
   const [dragging, setDragging] = useState(false)
+  const [zoomView, setZoomView] = useState({ zoom: MIN_ZOOM, x: 0, y: 0 })
+
+  const setZoomPan = useCallback((nextZoom, nextX = panRef.current.x, nextY = panRef.current.y) => {
+    const zoom = clampZoom(nextZoom)
+    const x = clampPan(nextX, zoom, size.maxW)
+    const y = clampPan(nextY, zoom, size.maxH)
+    zoomRef.current = zoom
+    panRef.current = { x, y }
+    setZoomView({ zoom, x, y })
+  }, [size.maxH, size.maxW])
+
+  useEffect(() => {
+    setZoomPan(MIN_ZOOM, 0, 0)
+  }, [focused, setZoomPan])
 
   const apply = useCallback(() => {
     const rot = rotationRef.current
@@ -235,6 +278,38 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
   }, [focused, items, N])
 
   const onPointerDown = useCallback((e) => {
+    const card = e.target.closest?.('.ui-ribbon-card')
+    const cardIndex = Number(card?.dataset?.index)
+    const onFocusedCard = card && cardIndex === focusedRef.current
+
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (e.pointerType === 'touch' && pointersRef.current.size >= 2 && onFocusedCard) {
+      const points = Array.from(pointersRef.current.values()).slice(-2)
+      draggingRef.current = false
+      movedRef.current = true
+      setDragging(false)
+      gestureRef.current = {
+        type: 'pinch',
+        distance: Math.max(1, distance(points[0], points[1])),
+        center: center(points[0], points[1]),
+        zoom: zoomRef.current,
+        pan: { ...panRef.current },
+      }
+      try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* noop */ }
+      return
+    }
+
+    if (onFocusedCard && zoomRef.current > MIN_ZOOM) {
+      movedRef.current = false
+      gestureRef.current = {
+        type: 'pan',
+        start: { x: e.clientX, y: e.clientY },
+        pan: { ...panRef.current },
+      }
+      try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* noop */ }
+      return
+    }
+
     if (N <= 1) return
     if (e.pointerType === 'mouse' && e.button !== 0) return
     draggingRef.current = true
@@ -249,6 +324,31 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
   }, [N])
 
   const onPointerMove = useCallback((e) => {
+    if (pointersRef.current.has(e.pointerId)) {
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    }
+
+    const gesture = gestureRef.current
+    if (gesture?.type === 'pinch' && pointersRef.current.size >= 2) {
+      const points = Array.from(pointersRef.current.values()).slice(-2)
+      const nextCenter = center(points[0], points[1])
+      const ratio = distance(points[0], points[1]) / gesture.distance
+      setZoomPan(
+        gesture.zoom * ratio,
+        gesture.pan.x + nextCenter.x - gesture.center.x,
+        gesture.pan.y + nextCenter.y - gesture.center.y,
+      )
+      return
+    }
+
+    if (gesture?.type === 'pan') {
+      const dx = e.clientX - gesture.start.x
+      const dy = e.clientY - gesture.start.y
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) movedRef.current = true
+      setZoomPan(zoomRef.current, gesture.pan.x + dx, gesture.pan.y + dy)
+      return
+    }
+
     if (!draggingRef.current) return
     const dx = e.clientX - lastXRef.current
     if (Math.abs(dx) > 3) movedRef.current = true
@@ -262,9 +362,14 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
     const v = (delta / dt) * 16
     const maxVel = maxFlingVelocity(th)
     velRef.current = Math.max(-maxVel, Math.min(maxVel, v))
-  }, [])
+  }, [setZoomPan])
 
-  const endDrag = useCallback(() => {
+  const endDrag = useCallback((e) => {
+    if (e?.pointerId != null) pointersRef.current.delete(e.pointerId)
+    if (gestureRef.current) {
+      gestureRef.current = null
+      return
+    }
     if (!draggingRef.current) return
     draggingRef.current = false
     setDragging(false)
@@ -278,6 +383,14 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
   }, [])
 
   const onWheel = useCallback((e) => {
+    if (e.ctrlKey || zoomRef.current > MIN_ZOOM) {
+      const nextZoom = zoomRef.current * Math.exp(-e.deltaY * 0.002)
+      if (Math.abs(nextZoom - zoomRef.current) < 0.001) return
+      e.preventDefault()
+      setZoomPan(nextZoom)
+      return
+    }
+
     const d = e.deltaX || e.deltaY
     if (Math.abs(d) < 2) return
     e.preventDefault()
@@ -286,7 +399,7 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
     targetRef.current = (current + Math.sign(d)) * th
     modeRef.current = 'idle'
     velRef.current = 0
-  }, [])
+  }, [setZoomPan])
 
   useEffect(() => {
     const el = stageRef.current
@@ -297,11 +410,18 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
 
   const onCardClick = useCallback((i) => {
     if (movedRef.current) return
+    const now = performance.now()
+    if (i === focusedRef.current && now - lastTapRef.current.time < DOUBLE_TAP_MS && lastTapRef.current.index === i) {
+      setZoomPan(zoomRef.current > MIN_ZOOM ? MIN_ZOOM : 2.4, 0, 0)
+      lastTapRef.current = { time: 0, index: -1 }
+      return
+    }
+    lastTapRef.current = { time: now, index: i }
     const th = thetaRef.current
     targetRef.current = i * th
     modeRef.current = 'idle'
     velRef.current = 0
-  }, [])
+  }, [setZoomPan])
 
   if (N === 0) return null
 
@@ -316,6 +436,7 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
   const positionLabel = N > 1 ? `${padNum(focused + 1)} / ${padNum(N)}` : null
 
   const { maxW, maxH } = size
+  const isZoomed = zoomView.zoom > MIN_ZOOM
 
   return (
     <div
@@ -343,7 +464,11 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
 
       <div
         ref={stageRef}
-        className={`ui-ribbon-stage${dragging ? ' is-dragging' : ''}`}
+        className={[
+          'ui-ribbon-stage',
+          dragging && 'is-dragging',
+          isZoomed && 'is-zoomed',
+        ].filter(Boolean).join(' ')}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
@@ -366,6 +491,7 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
                 type="button"
                 ref={(el) => { itemRefs.current[i] = el }}
                 className="ui-ribbon-card"
+                data-index={i}
                 style={{
                   width: w,
                   height: h,
@@ -377,18 +503,25 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
                 aria-label={`${label}を中央に表示`}
                 tabIndex={-1}
               >
-                <ArtworkMedia
-                  className="ui-ribbon-card-media"
-                  src={src}
-                  placeholderSrc={getGalleryThumbnailUrl(artwork.image_url)}
-                  alt={artwork.title || '作品画像'}
-                  label={artwork.title}
-                  loading={isFocused ? 'eager' : 'lazy'}
-                  fit="contain"
-                  fillHeight
-                  background={SLOT_BG}
-                  imageStyle={{ borderRadius: 6 }}
-                />
+                <div
+                  className="ui-ribbon-card-zoom"
+                  style={isFocused ? {
+                    transform: `translate3d(${zoomView.x}px, ${zoomView.y}px, 0) scale(${zoomView.zoom})`,
+                  } : undefined}
+                >
+                  <ArtworkMedia
+                    className="ui-ribbon-card-media"
+                    src={src}
+                    placeholderSrc={getGalleryThumbnailUrl(artwork.image_url)}
+                    alt={artwork.title || '作品画像'}
+                    label={artwork.title}
+                    loading={isFocused ? 'eager' : 'lazy'}
+                    fit="contain"
+                    fillHeight
+                    background={SLOT_BG}
+                    imageStyle={{ borderRadius: 6 }}
+                  />
+                </div>
               </button>
             )
           })}

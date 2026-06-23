@@ -1812,6 +1812,10 @@ a {
   cursor: grabbing;
 }
 
+.ui-ribbon-stage.is-zoomed {
+  cursor: move;
+}
+
 .ui-ribbon-cylinder {
   position: absolute;
   left: 50%;
@@ -1841,6 +1845,19 @@ a {
 .ui-ribbon-card-media {
   width: 100%;
   height: 100%;
+}
+
+.ui-ribbon-card-zoom {
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  transition: transform 160ms ease;
+  will-change: transform;
+}
+
+.ui-ribbon-stage.is-dragging .ui-ribbon-card-zoom,
+.ui-ribbon-stage.is-zoomed .ui-ribbon-card-zoom {
+  transition: none;
 }
 
 .ui-ribbon-nav {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
@@ -6,6 +6,7 @@ import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
+import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
 import { T, externalHost } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 
@@ -15,6 +16,7 @@ export default function ProfilePage() {
   const [organizations, setOrganizations] = useState([])
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
+  const [viewMode, setViewMode] = useState('grid')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -45,6 +47,11 @@ export default function ProfilePage() {
     }
     load()
   }, [profileSlug])
+
+  const viewableArtworks = useMemo(
+    () => artworks.filter((item) => item.image_url),
+    [artworks],
+  )
 
   if (loading) return (
     <div className="ui-page-shell" />
@@ -107,16 +114,31 @@ export default function ProfilePage() {
 
         {artworks.length > 0 ? (
           <>
-            <div className="ui-section-label">作品</div>
+            <div className="ui-exhibition-artworks-head">
+              <div className="ui-section-label">作品</div>
+              <button
+                type="button"
+                className="ui-immersive-launch"
+                onClick={() => setViewMode('ribbon')}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+                </svg>
+                <span>作品を巡る</span>
+              </button>
+            </div>
             <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={setSelectedArtwork} />
           </>
         ) : (
           <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>公開中の作品はまだありません</div>
         )}
+        {viewMode === 'ribbon' && viewableArtworks.length > 0 && (
+          <ExhibitionRibbonView artworks={viewableArtworks} onClose={() => setViewMode('grid')} />
+        )}
       </main>
       <ArtworkModal
         artwork={selectedArtwork}
-        artworks={artworks}
+        artworks={viewableArtworks}
         onSelectArtwork={setSelectedArtwork}
         onClose={() => setSelectedArtwork(null)}
       />
