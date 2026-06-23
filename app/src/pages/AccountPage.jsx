@@ -8,6 +8,7 @@ import ArtworkMedia from '../components/ArtworkMedia'
 import ArtworkModal from '../components/ArtworkModal'
 import ImageUploader from '../components/ImageUploader'
 import ArtworkCreateModal from '../components/ArtworkCreateModal'
+import ArtworkEditModal from '../components/ArtworkEditModal'
 import LoadingFrames from '../components/LoadingFrames'
 import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, pad2 } from '../lib/tokens'
@@ -15,6 +16,7 @@ import { useIsDesktop } from '../lib/useIsDesktop'
 import { attachNormalizedCreators, normalizeProfile } from '../lib/profile'
 import { getGalleryThumbnailUrl } from '../lib/imageUrl'
 import { ensureProfileWorksExhibition } from '../lib/profileWorks'
+import { getArtworkUploadConfigError, uploadArtworkImage } from '../lib/artworkUpload'
 
 function LoggedOut({ isDesktop }) {
   const navigate = useNavigate()
@@ -105,47 +107,6 @@ function AccountArtworkCard({ artwork, onOpen, onEdit }) {
           <div className="ui-profile-artwork-title">{artwork.title}</div>
         </div>
       )}
-    </div>
-  )
-}
-
-function AccountArtworkEditModal({ artwork, title, description, saving, deleting, error, onTitleChange, onDescriptionChange, onSave, onDelete, onClose }) {
-  if (!artwork) return null
-  return (
-    <div role="dialog" aria-modal="true" aria-labelledby="account-artwork-edit-title" style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(31,27,23,0.5)', display: 'grid', placeItems: 'center', padding: 16 }}>
-      <div className="ui-app-card" style={{ width: 'min(100%, 520px)', maxHeight: 'calc(100vh - 32px)', overflowY: 'auto', padding: 18 }}>
-        <div id="account-artwork-edit-title" className="ui-screen-title" style={{ fontSize: 22 }}>作品を編集</div>
-        <div style={{ marginTop: 14 }}>
-          <ArtworkMedia
-            src={artwork.image_url}
-            alt=""
-            decorative
-            loading="eager"
-            fit="contain"
-            minHeight={180}
-            wrapperStyle={{ borderRadius: 8 }}
-            imageStyle={{ borderRadius: 8, maxHeight: 280, objectFit: 'contain' }}
-          />
-        </div>
-        <div style={{ marginTop: 14 }} className="ui-input-wrap">
-          <input value={title} onChange={(e) => onTitleChange(e.target.value)} placeholder="作品名を入力" />
-        </div>
-        <div style={{ marginTop: 12 }} className="ui-input-wrap" data-multiline="true">
-          <textarea value={description} onChange={(e) => onDescriptionChange(e.target.value)} rows={4} placeholder="説明文を入力" />
-        </div>
-        {error && (
-          <div style={{ marginTop: 12, padding: '10px 12px', border: `1px solid ${T.accent}`, color: T.accent, background: 'rgba(190,85,61,0.06)', fontSize: 12 }}>
-            {error}
-          </div>
-        )}
-        <div className="ui-btn-row" style={{ marginTop: 16 }}>
-          <button type="button" onClick={onClose} disabled={saving || deleting} className="ui-btn ui-btn--ghost">閉じる</button>
-          <button type="button" onClick={onSave} disabled={saving || deleting} className="ui-btn ui-btn--accent">{saving ? '保存中…' : '保存する'}</button>
-        </div>
-        <button type="button" onClick={onDelete} disabled={saving || deleting} className="ui-btn ui-btn--danger ui-btn-block" style={{ marginTop: 12 }}>
-          {deleting ? '削除中…' : '作品を削除'}
-        </button>
-      </div>
     </div>
   )
 }
@@ -241,7 +202,7 @@ export default function AccountPage() {
             .eq('profile_id', session.user.id),
           supabase
             .from('artwork_creators')
-            .select('display_order, artworks(id, title, description, image_url, order, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name)), exhibitions(id, title, slug, organization_id, profile_id, organizations(id, name, slug), profiles(id, display_name, slug)))')
+            .select('display_order, artworks(id, title, description, image_url, file_name, file_size, order, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name)), exhibitions(id, title, slug, organization_id, profile_id, organizations(id, name, slug), profiles(id, display_name, slug)))')
             .eq('profile_id', session.user.id)
             .order('display_order', { ascending: true }),
         ])
@@ -316,21 +277,34 @@ export default function AccountPage() {
     setEditError('')
   }
 
-  async function handleEditSave() {
+  async function handleEditSave(imageBlob) {
     if (!editTarget || !supabase) return
     setEditSaving(true)
     setEditError('')
-    const updates = { title: editTitle.trim(), description: editDescription.trim() || null }
-    const { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
-    setEditSaving(false)
-    if (error) {
+    try {
+      let imageUpdates = {}
+      if (imageBlob) {
+        const configError = getArtworkUploadConfigError()
+        if (configError) throw new Error(configError)
+        const baseName = editTarget.file_name?.replace(/\.[^.]+$/, '') || `artwork-${editTarget.id}`
+        const uploadName = `${baseName}-edit.${imageBlob.type === 'image/png' ? 'png' : 'jpg'}`
+        const imageUrl = await uploadArtworkImage(imageBlob, uploadName)
+        imageUpdates = { image_url: imageUrl, file_size: imageBlob.size }
+      }
+
+      const updates = { title: editTitle.trim(), description: editDescription.trim() || null, ...imageUpdates }
+      const { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
+      if (error) throw error
+
+      const updated = { ...editTarget, ...updates }
+      setArtworks((prev) => prev.map((artwork) => artwork.id === editTarget.id ? updated : artwork))
+      setSelectedArtwork((prev) => prev?.id === editTarget.id ? updated : prev)
+      setEditTarget(null)
+    } catch (error) {
       setEditError(error.message || '保存に失敗しました。')
-      return
+    } finally {
+      setEditSaving(false)
     }
-    const updated = { ...editTarget, ...updates }
-    setArtworks((prev) => prev.map((artwork) => artwork.id === editTarget.id ? updated : artwork))
-    setSelectedArtwork((prev) => prev?.id === editTarget.id ? updated : prev)
-    setEditTarget(null)
   }
 
   async function handleEditDelete() {
@@ -449,19 +423,21 @@ export default function AccountPage() {
           setCreateFile(null)
         }}
       />
-      <AccountArtworkEditModal
-        artwork={editTarget}
-        title={editTitle}
-        description={editDescription}
-        saving={editSaving}
-        deleting={editDeleting}
-        error={editError}
-        onTitleChange={setEditTitle}
-        onDescriptionChange={setEditDescription}
-        onSave={handleEditSave}
-        onDelete={handleEditDelete}
-        onClose={() => setEditTarget(null)}
-      />
+      {editTarget && (
+        <ArtworkEditModal
+          artwork={editTarget}
+          title={editTitle}
+          description={editDescription}
+          saving={editSaving}
+          deleting={editDeleting}
+          error={editError}
+          onTitleChange={setEditTitle}
+          onDescriptionChange={setEditDescription}
+          onSave={handleEditSave}
+          onDelete={handleEditDelete}
+          onClose={() => setEditTarget(null)}
+        />
+      )}
     </div>
   )
 
@@ -492,19 +468,21 @@ export default function AccountPage() {
           setCreateFile(null)
         }}
       />
-      <AccountArtworkEditModal
-        artwork={editTarget}
-        title={editTitle}
-        description={editDescription}
-        saving={editSaving}
-        deleting={editDeleting}
-        error={editError}
-        onTitleChange={setEditTitle}
-        onDescriptionChange={setEditDescription}
-        onSave={handleEditSave}
-        onDelete={handleEditDelete}
-        onClose={() => setEditTarget(null)}
-      />
+      {editTarget && (
+        <ArtworkEditModal
+          artwork={editTarget}
+          title={editTitle}
+          description={editDescription}
+          saving={editSaving}
+          deleting={editDeleting}
+          error={editError}
+          onTitleChange={setEditTitle}
+          onDescriptionChange={setEditDescription}
+          onSave={handleEditSave}
+          onDelete={handleEditDelete}
+          onClose={() => setEditTarget(null)}
+        />
+      )}
       <BottomNav active="account" />
     </div>
   )

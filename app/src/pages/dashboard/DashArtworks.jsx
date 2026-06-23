@@ -7,10 +7,12 @@ import LoadingFrames from '../../components/LoadingFrames'
 import { useDelayedLoading } from '../../lib/useDelayedLoading'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkCreateModal from '../../components/ArtworkCreateModal'
+import ArtworkEditModal from '../../components/ArtworkEditModal'
 import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 import { getThumbnailUrl } from '../../lib/imageUrl'
+import { getArtworkUploadConfigError, uploadArtworkImage } from '../../lib/artworkUpload'
 import { persistArtworkOrder, reorderArtworksById } from '../../lib/reorderArtworks'
 import { attachNormalizedCreators } from '../../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../../lib/profileRoutes'
@@ -77,6 +79,8 @@ export default function DashArtworks() {
   const [editDesc, setEditDesc] = useState('')
   const [editCreatorIds, setEditCreatorIds] = useState([])
   const [editCreatorsVisible, setEditCreatorsVisible] = useState(true)
+  const [editSaving, setEditSaving] = useState(false)
+  const [editError, setEditError] = useState('')
   const [createFile, setCreateFile] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [draggingId, setDraggingId] = useState(null)
@@ -226,18 +230,40 @@ export default function DashArtworks() {
     handle.addEventListener('pointercancel', onPointerEnd)
   }
 
-  async function handleEditSave() {
+  async function handleEditSave(imageBlob) {
     if (!editTarget || !supabase) return
-    await supabase.from('artworks').update({ title: editTitle, description: editDesc }).eq('id', editTarget.id)
-    await saveArtworkCreators(editTarget.id, editCreatorIds, editCreatorsVisible)
-    const creators = editCreatorIds.map((profileId, index) => ({
-      profile_id: profileId,
-      display_order: index,
-      is_visible: editCreatorsVisible,
-      profile: memberProfiles.find((profile) => profile.id === profileId),
-    })).filter((creator) => creator.profile)
-    setArtworks((prev) => prev.map((a) => a.id === editTarget.id ? { ...a, title: editTitle, description: editDesc, creators } : a))
-    setEditTarget(null)
+    setEditSaving(true)
+    setEditError('')
+
+    try {
+      let imageUpdates = {}
+      if (imageBlob) {
+        const configError = getArtworkUploadConfigError()
+        if (configError) throw new Error(configError)
+        const baseName = editTarget.file_name?.replace(/\.[^.]+$/, '') || `artwork-${editTarget.id}`
+        const uploadName = `${baseName}-edit.${imageBlob.type === 'image/png' ? 'png' : 'jpg'}`
+        const imageUrl = await uploadArtworkImage(imageBlob, uploadName)
+        imageUpdates = { image_url: imageUrl, file_size: imageBlob.size }
+      }
+
+      const updates = { title: editTitle, description: editDesc, ...imageUpdates }
+      const { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
+      if (error) throw error
+
+      await saveArtworkCreators(editTarget.id, editCreatorIds, editCreatorsVisible)
+      const creators = editCreatorIds.map((profileId, index) => ({
+        profile_id: profileId,
+        display_order: index,
+        is_visible: editCreatorsVisible,
+        profile: memberProfiles.find((profile) => profile.id === profileId),
+      })).filter((creator) => creator.profile)
+      setArtworks((prev) => prev.map((a) => a.id === editTarget.id ? { ...a, ...updates, creators } : a))
+      setEditTarget(null)
+    } catch (error) {
+      setEditError(error?.message || '保存に失敗しました。')
+    } finally {
+      setEditSaving(false)
+    }
   }
 
   async function saveArtworkCreators(artworkId, profileIds, isVisible) {
@@ -282,6 +308,7 @@ export default function DashArtworks() {
     setEditDesc(w.description || '')
     setEditCreatorIds((w.creators || []).map((creator) => creator.profile_id))
     setEditCreatorsVisible((w.creators || []).every((creator) => creator.is_visible !== false))
+    setEditError('')
   }
 
   const dashboardBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
@@ -416,50 +443,26 @@ export default function DashArtworks() {
       />
 
       {editTarget && (
-        <div role="dialog" aria-modal="true" aria-labelledby="edit-work-title" style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(31,27,23,0.5)', display: 'grid', placeItems: 'center', padding: 16 }}>
-          <div className="ui-app-card" style={{ width: 'min(100%, 480px)', maxHeight: 'calc(100vh - 32px)', overflowY: 'auto', padding: 24 }}>
-            <div id="edit-work-title" className="ui-kicker">作品を編集</div>
-            <div style={{ marginTop: 14 }}>
-              <ArtworkMedia
-                src={editTarget.image_url}
-                alt=""
-                decorative
-                loading="eager"
-                fit="contain"
-                minHeight={160}
-                wrapperStyle={{ borderRadius: 6 }}
-                imageStyle={{ borderRadius: 6, maxHeight: 280, objectFit: 'contain' }}
-              />
-            </div>
-            <div style={{ marginTop: 16 }}>
-              <div className="ui-input-wrap"><input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="作品名を入力" /></div>
-            </div>
-            <div style={{ marginTop: 12 }}>
-              <div className="ui-input-wrap" data-multiline="true"><textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} placeholder="説明文を入力" /></div>
-            </div>
-            <div style={{ marginTop: 12 }}>
-              <CreatorPicker
-                profiles={memberProfiles}
-                selectedIds={editCreatorIds}
-                onToggle={toggleEditCreator}
-                visible={editCreatorsVisible}
-                onVisibleChange={setEditCreatorsVisible}
-              />
-            </div>
-            <div className="ui-btn-row" style={{ marginTop: 18 }}>
-              <button type="button" onClick={() => setEditTarget(null)} className="ui-btn ui-btn--ghost">キャンセル</button>
-              <button type="button" onClick={handleEditSave} className="ui-btn ui-btn--accent">保存する</button>
-            </div>
-            <button
-              type="button"
-              onClick={() => requestDelete(editTarget)}
-              className="ui-btn ui-btn--danger ui-btn-block"
-              style={{ marginTop: 12 }}
-            >
-              作品を削除
-            </button>
-          </div>
-        </div>
+        <ArtworkEditModal
+          artwork={editTarget}
+          title={editTitle}
+          description={editDesc}
+          saving={editSaving}
+          error={editError}
+          onTitleChange={setEditTitle}
+          onDescriptionChange={setEditDesc}
+          onSave={handleEditSave}
+          onDelete={() => requestDelete(editTarget)}
+          onClose={() => setEditTarget(null)}
+        >
+          <CreatorPicker
+            profiles={memberProfiles}
+            selectedIds={editCreatorIds}
+            onToggle={toggleEditCreator}
+            visible={editCreatorsVisible}
+            onVisibleChange={setEditCreatorsVisible}
+          />
+        </ArtworkEditModal>
       )}
     </>
   )
