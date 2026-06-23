@@ -75,7 +75,7 @@ function FreeImageCrop({ imageUrl, onCropPixelsChange }) {
         src={imageUrl}
         alt=""
         onLoad={handleImageLoad}
-        style={{ display: 'block', maxHeight: 'min(62vh, 620px)', maxWidth: '100%', width: 'auto', height: 'auto' }}
+        className="ui-artwork-create-crop-image"
       />
     </ReactCrop>
   )
@@ -272,8 +272,8 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="artwork-create-title" style={{ position: 'fixed', inset: 0, zIndex: 120, background: 'rgba(31,27,23,0.55)', display: 'grid', placeItems: 'center', padding: 16 }}>
-      <div className="ui-app-card" style={{ width: 'min(100%, 1080px)', maxHeight: 'calc(100vh - 32px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="artwork-create-title" className="ui-artwork-create-modal">
+      <div className="ui-app-card ui-artwork-create-card">
         <div style={{ padding: '18px 20px 16px', borderBottom: `1px solid ${T.lineSoft}`, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
           <div>
             <div className="ui-kicker">作品</div>
@@ -284,15 +284,13 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
           </button>
         </div>
 
-        <div className="ui-artwork-create-layout" style={{ gap: 16, padding: 18, overflow: 'auto' }}>
+        <div className="ui-artwork-create-layout">
           <div style={{ minWidth: 0 }}>
             <div
               className="ui-artwork-create-cropbox"
               style={{
                 position: 'relative',
                 width: '100%',
-                minHeight: 380,
-                height: 'min(62vh, 620px)',
                 background: T.ink,
                 borderRadius: 12,
                 overflow: 'hidden',
