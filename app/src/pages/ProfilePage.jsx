@@ -82,13 +82,13 @@ export default function ProfilePage() {
       <main className="ui-app-main">
         <div className="ui-app-topline" style={{ justifyContent: 'flex-end' }}>
           <div className="ui-app-topline-actions">
+            <ShareLinkButton />
             <PublicManageLink
               ownerType="profile"
               ownerId={profile.id}
               to="/account"
               label="管理"
             />
-            <ShareLinkButton />
           </div>
         </div>
         <section style={{ marginBottom: 48 }}>

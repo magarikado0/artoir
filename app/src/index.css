@@ -3234,6 +3234,12 @@ button.ui-account-org-pick-btn.ui-org-row {
     align-items: flex-start;
   }
 
+  .ui-app-topline-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
   .ui-artworks-topline {
     flex-direction: column;
     gap: 12px;

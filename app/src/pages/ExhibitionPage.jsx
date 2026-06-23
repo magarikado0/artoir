@@ -158,13 +158,13 @@ export default function ExhibitionPage() {
         <div className="ui-app-topline">
           <Link to={ownerBase} className="ui-back-link">← {ownerPageLabel}</Link>
           <div className="ui-app-topline-actions">
+            <ShareLinkButton />
             <PublicManageLink
               ownerType={profileSlug ? 'profile' : 'organization'}
               ownerId={owner?.id}
               to={exhibitionManagePath}
               label="展覧会を管理"
             />
-            <ShareLinkButton />
           </div>
         </div>
 

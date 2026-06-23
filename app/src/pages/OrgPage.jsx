@@ -62,13 +62,13 @@ export default function OrgPage() {
         <div className="ui-app-topline">
           <Link to="/orgs" className="ui-back-link">← 公開ページ一覧</Link>
           <div className="ui-app-topline-actions">
+            <ShareLinkButton />
             <PublicManageLink
               ownerType="organization"
               ownerId={org.id}
               to={`/${org.slug}/dashboard`}
               label="団体を管理"
             />
-            <ShareLinkButton />
           </div>
         </div>
         <section style={{ marginBottom: 48 }}>
