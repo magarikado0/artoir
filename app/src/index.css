@@ -3231,10 +3231,14 @@ button.ui-account-org-pick-btn.ui-org-row {
   }
 
   .ui-app-topline {
+    position: relative;
     align-items: flex-start;
   }
 
   .ui-app-topline-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
     flex-direction: column;
     align-items: flex-end;
     gap: 8px;
