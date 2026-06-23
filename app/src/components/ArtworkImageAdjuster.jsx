@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactCrop, { convertToPixelCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import { getCroppedBlob, getRotatedBlob, scaleCropToNaturalSize } from '../lib/imageCrop'
@@ -8,33 +8,69 @@ function getInitialFreeCrop() {
   return { unit: '%', x: 0, y: 0, width: 100, height: 100 }
 }
 
-function FreeImageCrop({ imageUrl, onCropPixelsChange }) {
+function FreeImageCrop({ imageUrl, containerRef, onCropPixelsChange }) {
   const imgRef = useRef(null)
   const [crop, setCrop] = useState()
+  const [naturalSize, setNaturalSize] = useState(null)
+  const [displaySize, setDisplaySize] = useState(null)
 
-  function applyPixelCrop(pixelCrop) {
+  const getContainedSize = useCallback((naturalWidth, naturalHeight) => {
+    const box = containerRef.current
+    if (!box || !naturalWidth || !naturalHeight) return null
+    const boxWidth = box.clientWidth
+    const boxHeight = box.clientHeight
+    if (!boxWidth || !boxHeight) return null
+    const scale = Math.min(boxWidth / naturalWidth, boxHeight / naturalHeight)
+    return {
+      width: Math.max(1, Math.floor(naturalWidth * scale)),
+      height: Math.max(1, Math.floor(naturalHeight * scale)),
+    }
+  }, [containerRef])
+
+  const applyPixelCrop = useCallback((pixelCrop) => {
     const img = imgRef.current
     if (!img) {
       onCropPixelsChange(null)
       return
     }
     onCropPixelsChange(scaleCropToNaturalSize(pixelCrop, img))
-  }
+  }, [onCropPixelsChange])
+
+  useEffect(() => {
+    if (!naturalSize || !containerRef.current) return undefined
+    const updateSize = () => {
+      const nextSize = getContainedSize(naturalSize.width, naturalSize.height)
+      if (nextSize) setDisplaySize(nextSize)
+    }
+    updateSize()
+
+    const observer = new ResizeObserver(updateSize)
+    observer.observe(containerRef.current)
+    return () => observer.disconnect()
+  }, [containerRef, getContainedSize, naturalSize])
+
+  useEffect(() => {
+    if (!displaySize || !crop) return
+    applyPixelCrop(convertToPixelCrop(crop, displaySize.width, displaySize.height))
+  }, [applyPixelCrop, crop, displaySize])
 
   function handleImageLoad(e) {
-    const { width, height } = e.currentTarget
+    const { naturalWidth, naturalHeight } = e.currentTarget
     const initial = getInitialFreeCrop()
+    const nextSize = getContainedSize(naturalWidth, naturalHeight)
+    setNaturalSize({ width: naturalWidth, height: naturalHeight })
+    if (nextSize) setDisplaySize(nextSize)
     setCrop(initial)
-    applyPixelCrop(convertToPixelCrop(initial, width, height))
+    onCropPixelsChange({ x: 0, y: 0, width: naturalWidth, height: naturalHeight })
   }
 
   return (
     <ReactCrop
+      className="ui-artwork-crop-control"
       crop={crop}
       onChange={(_, percentCrop) => setCrop(percentCrop)}
       onComplete={applyPixelCrop}
       ruleOfThirds
-      style={{ maxHeight: '100%', maxWidth: '100%' }}
     >
       <img
         ref={imgRef}
@@ -42,6 +78,7 @@ function FreeImageCrop({ imageUrl, onCropPixelsChange }) {
         alt=""
         onLoad={handleImageLoad}
         className="ui-artwork-create-crop-image"
+        style={displaySize ? { width: displaySize.width, height: displaySize.height } : undefined}
       />
     </ReactCrop>
   )
@@ -58,6 +95,7 @@ export default function ArtworkImageAdjuster({
   onBusyChange,
   onConfirm,
 }) {
+  const cropboxRef = useRef(null)
   const [rotation, setRotation] = useState(0)
   const [quarterRotation, setQuarterRotation] = useState(0)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
@@ -145,6 +183,7 @@ export default function ArtworkImageAdjuster({
   return (
     <div style={{ minWidth: 0 }}>
       <div
+        ref={cropboxRef}
         className="ui-artwork-create-cropbox"
         style={{
           position: 'relative',
@@ -161,6 +200,7 @@ export default function ArtworkImageAdjuster({
           <FreeImageCrop
             key={editPreviewUrl}
             imageUrl={editPreviewUrl}
+            containerRef={cropboxRef}
             onCropPixelsChange={setCroppedAreaPixels}
           />
         )}
