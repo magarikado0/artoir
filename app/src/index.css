@@ -1740,6 +1740,7 @@ a {
   color: #1F1B17;
   animation: ribbonOverlayIn 260ms cubic-bezier(.2,.8,.2,1);
   overflow: hidden;
+  touch-action: none;
 }
 
 @keyframes ribbonOverlayIn {

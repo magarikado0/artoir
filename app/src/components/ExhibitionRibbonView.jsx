@@ -134,6 +134,7 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
     return Math.max(r, size.maxW * 0.8)
   }, [N, theta, size.maxW])
 
+  const overlayRef = useRef(null)
   const stageRef = useRef(null)
   const cylinderRef = useRef(null)
   const itemRefs = useRef([])
@@ -279,11 +280,14 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
 
   const onPointerDown = useCallback((e) => {
     const card = e.target.closest?.('.ui-ribbon-card')
-    const cardIndex = Number(card?.dataset?.index)
-    const onFocusedCard = card && cardIndex === focusedRef.current
+    const isCard = Boolean(card)
+    const isControl = Boolean(e.target.closest?.('button, a')) && !isCard
+    const inStage = Boolean(stageRef.current?.contains(e.target))
+
+    if (isControl) return
 
     pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
-    if (e.pointerType === 'touch' && pointersRef.current.size >= 2 && onFocusedCard) {
+    if (e.pointerType === 'touch' && pointersRef.current.size >= 2) {
       const points = Array.from(pointersRef.current.values()).slice(-2)
       draggingRef.current = false
       movedRef.current = true
@@ -299,7 +303,7 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
       return
     }
 
-    if (onFocusedCard && zoomRef.current > MIN_ZOOM) {
+    if (zoomRef.current > MIN_ZOOM) {
       movedRef.current = false
       gestureRef.current = {
         type: 'pan',
@@ -310,6 +314,7 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
       return
     }
 
+    if (!inStage) return
     if (N <= 1) return
     if (e.pointerType === 'mouse' && e.button !== 0) return
     draggingRef.current = true
@@ -402,7 +407,7 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
   }, [setZoomPan])
 
   useEffect(() => {
-    const el = stageRef.current
+    const el = overlayRef.current
     if (!el) return
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => el.removeEventListener('wheel', onWheel)
@@ -440,10 +445,15 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
 
   return (
     <div
+      ref={overlayRef}
       role="dialog"
       aria-modal="true"
       aria-label="作品を巡る"
       className="ui-ribbon-overlay"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
     >
       <div className="ui-ribbon-bar">
         <div className="ui-ribbon-eyebrow">巡る</div>
@@ -469,10 +479,6 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
           dragging && 'is-dragging',
           isZoomed && 'is-zoomed',
         ].filter(Boolean).join(' ')}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
       >
         <div
           ref={cylinderRef}
