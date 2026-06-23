@@ -2,8 +2,7 @@
 -- Run after docs/ops/rebuild-profiles-organizations.sql.
 
 -- Tables covered:
--- profiles, organizations, organization_members, organization_invites,
--- exhibitions, artworks, artwork_creators
+-- profiles, organizations, organization_members, exhibitions, artworks, artwork_creators
 
 alter table if exists public.exhibitions
   drop constraint if exists exhibitions_profile_id_fkey;
@@ -195,7 +194,6 @@ grant execute on function public.artwork_creator_allowed(uuid, uuid) to authenti
 alter table public.profiles enable row level security;
 alter table public.organizations enable row level security;
 alter table public.organization_members enable row level security;
-alter table public.organization_invites enable row level security;
 alter table public.exhibitions enable row level security;
 alter table public.artworks enable row level security;
 alter table public.artwork_creators enable row level security;
@@ -216,7 +214,6 @@ grant select on public.artwork_creators to anon, authenticated;
 grant insert, update, delete on public.artwork_creators to authenticated;
 
 grant select, insert, update, delete on public.organization_members to authenticated;
-grant select, insert, update, delete on public.organization_invites to authenticated;
 
 -- profiles: public read, self create/update.
 drop policy if exists "profiles_public_read" on public.profiles;
@@ -265,7 +262,7 @@ for delete
 using (public.profile_is_org_owner(id));
 
 -- organization_members: members can read their org; first owner bootstrap;
--- owners manage members; invitees can join via valid invite.
+-- owners manage members.
 drop policy if exists "organization_members_select" on public.organization_members;
 create policy "organization_members_select"
 on public.organization_members
@@ -286,23 +283,6 @@ with check (
   )
 );
 
-drop policy if exists "organization_members_invite_accept" on public.organization_members;
-create policy "organization_members_invite_accept"
-on public.organization_members
-for insert
-with check (
-  profile_id = auth.uid()
-  and exists (
-    select 1
-    from public.organization_invites oi
-    where oi.organization_id = organization_members.organization_id
-      and lower(oi.email) = lower(auth.jwt() ->> 'email')
-      and oi.accepted_at is null
-      and oi.expires_at > now()
-      and oi.role = organization_members.role
-  )
-);
-
 drop policy if exists "organization_members_owner_insert" on public.organization_members;
 create policy "organization_members_owner_insert"
 on public.organization_members
@@ -319,54 +299,6 @@ with check (public.profile_is_org_owner(organization_id));
 drop policy if exists "organization_members_owner_delete" on public.organization_members;
 create policy "organization_members_owner_delete"
 on public.organization_members
-for delete
-using (public.profile_is_org_owner(organization_id));
-
--- organization_invites: owners manage; invited email can read and mark accepted.
-drop policy if exists "organization_invites_owner_manage" on public.organization_invites;
-
-drop policy if exists "organization_invites_owner_select" on public.organization_invites;
-create policy "organization_invites_owner_select"
-on public.organization_invites
-for select
-using (public.profile_is_org_owner(organization_id));
-
-drop policy if exists "organization_invites_invitee_read" on public.organization_invites;
-create policy "organization_invites_invitee_read"
-on public.organization_invites
-for select
-using (lower(email) = lower(auth.jwt() ->> 'email'));
-
-drop policy if exists "organization_invites_owner_insert" on public.organization_invites;
-create policy "organization_invites_owner_insert"
-on public.organization_invites
-for insert
-with check (
-  public.profile_is_org_owner(organization_id)
-  and invited_by = auth.uid()
-);
-
-drop policy if exists "organization_invites_owner_update" on public.organization_invites;
-create policy "organization_invites_owner_update"
-on public.organization_invites
-for update
-using (public.profile_is_org_owner(organization_id))
-with check (public.profile_is_org_owner(organization_id));
-
-drop policy if exists "organization_invites_invitee_accept" on public.organization_invites;
-create policy "organization_invites_invitee_accept"
-on public.organization_invites
-for update
-using (
-  lower(email) = lower(auth.jwt() ->> 'email')
-  and accepted_at is null
-  and expires_at > now()
-)
-with check (lower(email) = lower(auth.jwt() ->> 'email'));
-
-drop policy if exists "organization_invites_owner_delete" on public.organization_invites;
-create policy "organization_invites_owner_delete"
-on public.organization_invites
 for delete
 using (public.profile_is_org_owner(organization_id));
 

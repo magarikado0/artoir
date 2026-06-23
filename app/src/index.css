@@ -2872,14 +2872,9 @@ button.ui-account-org-pick-btn.ui-org-row {
   color: #4A413A;
 }
 
-.ui-settings-member-list,
-.ui-settings-pending-invites {
+.ui-settings-member-list {
   display: grid;
   gap: 12px;
-}
-
-.ui-settings-pending-invites {
-  margin-top: 8px;
 }
 
 .ui-settings-member-row {
@@ -2924,10 +2919,10 @@ button.ui-account-org-pick-btn.ui-org-row {
 
 .ui-settings-member-actions select,
 .ui-settings-member-actions button,
-.ui-settings-invite-grid input,
-.ui-settings-invite-grid select,
-.ui-settings-invite-grid button,
-.ui-settings-invite-result button {
+.ui-settings-member-add-grid input,
+.ui-settings-member-add-grid select,
+.ui-settings-member-add-grid button,
+.ui-settings-member-add-result button {
   min-height: 42px;
   border: 1px solid #E4DDD2;
   border-radius: 8px;
@@ -2940,31 +2935,31 @@ button.ui-account-org-pick-btn.ui-org-row {
 }
 
 .ui-settings-member-actions button,
-.ui-settings-invite-grid button,
-.ui-settings-invite-result button {
+.ui-settings-member-add-grid button,
+.ui-settings-member-add-result button {
   cursor: pointer;
   font-size: 13px;
   letter-spacing: 0.01em;
 }
 
-.ui-settings-invite-form {
+.ui-settings-member-add-form {
   display: grid;
   gap: 14px;
   padding-top: 8px;
 }
 
-.ui-settings-invite-grid {
+.ui-settings-member-add-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 140px auto;
   gap: 10px;
 }
 
-.ui-settings-invite-grid button[type="submit"] {
+.ui-settings-member-add-grid button[type="submit"] {
   font-size: 13px;
   white-space: nowrap;
 }
 
-.ui-settings-invite-result {
+.ui-settings-member-add-result {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
@@ -2975,23 +2970,11 @@ button.ui-account-org-pick-btn.ui-org-row {
   background: #FBF8F3;
 }
 
-.ui-settings-invite-result.is-copied {
-  border-color: #6B7355;
-  background: #EFF1E8;
-}
-
-.ui-settings-invite-result-url {
+.ui-settings-member-add-result-profile {
   color: #4A413A;
   font-size: 13px;
   line-height: 1.6;
   overflow-wrap: anywhere;
-}
-
-.ui-settings-invite-copied {
-  grid-column: 1 / -1;
-  color: #6B7355;
-  font-size: 12px;
-  letter-spacing: 0.01em;
 }
 
 .ui-exhibition-date-grid {
@@ -3553,8 +3536,8 @@ button.ui-account-org-pick-btn.ui-org-row {
   }
 
   .ui-settings-member-row,
-  .ui-settings-invite-grid,
-  .ui-settings-invite-result {
+  .ui-settings-member-add-grid,
+  .ui-settings-member-add-result {
     grid-template-columns: minmax(0, 1fr);
   }
 

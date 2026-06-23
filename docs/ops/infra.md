@@ -23,5 +23,5 @@ Older helper scripts for `organizations.kind` and `user_orgs` are deprecated and
 - Logged-in profiles can create organizations and become the first owner.
 - Organization members can manage exhibitions and artworks for that organization.
 - A profile can manage exhibitions and artworks directly owned by that profile.
-- Organization owners can manage members and invites.
+- Organization owners can manage members.
 - Artwork creator rows can only reference profiles that are valid for the exhibition: organization members for organization exhibitions, or the owning profile for profile exhibitions.

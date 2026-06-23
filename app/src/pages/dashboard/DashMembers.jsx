@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import DashShell from '../../components/DashShell'
 import { useAuth } from '../../lib/auth'
@@ -19,14 +19,14 @@ export default function DashMembers() {
   const [org, setOrg] = useState(null)
   const [loading, setLoading] = useState(true)
   const [members, setMembers] = useState([])
-  const [invites, setInvites] = useState([])
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState('admin')
-  const [inviteLink, setInviteLink] = useState('')
-  const [copiedInviteLink, setCopiedInviteLink] = useState('')
+  const [memberSearchId, setMemberSearchId] = useState('')
+  const [memberSearchRole, setMemberSearchRole] = useState('admin')
+  const [memberSearchResult, setMemberSearchResult] = useState(null)
+  const [memberSearchMessage, setMemberSearchMessage] = useState('')
   const [message, setMessage] = useState('')
   const [membersLoading, setMembersLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [searchingMember, setSearchingMember] = useState(false)
 
   useEffect(() => {
     if (!supabase) {
@@ -45,28 +45,27 @@ export default function DashMembers() {
     return () => { cancelled = true }
   }, [orgSlug])
 
-  useEffect(() => {
-    if (org) loadMembers(org)
-  }, [org])
-
-  async function loadMembers(nextOrg = org) {
+  const loadMembers = useCallback(async (nextOrg = org) => {
     if (!supabase || !nextOrg) return
     setMembersLoading(true)
     try {
-      const [{ data: memberRows, error: memberError }, { data: inviteRows }] = await Promise.all([
-        supabase.from('organization_members').select('*, profiles(id, display_name, slug)').eq('organization_id', nextOrg.id),
-        supabase.from('organization_invites').select('*').eq('organization_id', nextOrg.id).is('accepted_at', null).order('created_at', { ascending: false }),
-      ])
+      const { data: memberRows, error: memberError } = await supabase
+        .from('organization_members')
+        .select('*, profiles(id, display_name, slug)')
+        .eq('organization_id', nextOrg.id)
       if (memberError) {
         setMessage(memberError.message)
         return
       }
       setMembers(memberRows || [])
-      setInvites(inviteRows || [])
     } finally {
       setMembersLoading(false)
     }
-  }
+  }, [org])
+
+  useEffect(() => {
+    if (org) loadMembers(org)
+  }, [org, loadMembers])
 
   function currentMembership() {
     return members.find((member) => member.profile_id === session?.user?.id)
@@ -82,75 +81,77 @@ export default function DashMembers() {
     return member.profile_id
   }
 
-  async function copyText(text) {
-    function markCopied() {
-      setCopiedInviteLink(text)
-      window.setTimeout(() => setCopiedInviteLink((current) => current === text ? '' : current), 1800)
-    }
-
-    try {
-      await navigator.clipboard.writeText(text)
-      markCopied()
-    } catch {
-      const el = document.createElement('textarea')
-      el.value = text
-      el.setAttribute('readonly', '')
-      el.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;z-index:-1'
-      document.body.appendChild(el)
-      el.focus()
-      el.select()
-      el.setSelectionRange(0, el.value.length)
-      try {
-        const copied = document.execCommand('copy')
-        if (copied) markCopied()
-        setMessage(copied ? '' : text)
-      } finally {
-        document.body.removeChild(el)
-      }
-    }
+  function normalizeProfileId(value) {
+    return String(value || '').trim().replace(/^@+/, '').toLowerCase()
   }
 
-  function createInviteToken() {
-    if (crypto?.randomUUID) return crypto.randomUUID()
-    const random = crypto?.getRandomValues
-      ? Array.from(crypto.getRandomValues(new Uint8Array(24)), (value) => value.toString(16).padStart(2, '0')).join('')
-      : `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`
-    return random.replace(/[^a-zA-Z0-9-]/g, '')
-  }
-
-  async function handleCreateInvite(e) {
+  async function handleSearchMember(e) {
     e?.preventDefault()
-    if (!supabase || !org || !inviteEmail.trim()) return
-    setSaving(true)
+    if (!supabase || !org) return
+    const profileId = normalizeProfileId(memberSearchId)
+    if (!profileId) return
+
+    setSearchingMember(true)
+    setMemberSearchResult(null)
+    setMemberSearchMessage('')
     setMessage('')
-    setInviteLink('')
-    setCopiedInviteLink('')
     try {
-      const token = createInviteToken()
-      const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString()
       const { data, error } = await supabase
-        .from('organization_invites')
-        .insert({
-          organization_id: org.id,
-          email: inviteEmail.trim().toLowerCase(),
-          role: inviteRole,
-          token,
-          invited_by: session.user.id,
-          expires_at: expiresAt,
-        })
-        .select()
-        .single()
+        .from('profiles')
+        .select('id, display_name, slug')
+        .eq('slug', profileId)
+        .maybeSingle()
+
       if (error) {
-        setMessage(error.message)
+        setMemberSearchMessage(error.message)
         return
       }
-      const link = `${window.location.origin}/invite/${data.token}`
-      setInviteLink(link)
-      setInviteEmail('')
-      await loadMembers(org)
-      await copyText(link)
+      if (!data) {
+        setMemberSearchMessage('このIDのプロフィールが見つかりません。')
+        return
+      }
+      const existing = members.find((member) => member.profile_id === data.id)
+      if (existing) {
+        setMemberSearchMessage(`${data.display_name || `@${data.slug}`} はすでにメンバーです。`)
+        return
+      }
+      setMemberSearchResult(data)
     } catch (error) {
-      setMessage(error?.message || '招待リンクの作成に失敗しました。')
+      setMemberSearchMessage(error?.message || 'プロフィールの検索に失敗しました。')
+    } finally {
+      setSearchingMember(false)
+    }
+  }
+
+  async function handleAddSearchedMember() {
+    if (!supabase || !org || !memberSearchResult) return
+    setSaving(true)
+    setMessage('')
+    setMemberSearchMessage('')
+    try {
+      const { data, error } = await supabase
+        .from('organization_members')
+        .insert({
+          organization_id: org.id,
+          profile_id: memberSearchResult.id,
+          role: memberSearchRole,
+        })
+        .select('profile_id')
+        .maybeSingle()
+
+      if (error) {
+        setMemberSearchMessage(error.message)
+        return
+      }
+      if (!data) {
+        setMemberSearchMessage('メンバーを追加できませんでした。オーナー権限があるか確認してください。')
+        return
+      }
+      const addedName = memberSearchResult.display_name || `@${memberSearchResult.slug}`
+      setMemberSearchId('')
+      setMemberSearchResult(null)
+      setMemberSearchMessage(`${addedName} を追加しました。`)
+      await loadMembers(org)
     } finally {
       setSaving(false)
     }
@@ -218,19 +219,6 @@ export default function DashMembers() {
     }
   }
 
-  async function handleCancelInvite(invite) {
-    if (!supabase) return
-    setSaving(true)
-    setMessage('')
-    try {
-      const { error } = await supabase.from('organization_invites').delete().eq('id', invite.id)
-      if (error) setMessage(error.message)
-      else await loadMembers(org)
-    } finally {
-      setSaving(false)
-    }
-  }
-
   if (loading) return (
     <DashShell orgSlug={orgSlug} />
   )
@@ -274,59 +262,42 @@ export default function DashMembers() {
             )}
 
             {canManageMembers ? (
-              <form onSubmit={handleCreateInvite} className="ui-settings-invite-form">
-                <div className="ui-form-label">招待</div>
-                <div className="ui-settings-invite-grid">
+              <form onSubmit={handleSearchMember} className="ui-settings-member-add-form">
+                <div className="ui-form-label">IDで追加</div>
+                <div className="ui-settings-member-add-grid">
                   <input
-                    type="email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    placeholder="email@example.com"
-                    disabled={saving}
+                    type="text"
+                    value={memberSearchId}
+                    onChange={(e) => {
+                      setMemberSearchId(e.target.value)
+                      setMemberSearchResult(null)
+                      setMemberSearchMessage('')
+                    }}
+                    placeholder="@profile-id"
+                    disabled={saving || searchingMember}
                   />
-                  <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)} disabled={saving}>
+                  <select value={memberSearchRole} onChange={(e) => setMemberSearchRole(e.target.value)} disabled={saving}>
                     <option value="admin">管理者</option>
                     <option value="owner">オーナー</option>
                   </select>
-                  <button type="submit" disabled={saving || !inviteEmail.trim()}>
-                    招待リンクを作成
+                  <button type="submit" disabled={saving || searchingMember || !memberSearchId.trim()}>
+                    {searchingMember ? '検索中...' : '検索'}
                   </button>
                 </div>
-                {inviteLink && (
-                  <div className={`ui-settings-invite-result ${copiedInviteLink === inviteLink ? 'is-copied' : ''}`}>
-                    <div className="ui-settings-invite-result-url">{inviteLink}</div>
-                    {copiedInviteLink === inviteLink && <div className="ui-settings-invite-copied">コピーしました</div>}
-                    <button type="button" onClick={() => copyText(inviteLink)}>
-                      {copiedInviteLink === inviteLink ? 'コピー済み' : 'コピー'}
+                {memberSearchResult && (
+                  <div className="ui-settings-member-add-result">
+                    <div className="ui-settings-member-add-result-profile">
+                      {memberSearchResult.display_name || '名前未設定'} (@{memberSearchResult.slug})
+                    </div>
+                    <button type="button" onClick={handleAddSearchedMember} disabled={saving}>
+                      追加
                     </button>
                   </div>
                 )}
+                {memberSearchMessage && <div className="ui-settings-member-note">{memberSearchMessage}</div>}
               </form>
             ) : (
-              <div className="ui-settings-member-note">メンバーの招待・権限変更はオーナーのみ操作できます。</div>
-            )}
-
-            {invites.length > 0 && (
-              <div className="ui-settings-pending-invites">
-                <div className="ui-form-label">未承認の招待</div>
-                {invites.map((invite) => {
-                  const link = `${window.location.origin}/invite/${invite.token}`
-                  return (
-                    <div key={invite.id} className="ui-settings-member-row">
-                      <div>
-                        <div className="ui-settings-member-email">{invite.email}</div>
-                        <div className="ui-settings-member-role">{roleLabel(invite.role)} / {new Date(invite.expires_at).toLocaleDateString()}</div>
-                      </div>
-                      {canManageMembers && (
-                        <div className="ui-settings-member-actions">
-                          <button type="button" onClick={() => copyText(link)} disabled={saving}>{copiedInviteLink === link ? 'コピー済み' : 'コピー'}</button>
-                          <button type="button" onClick={() => handleCancelInvite(invite)} disabled={saving}>取消</button>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+              <div className="ui-settings-member-note">メンバーの追加・権限変更はオーナーのみ操作できます。</div>
             )}
 
             {message && <div className="ui-settings-member-message">{message}</div>}

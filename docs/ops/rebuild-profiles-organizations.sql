@@ -2,7 +2,6 @@
 -- Intended for development DB rebuilds. Back up production data before running anywhere persistent.
 
 drop table if exists public.artwork_creators cascade;
-drop table if exists public.organization_invites cascade;
 drop table if exists public.organization_members cascade;
 drop table if exists public.user_orgs cascade;
 
@@ -90,18 +89,6 @@ create table if not exists public.organization_members (
   role text not null default 'admin' check (role in ('owner', 'admin')),
   created_at timestamptz not null default now(),
   primary key (organization_id, profile_id)
-);
-
-create table if not exists public.organization_invites (
-  id uuid primary key default gen_random_uuid(),
-  organization_id uuid not null references public.organizations(id) on delete cascade,
-  email text not null,
-  role text not null default 'admin' check (role in ('owner', 'admin')),
-  token text not null unique,
-  invited_by uuid not null references public.profiles(id) on delete cascade,
-  accepted_at timestamptz,
-  expires_at timestamptz not null,
-  created_at timestamptz not null default now()
 );
 
 create table if not exists public.artwork_creators (
@@ -270,7 +257,6 @@ alter table public.organizations enable row level security;
 alter table public.exhibitions enable row level security;
 alter table public.artworks enable row level security;
 alter table public.organization_members enable row level security;
-alter table public.organization_invites enable row level security;
 alter table public.artwork_creators enable row level security;
 
 drop policy if exists "profiles_public_read" on public.profiles;
@@ -393,23 +379,6 @@ drop policy if exists "organization_members_owner_delete" on public.organization
 create policy "organization_members_owner_delete"
 on public.organization_members for delete
 using (public.profile_is_org_owner(organization_id));
-
-drop policy if exists "organization_invites_owner_manage" on public.organization_invites;
-create policy "organization_invites_owner_manage"
-on public.organization_invites for all
-using (public.profile_is_org_owner(organization_id))
-with check (public.profile_is_org_owner(organization_id));
-
-drop policy if exists "organization_invites_invitee_read" on public.organization_invites;
-create policy "organization_invites_invitee_read"
-on public.organization_invites for select
-using (lower(email) = lower(auth.jwt() ->> 'email'));
-
-drop policy if exists "organization_invites_invitee_accept" on public.organization_invites;
-create policy "organization_invites_invitee_accept"
-on public.organization_invites for update
-using (lower(email) = lower(auth.jwt() ->> 'email'))
-with check (lower(email) = lower(auth.jwt() ->> 'email'));
 
 drop policy if exists "artwork_creators_public_read_visible" on public.artwork_creators;
 create policy "artwork_creators_public_read_visible"

@@ -23,7 +23,6 @@ const AccountPage = lazy(() => import('./pages/AccountPage'))
 const AccountSetup = lazy(() => import('./pages/AccountSetup'))
 const OrganizationCreatePage = lazy(() => import('./pages/OrganizationCreatePage'))
 const AccountSetupLinks = lazy(() => import('./pages/AccountSetupLinks'))
-const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -155,7 +154,6 @@ export default function App() {
             <Route path="/account/setup" element={<AccountSetup />} />
             <Route path="/account/organizations/new" element={<OrganizationCreatePage />} />
             <Route path="/account/setup/links" element={<AccountSetupLinks />} />
-            <Route path="/invite/:token" element={<InviteAcceptPage />} />
             <Route path="/profile/:profileSlug" element={<ProfilePage />} />
             <Route path="/@:profileSlug" element={<ProfilePage />} />
             <Route path="/profile/:profileSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
