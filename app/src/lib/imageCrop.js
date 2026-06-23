@@ -66,6 +66,52 @@ export function scaleCropToNaturalSize(pixelCrop, image) {
   }
 }
 
+export async function getRotatedCroppedBlob(
+  imageSrc,
+  cropPixels,
+  degrees,
+  mimeType = 'image/jpeg',
+  maxPixels = ARTWORK_MAX_PIXELS,
+) {
+  if (!cropPixels) throw new Error('クロップ範囲が未設定です')
+
+  const image = await loadImage(imageSrc)
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
+
+  if (!context) throw new Error('キャンバスを初期化できませんでした')
+
+  const cropWidth = Math.max(1, Math.round(cropPixels.width))
+  const cropHeight = Math.max(1, Math.round(cropPixels.height))
+  const { width: targetWidth, height: targetHeight } = calculateDimensionsForMaxPixels(
+    cropWidth,
+    cropHeight,
+    maxPixels,
+  )
+
+  canvas.width = targetWidth
+  canvas.height = targetHeight
+
+  context.scale(targetWidth / cropWidth, targetHeight / cropHeight)
+  context.translate(-cropPixels.x, -cropPixels.y)
+  context.translate(image.naturalWidth / 2, image.naturalHeight / 2)
+  context.rotate(degrees * Math.PI / 180)
+  context.drawImage(image, -image.naturalWidth / 2, -image.naturalHeight / 2)
+
+  const targetMimeType = mimeType === 'image/png' ? 'image/png' : 'image/jpeg'
+  const quality = targetMimeType === 'image/jpeg' ? ARTWORK_JPEG_QUALITY : undefined
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('画像の反映に失敗しました'))
+        return
+      }
+      resolve(blob)
+    }, targetMimeType, quality)
+  })
+}
+
 export async function getCroppedBlob(
   imageSrc,
   cropPixels,

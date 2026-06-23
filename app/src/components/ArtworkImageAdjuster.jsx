@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactCrop, { convertToPixelCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
-import { getCroppedBlob, getRotatedBlob, scaleCropToNaturalSize } from '../lib/imageCrop'
+import { getRotatedCroppedBlob, scaleCropToNaturalSize } from '../lib/imageCrop'
 import { T } from '../lib/tokens'
 
 function getInitialFreeCrop() {
@@ -60,8 +60,10 @@ function FreeImageCrop({ imageUrl, containerRef, visualRotation = 0, onCropPixel
     const nextSize = getContainedSize(naturalWidth, naturalHeight)
     setNaturalSize({ width: naturalWidth, height: naturalHeight })
     if (nextSize) setDisplaySize(nextSize)
-    setCrop(initial)
-    onCropPixelsChange({ x: 0, y: 0, width: naturalWidth, height: naturalHeight })
+    if (!crop) {
+      setCrop(initial)
+      onCropPixelsChange({ x: 0, y: 0, width: naturalWidth, height: naturalHeight })
+    }
   }
 
   const imageStyle = {
@@ -104,9 +106,6 @@ export default function ArtworkImageAdjuster({
   const [rotation, setRotation] = useState(0)
   const [quarterRotation, setQuarterRotation] = useState(0)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
-  const [editPreviewUrl, setEditPreviewUrl] = useState(sourceUrl || '')
-  const [previewRotation, setPreviewRotation] = useState(0)
-  const [rotationPending, setRotationPending] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState('')
   const appliedRotation = quarterRotation + rotation
@@ -115,75 +114,34 @@ export default function ArtworkImageAdjuster({
     setRotation(0)
     setQuarterRotation(0)
     setCroppedAreaPixels(null)
-    setEditPreviewUrl(sourceUrl || '')
-    setPreviewRotation(0)
-    setRotationPending(false)
     setConfirming(false)
     setError('')
   }, [sourceUrl])
 
   useEffect(() => {
-    onBusyChange?.(confirming || rotationPending)
-  }, [confirming, onBusyChange, rotationPending])
+    onBusyChange?.(confirming)
+  }, [confirming, onBusyChange])
 
   useEffect(() => (
     () => onBusyChange?.(false)
   ), [onBusyChange])
 
-  useEffect(() => {
-    if (!sourceUrl) return undefined
-    if (appliedRotation === 0) {
-      setEditPreviewUrl(sourceUrl)
-      setPreviewRotation(0)
-      setRotationPending(false)
-      return undefined
-    }
-
-    let cancelled = false
-    let rotatedUrl = ''
-    setRotationPending(true)
-    const timer = window.setTimeout(async () => {
-      try {
-        const blob = await getRotatedBlob(sourceUrl, appliedRotation, sourceType)
-        if (cancelled) return
-        rotatedUrl = URL.createObjectURL(blob)
-        setEditPreviewUrl(rotatedUrl)
-        setPreviewRotation(appliedRotation)
-      } catch (err) {
-        if (!cancelled) setError(err?.message || '画像の回転に失敗しました')
-      } finally {
-        if (!cancelled) setRotationPending(false)
-      }
-    }, 120)
-
-    return () => {
-      cancelled = true
-      window.clearTimeout(timer)
-      if (rotatedUrl) URL.revokeObjectURL(rotatedUrl)
-    }
-  }, [appliedRotation, sourceType, sourceUrl])
-
-  function resetCropFrame() {
-    setCroppedAreaPixels(null)
-  }
 
   function rotateQuarter(degrees) {
     setQuarterRotation((current) => (current + degrees) % 360)
-    resetCropFrame()
   }
 
   function handleRotationChange(e) {
     setRotation(Number(e.currentTarget.value))
-    resetCropFrame()
   }
 
   async function handleConfirm() {
-    if (!sourceUrl || !editPreviewUrl || !croppedAreaPixels || disabled || confirming || rotationPending) return
+    if (!sourceUrl || !croppedAreaPixels || disabled || confirming) return
     setConfirming(true)
     setError('')
 
     try {
-      const croppedBlob = await getCroppedBlob(editPreviewUrl, croppedAreaPixels, sourceType)
+      const croppedBlob = await getRotatedCroppedBlob(sourceUrl, croppedAreaPixels, appliedRotation, sourceType)
       await onConfirm?.(croppedBlob)
     } catch (err) {
       setError(err?.message || '画像の反映に失敗しました')
@@ -192,8 +150,7 @@ export default function ArtworkImageAdjuster({
     }
   }
 
-  const visualRotation = appliedRotation - previewRotation
-  const canConfirm = Boolean(croppedAreaPixels) && !disabled && !confirming && !rotationPending
+  const canConfirm = Boolean(croppedAreaPixels) && !disabled && !confirming
 
   return (
     <div style={{ minWidth: 0 }}>
@@ -211,12 +168,12 @@ export default function ArtworkImageAdjuster({
           justifyContent: 'center',
         }}
       >
-        {editPreviewUrl && (
+        {sourceUrl && (
           <FreeImageCrop
-            key={editPreviewUrl}
-            imageUrl={editPreviewUrl}
+            key={sourceUrl}
+            imageUrl={sourceUrl}
             containerRef={cropboxRef}
-            visualRotation={visualRotation}
+            visualRotation={appliedRotation}
             onCropPixelsChange={setCroppedAreaPixels}
           />
         )}
@@ -238,7 +195,6 @@ export default function ArtworkImageAdjuster({
             disabled={rotation === 0 || disabled || confirming}
             onClick={() => {
               setRotation(0)
-              resetCropFrame()
             }}
           >
             0°に戻す
@@ -260,7 +216,6 @@ export default function ArtworkImageAdjuster({
           <span>+15°</span>
           <output>{rotation.toFixed(1)}°</output>
         </div>
-        {rotationPending && <div className="ui-field-help" style={{ marginTop: 6 }}>傾きを反映しています…</div>}
       </div>
       <div style={{ marginTop: 10, fontSize: 12, color: T.inkMuted, lineHeight: 1.7 }}>
         {helpText}
