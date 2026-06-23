@@ -131,6 +131,7 @@ export default function ProfilePage() {
         {artworks.length > 0 ? (
           <>
             <div className="ui-exhibition-artworks-head">
+              <div className="ui-section-label">作品</div>
               <button
                 type="button"
                 className="ui-immersive-launch"
