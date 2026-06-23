@@ -80,8 +80,12 @@ export default function ProfilePage() {
     <div className="ui-page-shell">
       <Header activeTab="account" />
       <main className="ui-app-main">
-        <div className="ui-app-topline" style={{ justifyContent: 'flex-end' }}>
-          <div className="ui-app-topline-actions">
+        <section style={{ marginBottom: 48 }}>
+          <div className="ui-kicker">プロフィール</div>
+          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
+          <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
+          {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 16 }}>{profile.bio}</p>}
+          <div className="ui-public-action-row">
             <ShareLinkButton />
             <PublicManageLink
               ownerType="profile"
@@ -90,12 +94,6 @@ export default function ProfilePage() {
               label="管理"
             />
           </div>
-        </div>
-        <section style={{ marginBottom: 48 }}>
-          <div className="ui-kicker">プロフィール</div>
-          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
-          <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
-          {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 16 }}>{profile.bio}</p>}
           {(sns.instagram || sns.x || profile.homepage_url) && (
             <div className="ui-public-link-row">
               {sns.instagram && (

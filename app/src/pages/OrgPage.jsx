@@ -61,7 +61,12 @@ export default function OrgPage() {
       <main className="ui-app-main">
         <div className="ui-app-topline">
           <Link to="/orgs" className="ui-back-link">← 公開ページ一覧</Link>
-          <div className="ui-app-topline-actions">
+        </div>
+        <section style={{ marginBottom: 48 }}>
+          <div className="ui-kicker">{org.kind === 'person' ? '作家' : '団体'}</div>
+          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{org.name}</h1>
+          {org.description && <p className="ui-screen-subtitle">{org.description}</p>}
+          <div className="ui-public-action-row">
             <ShareLinkButton />
             <PublicManageLink
               ownerType="organization"
@@ -70,11 +75,6 @@ export default function OrgPage() {
               label="団体を管理"
             />
           </div>
-        </div>
-        <section style={{ marginBottom: 48 }}>
-          <div className="ui-kicker">{org.kind === 'person' ? '作家' : '団体'}</div>
-          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{org.name}</h1>
-          {org.description && <p className="ui-screen-subtitle">{org.description}</p>}
           {(sns.instagram || sns.x || org.homepage_url) && (
             <div className="ui-public-link-row">
               {sns.instagram && (

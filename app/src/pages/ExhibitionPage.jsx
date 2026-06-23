@@ -157,21 +157,21 @@ export default function ExhibitionPage() {
       <main className="ui-app-main">
         <div className="ui-app-topline">
           <Link to={ownerBase} className="ui-back-link">← {ownerPageLabel}</Link>
-          <div className="ui-app-topline-actions">
-            <ShareLinkButton />
-            <PublicManageLink
-              ownerType={profileSlug ? 'profile' : 'organization'}
-              ownerId={owner?.id}
-              to={exhibitionManagePath}
-              label="展覧会を管理"
-            />
-          </div>
         </div>
 
         <section>
           <div className="ui-exhibition-summary-card">
             <h1 className="ui-screen-title">{exhibition.title}</h1>
             {exhibition.description && <p className="ui-screen-subtitle">{exhibition.description}</p>}
+            <div className="ui-public-action-row">
+              <ShareLinkButton />
+              <PublicManageLink
+                ownerType={profileSlug ? 'profile' : 'organization'}
+                ownerId={owner?.id}
+                to={exhibitionManagePath}
+                label="展覧会を管理"
+              />
+            </div>
             <div className="ui-exhibition-summary-grid">
               <SummaryItem label="会期" value={dateText} />
               <SummaryItem label="会場" value={exhibition.location} />
