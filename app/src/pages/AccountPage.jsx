@@ -441,6 +441,7 @@ export default function AccountPage() {
         nextOrder={artworks.length > 0 ? Math.max(...artworks.map((artwork) => artwork.order ?? 0)) + 1 : 1}
         creatorOptions={profile ? [profile] : []}
         defaultCreatorIds={profile ? [profile.id] : []}
+        showCreatorPicker={false}
         onClose={() => setCreateFile(null)}
         onCreated={(newWork) => {
           if (!newWork) return
@@ -486,6 +487,7 @@ export default function AccountPage() {
         nextOrder={artworks.length > 0 ? Math.max(...artworks.map((artwork) => artwork.order ?? 0)) + 1 : 1}
         creatorOptions={profile ? [profile] : []}
         defaultCreatorIds={profile ? [profile.id] : []}
+        showCreatorPicker={false}
         onClose={() => setCreateFile(null)}
         onCreated={(newWork) => {
           if (!newWork) return

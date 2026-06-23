@@ -28,7 +28,7 @@ function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator }) 
   )
 }
 
-export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder, creatorOptions = [], defaultCreatorIds = [], onClose, onCreated }) {
+export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder, creatorOptions = [], defaultCreatorIds = [], showCreatorPicker = true, onClose, onCreated }) {
   const [step, setStep] = useState('crop')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -216,11 +216,13 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
                   />
                 </div>
 
-                <CreatorPicker
-                  creatorOptions={creatorOptions}
-                  selectedCreatorIds={selectedCreatorIds}
-                  onToggleCreator={toggleCreator}
-                />
+                {showCreatorPicker && (
+                  <CreatorPicker
+                    creatorOptions={creatorOptions}
+                    selectedCreatorIds={selectedCreatorIds}
+                    onToggleCreator={toggleCreator}
+                  />
+                )}
 
                 {error && <div className="ui-alert ui-alert--error">{error}</div>}
 
