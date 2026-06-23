@@ -3038,6 +3038,10 @@ button.ui-account-org-pick-btn.ui-org-row {
   overscroll-behavior: contain;
 }
 
+.ui-artwork-create-layout.is-crop-step {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .ui-artwork-create-cropbox {
   min-height: 320px;
   height: min(62vh, 620px);
@@ -3050,6 +3054,47 @@ button.ui-account-org-pick-btn.ui-org-row {
   height: auto;
   max-width: 100%;
   max-height: 100%;
+}
+
+.ui-artwork-confirmed-preview {
+  min-height: 320px;
+  height: min(52vh, 560px);
+  height: min(52dvh, 560px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #1F1B17;
+}
+
+.ui-artwork-confirmed-preview img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.ui-artwork-adjust-button {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 12px;
+  border: 1px solid #D8CFC2;
+  border-radius: 8px;
+  background: #FBF8F3;
+  color: #312B27;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ui-artwork-adjust-button:hover:not(:disabled) {
+  border-color: #8A8178;
+}
+
+.ui-artwork-create-actions {
+  margin-top: 16px;
 }
 
 
@@ -3310,6 +3355,12 @@ button.ui-account-org-pick-btn.ui-org-row {
     min-height: 220px;
     height: clamp(220px, 42vh, 420px);
     height: clamp(220px, 42dvh, 420px);
+  }
+
+  .ui-artwork-confirmed-preview {
+    min-height: 220px;
+    height: clamp(220px, 38vh, 360px);
+    height: clamp(220px, 38dvh, 360px);
   }
 
   .ui-toolbar-grid {

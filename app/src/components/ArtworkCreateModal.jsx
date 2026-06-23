@@ -110,6 +110,7 @@ function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator, cr
 }
 
 export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder, creatorOptions = [], defaultCreatorIds = [], onClose, onCreated }) {
+  const [step, setStep] = useState('crop')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [selectedCreatorIds, setSelectedCreatorIds] = useState([])
@@ -122,11 +123,15 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
   const [error, setError] = useState('')
   const [previewUrl, setPreviewUrl] = useState('')
   const [editPreviewUrl, setEditPreviewUrl] = useState('')
+  const [confirmedBlob, setConfirmedBlob] = useState(null)
+  const [confirmedPreviewUrl, setConfirmedPreviewUrl] = useState('')
+  const [confirming, setConfirming] = useState(false)
   const [rotationPending, setRotationPending] = useState(false)
   const appliedRotation = quarterRotation + rotation
 
   useEffect(() => {
     if (!open || !file) {
+      setStep('crop')
       setTitle('')
       setDescription('')
       setSelectedCreatorIds([])
@@ -139,6 +144,9 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
       setError('')
       setPreviewUrl('')
       setEditPreviewUrl('')
+      setConfirmedBlob(null)
+      setConfirmedPreviewUrl('')
+      setConfirming(false)
       setRotationPending(false)
       return undefined
     }
@@ -149,6 +157,11 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
     setEditPreviewUrl(url)
     return () => URL.revokeObjectURL(url)
   }, [open, file, defaultCreatorIds])
+
+  useEffect(() => {
+    if (!confirmedPreviewUrl) return undefined
+    return () => URL.revokeObjectURL(confirmedPreviewUrl)
+  }, [confirmedPreviewUrl])
 
   useEffect(() => {
     if (!previewUrl || !file) return undefined
@@ -183,13 +196,31 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
 
   useEffect(() => {
     if (!open) return undefined
-    const handler = (e) => { if (e.key === 'Escape' && !saving) onClose() }
+    const handler = (e) => { if (e.key === 'Escape' && !saving && !confirming) onClose() }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [open, onClose, saving])
+  }, [confirming, open, onClose, saving])
+
+  async function handleConfirmImage() {
+    if (!open || !file || !editPreviewUrl || !croppedAreaPixels || rotationPending || confirming) return
+
+    setConfirming(true)
+    setError('')
+
+    try {
+      const croppedBlob = await getCroppedBlob(editPreviewUrl, croppedAreaPixels, file.type)
+      setConfirmedBlob(croppedBlob)
+      setConfirmedPreviewUrl(URL.createObjectURL(croppedBlob))
+      setStep('details')
+    } catch (err) {
+      setError(err?.message || '画像の確定に失敗しました')
+    } finally {
+      setConfirming(false)
+    }
+  }
 
   async function handleSave() {
-    if (!open || !file || !editPreviewUrl || !croppedAreaPixels || rotationPending) return
+    if (!open || !file || !confirmedBlob || saving) return
     if (!supabase) {
       setError('Supabase が未設定です')
       return
@@ -204,10 +235,9 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
     setProgress(0)
 
     try {
-      const croppedBlob = await getCroppedBlob(editPreviewUrl, croppedAreaPixels, file.type)
       const croppedName = file.name?.replace(/\.[^.]+$/, '') || 'artwork'
-      const uploadName = `${croppedName}-crop.${croppedBlob.type === 'image/png' ? 'png' : 'jpg'}`
-      const imageUrl = await uploadToCloudinary(croppedBlob, uploadName, setProgress)
+      const uploadName = `${croppedName}-crop.${confirmedBlob.type === 'image/png' ? 'png' : 'jpg'}`
+      const imageUrl = await uploadToCloudinary(confirmedBlob, uploadName, setProgress)
 
       const payload = {
         exhibition_id: exhibitionId,
@@ -216,7 +246,7 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
         description: description.trim() || null,
         order: nextOrder,
         file_name: file.name,
-        file_size: croppedBlob.size,
+        file_size: confirmedBlob.size,
       }
 
       const { data: newWork, error: insertError } = await supabase.from('artworks').insert(payload).select().single()
@@ -252,7 +282,8 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
 
   if (!open || !file) return null
 
-  const canSave = Boolean(croppedAreaPixels) && !saving && !rotationPending
+  const canConfirmImage = Boolean(croppedAreaPixels) && !confirming && !rotationPending
+  const canSave = Boolean(confirmedBlob) && !saving
 
   function toggleCreator(profileId) {
     setSelectedCreatorIds((prev) => (
@@ -264,6 +295,8 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
 
   function resetCropFrame() {
     setCroppedAreaPixels(null)
+    setConfirmedBlob(null)
+    setConfirmedPreviewUrl('')
   }
 
   function rotateQuarter(degrees) {
@@ -279,123 +312,152 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
             <div className="ui-kicker">作品</div>
             <div id="artwork-create-title" className="ui-screen-title" style={{ fontSize: 22, marginTop: 6 }}>作品を追加</div>
           </div>
-          <button onClick={onClose} disabled={saving} className="ui-modal-close" type="button">
+          <button onClick={onClose} disabled={saving || confirming} className="ui-modal-close" type="button">
             ×
           </button>
         </div>
 
-        <div className="ui-artwork-create-layout">
-          <div style={{ minWidth: 0 }}>
-            <div
-              className="ui-artwork-create-cropbox"
-              style={{
-                position: 'relative',
-                width: '100%',
-                background: T.ink,
-                borderRadius: 12,
-                overflow: 'hidden',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <FreeImageCrop
-                key={editPreviewUrl}
-                imageUrl={editPreviewUrl}
-                onCropPixelsChange={setCroppedAreaPixels}
-              />
-            </div>
-            <div style={{ marginTop: 14 }}>
-              <div className="ui-artwork-rotation-actions" aria-label="画像を90度回転">
-                <button type="button" disabled={saving} onClick={() => rotateQuarter(-90)}>
-                  <span aria-hidden="true">↶</span> 左へ90°
-                </button>
-                <button type="button" disabled={saving} onClick={() => rotateQuarter(90)}>
-                  右へ90° <span aria-hidden="true">↷</span>
+        <div className={`ui-artwork-create-layout ${step === 'crop' ? 'is-crop-step' : ''}`}>
+          {step === 'crop' ? (
+            <div style={{ minWidth: 0 }}>
+              <div
+                className="ui-artwork-create-cropbox"
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  background: T.ink,
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <FreeImageCrop
+                  key={editPreviewUrl}
+                  imageUrl={editPreviewUrl}
+                  onCropPixelsChange={setCroppedAreaPixels}
+                />
+              </div>
+              <div style={{ marginTop: 14 }}>
+                <div className="ui-artwork-rotation-actions" aria-label="画像を90度回転">
+                  <button type="button" disabled={confirming} onClick={() => rotateQuarter(-90)}>
+                    <span aria-hidden="true">↶</span> 左へ90°
+                  </button>
+                  <button type="button" disabled={confirming} onClick={() => rotateQuarter(90)}>
+                    右へ90° <span aria-hidden="true">↷</span>
+                  </button>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <div className="ui-form-label">傾き</div>
+                  <button
+                    type="button"
+                    className="ui-artwork-rotation-reset"
+                    disabled={rotation === 0 || confirming}
+                    onClick={() => {
+                      setRotation(0)
+                      resetCropFrame()
+                    }}
+                  >
+                    0°に戻す
+                  </button>
+                </div>
+                <div className="ui-artwork-rotation-control">
+                  <span>−15°</span>
+                  <input
+                    type="range"
+                    min="-15"
+                    max="15"
+                    step="0.1"
+                    value={rotation}
+                    disabled={confirming}
+                    aria-label="画像の傾き"
+                    onChange={(e) => {
+                      setRotation(Number(e.target.value))
+                      resetCropFrame()
+                    }}
+                  />
+                  <span>+15°</span>
+                  <output>{rotation.toFixed(1)}°</output>
+                </div>
+                {rotationPending && <div className="ui-field-help" style={{ marginTop: 6 }}>傾きを反映しています…</div>}
+              </div>
+              <div style={{ marginTop: 10, fontSize: 12, color: T.inkMuted, lineHeight: 1.7 }}>
+                そのまま進むと画像全体が使われます。切り抜く場合は、枠の角や辺をドラッグして調整します。
+              </div>
+              {error && <div className="ui-alert ui-alert--error" style={{ marginTop: 12 }}>{error}</div>}
+              <div className="ui-btn-row ui-artwork-create-actions">
+                <button onClick={onClose} disabled={confirming} className="ui-btn ui-btn--ghost">閉じる</button>
+                <button onClick={handleConfirmImage} disabled={!canConfirmImage} className="ui-btn ui-btn--accent">
+                  {confirming ? '確定中…' : '画像を確定'}
                 </button>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                <div className="ui-form-label">傾き</div>
+            </div>
+          ) : (
+            <>
+              <div style={{ minWidth: 0 }}>
+                <div className="ui-artwork-confirmed-preview">
+                  <img src={confirmedPreviewUrl} alt="" />
+                </div>
                 <button
                   type="button"
-                  className="ui-artwork-rotation-reset"
-                  disabled={rotation === 0 || saving}
+                  className="ui-artwork-adjust-button"
+                  disabled={saving}
                   onClick={() => {
-                    setRotation(0)
-                    resetCropFrame()
+                    setError('')
+                    setProgress(null)
+                    setStep('crop')
                   }}
                 >
-                  0°に戻す
+                  画像を調整し直す
                 </button>
               </div>
-              <div className="ui-artwork-rotation-control">
-                <span>−15°</span>
-                <input
-                  type="range"
-                  min="-15"
-                  max="15"
-                  step="0.1"
-                  value={rotation}
-                  disabled={saving}
-                  aria-label="画像の傾き"
-                  onChange={(e) => {
-                    setRotation(Number(e.target.value))
-                    resetCropFrame()
-                  }}
-                />
-                <span>+15°</span>
-                <output>{rotation.toFixed(1)}°</output>
-              </div>
-              {rotationPending && <div className="ui-field-help" style={{ marginTop: 6 }}>傾きを反映しています…</div>}
-            </div>
-            <div style={{ marginTop: 10, fontSize: 12, color: T.inkMuted, lineHeight: 1.7 }}>
-              そのまま保存すると画像全体が使われます。切り抜く場合は、枠の角や辺をドラッグして調整します。
-            </div>
-          </div>
 
-          <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div className="ui-input-wrap">
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="作品名を入力"
-                style={{ fontFamily: T.sans }}
-              />
-            </div>
-            <div className="ui-input-wrap" data-multiline="true">
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="説明文を入力"
-                rows={4}
-                style={{ fontFamily: T.sans }}
-              />
-            </div>
-
-            <CreatorPicker
-              creatorOptions={creatorOptions}
-              selectedCreatorIds={selectedCreatorIds}
-              onToggleCreator={toggleCreator}
-              creatorsVisible={creatorsVisible}
-              onVisibleChange={setCreatorsVisible}
-            />
-
-            {error && <div className="ui-alert ui-alert--error">{error}</div>}
-
-            {progress !== null && (
-              <div style={{ padding: '10px 12px', border: `1px solid ${T.lineSoft}`, background: T.card }}>
-                <div style={{ height: 4, borderRadius: 999, background: T.paperAlt, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${progress}%`, background: T.accent }} />
+              <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div className="ui-input-wrap">
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="作品名を入力"
+                    style={{ fontFamily: T.sans }}
+                  />
                 </div>
-                <div style={{ marginTop: 8, fontSize: 12, color: T.inkMuted }}>{progress}%</div>
-              </div>
-            )}
+                <div className="ui-input-wrap" data-multiline="true">
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="説明文を入力"
+                    rows={4}
+                    style={{ fontFamily: T.sans }}
+                  />
+                </div>
 
-            <div className="ui-btn-row" style={{ marginTop: 'auto' }}>
-              <button onClick={onClose} disabled={saving} className="ui-btn ui-btn--ghost">閉じる</button>
-              <button onClick={handleSave} disabled={!canSave} className="ui-btn ui-btn--accent">保存する</button>
-            </div>
-          </div>
+                <CreatorPicker
+                  creatorOptions={creatorOptions}
+                  selectedCreatorIds={selectedCreatorIds}
+                  onToggleCreator={toggleCreator}
+                  creatorsVisible={creatorsVisible}
+                  onVisibleChange={setCreatorsVisible}
+                />
+
+                {error && <div className="ui-alert ui-alert--error">{error}</div>}
+
+                {progress !== null && (
+                  <div style={{ padding: '10px 12px', border: `1px solid ${T.lineSoft}`, background: T.card }}>
+                    <div style={{ height: 4, borderRadius: 999, background: T.paperAlt, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${progress}%`, background: T.accent }} />
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 12, color: T.inkMuted }}>{progress}%</div>
+                  </div>
+                )}
+
+                <div className="ui-btn-row ui-artwork-create-actions" style={{ marginTop: 'auto' }}>
+                  <button onClick={onClose} disabled={saving} className="ui-btn ui-btn--ghost">閉じる</button>
+                  <button onClick={handleSave} disabled={!canSave} className="ui-btn ui-btn--accent">保存する</button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
