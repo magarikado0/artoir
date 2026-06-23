@@ -156,10 +156,17 @@ export default function DashHome() {
             <p className="ui-screen-subtitle">{ownerDescription.split('。')[0]}</p>
           )}
         </div>
-        <button onClick={() => navigate(`${dashboardBase}/dashboard/exhibitions/new`)} className="ui-pill-action ui-pill-action--accent">
-          <Icon name="plus" size={18} />
-          <span>展覧会を作成</span>
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {!profileSlug && (
+            <button type="button" onClick={() => navigate(dashboardBase)} className="ui-inline-edit-action">
+              公開ページ
+            </button>
+          )}
+          <button onClick={() => navigate(`${dashboardBase}/dashboard/exhibitions/new`)} className="ui-pill-action ui-pill-action--accent">
+            <Icon name="plus" size={18} />
+            <span>展覧会を作成</span>
+          </button>
+        </div>
       </div>
 
       {deleteTarget && (

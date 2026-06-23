@@ -17,6 +17,7 @@ import { attachNormalizedCreators, normalizeProfile } from '../lib/profile'
 import { getGalleryThumbnailUrl } from '../lib/imageUrl'
 import { ensureProfileWorksExhibition } from '../lib/profileWorks'
 import { getArtworkUploadConfigError, uploadArtworkImage } from '../lib/artworkUpload'
+import { profilePath } from '../lib/profileRoutes'
 
 function LoggedOut({ isDesktop }) {
   const navigate = useNavigate()
@@ -60,7 +61,14 @@ function ProfileSummary({ profile }) {
     <section className="ui-account-section">
       <div className="ui-account-section-head">
         <div className="ui-kicker">プロフィール</div>
-        <Link to="/account/setup" className="ui-btn ui-btn--ghost">プロフィール編集</Link>
+        <div className="ui-profile-summary-actions">
+          <Link to={profilePath(profile.slug)} className="ui-inline-edit-action">
+            <span>公開ページ</span>
+          </Link>
+          <Link to="/account/setup" className="ui-inline-edit-action">
+            <span>プロフィール編集</span>
+          </Link>
+        </div>
       </div>
       <div className="ui-screen-title" style={{ fontSize: 28 }}>{profile.display_name}</div>
       <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>

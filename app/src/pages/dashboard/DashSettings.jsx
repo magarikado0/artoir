@@ -204,6 +204,15 @@ export default function DashSettings() {
 
   const settingsContent = (
     <div className="ui-settings-page">
+      <div className="ui-dashboard-list-head" style={{ marginBottom: 12 }}>
+        <div className="ui-dashboard-list-head-copy">
+          <div className="ui-dashboard-list-count">{org?.name || '団体設定'}</div>
+        </div>
+        <button type="button" onClick={() => navigate(`/${org?.slug || orgSlug}`)} className="ui-inline-edit-action">
+          公開ページ
+        </button>
+      </div>
+
       <SettingsItem
         editSection={editSection}
         onBeginEdit={beginEditSection}

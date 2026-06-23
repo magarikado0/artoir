@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import Header, { Icon } from '../components/Header'
+import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import ShareLinkButton from '../components/ShareLinkButton'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
@@ -32,7 +33,6 @@ export default function ExhibitionPage() {
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
-  const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
   const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
@@ -93,29 +93,6 @@ export default function ExhibitionPage() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [artworks])
 
-  async function copyLink() {
-    const url = window.location.href
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1800)
-    } catch {
-      const el = document.createElement('textarea')
-      el.value = url
-      el.style.cssText = 'position:fixed;opacity:0;top:0;left:0'
-      document.body.appendChild(el)
-      el.focus()
-      el.select()
-      try {
-        document.execCommand('copy')
-        setCopied(true)
-        setTimeout(() => setCopied(false), 1800)
-      } finally {
-        document.body.removeChild(el)
-      }
-    }
-  }
-
   const viewableArtworks = useMemo(
     () => artworks.filter((item) => item.image_url),
     [artworks],
@@ -168,14 +145,7 @@ export default function ExhibitionPage() {
       <main className="ui-app-main">
         <div className="ui-app-topline">
           <Link to={ownerBase} className="ui-back-link">← {ownerPageLabel}</Link>
-          <button
-            onClick={copyLink}
-            type="button"
-            className={`ui-pill-action ${copied ? 'ui-pill-action--accent' : ''}`}
-          >
-            <Icon name={copied ? 'check' : 'share'} size={16} />
-            <span>{copied ? 'コピー済み' : 'リンクを共有'}</span>
-          </button>
+          <ShareLinkButton />
         </div>
 
         <section>

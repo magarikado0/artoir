@@ -305,6 +305,7 @@ export default function DashExhibitionEdit() {
   const dashboardBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
   const publicBase = profileSlug ? `artoir.net/profile/${profileSlug}` : `artoir.net/${orgSlug}`
   const savedPublicUrl = `${publicBase}/exhibition/${exhibition?.slug || '(未保存)'}`
+  const publicExhibitionPath = exhibition?.slug ? `${profileSlug ? profilePath(profileSlug) : `/${orgSlug}`}/exhibition/${exhibition.slug}` : ''
   const savedPeriodText = getExhibitionPeriodText(exhibition)
   const savedThumbnailUrl = getExhibitionThumbnailUrlFromRecord(exhibition)
 
@@ -429,13 +430,20 @@ export default function DashExhibitionEdit() {
         <div className="ui-dashboard-list-head-copy">
           <div className="ui-dashboard-list-count">{exhibition?.title || '展覧会情報'}</div>
         </div>
-        <button
-          type="button"
-          onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/artworks`)}
-          className="ui-pill-action"
-        >
-          作品を管理
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {publicExhibitionPath && (
+            <button type="button" onClick={() => navigate(publicExhibitionPath)} className="ui-inline-edit-action">
+              公開ページ
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => exhibitionId && exhibitionId !== 'undefined' && navigate(`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/artworks`)}
+            className="ui-pill-action"
+          >
+            作品を管理
+          </button>
+        </div>
       </div>
 
       <ExhibitionItem

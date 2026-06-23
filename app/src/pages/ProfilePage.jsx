@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import ShareLinkButton from '../components/ShareLinkButton'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import { T, externalHost } from '../lib/tokens'
@@ -61,7 +62,10 @@ export default function ProfilePage() {
     <div className="ui-page-shell">
       <Header />
       <main className="ui-app-main">
-        <Link to="/" className="ui-back-link" style={{ marginBottom: 20 }}>← 展覧会</Link>
+        <div className="ui-app-topline">
+          <Link to="/" className="ui-back-link">← 展覧会</Link>
+          <ShareLinkButton />
+        </div>
         <section style={{ marginBottom: 48 }}>
           <div className="ui-kicker">プロフィール</div>
           <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>

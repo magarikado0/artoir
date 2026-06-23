@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import ShareLinkButton from '../components/ShareLinkButton'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { T, externalHost } from '../lib/tokens'
 import { mapExhibitionListRow } from '../lib/exhibition'
@@ -57,7 +58,10 @@ export default function OrgPage() {
     <div className="ui-page-shell">
       <Header activeTab="orgs" />
       <main className="ui-app-main">
-        <Link to="/orgs" className="ui-back-link" style={{ marginBottom: 20 }}>← 公開ページ一覧</Link>
+        <div className="ui-app-topline">
+          <Link to="/orgs" className="ui-back-link">← 公開ページ一覧</Link>
+          <ShareLinkButton />
+        </div>
         <section style={{ marginBottom: 48 }}>
           <div className="ui-kicker">{org.kind === 'person' ? '作家' : '団体'}</div>
           <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{org.name}</h1>
