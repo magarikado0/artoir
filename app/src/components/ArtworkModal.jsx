@@ -88,7 +88,7 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
 
   const title = artwork.title?.trim() ?? ''
   const description = artwork.description?.trim() ?? ''
-  const visibleCreators = (artwork.creators || []).filter((creator) => creator.is_visible && creator.profile?.display_name)
+  const visibleCreators = (artwork.creators || []).filter((creator) => creator.profile?.display_name)
   const exhibition = artwork.exhibitions
   const ownerOrg = exhibition?.organizations
   const ownerProfile = exhibition?.profiles

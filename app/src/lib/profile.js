@@ -30,7 +30,6 @@ export function normalizeArtworkCreators(creatorRows) {
     .map((row) => ({
       profile_id: row.profile_id || row.profiles?.id,
       display_order: row.display_order ?? 0,
-      is_visible: row.is_visible !== false,
       profile: normalizeProfile(row.profiles),
     }))
 }

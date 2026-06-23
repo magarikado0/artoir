@@ -202,17 +202,18 @@ export default function AccountPage() {
     setLoading(true)
     async function load() {
       try {
-        const [{ data: profileData, error: profileError }, { data: membershipRows, error: membershipError }, { data: artworkRows, error: artworkError }] = await Promise.all([
+        const [{ data: profileData, error: profileError }, { data: membershipRows, error: membershipError }, { data: worksExhibition, error: worksExhibitionError }] = await Promise.all([
           supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
           supabase
             .from('organization_members')
             .select('role, organizations(*)')
             .eq('profile_id', session.user.id),
           supabase
-            .from('artwork_creators')
-            .select('display_order, artworks(id, title, description, image_url, file_name, file_size, order, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name)), exhibitions(id, title, slug, organization_id, profile_id, organizations(id, name, slug), profiles(id, display_name, slug)))')
+            .from('exhibitions')
+            .select('id, title, slug, organization_id, profile_id')
             .eq('profile_id', session.user.id)
-            .order('display_order', { ascending: true }),
+            .eq('slug', 'works')
+            .maybeSingle(),
         ])
         if (cancelled) return
         if (profileError) {
@@ -225,9 +226,28 @@ export default function AccountPage() {
         }
         setProfile(normalizeProfile(profileData))
         setProfileMissing(!profileData)
-        setLoadError(membershipError?.message || artworkError?.message || '')
+        setLoadError(membershipError?.message || worksExhibitionError?.message || '')
         setOrgs((membershipRows || []).map((row) => row.organizations).filter(Boolean))
-        setArtworks((artworkRows || []).map((row) => attachNormalizedCreators(row.artworks)).filter((artwork) => artwork?.image_url))
+        setWorksExhibitionId(worksExhibition?.id || null)
+        if (worksExhibition?.id) {
+          const { data: artworkRows, error: artworkError } = await supabase
+            .from('artworks')
+            .select('id, title, description, image_url, file_name, file_size, order, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
+            .eq('exhibition_id', worksExhibition.id)
+            .order('order')
+          if (cancelled) return
+          if (artworkError) setLoadError(artworkError.message || '')
+          setArtworks((artworkRows || []).map((artwork) => attachNormalizedCreators({
+            ...artwork,
+            exhibitions: {
+              ...worksExhibition,
+              organizations: null,
+              profiles: profileData,
+            },
+          })).filter((artwork) => artwork?.image_url))
+        } else {
+          setArtworks([])
+        }
       } catch {
         if (!cancelled) {
           setProfile(null)

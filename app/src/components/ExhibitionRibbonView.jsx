@@ -434,9 +434,7 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
   const title = current.title?.trim() ?? ''
   const description = current.description?.trim() ?? ''
   const meta = composeArtworkMeta(current)
-  const visibleCreators = (current.creators || []).filter(
-    (c) => c.is_visible && c.profile?.display_name,
-  )
+  const visibleCreators = (current.creators || []).filter((c) => c.profile?.display_name)
   const hasCaption = Boolean(title || description || meta || visibleCreators.length)
   const positionLabel = N > 1 ? `${padNum(focused + 1)} / ${padNum(N)}` : null
 

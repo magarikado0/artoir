@@ -26,18 +26,35 @@ export default function ProfilePage() {
         const { data: profileData } = await supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle()
         if (!profileData) return setLoading(false)
         setProfile(profileData)
-        const [{ data: rows }, { data: membershipRows }] = await Promise.all([
+        const [{ data: worksExhibition }, { data: membershipRows }] = await Promise.all([
           supabase
-            .from('artwork_creators')
-            .select('display_order, artworks(id, title, description, image_url, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name)), exhibitions(id, title, slug, start_date, end_date, organization_id, profile_id, organizations(id, name, slug), profiles(id, display_name, slug)))')
+            .from('exhibitions')
+            .select('id, title, slug, start_date, end_date, organization_id, profile_id')
             .eq('profile_id', profileData.id)
-            .eq('is_visible', true),
+            .eq('slug', 'works')
+            .maybeSingle(),
           supabase
             .from('organization_members')
             .select('role, organizations(id, name, slug)')
             .eq('profile_id', profileData.id),
         ])
-        setArtworks((rows || []).map((row) => attachNormalizedCreators(row.artworks)).filter((artwork) => artwork?.image_url))
+        if (worksExhibition?.id) {
+          const { data: works } = await supabase
+            .from('artworks')
+            .select('id, title, description, image_url, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
+            .eq('exhibition_id', worksExhibition.id)
+            .order('order')
+          setArtworks((works || []).map((artwork) => attachNormalizedCreators({
+            ...artwork,
+            exhibitions: {
+              ...worksExhibition,
+              organizations: null,
+              profiles: profileData,
+            },
+          })).filter((artwork) => artwork?.image_url))
+        } else {
+          setArtworks([])
+        }
         setOrganizations((membershipRows || []).map((row) => row.organizations).filter((org) => org?.slug))
       } catch {
         /* unavailable */

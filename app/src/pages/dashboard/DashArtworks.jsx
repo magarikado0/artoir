@@ -32,7 +32,7 @@ function DragHandleIcon() {
   )
 }
 
-function CreatorPicker({ profiles, selectedIds, onToggle, visible, onVisibleChange }) {
+function CreatorPicker({ profiles, selectedIds, onToggle }) {
   if (!profiles.length) {
     return <div className="ui-field-help">作者候補がありません。</div>
   }
@@ -51,10 +51,6 @@ function CreatorPicker({ profiles, selectedIds, onToggle, visible, onVisibleChan
           )
         })}
       </div>
-      <label className="ui-creator-visible-toggle">
-        <input type="checkbox" checked={visible} onChange={(e) => onVisibleChange(e.target.checked)} />
-        <span>公開画面に作者を表示する</span>
-      </label>
     </div>
   )
 }
@@ -78,7 +74,6 @@ export default function DashArtworks() {
   const [editTitle, setEditTitle] = useState('')
   const [editDesc, setEditDesc] = useState('')
   const [editCreatorIds, setEditCreatorIds] = useState([])
-  const [editCreatorsVisible, setEditCreatorsVisible] = useState(true)
   const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState('')
   const [createFile, setCreateFile] = useState(null)
@@ -122,7 +117,7 @@ export default function DashArtworks() {
         setExhibition(exh)
         const { data: works } = await supabase
           .from('artworks')
-          .select('*, artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name))')
+          .select('*, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
           .eq('exhibition_id', exhibitionId)
           .order('order')
         setArtworks((works || []).map(attachNormalizedCreators))
@@ -250,11 +245,10 @@ export default function DashArtworks() {
       const { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
       if (error) throw error
 
-      await saveArtworkCreators(editTarget.id, editCreatorIds, editCreatorsVisible)
+      await saveArtworkCreators(editTarget.id, editCreatorIds)
       const creators = editCreatorIds.map((profileId, index) => ({
         profile_id: profileId,
         display_order: index,
-        is_visible: editCreatorsVisible,
         profile: memberProfiles.find((profile) => profile.id === profileId),
       })).filter((creator) => creator.profile)
       setArtworks((prev) => prev.map((a) => a.id === editTarget.id ? { ...a, ...updates, creators } : a))
@@ -266,14 +260,13 @@ export default function DashArtworks() {
     }
   }
 
-  async function saveArtworkCreators(artworkId, profileIds, isVisible) {
+  async function saveArtworkCreators(artworkId, profileIds) {
     const { error: deleteError } = await supabase.from('artwork_creators').delete().eq('artwork_id', artworkId)
     if (deleteError) throw deleteError
     const rows = profileIds.map((profileId, index) => ({
       artwork_id: artworkId,
       profile_id: profileId,
       display_order: index,
-      is_visible: isVisible,
     }))
     if (rows.length === 0) return
     const { error } = await supabase.from('artwork_creators').insert(rows)
@@ -307,7 +300,6 @@ export default function DashArtworks() {
     setEditTitle(w.title || '')
     setEditDesc(w.description || '')
     setEditCreatorIds((w.creators || []).map((creator) => creator.profile_id))
-    setEditCreatorsVisible((w.creators || []).every((creator) => creator.is_visible !== false))
     setEditError('')
   }
 
@@ -459,8 +451,6 @@ export default function DashArtworks() {
             profiles={memberProfiles}
             selectedIds={editCreatorIds}
             onToggle={toggleEditCreator}
-            visible={editCreatorsVisible}
-            onVisibleChange={setEditCreatorsVisible}
           />
         </ArtworkEditModal>
       )}

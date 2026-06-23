@@ -4,7 +4,7 @@ import { getArtworkUploadConfigError, uploadArtworkImage } from '../lib/artworkU
 import { T } from '../lib/tokens'
 import ArtworkImageAdjuster from './ArtworkImageAdjuster'
 
-function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator, creatorsVisible, onVisibleChange }) {
+function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator }) {
   if (!creatorOptions?.length) {
     return <div className="ui-field-help">作者候補がありません。</div>
   }
@@ -24,10 +24,6 @@ function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator, cr
           )
         })}
       </div>
-      <label className="ui-creator-visible-toggle">
-        <input type="checkbox" checked={creatorsVisible} onChange={(e) => onVisibleChange(e.target.checked)} />
-        <span>公開画面に作者を表示する</span>
-      </label>
     </div>
   )
 }
@@ -37,7 +33,6 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [selectedCreatorIds, setSelectedCreatorIds] = useState([])
-  const [creatorsVisible, setCreatorsVisible] = useState(true)
   const [saving, setSaving] = useState(false)
   const [progress, setProgress] = useState(null)
   const [error, setError] = useState('')
@@ -52,7 +47,6 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
       setTitle('')
       setDescription('')
       setSelectedCreatorIds([])
-      setCreatorsVisible(true)
       setSaving(false)
       setProgress(null)
       setError('')
@@ -119,7 +113,6 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
         artwork_id: newWork.id,
         profile_id: profileId,
         display_order: index,
-        is_visible: creatorsVisible,
       }))
       if (creatorRows.length > 0) {
         const { error: creatorError } = await supabase.from('artwork_creators').insert(creatorRows)
@@ -129,7 +122,6 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
       const creators = selectedCreatorIds.map((profileId, index) => ({
         profile_id: profileId,
         display_order: index,
-        is_visible: creatorsVisible,
         profile: creatorOptions.find((profile) => profile.id === profileId),
       })).filter((creator) => creator.profile)
 
@@ -228,8 +220,6 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
                   creatorOptions={creatorOptions}
                   selectedCreatorIds={selectedCreatorIds}
                   onToggleCreator={toggleCreator}
-                  creatorsVisible={creatorsVisible}
-                  onVisibleChange={setCreatorsVisible}
                 />
 
                 {error && <div className="ui-alert ui-alert--error">{error}</div>}
