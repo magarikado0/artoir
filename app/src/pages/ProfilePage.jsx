@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
+import PublicManageLink from '../components/PublicManageLink'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
@@ -26,35 +27,28 @@ export default function ProfilePage() {
         const { data: profileData } = await supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle()
         if (!profileData) return setLoading(false)
         setProfile(profileData)
-        const [{ data: worksExhibition }, { data: membershipRows }] = await Promise.all([
+        const [{ data: works }, { data: membershipRows }] = await Promise.all([
           supabase
-            .from('exhibitions')
-            .select('id, title, slug, start_date, end_date, organization_id, profile_id')
+            .from('artworks')
+            .select('id, title, description, image_url, profile_id, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
             .eq('profile_id', profileData.id)
-            .eq('slug', 'works')
-            .maybeSingle(),
+            .order('order'),
           supabase
             .from('organization_members')
             .select('role, organizations(id, name, slug)')
             .eq('profile_id', profileData.id),
         ])
-        if (worksExhibition?.id) {
-          const { data: works } = await supabase
-            .from('artworks')
-            .select('id, title, description, image_url, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
-            .eq('exhibition_id', worksExhibition.id)
-            .order('order')
-          setArtworks((works || []).map((artwork) => attachNormalizedCreators({
-            ...artwork,
-            exhibitions: {
-              ...worksExhibition,
-              organizations: null,
-              profiles: profileData,
-            },
-          })).filter((artwork) => artwork?.image_url))
-        } else {
-          setArtworks([])
-        }
+        setArtworks((works || []).map((artwork) => attachNormalizedCreators({
+          ...artwork,
+          exhibitions: {
+            id: null,
+            title: '',
+            slug: '',
+            profile_id: profileData.id,
+            organizations: null,
+            profiles: profileData,
+          },
+        })).filter((artwork) => artwork?.image_url))
         setOrganizations((membershipRows || []).map((row) => row.organizations).filter((org) => org?.slug))
       } catch {
         /* unavailable */
@@ -84,11 +78,18 @@ export default function ProfilePage() {
 
   return (
     <div className="ui-page-shell">
-      <Header />
+      <Header activeTab="account" />
       <main className="ui-app-main">
-        <div className="ui-app-topline">
-          <Link to="/" className="ui-back-link">← 展覧会</Link>
-          <ShareLinkButton />
+        <div className="ui-app-topline" style={{ justifyContent: 'flex-end' }}>
+          <div className="ui-app-topline-actions">
+            <PublicManageLink
+              ownerType="profile"
+              ownerId={profile.id}
+              to="/account"
+              label="管理"
+            />
+            <ShareLinkButton />
+          </div>
         </div>
         <section style={{ marginBottom: 48 }}>
           <div className="ui-kicker">プロフィール</div>
@@ -132,7 +133,6 @@ export default function ProfilePage() {
         {artworks.length > 0 ? (
           <>
             <div className="ui-exhibition-artworks-head">
-              <div className="ui-section-label">作品</div>
               <button
                 type="button"
                 className="ui-immersive-launch"

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ArtworkMedia from './ArtworkMedia'
 import { getArtworkHighResolutionUrl, getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
-import { profileExhibitionPath, profilePath } from '../lib/profileRoutes'
+import { profilePath } from '../lib/profileRoutes'
 import { useHorizontalSwipe } from '../lib/useHorizontalSwipe'
 
 function ModalNavIcon({ direction }) {
@@ -92,13 +92,7 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
   const exhibition = artwork.exhibitions
   const ownerOrg = exhibition?.organizations
   const ownerProfile = exhibition?.profiles
-  const exhibitionHref = exhibition?.slug
-    ? ownerProfile?.slug
-      ? profileExhibitionPath(ownerProfile.slug, exhibition.slug)
-      : ownerOrg?.slug
-        ? `/${ownerOrg.slug}/exhibition/${exhibition.slug}`
-        : ''
-    : ''
+  const exhibitionHref = exhibition?.slug && ownerOrg?.slug ? `/${ownerOrg.slug}/exhibition/${exhibition.slug}` : ''
   const exhibitionTitle = exhibition?.title?.trim() || '展示を見る'
   const ownerHref = ownerProfile?.slug ? profilePath(ownerProfile.slug) : ownerOrg?.slug ? `/${ownerOrg.slug}` : ''
   const ownerName = ownerOrg?.name || ownerProfile?.display_name || ''

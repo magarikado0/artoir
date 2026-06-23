@@ -15,6 +15,7 @@ auth.users（認証）
   └── profiles（プロフィール）
 
 profiles
+  └── artworks
   └── organization_members
         └── organizations
               └── exhibitions
@@ -74,7 +75,8 @@ profiles
 | カラム | 型 |
 |--------|-----|
 | id | UUID (PK) |
-| exhibition_id | UUID (exhibitions.id) |
+| exhibition_id | UUID (exhibitions.id, 団体展示作品のみ) |
+| profile_id | UUID (profiles.id, プロフィール作品のみ) |
 | title | string |
 | description | text |
 | image_url | string |
@@ -89,16 +91,17 @@ profiles
 | display_order | integer |
 | is_visible | boolean |
 
-作者名は `artworks` に直接持たず、`artwork_creators` でプロフィールに紐づける。団体展示では、作者候補は団体メンバーに限定する。
+`artworks` は `exhibition_id` または `profile_id` のどちらか一方に属する。団体展示の作品は `exhibition_id`、プロフィール直下の作品は `profile_id` を使う。作者名は `artworks` に直接持たず、`artwork_creators` でプロフィールに紐づける。団体展示では、作者候補は団体メンバーに限定する。
 
 ## URL設計
 
 ```
 /{org-slug}/                              # 団体ページ
 /{org-slug}/exhibition/{exhibition-slug}  # 展覧会ページ
+/profile/{profile-slug}                   # プロフィールページ
 ```
 
-プロフィール公開URLは将来の `@profileSlug` を想定するが、現時点では主導線にしない。
+プロフィール作品はプロフィールページ上に直接表示し、プロフィール配下の便宜的な展覧会ページは作らない。
 
 ## 画面仕様
 

@@ -28,7 +28,7 @@ function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator }) 
   )
 }
 
-export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder, creatorOptions = [], defaultCreatorIds = [], showCreatorPicker = true, onClose, onCreated }) {
+export default function ArtworkCreateModal({ open, file, exhibitionId, profileId, nextOrder, creatorOptions = [], defaultCreatorIds = [], showCreatorPicker = true, onClose, onCreated }) {
   const [step, setStep] = useState('crop')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -97,7 +97,8 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, nextOrder
       const imageUrl = await uploadArtworkImage(confirmedBlob, uploadName, setProgress)
 
       const payload = {
-        exhibition_id: exhibitionId,
+        exhibition_id: exhibitionId || null,
+        profile_id: profileId || null,
         image_url: imageUrl,
         title: title.trim(),
         description: description.trim() || null,

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
+import { useAccountDestination } from '../lib/useAccountDestination'
 import { BrandLockup } from './BrandMark'
 
 const TABS = [
@@ -72,6 +73,7 @@ export function Icon({ name, size = 20 }) {
 export default function Header({ activeTab }) {
   const { session } = useAuth()
   const navigate = useNavigate()
+  const accountPath = useAccountDestination()
 
   async function handleLogout() {
     if (!supabase) return
@@ -88,7 +90,7 @@ export default function Header({ activeTab }) {
         {TABS.map((t) => (
           <Link
             key={t.key}
-            to={t.path}
+            to={t.key === 'account' ? accountPath : t.path}
             className={`ui-topbar-link ${activeTab === t.key ? 'is-active' : ''}`}
           >
             {t.label}

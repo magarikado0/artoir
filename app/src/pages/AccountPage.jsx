@@ -15,9 +15,7 @@ import { T, pad2 } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { attachNormalizedCreators, normalizeProfile } from '../lib/profile'
 import { getGalleryThumbnailUrl } from '../lib/imageUrl'
-import { ensureProfileWorksExhibition } from '../lib/profileWorks'
 import { getArtworkUploadConfigError, uploadArtworkImage } from '../lib/artworkUpload'
-import { profilePath } from '../lib/profileRoutes'
 
 function LoggedOut({ isDesktop }) {
   const navigate = useNavigate()
@@ -62,9 +60,6 @@ function ProfileSummary({ profile }) {
       <div className="ui-account-section-head">
         <div className="ui-kicker">プロフィール</div>
         <div className="ui-profile-summary-actions">
-          <Link to={profilePath(profile.slug)} className="ui-inline-edit-action">
-            <span>公開ページ</span>
-          </Link>
           <Link to="/account/setup" className="ui-inline-edit-action">
             <span>プロフィール編集</span>
           </Link>
@@ -79,8 +74,8 @@ function ProfileSummary({ profile }) {
 
 function AccountArtworkCard({ artwork, onOpen, onEdit }) {
   const exhibition = artwork?.exhibitions
-  const hasOwner = Boolean(exhibition?.organizations?.slug || exhibition?.profiles?.slug)
-  const isOwnProfileWork = Boolean(exhibition?.profile_id)
+  const hasOwner = Boolean(exhibition?.organizations?.slug || exhibition?.profiles?.slug || artwork?.profiles?.slug)
+  const isOwnProfileWork = Boolean(artwork?.profile_id || exhibition?.profile_id)
   const hasTitle = Boolean(artwork.title?.trim())
   if (!artwork?.image_url || !exhibition || !hasOwner) return null
 
@@ -171,9 +166,7 @@ export default function AccountPage() {
   const [orgs, setOrgs] = useState([])
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
-  const [worksExhibitionId, setWorksExhibitionId] = useState(null)
   const [createFile, setCreateFile] = useState(null)
-  const [preparingWork, setPreparingWork] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')
   const [editDescription, setEditDescription] = useState('')
@@ -191,7 +184,6 @@ export default function AccountPage() {
       setOrgs([])
       setArtworks([])
       setSelectedArtwork(null)
-      setWorksExhibitionId(null)
       setProfileMissing(false)
       setLoadError('')
       setLoading(false)
@@ -202,18 +194,12 @@ export default function AccountPage() {
     setLoading(true)
     async function load() {
       try {
-        const [{ data: profileData, error: profileError }, { data: membershipRows, error: membershipError }, { data: worksExhibition, error: worksExhibitionError }] = await Promise.all([
+        const [{ data: profileData, error: profileError }, { data: membershipRows, error: membershipError }] = await Promise.all([
           supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
           supabase
             .from('organization_members')
             .select('role, organizations(*)')
             .eq('profile_id', session.user.id),
-          supabase
-            .from('exhibitions')
-            .select('id, title, slug, organization_id, profile_id')
-            .eq('profile_id', session.user.id)
-            .eq('slug', 'works')
-            .maybeSingle(),
         ])
         if (cancelled) return
         if (profileError) {
@@ -226,21 +212,24 @@ export default function AccountPage() {
         }
         setProfile(normalizeProfile(profileData))
         setProfileMissing(!profileData)
-        setLoadError(membershipError?.message || worksExhibitionError?.message || '')
+        setLoadError(membershipError?.message || '')
         setOrgs((membershipRows || []).map((row) => row.organizations).filter(Boolean))
-        setWorksExhibitionId(worksExhibition?.id || null)
-        if (worksExhibition?.id) {
+        if (profileData?.id) {
           const { data: artworkRows, error: artworkError } = await supabase
             .from('artworks')
             .select('id, title, description, image_url, file_name, file_size, order, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
-            .eq('exhibition_id', worksExhibition.id)
+            .eq('profile_id', profileData.id)
             .order('order')
           if (cancelled) return
           if (artworkError) setLoadError(artworkError.message || '')
           setArtworks((artworkRows || []).map((artwork) => attachNormalizedCreators({
             ...artwork,
+            profile_id: profileData.id,
             exhibitions: {
-              ...worksExhibition,
+              id: null,
+              title: '',
+              slug: '',
+              profile_id: profileData.id,
               organizations: null,
               profiles: profileData,
             },
@@ -274,28 +263,13 @@ export default function AccountPage() {
     navigate('/')
   }
 
-  async function prepareWorksExhibition() {
-    if (!supabase || !profile?.id) throw new Error('プロフィールを読み込めていません。')
-    if (worksExhibitionId) return worksExhibitionId
-    setPreparingWork(true)
-    try {
-      const exhibition = await ensureProfileWorksExhibition(supabase, profile.id)
-      setWorksExhibitionId(exhibition.id)
-      return exhibition.id
-    } finally {
-      setPreparingWork(false)
-    }
-  }
-
   async function handleAddWork(file) {
-    try {
-      await prepareWorksExhibition()
-      if (file instanceof File) setCreateFile(file)
-      return true
-    } catch (error) {
-      setLoadError(error?.message || '作品追加の準備に失敗しました。')
+    if (!profile?.id) {
+      setLoadError('プロフィールを読み込めていません。')
       return false
     }
+    if (file instanceof File) setCreateFile(file)
+    return true
   }
 
   function openEditArtwork(artwork) {
@@ -403,7 +377,7 @@ export default function AccountPage() {
               onFileSelected={handleAddWork}
             >
               <Icon name="plus" size={15} />
-              <span>{preparingWork ? '準備中…' : '作品を追加'}</span>
+              <span>作品を追加</span>
             </ImageUploader>
           </div>
           {artworks.length > 0 ? (
@@ -437,7 +411,7 @@ export default function AccountPage() {
       <ArtworkCreateModal
         open={Boolean(createFile)}
         file={createFile}
-        exhibitionId={worksExhibitionId}
+        profileId={profile?.id}
         nextOrder={artworks.length > 0 ? Math.max(...artworks.map((artwork) => artwork.order ?? 0)) + 1 : 1}
         creatorOptions={profile ? [profile] : []}
         defaultCreatorIds={profile ? [profile.id] : []}
@@ -447,7 +421,7 @@ export default function AccountPage() {
           if (!newWork) return
           setArtworks((prev) => [...prev, {
             ...newWork,
-            exhibitions: { id: worksExhibitionId, title: '作品', slug: 'works', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug, display_name: profile.display_name } },
+            exhibitions: { id: null, title: '', slug: '', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug, display_name: profile.display_name } },
           }])
           setCreateFile(null)
         }}
@@ -483,7 +457,7 @@ export default function AccountPage() {
       <ArtworkCreateModal
         open={Boolean(createFile)}
         file={createFile}
-        exhibitionId={worksExhibitionId}
+        profileId={profile?.id}
         nextOrder={artworks.length > 0 ? Math.max(...artworks.map((artwork) => artwork.order ?? 0)) + 1 : 1}
         creatorOptions={profile ? [profile] : []}
         defaultCreatorIds={profile ? [profile.id] : []}
@@ -493,7 +467,7 @@ export default function AccountPage() {
           if (!newWork) return
           setArtworks((prev) => [...prev, {
             ...newWork,
-            exhibitions: { id: worksExhibitionId, title: '作品', slug: 'works', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug, display_name: profile.display_name } },
+            exhibitions: { id: null, title: '', slug: '', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug, display_name: profile.display_name } },
           }])
           setCreateFile(null)
         }}

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams, Link, useLocation } from 'react-router-dom'
+import { Navigate, useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
+import PublicManageLink from '../components/PublicManageLink'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
@@ -38,6 +39,11 @@ export default function ExhibitionPage() {
   const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
 
   useEffect(() => {
+    if (profileSlug) {
+      setLoading(false)
+      return undefined
+    }
+
     async function load() {
       if (!supabase) return setLoading(false)
       try {
@@ -98,6 +104,8 @@ export default function ExhibitionPage() {
     [artworks],
   )
 
+  if (profileSlug) return <Navigate to={profilePath(profileSlug)} replace />
+
   function openArtwork(artwork) {
     window.history.pushState({ artworkModalArtworkId: artwork.id }, '', window.location.href)
     setSelectedArtwork(artwork)
@@ -133,6 +141,10 @@ export default function ExhibitionPage() {
   )
 
   const ownerBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
+  const dashboardBase = ownerBase
+  const exhibitionManagePath = exhibition?.id
+    ? `${dashboardBase}/dashboard/exhibitions/${exhibition.id}/artworks`
+    : `${dashboardBase}/dashboard`
   const ownerPageLabel = profileSlug ? 'プロフィール' : '団体ページ'
   const hostLabel = profileSlug ? '作家' : '主催団体'
   const dateText = exhibition.start_date
@@ -145,7 +157,15 @@ export default function ExhibitionPage() {
       <main className="ui-app-main">
         <div className="ui-app-topline">
           <Link to={ownerBase} className="ui-back-link">← {ownerPageLabel}</Link>
-          <ShareLinkButton />
+          <div className="ui-app-topline-actions">
+            <PublicManageLink
+              ownerType={profileSlug ? 'profile' : 'organization'}
+              ownerId={owner?.id}
+              to={exhibitionManagePath}
+              label="展覧会を管理"
+            />
+            <ShareLinkButton />
+          </div>
         </div>
 
         <section>
@@ -162,7 +182,7 @@ export default function ExhibitionPage() {
 
         <section style={{ marginTop: 64 }}>
           <div className="ui-exhibition-artworks-head">
-            <div className="ui-section-label">作品</div>
+            {!profileSlug && <div className="ui-section-label">作品</div>}
             {artworks.length > 0 && (
               <button
                 type="button"
@@ -198,4 +218,3 @@ export default function ExhibitionPage() {
     </div>
   )
 }
-

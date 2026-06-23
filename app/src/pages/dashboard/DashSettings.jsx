@@ -208,9 +208,6 @@ export default function DashSettings() {
         <div className="ui-dashboard-list-head-copy">
           <div className="ui-dashboard-list-count">{org?.name || '団体設定'}</div>
         </div>
-        <button type="button" onClick={() => navigate(`/${org?.slug || orgSlug}`)} className="ui-inline-edit-action">
-          公開ページ
-        </button>
       </div>
 
       <SettingsItem

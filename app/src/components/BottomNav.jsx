@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { T } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
+import { useAccountDestination } from '../lib/useAccountDestination'
 import { Icon } from './Header'
 
 const ITEMS = [
@@ -12,6 +13,7 @@ const ITEMS = [
 export default function BottomNav({ active }) {
   const isDesktop = useIsDesktop()
   const navigate = useNavigate()
+  const accountPath = useAccountDestination()
 
   if (isDesktop) return null
 
@@ -23,7 +25,7 @@ export default function BottomNav({ active }) {
           <button
             key={it.key}
             type="button"
-            onClick={() => navigate(it.path)}
+            onClick={() => navigate(it.key === 'account' ? accountPath : it.path)}
             className={`ui-bottom-item ${on ? 'is-active' : ''}`}
             style={{ color: on ? T.ink : T.inkMuted }}
           >

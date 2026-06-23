@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
+import PublicManageLink from '../components/PublicManageLink'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { T, externalHost } from '../lib/tokens'
 import { mapExhibitionListRow } from '../lib/exhibition'
@@ -60,7 +61,15 @@ export default function OrgPage() {
       <main className="ui-app-main">
         <div className="ui-app-topline">
           <Link to="/orgs" className="ui-back-link">← 公開ページ一覧</Link>
-          <ShareLinkButton />
+          <div className="ui-app-topline-actions">
+            <PublicManageLink
+              ownerType="organization"
+              ownerId={org.id}
+              to={`/${org.slug}/dashboard`}
+              label="団体を管理"
+            />
+            <ShareLinkButton />
+          </div>
         </div>
         <section style={{ marginBottom: 48 }}>
           <div className="ui-kicker">{org.kind === 'person' ? '作家' : '団体'}</div>
