@@ -8,7 +8,7 @@ function getInitialFreeCrop() {
   return { unit: '%', x: 0, y: 0, width: 100, height: 100 }
 }
 
-function FreeImageCrop({ imageUrl, containerRef, onCropPixelsChange }) {
+function FreeImageCrop({ imageUrl, containerRef, visualRotation = 0, onCropPixelsChange }) {
   const imgRef = useRef(null)
   const [crop, setCrop] = useState()
   const [naturalSize, setNaturalSize] = useState(null)
@@ -64,6 +64,11 @@ function FreeImageCrop({ imageUrl, containerRef, onCropPixelsChange }) {
     onCropPixelsChange({ x: 0, y: 0, width: naturalWidth, height: naturalHeight })
   }
 
+  const imageStyle = {
+    ...(displaySize ? { width: displaySize.width, height: displaySize.height } : {}),
+    ...(visualRotation ? { transform: `rotate(${visualRotation}deg)` } : {}),
+  }
+
   return (
     <ReactCrop
       className="ui-artwork-crop-control"
@@ -78,7 +83,7 @@ function FreeImageCrop({ imageUrl, containerRef, onCropPixelsChange }) {
         alt=""
         onLoad={handleImageLoad}
         className="ui-artwork-create-crop-image"
-        style={displaySize ? { width: displaySize.width, height: displaySize.height } : undefined}
+        style={Object.keys(imageStyle).length ? imageStyle : undefined}
       />
     </ReactCrop>
   )
@@ -100,6 +105,7 @@ export default function ArtworkImageAdjuster({
   const [quarterRotation, setQuarterRotation] = useState(0)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
   const [editPreviewUrl, setEditPreviewUrl] = useState(sourceUrl || '')
+  const [previewRotation, setPreviewRotation] = useState(0)
   const [rotationPending, setRotationPending] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState('')
@@ -110,6 +116,7 @@ export default function ArtworkImageAdjuster({
     setQuarterRotation(0)
     setCroppedAreaPixels(null)
     setEditPreviewUrl(sourceUrl || '')
+    setPreviewRotation(0)
     setRotationPending(false)
     setConfirming(false)
     setError('')
@@ -127,6 +134,7 @@ export default function ArtworkImageAdjuster({
     if (!sourceUrl) return undefined
     if (appliedRotation === 0) {
       setEditPreviewUrl(sourceUrl)
+      setPreviewRotation(0)
       setRotationPending(false)
       return undefined
     }
@@ -140,6 +148,7 @@ export default function ArtworkImageAdjuster({
         if (cancelled) return
         rotatedUrl = URL.createObjectURL(blob)
         setEditPreviewUrl(rotatedUrl)
+        setPreviewRotation(appliedRotation)
       } catch (err) {
         if (!cancelled) setError(err?.message || '画像の回転に失敗しました')
       } finally {
@@ -163,6 +172,11 @@ export default function ArtworkImageAdjuster({
     resetCropFrame()
   }
 
+  function handleRotationChange(e) {
+    setRotation(Number(e.currentTarget.value))
+    resetCropFrame()
+  }
+
   async function handleConfirm() {
     if (!sourceUrl || !editPreviewUrl || !croppedAreaPixels || disabled || confirming || rotationPending) return
     setConfirming(true)
@@ -178,6 +192,7 @@ export default function ArtworkImageAdjuster({
     }
   }
 
+  const visualRotation = appliedRotation - previewRotation
   const canConfirm = Boolean(croppedAreaPixels) && !disabled && !confirming && !rotationPending
 
   return (
@@ -201,6 +216,7 @@ export default function ArtworkImageAdjuster({
             key={editPreviewUrl}
             imageUrl={editPreviewUrl}
             containerRef={cropboxRef}
+            visualRotation={visualRotation}
             onCropPixelsChange={setCroppedAreaPixels}
           />
         )}
@@ -238,10 +254,8 @@ export default function ArtworkImageAdjuster({
             value={rotation}
             disabled={disabled || confirming}
             aria-label="画像の傾き"
-            onChange={(e) => {
-              setRotation(Number(e.target.value))
-              resetCropFrame()
-            }}
+            onInput={handleRotationChange}
+            onChange={handleRotationChange}
           />
           <span>+15°</span>
           <output>{rotation.toFixed(1)}°</output>
