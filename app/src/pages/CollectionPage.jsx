@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
@@ -135,15 +134,16 @@ export default function CollectionPage() {
   }, [favLoaded, idsByType])
 
   // 一覧から「お気に入り解除」したら即座に消えるよう、最新の favorites で絞り込む。
+  const favorites = fav?.favorites
   const visible = useMemo(() => {
-    const keep = (it) => fav?.favorites?.[it.targetType]?.has(it.targetId)
+    const keep = (it) => favorites?.[it.targetType]?.has(it.targetId)
     return {
       artwork: items.artwork.filter(keep),
       exhibition: items.exhibition.filter(keep),
       organization: items.organization.filter(keep),
       profile: items.profile.filter(keep),
     }
-  }, [items, fav])
+  }, [items, favorites])
 
   const current = visible[activeTab] || []
 
@@ -151,16 +151,9 @@ export default function CollectionPage() {
     <div className="ui-page-shell">
       <Header activeTab="collection" />
       <main className="ui-app-main">
-        <div className="ui-app-topline">
-          <Link to="/account" className="ui-back-link">← アカウント</Link>
-        </div>
 
         <section style={{ marginBottom: 32 }}>
-          <div className="ui-kicker" style={{ color: T.accent }}>MY LIST</div>
           <h1 className="ui-screen-title" style={{ marginTop: 8 }}>わたしのコレクション</h1>
-          <p className="ui-screen-subtitle" style={{ marginTop: 12 }}>
-            保存した作品・展覧会・公開ページがここに集まります。
-          </p>
 
           <div className="ui-collection-tabs" role="tablist">
             {TABS.map((tab) => (
