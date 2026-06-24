@@ -188,6 +188,25 @@ a {
   -webkit-backdrop-filter: blur(4px);
 }
 
+/* 写真ウォール（作品グリッド）のタイル */
+.ui-artwork-wall-card {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+.ui-artwork-wall-card:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
 /* コレクション（わたしのコレクション）ページ */
 .ui-collection-tabs {
   display: flex;
