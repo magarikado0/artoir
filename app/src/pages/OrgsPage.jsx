@@ -4,6 +4,7 @@ import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import FavoriteButton from '../components/FavoriteButton'
 import { T, pad2 } from '../lib/tokens'
 
 const loginForSetupState = { from: '/account/organizations/new' }
@@ -58,11 +59,12 @@ export default function OrgsPage() {
           </Link>
         </div>
 
-        <div className="ui-org-table">
+        <div className="ui-org-table ui-org-table--fav">
           <div className="ui-org-table-head" aria-hidden="true">
             <span>No.</span>
             <span>団体</span>
             <span>展示</span>
+            <span />
           </div>
           <div className="ui-org-list">
             {filtered.map((o, i) => (
@@ -77,6 +79,14 @@ export default function OrgsPage() {
                 <div className="ui-org-count">
                   <span>{pad2(o.exh_count ?? 0)}</span>
                 </div>
+                <FavoriteButton
+                  targetType="organization"
+                  targetId={o.id}
+                  kind="bookmark"
+                  appearance="icon"
+                  stopPropagation
+                  className="ui-org-row-fav"
+                />
               </Link>
             ))}
           </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
@@ -85,18 +85,19 @@ export default function CollectionPage() {
   const [items, setItems] = useState({ artwork: [], exhibition: [], group: [] })
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('artwork')
-  const fetchedRef = useRef(false)
 
+  // お気に入りの id 一覧。favorites の中身が変わったときだけ作り直す（pending 変化では作り直さない）。
+  const idsByType = useMemo(() => ({
+    artwork: [...(fav?.favorites?.artwork || [])],
+    exhibition: [...(fav?.favorites?.exhibition || [])],
+    organization: [...(fav?.favorites?.organization || [])],
+    profile: [...(fav?.favorites?.profile || [])],
+  }), [fav?.favorites])
+
+  // お気に入り集合が変わるたびに詳細を取り直す（新規に追加した作品・作家もここで反映される）。
   useEffect(() => {
-    if (!favLoaded || fetchedRef.current) return
-    fetchedRef.current = true
-
-    const ids = {
-      artwork: [...(fav.favorites.artwork || [])],
-      exhibition: [...(fav.favorites.exhibition || [])],
-      organization: [...(fav.favorites.organization || [])],
-      profile: [...(fav.favorites.profile || [])],
-    }
+    if (!favLoaded) return undefined
+    let active = true
 
     async function load() {
       if (!supabase) { setLoading(false); return }
@@ -107,23 +108,25 @@ export default function CollectionPage() {
       const [aw, exh, orgs, profs] = await Promise.all([
         q('artworks',
           'id, title, image_url, exhibition_id, profile_id, exhibitions(slug, organizations(slug), profiles(slug)), profiles(slug), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))',
-          ids.artwork),
+          idsByType.artwork),
         q('exhibitions',
           'id, title, slug, thumbnail_url, organization_id, profile_id, organizations(slug, name), profiles(slug, display_name), artworks(image_url, order)',
-          ids.exhibition),
-        q('organizations', 'id, name, slug, kind', ids.organization),
-        q('profiles', 'id, display_name, slug', ids.profile),
+          idsByType.exhibition),
+        q('organizations', 'id, name, slug, kind', idsByType.organization),
+        q('profiles', 'id, display_name, slug', idsByType.profile),
       ])
+      if (!active) return
 
       setItems({
-        artwork: buildArtworkItems(ids.artwork, aw.data || []),
-        exhibition: buildExhibitionItems(ids.exhibition, exh.data || []),
-        group: buildGroupItems(ids.organization, orgs.data || [], ids.profile, profs.data || []),
+        artwork: buildArtworkItems(idsByType.artwork, aw.data || []),
+        exhibition: buildExhibitionItems(idsByType.exhibition, exh.data || []),
+        group: buildGroupItems(idsByType.organization, orgs.data || [], idsByType.profile, profs.data || []),
       })
       setLoading(false)
     }
-    load().catch(() => setLoading(false))
-  }, [favLoaded, fav])
+    load().catch(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [favLoaded, idsByType])
 
   // 一覧から「お気に入り解除」したら即座に消えるよう、最新の favorites で絞り込む。
   const visible = useMemo(() => {

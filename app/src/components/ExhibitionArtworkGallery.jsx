@@ -3,6 +3,7 @@ import ArtworkMedia from './ArtworkMedia'
 import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
 import { usePhotoWallLayout } from '../lib/usePhotoWallLayout'
 import { useImageNaturalSizes } from '../lib/useImageNaturalSizes'
+import FavoriteButton from './FavoriteButton'
 import { T } from '../lib/tokens'
 
 // 画像サイズが未計測のあいだの仮サイズ（正方形扱い）。計測後に正しい span へ反映される。
@@ -82,27 +83,39 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
         if (!artwork) return null
         const label = artwork.title?.trim() || `作品 ${index + 1}`
         return (
-          <button
+          <div
             key={item.id}
-            type="button"
             className="ui-list-card ui-artwork-wall-card"
             style={{ gridColumn: `span ${item.spanX}`, gridRow: `span ${item.spanY}`, minWidth: 0, minHeight: 0 }}
-            onPointerEnter={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
-            onFocus={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
-            onClick={() => onOpenArtwork(artwork)}
-            aria-label={`${label}の詳細を見る`}
           >
-            <ArtworkMedia
-              src={getGalleryThumbnailUrl(artwork.image_url)}
-              alt=""
-              decorative
-              loading="lazy"
-              fillHeight
-              fit="contain"
-              wrapperStyle={{ borderRadius: 4, background: T.surfaceMuted, width: '100%', height: '100%' }}
-              imageStyle={{ borderRadius: 4 }}
+            <button
+              type="button"
+              className="ui-artwork-wall-open"
+              onPointerEnter={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
+              onFocus={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
+              onClick={() => onOpenArtwork(artwork)}
+              aria-label={`${label}の詳細を見る`}
+            >
+              <ArtworkMedia
+                src={getGalleryThumbnailUrl(artwork.image_url)}
+                alt=""
+                decorative
+                loading="lazy"
+                fillHeight
+                fit="contain"
+                wrapperStyle={{ borderRadius: 4, background: T.surfaceMuted, width: '100%', height: '100%' }}
+                imageStyle={{ borderRadius: 4 }}
+              />
+            </button>
+            <FavoriteButton
+              targetType="artwork"
+              targetId={artwork.id}
+              kind="like"
+              appearance="icon"
+              stopPropagation
+              className="ui-artwork-wall-fav"
             />
-          </button>
+          </div>
         )
       })}
     </div>
