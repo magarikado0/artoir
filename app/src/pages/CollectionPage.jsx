@@ -13,7 +13,8 @@ import { T } from '../lib/tokens'
 const TABS = [
   { key: 'artwork', label: '作品' },
   { key: 'exhibition', label: '展覧会' },
-  { key: 'group', label: '団体・作家' },
+  { key: 'organization', label: '団体' },
+  { key: 'profile', label: '作家' },
 ]
 
 function exhibitionLink(exh) {
@@ -28,12 +29,12 @@ function buildArtworkItems(ids, rows) {
   const byId = new Map(rows.map((r) => [r.id, r]))
   return ids.map((id) => byId.get(id)).filter(Boolean).map((a) => {
     const exh = a.exhibitions
-    const to = exh ? exhibitionLink(exh) : (a.profiles?.slug ? profilePath(a.profiles.slug) : null)
+    const to = exh ? exhibitionLink(exh) : (a.owner_profile?.slug ? profilePath(a.owner_profile.slug) : null)
     const creators = normalizeArtworkCreators(a.artwork_creators)
     return {
       targetType: 'artwork',
       targetId: a.id,
-      kind: 'like',
+      kind: 'bookmark',
       to: to || '#',
       imageUrl: a.image_url,
       title: a.title,
@@ -55,19 +56,22 @@ function buildExhibitionItems(ids, rows) {
   }))
 }
 
-function buildGroupItems(orgIds, orgRows, profileIds, profileRows) {
-  const orgById = new Map(orgRows.map((r) => [r.id, r]))
-  const profById = new Map(profileRows.map((r) => [r.id, r]))
-  const orgItems = orgIds.map((id) => orgById.get(id)).filter(Boolean).map((o) => ({
+function buildOrganizationItems(ids, rows) {
+  const byId = new Map(rows.map((r) => [r.id, r]))
+  return ids.map((id) => byId.get(id)).filter(Boolean).map((o) => ({
     targetType: 'organization',
     targetId: o.id,
     kind: 'bookmark',
     to: `/${o.slug}`,
     imageUrl: null,
     title: o.name,
-    subtitle: o.kind === 'person' ? '作家' : '団体',
+    subtitle: '団体',
   }))
-  const profItems = profileIds.map((id) => profById.get(id)).filter(Boolean).map((p) => ({
+}
+
+function buildProfileItems(ids, rows) {
+  const byId = new Map(rows.map((r) => [r.id, r]))
+  return ids.map((id) => byId.get(id)).filter(Boolean).map((p) => ({
     targetType: 'profile',
     targetId: p.id,
     kind: 'bookmark',
@@ -76,13 +80,12 @@ function buildGroupItems(orgIds, orgRows, profileIds, profileRows) {
     title: p.display_name,
     subtitle: '作家',
   }))
-  return [...orgItems, ...profItems]
 }
 
 export default function CollectionPage() {
   const fav = useFavorites()
   const favLoaded = Boolean(fav?.loaded)
-  const [items, setItems] = useState({ artwork: [], exhibition: [], group: [] })
+  const [items, setItems] = useState({ artwork: [], exhibition: [], organization: [], profile: [] })
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('artwork')
 
@@ -107,12 +110,14 @@ export default function CollectionPage() {
 
       const [aw, exh, orgs, profs] = await Promise.all([
         q('artworks',
-          'id, title, image_url, exhibition_id, profile_id, exhibitions(slug, organizations(slug), profiles(slug)), profiles(slug), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))',
+          // artworks→profiles は直接(profile_id)と artwork_creators 経由の 2 経路があり曖昧になるため、FK を明示する。
+          'id, title, image_url, exhibition_id, profile_id, exhibitions(slug, organizations(slug), profiles!exhibitions_profile_id_fkey(slug)), owner_profile:profiles!artworks_profile_id_fkey(slug), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))',
           idsByType.artwork),
         q('exhibitions',
-          'id, title, slug, thumbnail_url, organization_id, profile_id, organizations(slug, name), profiles(slug, display_name), artworks(image_url, order)',
+          // exhibitions→profiles は直接(profile_id)と artworks 経由の 2 経路があり曖昧になるため、FK を明示する。
+          'id, title, slug, thumbnail_url, organization_id, profile_id, organizations(slug, name), profiles!exhibitions_profile_id_fkey(slug, display_name), artworks(image_url, order)',
           idsByType.exhibition),
-        q('organizations', 'id, name, slug, kind', idsByType.organization),
+        q('organizations', 'id, name, slug', idsByType.organization),
         q('profiles', 'id, display_name, slug', idsByType.profile),
       ])
       if (!active) return
@@ -120,7 +125,8 @@ export default function CollectionPage() {
       setItems({
         artwork: buildArtworkItems(idsByType.artwork, aw.data || []),
         exhibition: buildExhibitionItems(idsByType.exhibition, exh.data || []),
-        group: buildGroupItems(idsByType.organization, orgs.data || [], idsByType.profile, profs.data || []),
+        organization: buildOrganizationItems(idsByType.organization, orgs.data || []),
+        profile: buildProfileItems(idsByType.profile, profs.data || []),
       })
       setLoading(false)
     }
@@ -134,7 +140,8 @@ export default function CollectionPage() {
     return {
       artwork: items.artwork.filter(keep),
       exhibition: items.exhibition.filter(keep),
-      group: items.group.filter(keep),
+      organization: items.organization.filter(keep),
+      profile: items.profile.filter(keep),
     }
   }, [items, fav])
 
@@ -142,7 +149,7 @@ export default function CollectionPage() {
 
   return (
     <div className="ui-page-shell">
-      <Header activeTab="account" />
+      <Header activeTab="collection" />
       <main className="ui-app-main">
         <div className="ui-app-topline">
           <Link to="/account" className="ui-back-link">← アカウント</Link>

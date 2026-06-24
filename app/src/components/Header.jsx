@@ -96,6 +96,14 @@ export default function Header({ activeTab }) {
             {t.label}
           </Link>
         ))}
+        {session && (
+          <Link
+            to="/collection"
+            className={`ui-topbar-link ${activeTab === 'collection' ? 'is-active' : ''}`}
+          >
+            コレクション
+          </Link>
+        )}
       </nav>
       <div className="ui-topbar-actions">
         {session ? (

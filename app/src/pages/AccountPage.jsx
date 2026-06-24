@@ -60,9 +60,6 @@ function ProfileSummary({ profile }) {
       <div className="ui-account-section-head">
         <div className="ui-kicker">プロフィール</div>
         <div className="ui-profile-summary-actions">
-          <Link to="/collection" className="ui-inline-edit-action">
-            <span>コレクション</span>
-          </Link>
           <Link to="/account/setup" className="ui-inline-edit-action">
             <span>プロフィール編集</span>
           </Link>

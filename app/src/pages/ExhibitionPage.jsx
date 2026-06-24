@@ -162,11 +162,19 @@ export default function ExhibitionPage() {
 
         <section>
           <div className="ui-exhibition-summary-card">
-            <h1 className="ui-screen-title">{exhibition.title}</h1>
+            <div className="ui-exhibition-title-row">
+              <h1 className="ui-screen-title">{exhibition.title}</h1>
+              <FavoriteButton
+                targetType="exhibition"
+                targetId={exhibition.id}
+                kind="bookmark"
+                appearance="icon"
+                className="ui-exhibition-title-fav"
+              />
+            </div>
             {exhibition.description && <p className="ui-screen-subtitle">{exhibition.description}</p>}
             <div className="ui-public-action-row">
               <ShareLinkButton />
-              <FavoriteButton targetType="exhibition" targetId={exhibition.id} kind="bookmark" />
               <PublicManageLink
                 ownerType={profileSlug ? 'profile' : 'organization'}
                 ownerId={owner?.id}

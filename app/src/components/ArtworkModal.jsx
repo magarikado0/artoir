@@ -158,7 +158,7 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
         <FavoriteButton
           targetType="artwork"
           targetId={artwork.id}
-          kind="like"
+          kind="bookmark"
           appearance="icon"
           className="ui-artwork-modal-fav"
         />

@@ -110,7 +110,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
             <FavoriteButton
               targetType="artwork"
               targetId={artwork.id}
-              kind="like"
+              kind="bookmark"
               appearance="icon"
               stopPropagation
               className="ui-artwork-wall-fav"
