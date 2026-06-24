@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
 import PublicManageLink from '../components/PublicManageLink'
+import FavoriteButton from '../components/FavoriteButton'
 import ExhibitionListCard from '../components/ExhibitionListCard'
 import { T, externalHost } from '../lib/tokens'
 import { mapExhibitionListRow } from '../lib/exhibition'
@@ -68,6 +69,7 @@ export default function OrgPage() {
           {org.description && <p className="ui-screen-subtitle">{org.description}</p>}
           <div className="ui-public-action-row">
             <ShareLinkButton />
+            <FavoriteButton targetType="organization" targetId={org.id} kind="bookmark" />
             <PublicManageLink
               ownerType="organization"
               ownerId={org.id}

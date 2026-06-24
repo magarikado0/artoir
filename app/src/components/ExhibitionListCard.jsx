@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { T, fmtDateRangeShort } from '../lib/tokens'
 import ArtworkMedia from './ArtworkMedia'
+import FavoriteButton from './FavoriteButton'
 import { getExhibitionThumbnailUrl } from '../lib/exhibition'
 import { getThumbnailUrl } from '../lib/imageUrl'
 import { profileExhibitionPath } from '../lib/profileRoutes'
@@ -70,6 +71,14 @@ export default function ExhibitionListCard({ exhibition: exh, org, profile, show
     >
       <div className="ui-exhibition-list-card-media">
         <ExhibitionCardMedia thumbnailUrl={thumbnailUrl} title={exh.title} />
+        <FavoriteButton
+          targetType="exhibition"
+          targetId={exh.id}
+          kind="bookmark"
+          appearance="icon"
+          stopPropagation
+          className="ui-exhibition-list-card-fav"
+        />
       </div>
       <div className="ui-exhibition-list-card-body">
         {showOrgName && ownerName && (

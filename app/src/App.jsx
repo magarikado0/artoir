@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import { peekSupabaseAuthUrlErrorFromWindow, isGoogleExchangeExternalCodeError, getSupabaseAuthCallbackUrlForGoogle } from './lib/oauthUrlError'
 import { AuthContext } from './lib/auth'
+import { FavoritesProvider } from './lib/useFavorites'
 import ProtectedRoute from './components/ProtectedRoute'
 import OAuthReturnRedirect from './components/OAuthReturnRedirect'
 import LoadingFrames from './components/LoadingFrames'
@@ -20,6 +21,7 @@ const DashMembers = lazy(() => import('./pages/dashboard/DashMembers'))
 const DashExhibitionEdit = lazy(() => import('./pages/dashboard/DashExhibitionEdit'))
 const DashArtworks = lazy(() => import('./pages/dashboard/DashArtworks'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
+const CollectionPage = lazy(() => import('./pages/CollectionPage'))
 const AccountSetup = lazy(() => import('./pages/AccountSetup'))
 const OrganizationCreatePage = lazy(() => import('./pages/OrganizationCreatePage'))
 const AccountSetupLinks = lazy(() => import('./pages/AccountSetupLinks'))
@@ -141,6 +143,7 @@ export default function App() {
 
   return (
     <AuthContext.Provider value={{ session }}>
+      <FavoritesProvider>
       <BrowserRouter>
         <SupabaseOAuthErrorBanner />
         <OAuthReturnRedirect />
@@ -151,6 +154,7 @@ export default function App() {
             <Route path="/orgs" element={<OrgsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/account" element={<AccountPage />} />
+            <Route path="/collection" element={<ProtectedRoute><CollectionPage /></ProtectedRoute>} />
             <Route path="/account/setup" element={<AccountSetup />} />
             <Route path="/account/organizations/new" element={<OrganizationCreatePage />} />
             <Route path="/account/setup/links" element={<AccountSetupLinks />} />
@@ -178,6 +182,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </BrowserRouter>
+      </FavoritesProvider>
     </AuthContext.Provider>
   )
 }

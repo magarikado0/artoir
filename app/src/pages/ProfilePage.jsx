@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
 import PublicManageLink from '../components/PublicManageLink'
+import FavoriteButton from '../components/FavoriteButton'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
@@ -87,6 +88,7 @@ export default function ProfilePage() {
           {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 16 }}>{profile.bio}</p>}
           <div className="ui-public-action-row">
             <ShareLinkButton />
+            <FavoriteButton targetType="profile" targetId={profile.id} kind="bookmark" />
             <PublicManageLink
               ownerType="profile"
               ownerId={profile.id}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import ArtworkMedia from './ArtworkMedia'
+import FavoriteButton from './FavoriteButton'
 import { getArtworkHighResolutionUrl, getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
 import { profilePath } from '../lib/profileRoutes'
 import { useHorizontalSwipe } from '../lib/useHorizontalSwipe'
@@ -153,6 +154,14 @@ export default function ArtworkModal({ artwork, artworks = [], onSelectArtwork, 
             <ModalNavIcon direction="next" />
           </button>
         )}
+
+        <FavoriteButton
+          targetType="artwork"
+          targetId={artwork.id}
+          kind="like"
+          appearance="icon"
+          className="ui-artwork-modal-fav"
+        />
 
         <button
           onClick={onClose}

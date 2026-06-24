@@ -5,6 +5,7 @@ import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
 import PublicManageLink from '../components/PublicManageLink'
+import FavoriteButton from '../components/FavoriteButton'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
@@ -165,6 +166,7 @@ export default function ExhibitionPage() {
             {exhibition.description && <p className="ui-screen-subtitle">{exhibition.description}</p>}
             <div className="ui-public-action-row">
               <ShareLinkButton />
+              <FavoriteButton targetType="exhibition" targetId={exhibition.id} kind="bookmark" />
               <PublicManageLink
                 ownerType={profileSlug ? 'profile' : 'organization'}
                 ownerId={owner?.id}
