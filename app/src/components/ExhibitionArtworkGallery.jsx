@@ -9,9 +9,8 @@ import { T } from '../lib/tokens'
 // 画像サイズが未計測のあいだの仮サイズ（正方形扱い）。計測後に正しい span へ反映される。
 const FALLBACK_SIZE = { width: 1000, height: 1000 }
 
-// コンテナ幅から列数を決める（スマホ2・小型タブレット3・タブレット4・デスクトップ6）。
+// コンテナ幅から列数を決める（スマホ3・タブレット4・デスクトップ6）。
 function columnsForWidth(width) {
-  if (width < 420) return 2
   if (width < 640) return 3
   if (width < 1024) return 4
   return 6
