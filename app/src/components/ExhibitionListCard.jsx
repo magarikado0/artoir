@@ -71,14 +71,6 @@ export default function ExhibitionListCard({ exhibition: exh, org, profile, show
     >
       <div className="ui-exhibition-list-card-media">
         <ExhibitionCardMedia thumbnailUrl={thumbnailUrl} title={exh.title} />
-        <FavoriteButton
-          targetType="exhibition"
-          targetId={exh.id}
-          kind="bookmark"
-          appearance="icon"
-          stopPropagation
-          className="ui-exhibition-list-card-fav"
-        />
       </div>
       <div className="ui-exhibition-list-card-body">
         {showOrgName && ownerName && (
@@ -97,9 +89,19 @@ export default function ExhibitionListCard({ exhibition: exh, org, profile, show
         </div>
         <div className="ui-exhibition-list-card-footer">
           <span className="ui-exhibition-list-card-date">{fmtDateRangeShort(exh.start_date, exh.end_date)}</span>
-          {artworkCount != null && (
-            <span className="ui-exhibition-list-card-count">{artworkCount} 作品</span>
-          )}
+          <span className="ui-exhibition-list-card-count-row">
+            {artworkCount != null && (
+              <span className="ui-exhibition-list-card-count">{artworkCount} 作品</span>
+            )}
+            <FavoriteButton
+              targetType="exhibition"
+              targetId={exh.id}
+              kind="bookmark"
+              appearance="icon"
+              stopPropagation
+              className="ui-exhibition-list-card-count-fav"
+            />
+          </span>
         </div>
       </div>
     </Link>

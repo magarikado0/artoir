@@ -43,6 +43,14 @@ export function getGalleryThumbnailUrl(url) {
   return getThumbnailUrl(url, 320)
 }
 
+/**
+ * 作品ウォールの表示用。枠いっぱいまで拡大して表示する（contain で片辺が枠に接する）ため、
+ * 320 ではボケる。大画面・Retina の縦長セル（最大 ~600px 表示）を見込んで 800。
+ */
+export function getWallThumbnailUrl(url) {
+  return getThumbnailUrl(url, 800)
+}
+
 export function getHeroImageUrl(url, width = 800) {
   return getResizedImageUrl(url, {
     width,

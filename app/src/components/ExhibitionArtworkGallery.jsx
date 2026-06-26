@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import ArtworkMedia from './ArtworkMedia'
-import { getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
+import { getModalImageUrl, getWallThumbnailUrl, preloadImageUrl } from '../lib/imageUrl'
 import { usePhotoWallLayout } from '../lib/usePhotoWallLayout'
 import { useImageNaturalSizes } from '../lib/useImageNaturalSizes'
 import FavoriteButton from './FavoriteButton'
@@ -42,7 +42,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
 
   // サムネイルの自然サイズを計測（DB に幅高さが無いため）。
   const sources = useMemo(
-    () => items.map((a) => ({ id: String(a.id), url: getGalleryThumbnailUrl(a.image_url) })),
+    () => items.map((a) => ({ id: String(a.id), url: getWallThumbnailUrl(a.image_url) })),
     [items],
   )
   const sizes = useImageNaturalSizes(sources)
@@ -97,14 +97,16 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
               aria-label={`${label}の詳細を見る`}
             >
               <ArtworkMedia
-                src={getGalleryThumbnailUrl(artwork.image_url)}
+                src={getWallThumbnailUrl(artwork.image_url)}
                 alt=""
                 decorative
                 loading="lazy"
                 fillHeight
                 fit="contain"
                 wrapperStyle={{ borderRadius: 4, background: T.surfaceMuted, width: '100%', height: '100%' }}
-                imageStyle={{ borderRadius: 4 }}
+                // 枠いっぱいに拡大して contain（上下または左右の辺が枠に接する）。
+                // 既定の contain は自然サイズ上限で拡大しないため、明示的に枠を充たす。
+                imageStyle={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 4 }}
               />
             </button>
             <FavoriteButton
