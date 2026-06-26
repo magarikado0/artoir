@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { T, fmtDateRangeShort } from '../lib/tokens'
 import ArtworkMedia from './ArtworkMedia'
 import FavoriteButton from './FavoriteButton'
+import ExhibitionStatusBadge from './ExhibitionStatusBadge'
 import { getExhibitionThumbnailUrl } from '../lib/exhibition'
 import { getThumbnailUrl } from '../lib/imageUrl'
 import { profileExhibitionPath } from '../lib/profileRoutes'
@@ -88,7 +89,10 @@ export default function ExhibitionListCard({ exhibition: exh, org, profile, show
           )}
         </div>
         <div className="ui-exhibition-list-card-footer">
-          <span className="ui-exhibition-list-card-date">{fmtDateRangeShort(exh.start_date, exh.end_date)}</span>
+          <span className="ui-exhibition-list-card-period">
+            <ExhibitionStatusBadge exhibition={exh} />
+            <span className="ui-exhibition-list-card-date">{fmtDateRangeShort(exh.start_date, exh.end_date)}</span>
+          </span>
           <span className="ui-exhibition-list-card-count-row">
             {artworkCount != null && (
               <span className="ui-exhibition-list-card-count">{artworkCount} 作品</span>

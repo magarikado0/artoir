@@ -1332,6 +1332,41 @@ a {
   flex-wrap: wrap;
 }
 
+/* 展覧会の開催状態バッジ（言葉＋形アイコン、色は補助）。 */
+.ui-exh-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 22px;
+  padding: 0 10px 0 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.ui-exh-status svg {
+  flex-shrink: 0;
+}
+
+.ui-exh-status--live {
+  color: #BE553D;
+  background: rgba(190, 85, 61, 0.10);
+}
+
+.ui-exh-status--upcoming {
+  color: #8A6A1F;
+  background: rgba(196, 154, 58, 0.16);
+}
+
+.ui-exh-status--ended {
+  color: #8A8178;
+  background: #F1ECE3;
+  border-color: #E4DDD2;
+}
+
 .ui-exhibition-list-card-tag {
   display: inline-flex;
   align-items: center;
@@ -1410,6 +1445,14 @@ a {
   margin-top: 2px;
   padding-top: 8px;
   border-top: 1px solid #ECE5D9;
+}
+
+/* 開催状態バッジ＋会期日付。PC は横並び（バッジが日付の左）。 */
+.ui-exhibition-list-card-period {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .ui-exhibition-list-card-date {
@@ -3636,6 +3679,13 @@ button.ui-account-org-pick-btn.ui-org-row {
     flex-direction: column;
     gap: 4px;
     padding-top: 8px;
+  }
+
+  /* モバイルはバッジを日付の上に積む。 */
+  .ui-exhibition-list-card-period {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 
   .ui-exhibition-list-card-date,
