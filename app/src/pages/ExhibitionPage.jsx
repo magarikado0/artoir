@@ -35,9 +35,17 @@ export default function ExhibitionPage() {
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
+  // 作品一覧の並び: 'wall'（現状の可変サイズ）/ 'grid'（均質な行列）。設定は端末に保持する。
+  const [galleryLayout, setGalleryLayout] = useState(() =>
+    (typeof window !== 'undefined' && window.localStorage.getItem('artoir:galleryLayout') === 'grid') ? 'grid' : 'wall',
+  )
   const [loading, setLoading] = useState(true)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
   const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
+
+  useEffect(() => {
+    try { window.localStorage.setItem('artoir:galleryLayout', galleryLayout) } catch { /* localStorage 不可環境は無視 */ }
+  }, [galleryLayout])
 
   useEffect(() => {
     if (profileSlug) {
@@ -194,20 +202,54 @@ export default function ExhibitionPage() {
           <div className="ui-exhibition-artworks-head">
             {!profileSlug && <div className="ui-section-label">作品</div>}
             {artworks.length > 0 && (
-              <button
-                type="button"
-                className="ui-immersive-launch"
-                onClick={() => setViewMode('ribbon')}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
-                </svg>
-                <span>作品を巡る</span>
-              </button>
+              <div className="ui-exhibition-artworks-actions">
+                <div className="ui-gallery-layout-toggle" role="group" aria-label="作品の表示方法">
+                  <button
+                    type="button"
+                    className={galleryLayout === 'wall' ? 'is-active' : ''}
+                    aria-pressed={galleryLayout === 'wall'}
+                    aria-label="ウォール表示"
+                    title="ウォール表示"
+                    onClick={() => setGalleryLayout('wall')}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+                      <rect x="4" y="4" width="7" height="10" rx="1" />
+                      <rect x="13" y="4" width="7" height="6" rx="1" />
+                      <rect x="4" y="16" width="7" height="4" rx="1" />
+                      <rect x="13" y="12" width="7" height="8" rx="1" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className={galleryLayout === 'grid' ? 'is-active' : ''}
+                    aria-pressed={galleryLayout === 'grid'}
+                    aria-label="均質な行列表示"
+                    title="均質な行列表示"
+                    onClick={() => setGalleryLayout('grid')}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+                      <rect x="4" y="4" width="7" height="7" rx="1" />
+                      <rect x="13" y="4" width="7" height="7" rx="1" />
+                      <rect x="4" y="13" width="7" height="7" rx="1" />
+                      <rect x="13" y="13" width="7" height="7" rx="1" />
+                    </svg>
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="ui-immersive-launch"
+                  onClick={() => setViewMode('ribbon')}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+                  </svg>
+                  <span>作品を巡る</span>
+                </button>
+              </div>
             )}
           </div>
           {artworks.length > 0 ? (
-            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={openArtwork} />
+            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={openArtwork} layout={galleryLayout} />
           ) : (
             <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>
               作品がまだありません
