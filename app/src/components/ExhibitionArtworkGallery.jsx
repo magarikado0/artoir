@@ -64,6 +64,50 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
 
   const { items: layoutItems } = usePhotoWallLayout(photos, columns)
 
+  // 未保存作品の栞は既定で隠す。PC はホバー（CSS）、モバイルは長押しで「追加」ボタンを出す。
+  // 保存済みは常時表示（CSS の .is-active）。長押し中はこの id のカードに .is-revealed を付ける。
+  const [revealedId, setRevealedId] = useState(null)
+  const longPressTimer = useRef(null)
+  const suppressClickRef = useRef(false)
+  const pointerStartRef = useRef(null)
+
+  const cancelLongPress = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+    pointerStartRef.current = null
+  }
+
+  const handlePointerDown = (e, id) => {
+    // 栞ボタン自体のタップは邪魔しない（トグルさせる）。
+    if (e.target.closest('.ui-artwork-wall-fav')) return
+    // 別のカードに触れたら前の表示を畳む。
+    setRevealedId((cur) => (cur === id ? cur : null))
+    cancelLongPress()
+    pointerStartRef.current = { x: e.clientX, y: e.clientY }
+    longPressTimer.current = setTimeout(() => {
+      suppressClickRef.current = true // 直後の click（モーダル展開）を抑止する
+      setRevealedId(id)
+    }, 450)
+  }
+
+  const handlePointerMove = (e) => {
+    const start = pointerStartRef.current
+    if (!start) return
+    // スクロール/ドラッグとみなせる移動があれば長押しを取り消す。
+    if (Math.abs(e.clientX - start.x) > 10 || Math.abs(e.clientY - start.y) > 10) cancelLongPress()
+  }
+
+  const handleOpen = (artwork) => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false // 長押し直後のクリックは無視（栞を出すだけ）
+      return
+    }
+    setRevealedId(null)
+    onOpenArtwork(artwork)
+  }
+
   if (items.length === 0) return null
 
   return (
@@ -85,15 +129,21 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
         return (
           <div
             key={item.id}
-            className="ui-list-card ui-artwork-wall-card"
+            className={`ui-list-card ui-artwork-wall-card${revealedId === item.id ? ' is-revealed' : ''}`}
             style={{ gridColumn: `span ${item.spanX}`, gridRow: `span ${item.spanY}`, minWidth: 0, minHeight: 0 }}
+            onPointerDown={(e) => handlePointerDown(e, item.id)}
+            onPointerMove={handlePointerMove}
+            onPointerUp={cancelLongPress}
+            onPointerCancel={cancelLongPress}
+            onPointerLeave={cancelLongPress}
+            onContextMenu={(e) => e.preventDefault()}
           >
             <button
               type="button"
               className="ui-artwork-wall-open"
               onPointerEnter={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
               onFocus={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
-              onClick={() => onOpenArtwork(artwork)}
+              onClick={() => handleOpen(artwork)}
               aria-label={`${label}の詳細を見る`}
             >
               <ArtworkMedia

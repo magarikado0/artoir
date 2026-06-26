@@ -206,6 +206,9 @@ a {
 /* 写真ウォール（作品グリッド）のタイル */
 .ui-artwork-wall-card {
   position: relative;
+  /* 長押し時の iOS 画像メニュー/選択を抑止する。 */
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .ui-artwork-wall-open {
@@ -225,7 +228,9 @@ a {
   opacity: 0.92;
 }
 
-/* 各作品タイルの左下のいいねボタン */
+/* 各作品タイルの左下のお気に入り（栞）。
+   未保存は既定で隠し、保存済み(.is-active)は常時表示。
+   未保存の「追加」はホバー(PC)・フォーカス・長押し(.is-revealed)でのみ出す。 */
 .ui-artwork-wall-fav {
   position: absolute;
   left: 8px;
@@ -234,6 +239,23 @@ a {
   width: 32px;
   height: 32px;
   filter: drop-shadow(0 1px 2px rgba(251, 248, 243, 0.9));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.ui-artwork-wall-fav.is-active,
+.ui-artwork-wall-card:focus-within .ui-artwork-wall-fav,
+.ui-artwork-wall-card.is-revealed .ui-artwork-wall-fav {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: hover) {
+  .ui-artwork-wall-card:hover .ui-artwork-wall-fav {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 /* コレクション（わたしのコレクション）ページ */
