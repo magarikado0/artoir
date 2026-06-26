@@ -1,6 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
-import { supabase } from '../lib/supabase'
 import { useAccountDestination } from '../lib/useAccountDestination'
 import { BrandLockup } from './BrandMark'
 
@@ -72,14 +71,7 @@ export function Icon({ name, size = 20 }) {
 
 export default function Header({ activeTab }) {
   const { session } = useAuth()
-  const navigate = useNavigate()
   const accountPath = useAccountDestination()
-
-  async function handleLogout() {
-    if (!supabase) return
-    await supabase.auth.signOut()
-    navigate('/')
-  }
 
   return (
     <header className="ui-topbar">
@@ -106,11 +98,7 @@ export default function Header({ activeTab }) {
         )}
       </nav>
       <div className="ui-topbar-actions">
-        {session ? (
-          <button onClick={handleLogout} className="ui-topbar-icon" aria-label="ログアウト" type="button">
-            <Icon name="logout" size={18} />
-          </button>
-        ) : (
+        {!session && (
           <Link to="/login" className="ui-topbar-icon" aria-label="ログイン">
             <Icon name="login" size={18} />
           </Link>
