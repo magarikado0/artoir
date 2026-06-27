@@ -10,8 +10,9 @@ import { T } from '../lib/tokens'
 const FALLBACK_SIZE = { width: 1000, height: 1000 }
 
 // コンテナ幅から列数を決める（スマホ3・タブレット4・デスクトップ6）。
-function columnsForWidth(width) {
-  if (width < 640) return 3
+// 均質な行列表示（grid）のみ、スマホは2カラムにする。
+function columnsForWidth(width, layout) {
+  if (width < 640) return layout === 'grid' ? 2 : 3
   if (width < 1024) return 4
   return 6
 }
@@ -32,7 +33,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
   }, [])
 
   const gap = containerWidth && containerWidth < 640 ? 8 : 16
-  const columns = columnsForWidth(containerWidth || 1024)
+  const columns = columnsForWidth(containerWidth || 1024, layout)
   // 1 セル（1×1）が正方形になるよう、行高 = 列幅 にそろえる。
   const columnWidth = containerWidth > 0 ? (containerWidth - gap * (columns - 1)) / columns : 0
   const rowHeight = columnWidth > 0 ? columnWidth : 120
