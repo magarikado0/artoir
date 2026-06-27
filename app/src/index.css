@@ -1634,6 +1634,60 @@ a {
   text-align: right;
 }
 
+/* 作家一覧（profiles 検索） */
+.ui-creator-list {
+  border-top: 1px solid #ECE5D9;
+}
+
+.ui-creator-row {
+  display: block;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ECE5D9;
+  text-decoration: none;
+  transition: background 140ms ease;
+}
+
+.ui-creator-row:hover {
+  background: #FBF8F3;
+}
+
+.ui-creator-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ui-creator-name {
+  color: #1F1B17;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-creator-handle {
+  color: #8A8178;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.ui-creator-bio {
+  margin-top: 4px;
+  color: #8A8178;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 /* 団体一覧の各行のお気に入りボタン */
 .ui-org-row-fav {
   justify-self: center;

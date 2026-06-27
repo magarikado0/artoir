@@ -6,6 +6,7 @@ import { BrandLockup } from './BrandMark'
 const TABS = [
   { key: 'top', label: '展覧会', path: '/', icon: 'list' },
   { key: 'orgs', label: '団体', path: '/orgs', icon: 'org' },
+  { key: 'creators', label: '作家', path: '/creators', icon: 'users' },
   { key: 'account', label: 'アカウント', path: '/account', icon: 'user' },
 ]
 
@@ -21,6 +22,13 @@ export function Icon({ name, size = 20 }) {
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="12" cy="8" r="4" {...s} />
       <path d="M4 21c1.8-4 4.5-6 8-6s6.2 2 8 6" {...s} />
+    </svg>
+  )
+  if (name === 'users') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="9" cy="8" r="3.2" {...s} />
+      <path d="M3 20c1.3-3.2 3.4-4.8 6-4.8s4.7 1.6 6 4.8" {...s} />
+      <path d="M16 5.2a3.2 3.2 0 0 1 0 6.1M18.5 20c-.5-1.6-1.3-2.9-2.4-3.8" {...s} />
     </svg>
   )
   if (name === 'login') return (

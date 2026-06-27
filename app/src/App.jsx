@@ -10,6 +10,7 @@ import LoadingFrames from './components/LoadingFrames'
 
 const AllExhibitionsPage = lazy(() => import('./pages/AllExhibitionsPage'))
 const OrgsPage = lazy(() => import('./pages/OrgsPage'))
+const CreatorsPage = lazy(() => import('./pages/CreatorsPage'))
 const OrgPage = lazy(() => import('./pages/OrgPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const ExhibitionPage = lazy(() => import('./pages/ExhibitionPage'))
@@ -152,6 +153,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<AllExhibitionsPage />} />
             <Route path="/orgs" element={<OrgsPage />} />
+            <Route path="/creators" element={<CreatorsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/collection" element={<ProtectedRoute><CollectionPage /></ProtectedRoute>} />
