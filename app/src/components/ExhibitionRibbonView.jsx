@@ -14,6 +14,12 @@ const DEFAULT_AR = 0.8
 const MIN_ZOOM = 1
 const MAX_ZOOM = 4
 const DOUBLE_TAP_MS = 280
+// ホイール送り。トラックパッドの慣性スクロールは wheel イベントが途切れず連続発火し、
+// 1 イベント=1 枚送りだと速すぎる。イベント間隔が WHEEL_STREAM_GAP_MS 未満なら
+// 「連続ストリーム（慣性）」とみなし、WHEEL_STEP_COOLDOWN_MS の最短間隔でしか進めない。
+// マウスホイールは 1 ノッチごとに間隔が空くため判定から外れ、従来どおり 1 ノッチ=1 枚のまま。
+const WHEEL_STREAM_GAP_MS = 50
+const WHEEL_STEP_COOLDOWN_MS = 200
 
 function fitCardToBox(ar, maxW, maxH) {
   const safeAr = ar > 0 ? ar : DEFAULT_AR
@@ -155,6 +161,8 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
   const lastTapRef = useRef({ time: 0, index: -1 })
   const zoomRef = useRef(MIN_ZOOM)
   const panRef = useRef({ x: 0, y: 0 })
+  const lastWheelTimeRef = useRef(0)
+  const lastWheelStepRef = useRef(0)
   useEffect(() => {
     thetaRef.current = theta
     radiusRef.current = radius
@@ -399,6 +407,17 @@ export default function ExhibitionRibbonView({ artworks, onClose }) {
     const d = e.deltaX || e.deltaY
     if (Math.abs(d) < 2) return
     e.preventDefault()
+
+    const now = performance.now()
+    const sinceLastEvent = now - lastWheelTimeRef.current
+    lastWheelTimeRef.current = now
+    // 連続ストリーム（トラックパッドの慣性）中は最短間隔を空けてしか進めない。
+    // 離散的なマウスホイール（イベント間隔が空く）は gap が大きいので、ここでは弾かれない。
+    if (sinceLastEvent < WHEEL_STREAM_GAP_MS && now - lastWheelStepRef.current < WHEEL_STEP_COOLDOWN_MS) {
+      return
+    }
+    lastWheelStepRef.current = now
+
     const th = thetaRef.current
     const current = Math.round(rotationRef.current / th)
     targetRef.current = (current + Math.sign(d)) * th

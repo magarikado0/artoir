@@ -203,6 +203,23 @@ a {
   height: 38px;
 }
 
+/* 個人ページ：名前の右に栞アイコン（展覧会タイトルと同じ並び）。 */
+.ui-profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ui-profile-name-row .ui-screen-title {
+  min-width: 0;
+}
+
+.ui-profile-name-fav {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+}
+
 /* 写真ウォール（作品グリッド）のタイル */
 .ui-artwork-wall-card {
   position: relative;

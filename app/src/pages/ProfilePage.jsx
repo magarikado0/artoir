@@ -86,12 +86,20 @@ export default function ProfilePage() {
       <main className="ui-app-main">
         <section style={{ marginBottom: 48 }}>
           <div className="ui-kicker">プロフィール</div>
-          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
+          <div className="ui-profile-name-row">
+            <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
+            <FavoriteButton
+              targetType="profile"
+              targetId={profile.id}
+              kind="bookmark"
+              appearance="icon"
+              className="ui-profile-name-fav"
+            />
+          </div>
           <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
           {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 16 }}>{profile.bio}</p>}
           <div className="ui-public-action-row">
             <ShareLinkButton />
-            <FavoriteButton targetType="profile" targetId={profile.id} kind="bookmark" />
             <PublicManageLink
               ownerType="profile"
               ownerId={profile.id}
