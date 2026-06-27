@@ -1640,8 +1640,9 @@ a {
 }
 
 .ui-creator-row {
+  position: relative;
   display: block;
-  padding: 16px 20px;
+  padding: 16px 56px 16px 20px;
   border-bottom: 1px solid #ECE5D9;
   text-decoration: none;
   transition: background 140ms ease;
@@ -1649,6 +1650,14 @@ a {
 
 .ui-creator-row:hover {
   background: #FBF8F3;
+}
+
+.ui-creator-row-fav {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
 }
 
 .ui-creator-name-row {

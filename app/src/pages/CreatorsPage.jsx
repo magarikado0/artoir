@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
+import FavoriteButton from '../components/FavoriteButton'
 import { T } from '../lib/tokens'
 
 export default function CreatorsPage() {
@@ -70,6 +71,14 @@ export default function CreatorsPage() {
                 <span className="ui-creator-handle">@{c.slug}</span>
               </div>
               {c.bio && <div className="ui-creator-bio">{c.bio}</div>}
+              <FavoriteButton
+                targetType="profile"
+                targetId={c.id}
+                kind="bookmark"
+                appearance="icon"
+                stopPropagation
+                className="ui-creator-row-fav"
+              />
             </Link>
           ))}
         </div>
