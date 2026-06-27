@@ -9,6 +9,8 @@ import FavoriteButton from '../components/FavoriteButton'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
+import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
+import { useGalleryLayout } from '../lib/useGalleryLayout'
 import LoadingFrames from '../components/LoadingFrames'
 import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
@@ -35,17 +37,10 @@ export default function ExhibitionPage() {
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
-  // 作品一覧の並び: 'wall'（現状の可変サイズ）/ 'grid'（均質な行列）。設定は端末に保持する。
-  const [galleryLayout, setGalleryLayout] = useState(() =>
-    (typeof window !== 'undefined' && window.localStorage.getItem('artoir:galleryLayout') === 'grid') ? 'grid' : 'wall',
-  )
+  const [galleryLayout, setGalleryLayout] = useGalleryLayout()
   const [loading, setLoading] = useState(true)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
   const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
-
-  useEffect(() => {
-    try { window.localStorage.setItem('artoir:galleryLayout', galleryLayout) } catch { /* localStorage 不可環境は無視 */ }
-  }, [galleryLayout])
 
   useEffect(() => {
     if (profileSlug) {
@@ -203,38 +198,7 @@ export default function ExhibitionPage() {
             {!profileSlug && <div className="ui-section-label">作品</div>}
             {artworks.length > 0 && (
               <div className="ui-exhibition-artworks-actions">
-                <div className="ui-gallery-layout-toggle" role="group" aria-label="作品の表示方法">
-                  <button
-                    type="button"
-                    className={galleryLayout === 'wall' ? 'is-active' : ''}
-                    aria-pressed={galleryLayout === 'wall'}
-                    aria-label="ウォール表示"
-                    title="ウォール表示"
-                    onClick={() => setGalleryLayout('wall')}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
-                      <rect x="4" y="4" width="7" height="10" rx="1" />
-                      <rect x="13" y="4" width="7" height="6" rx="1" />
-                      <rect x="4" y="16" width="7" height="4" rx="1" />
-                      <rect x="13" y="12" width="7" height="8" rx="1" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className={galleryLayout === 'grid' ? 'is-active' : ''}
-                    aria-pressed={galleryLayout === 'grid'}
-                    aria-label="均質な行列表示"
-                    title="均質な行列表示"
-                    onClick={() => setGalleryLayout('grid')}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
-                      <rect x="4" y="4" width="7" height="7" rx="1" />
-                      <rect x="13" y="4" width="7" height="7" rx="1" />
-                      <rect x="4" y="13" width="7" height="7" rx="1" />
-                      <rect x="13" y="13" width="7" height="7" rx="1" />
-                    </svg>
-                  </button>
-                </div>
+                <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
                 <button
                   type="button"
                   className="ui-immersive-launch"

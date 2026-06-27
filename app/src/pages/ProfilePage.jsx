@@ -8,6 +8,8 @@ import PublicManageLink from '../components/PublicManageLink'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
+import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
+import { useGalleryLayout } from '../lib/useGalleryLayout'
 import { T, externalHost } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 
@@ -18,6 +20,7 @@ export default function ProfilePage() {
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
+  const [galleryLayout, setGalleryLayout] = useGalleryLayout()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -132,18 +135,21 @@ export default function ProfilePage() {
           <>
             <div className="ui-exhibition-artworks-head">
               <div className="ui-section-label">作品</div>
-              <button
-                type="button"
-                className="ui-immersive-launch"
-                onClick={() => setViewMode('ribbon')}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
-                </svg>
-                <span>作品を巡る</span>
-              </button>
+              <div className="ui-exhibition-artworks-actions">
+                <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
+                <button
+                  type="button"
+                  className="ui-immersive-launch"
+                  onClick={() => setViewMode('ribbon')}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+                  </svg>
+                  <span>作品を巡る</span>
+                </button>
+              </div>
             </div>
-            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={setSelectedArtwork} />
+            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={setSelectedArtwork} layout={galleryLayout} />
           </>
         ) : (
           <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>公開中の作品はまだありません</div>
