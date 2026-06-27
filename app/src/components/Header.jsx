@@ -31,6 +31,11 @@ export function Icon({ name, size = 20 }) {
       <path d="M16 5.2a3.2 3.2 0 0 1 0 6.1M18.5 20c-.5-1.6-1.3-2.9-2.4-3.8" {...s} />
     </svg>
   )
+  if (name === 'bookmark') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z" {...s} />
+    </svg>
+  )
   if (name === 'login') return (
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <path d="M9 18l6-6-6-6M15 12H3M21 4v16" {...s} />

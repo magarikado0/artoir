@@ -186,7 +186,7 @@ export default function CollectionPage() {
           </div>
         )}
       </main>
-      <BottomNav active="account" />
+      <BottomNav active="collection" />
     </div>
   )
 }

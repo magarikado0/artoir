@@ -4,9 +4,11 @@ import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import FavoriteButton from '../components/FavoriteButton'
+import { useAuth } from '../lib/auth'
 import { T } from '../lib/tokens'
 
 export default function CreatorsPage() {
+  const { session } = useAuth()
   const [creators, setCreators] = useState([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
@@ -71,14 +73,16 @@ export default function CreatorsPage() {
                 <span className="ui-creator-handle">@{c.slug}</span>
               </div>
               {c.bio && <div className="ui-creator-bio">{c.bio}</div>}
-              <FavoriteButton
-                targetType="profile"
-                targetId={c.id}
-                kind="bookmark"
-                appearance="icon"
-                stopPropagation
-                className="ui-creator-row-fav"
-              />
+              {session?.user?.id !== c.id && (
+                <FavoriteButton
+                  targetType="profile"
+                  targetId={c.id}
+                  kind="bookmark"
+                  appearance="icon"
+                  stopPropagation
+                  className="ui-creator-row-fav"
+                />
+              )}
             </Link>
           ))}
         </div>

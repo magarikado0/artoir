@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../lib/auth'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
@@ -16,6 +17,7 @@ import { attachNormalizedCreators } from '../lib/profile'
 
 export default function ProfilePage() {
   const { profileSlug } = useParams()
+  const { session } = useAuth()
   const [profile, setProfile] = useState(null)
   const [organizations, setOrganizations] = useState([])
   const [artworks, setArtworks] = useState([])
@@ -79,22 +81,28 @@ export default function ProfilePage() {
   )
 
   const sns = profile.sns_links || {}
+  // 自分のプロフィール = ログイン中ユーザー自身。ナビ表示や自己ブックマーク抑止に使う。
+  const isOwnProfile = Boolean(session?.user?.id && session.user.id === profile.id)
+  const navTab = isOwnProfile ? 'account' : 'creators'
 
   return (
     <div className="ui-page-shell">
-      <Header activeTab="account" />
+      <Header activeTab={navTab} />
       <main className="ui-app-main">
         <section style={{ marginBottom: 48 }}>
           <div className="ui-kicker">プロフィール</div>
           <div className="ui-profile-name-row">
             <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
-            <FavoriteButton
-              targetType="profile"
-              targetId={profile.id}
-              kind="bookmark"
-              appearance="icon"
-              className="ui-profile-name-fav"
-            />
+            {/* 自分のプロフィールは自分をブックマークできないよう非表示。 */}
+            {!isOwnProfile && (
+              <FavoriteButton
+                targetType="profile"
+                targetId={profile.id}
+                kind="bookmark"
+                appearance="icon"
+                className="ui-profile-name-fav"
+              />
+            )}
           </div>
           <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
           {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 16 }}>{profile.bio}</p>}
@@ -174,7 +182,7 @@ export default function ProfilePage() {
         onSelectArtwork={setSelectedArtwork}
         onClose={() => setSelectedArtwork(null)}
       />
-      <BottomNav active="account" />
+      <BottomNav active={navTab} />
     </div>
   )
 }
