@@ -1312,9 +1312,9 @@ a {
   order: 2;
   flex: 0 0 clamp(96px, 22%, 128px);
   position: relative;
+  /* カード高さいっぱいに伸ばす（正方形固定をやめる）。本文が高くてもサムネ下端が枠から離れない。 */
   align-self: stretch;
-  aspect-ratio: 1 / 1;
-  max-height: 128px;
+  min-height: clamp(96px, 22vw, 128px);
   background: #ECE5D9;
   overflow: hidden;
 }
@@ -3752,7 +3752,6 @@ button.ui-account-org-pick-btn.ui-org-row {
 
   .ui-exhibition-list-card-media {
     flex-basis: clamp(92px, 31%, 128px);
-    max-height: 128px;
   }
 
   .ui-exhibition-list-card-body {
