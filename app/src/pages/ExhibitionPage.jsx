@@ -10,6 +10,7 @@ import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
 import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
+import ExhibitionStatusBadge from '../components/ExhibitionStatusBadge'
 import { useGalleryLayout } from '../lib/useGalleryLayout'
 import LoadingFrames from '../components/LoadingFrames'
 import { useDelayedLoading } from '../lib/useDelayedLoading'
@@ -165,6 +166,7 @@ export default function ExhibitionPage() {
 
         <section>
           <div className="ui-exhibition-summary-card">
+            <ExhibitionStatusBadge exhibition={exhibition} className="ui-exhibition-status-eyebrow" />
             <div className="ui-exhibition-title-row">
               <h1 className="ui-screen-title">{exhibition.title}</h1>
               <FavoriteButton

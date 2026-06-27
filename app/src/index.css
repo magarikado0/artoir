@@ -1351,6 +1351,11 @@ a {
   flex-shrink: 0;
 }
 
+/* 展覧会ページのタイトル上に出すステータス（アイブロウ的に1段上げる）。 */
+.ui-exhibition-status-eyebrow {
+  margin-bottom: 10px;
+}
+
 .ui-exh-status--live {
   color: #BE553D;
   background: rgba(190, 85, 61, 0.10);
@@ -3679,13 +3684,6 @@ button.ui-account-org-pick-btn.ui-org-row {
     flex-direction: column;
     gap: 4px;
     padding-top: 8px;
-  }
-
-  /* モバイルはバッジを日付の上に積む。 */
-  .ui-exhibition-list-card-period {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
   }
 
   .ui-exhibition-list-card-date,
