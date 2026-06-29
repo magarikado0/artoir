@@ -18,12 +18,14 @@ import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
 
-function SummaryItem({ label, value }) {
+function SummaryItem({ label, value, to }) {
   if (!value) return null
   return (
     <div className="ui-exhibition-summary-item">
       <div className="ui-exhibition-summary-label">{label}</div>
-      <div className="ui-exhibition-summary-value">{value}</div>
+      <div className="ui-exhibition-summary-value">
+        {to ? <Link to={to} className="ui-exhibition-summary-link">{value}</Link> : value}
+      </div>
     </div>
   )
 }
@@ -190,7 +192,7 @@ export default function ExhibitionPage() {
             <div className="ui-exhibition-summary-grid">
               <SummaryItem label="会期" value={dateText} />
               <SummaryItem label="会場" value={exhibition.location} />
-              <SummaryItem label={hostLabel} value={owner?.display_name || owner?.name || ''} />
+              <SummaryItem label={hostLabel} value={owner?.display_name || owner?.name || ''} to={ownerBase} />
             </div>
           </div>
         </section>
