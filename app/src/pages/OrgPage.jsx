@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
@@ -59,9 +59,6 @@ export default function OrgPage() {
     <div className="ui-page-shell">
       <Header activeTab="orgs" />
       <main className="ui-app-main">
-        <div className="ui-app-topline">
-          <Link to="/orgs" className="ui-back-link">← 公開ページ一覧</Link>
-        </div>
         <section style={{ marginBottom: 48 }}>
           <div className="ui-kicker">{org.kind === 'person' ? '作家' : '団体'}</div>
           <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{org.name}</h1>

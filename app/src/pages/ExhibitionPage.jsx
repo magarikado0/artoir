@@ -152,7 +152,6 @@ export default function ExhibitionPage() {
   const exhibitionManagePath = exhibition?.id
     ? `${dashboardBase}/dashboard/exhibitions/${exhibition.id}/artworks`
     : `${dashboardBase}/dashboard`
-  const ownerPageLabel = profileSlug ? 'プロフィール' : '団体ページ'
   const hostLabel = profileSlug ? '作家' : '主催団体'
   const dateText = exhibition.start_date
     ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}`
@@ -162,10 +161,6 @@ export default function ExhibitionPage() {
     <div className="ui-page-shell">
       <Header activeTab="top" />
       <main className="ui-app-main">
-        <div className="ui-app-topline">
-          <Link to={ownerBase} className="ui-back-link">← {ownerPageLabel}</Link>
-        </div>
-
         <section>
           <div className="ui-exhibition-summary-card">
             <ExhibitionStatusBadge exhibition={exhibition} className="ui-exhibition-status-eyebrow" />
