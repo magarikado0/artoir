@@ -90,7 +90,6 @@ export default function ProfilePage() {
       <Header activeTab={navTab} />
       <main className="ui-app-main">
         <section style={{ marginBottom: 48 }}>
-          <div className="ui-kicker">プロフィール</div>
           <div className="ui-profile-name-row">
             <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
             {/* 自分のプロフィールは自分をブックマークできないよう非表示。 */}
