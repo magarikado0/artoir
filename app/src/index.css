@@ -3643,6 +3643,64 @@ button.ui-account-org-pick-btn.ui-org-row {
   cursor: default;
   opacity: 0.4;
 }
+
+/* --- 4隅クロップ（透視補正）UI --- */
+.ui-quad-loupe-wrap {
+  position: absolute;
+  width: 132px;
+  height: 132px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 3px solid #FBF8F3;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  background: #1F1B17;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ui-quad-loupe {
+  display: block;
+  width: 132px;
+  height: 132px;
+}
+
+.ui-quad-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ui-quad-reset,
+.ui-quad-rotate {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid #D8CFC2;
+  border-radius: 8px;
+  background: #FBF8F3;
+  color: #312B27;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.ui-quad-rotate {
+  margin-right: auto; /* 回転は左寄せ、リセットは右寄せ */
+}
+
+.ui-quad-reset:hover:not(:disabled),
+.ui-quad-rotate:hover:not(:disabled) {
+  border-color: #8A8178;
+  background: #F3EEE5;
+}
+
+.ui-quad-reset:disabled,
+.ui-quad-rotate:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
 @media (min-width: 1024px) {
   .ui-exhibition-list-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

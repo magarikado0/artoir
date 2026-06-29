@@ -53,7 +53,6 @@ export default function ArtworkEditModal({
               disabled={saving || deleting}
               confirmLabel="画像を反映"
               confirmingLabel="反映中…"
-              helpText="現在の画像をもう一度切り抜き・角度調整できます。反映後、保存するまで公開画像は変更されません。"
               onBusyChange={setImageBusy}
               onConfirm={(croppedBlob) => {
                 setPendingImageBlob(croppedBlob)
