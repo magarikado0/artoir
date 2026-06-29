@@ -152,23 +152,20 @@ function warpWebGL(source, srcW, srcH, quad, outW, outH) {
     || canvas.getContext('experimental-webgl')
   if (!gl) return null
 
-  // テクスチャ上限を超える原画像は、上限に収まるよう縮小してからテクスチャ化する。
+  // ソースを常に top-down の 2D canvas に正規化する。
+  // ImageBitmap と canvas で texImage2D の上下方向の扱いが食い違うのを避け、
+  // CPU フォールバック経路（同じく top-down 前提）と挙動を一致させるため。
+  // テクスチャ上限を超える場合はここで縮小する。
   const maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE)
-  let texSource = source
-  let sw = srcW
-  let sh = srcH
-  let srcQuad = quad
-  if (srcW > maxTex || srcH > maxTex) {
-    const f = maxTex / Math.max(srcW, srcH)
-    sw = Math.max(1, Math.floor(srcW * f))
-    sh = Math.max(1, Math.floor(srcH * f))
-    const tmp = document.createElement('canvas')
-    tmp.width = sw
-    tmp.height = sh
-    tmp.getContext('2d').drawImage(source, 0, 0, sw, sh)
-    texSource = tmp
-    srcQuad = quad.map((pt) => ({ x: pt.x * f, y: pt.y * f }))
-  }
+  const f = Math.min(1, maxTex / Math.max(srcW, srcH))
+  const sw = Math.max(1, Math.round(srcW * f))
+  const sh = Math.max(1, Math.round(srcH * f))
+  const texCanvas = document.createElement('canvas')
+  texCanvas.width = sw
+  texCanvas.height = sh
+  texCanvas.getContext('2d').drawImage(source, 0, 0, sw, sh)
+  const texSource = texCanvas
+  const srcQuad = f === 1 ? quad : quad.map((pt) => ({ x: pt.x * f, y: pt.y * f }))
 
   const program = gl.createProgram()
   gl.attachShader(program, compileShader(gl, gl.VERTEX_SHADER, VERT_SRC))
@@ -198,7 +195,8 @@ function warpWebGL(source, srcW, srcH, quad, outW, outH) {
 
   const tex = gl.createTexture()
   gl.bindTexture(gl.TEXTURE_2D, tex)
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true) // テクスチャ v=0 を画像の上端に合わせる
+  // texSource は top-down に正規化済みなので flip しない（v=0 が画像上端）。
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)

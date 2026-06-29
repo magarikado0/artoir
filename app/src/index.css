@@ -3523,6 +3523,10 @@ button.ui-account-org-pick-btn.ui-org-row {
   min-height: 320px;
   height: min(62vh, 620px);
   height: min(62dvh, 620px);
+  /* クロップ中に背後のモーダルがスクロールしてハンドル操作を奪わないようにする。
+     コーナーハンドルは画像の縁より外（レターボックス余白）にもはみ出すため、
+     オーバーレイだけでなくクロップ領域全体でジェスチャを無効化する。 */
+  touch-action: none;
 }
 
 .ui-artwork-crop-control {
