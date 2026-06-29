@@ -60,7 +60,6 @@ export default function OrgPage() {
       <Header activeTab="orgs" />
       <main className="ui-app-main">
         <section style={{ marginBottom: 48 }}>
-          <div className="ui-kicker">{org.kind === 'person' ? '作家' : '団体'}</div>
           <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{org.name}</h1>
           {org.description && <p className="ui-screen-subtitle">{org.description}</p>}
           <div className="ui-public-action-row">
