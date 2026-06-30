@@ -56,12 +56,14 @@ function DashOrgBar({ dashboardBase, ownerName }) {
   )
 }
 
-export default function DashShell({ children, orgSlug, profileSlug, crumbs = [] }) {
+export default function DashShell({ children, orgSlug, profileSlug, crumbs = [], hideOrgBar = false }) {
   const isDesktop = useIsDesktop()
   const [owner, setOwner] = useState(null)
   const dashboardBase = profileSlug ? profilePath(profileSlug) : orgSlug ? `/${orgSlug}` : ''
   const isProfile = Boolean(profileSlug)
   const hasDashboardContext = Boolean(dashboardBase)
+  // hideOrgBar: 上部の「団体名＋戻る矢印」バーを隠す（タブナビ DashboardSubNav は残す）
+  const showOrgBar = hasDashboardContext && !hideOrgBar
 
   useEffect(() => {
     if (!hasDashboardContext || !supabase) return
@@ -80,7 +82,7 @@ export default function DashShell({ children, orgSlug, profileSlug, crumbs = [] 
   const ownerName = owner?.display_name || owner?.name || profileSlug || orgSlug
   const showSetupCrumbs = !hasDashboardContext && crumbs.length > 0
 
-  const ownerContext = hasDashboardContext ? (
+  const ownerContext = showOrgBar ? (
     isDesktop ? (
       <DashOrgBar dashboardBase={dashboardBase} ownerName={ownerName} />
     ) : null
@@ -100,7 +102,7 @@ export default function DashShell({ children, orgSlug, profileSlug, crumbs = [] 
   return (
     <div className="ui-page-shell" style={{ color: T.ink, fontFamily: T.sans, paddingBottom: 92 }}>
       <div className="ui-mobile-topbar">
-        {hasDashboardContext ? (
+        {showOrgBar ? (
           <div className="ui-dash-mobile-org-context">
             <Link to="/account" className="ui-dash-account-back" aria-label="アカウントへ戻る">
               <Icon name="back" size={16} />
@@ -118,7 +120,7 @@ export default function DashShell({ children, orgSlug, profileSlug, crumbs = [] 
             <BrandLockup />
           </Link>
         )}
-        {!hasDashboardContext && (
+        {!showOrgBar && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Link to="/account" className="ui-top-icon" aria-label="アカウント">
               <Icon name="user" size={18} />

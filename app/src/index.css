@@ -3390,6 +3390,18 @@ button.ui-account-org-pick-btn.ui-org-row {
   overflow-wrap: anywhere;
 }
 
+a.ui-settings-member-link {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+a.ui-settings-member-link:hover {
+  color: #BE553D;
+  text-decoration: underline;
+}
+
 .ui-settings-member-role,
 .ui-settings-member-note,
 .ui-settings-member-message {

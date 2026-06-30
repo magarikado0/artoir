@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import DashShell from '../../components/DashShell'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
+import { profilePath } from '../../lib/profileRoutes'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 
@@ -236,7 +237,13 @@ export default function DashMembers() {
                 {members.map((member) => (
                   <div key={`${member.organization_id}-${member.profile_id}`} className="ui-settings-member-row">
                     <div>
-                      <div className="ui-settings-member-email">{memberEmail(member)}</div>
+                      {member.profiles?.slug ? (
+                        <Link to={profilePath(member.profiles.slug)} className="ui-settings-member-email ui-settings-member-link">
+                          {memberEmail(member)}
+                        </Link>
+                      ) : (
+                        <div className="ui-settings-member-email">{memberEmail(member)}</div>
+                      )}
                       <div className="ui-settings-member-role">{roleLabel(member.role)}</div>
                     </div>
                     {canManageMembers ? (
