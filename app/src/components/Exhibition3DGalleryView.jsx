@@ -4,8 +4,8 @@ import "./Exhibition3DGalleryView.css";
 
 const ROOM_WIDTH = 3000;
 const ROOM_DEPTH = 3000;
-const ROOM_HEIGHT = 1100; // Taller walls reduce the visible floor/ceiling area
-const FLOOR_Y = 350;
+const ROOM_HEIGHT = 2000; // Taller walls reduce the visible floor/ceiling area
+const FLOOR_Y = 200;
 const CEILING_Y = FLOOR_Y - ROOM_HEIGHT;
 const WALL_CENTER_Y = (FLOOR_Y + CEILING_Y) / 2;
 const MARKER_FLOOR_Y = FLOOR_Y - 2;
@@ -22,7 +22,7 @@ const FRAME_MIN_W = 140;
 // CSS frame chrome: 15px border + 20px matte padding on both sides.
 // The JS sizing keeps the *inner image area* at the artwork aspect ratio, then
 // adds this chrome so portrait works do not get excessive top/bottom whitespace.
-const FRAME_CHROME = (15 + 20) * 2;
+const FRAME_CHROME = (15+ 20) * 2;
 // Constant edge-to-edge gap between neighboring frames.
 const FRAME_EDGE_GAP = 90;
 // Keep the group of artworks comfortably inside the wall, away from the corners.
