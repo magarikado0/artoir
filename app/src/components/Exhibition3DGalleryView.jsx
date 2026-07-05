@@ -4,23 +4,16 @@ import "./Exhibition3DGalleryView.css";
 
 const ROOM_WIDTH = 3000;
 const ROOM_DEPTH = 3000;
-const ROOM_HEIGHT = 700; // Wall height is 700px
+const ROOM_HEIGHT = 1100; // Taller walls reduce the visible floor/ceiling area
+const FLOOR_Y = 350;
+const CEILING_Y = FLOOR_Y - ROOM_HEIGHT;
+const WALL_CENTER_Y = (FLOOR_Y + CEILING_Y) / 2;
+const MARKER_FLOOR_Y = FLOOR_Y - 2;
 
 const WALLS = ["front", "left", "right", "back"];
-const WALL_LABELS = {
-  front: "正面",
-  left: "左側",
-  right: "右側",
-  back: "背面",
-};
 
 // How many artworks should comfortably fit in view from a single standing spot.
 const ARTWORKS_PER_VIEWPOINT = 3;
-// Fraction of the available horizontal field of view a group of artworks should
-// occupy, leaving breathing room at the edges of the screen for an immersive feel.
-const VIEW_COVERAGE = 0.55;
-const MIN_VIEW_DISTANCE = 400;
-const MAX_VIEW_DISTANCE = 1200;
 
 // Frame sizing: the base max outer box a frame can grow to.
 const FRAME_MAX_W = 360;
@@ -34,19 +27,6 @@ const FRAME_CHROME = (15 + 20) * 2;
 const FRAME_EDGE_GAP = 90;
 // Keep the group of artworks comfortably inside the wall, away from the corners.
 const MAX_WALL_SPAN = ROOM_WIDTH - 300;
-
-// Fixed overview spot near the entrance, used as the starting position.
-const ENTRANCE_VIEWPOINT = {
-  id: "entrance",
-  name: "エントランス",
-  x: 0,
-  y: 0,
-  z: 1050,
-  rx: 0,
-  ry: 0,
-  markerX: 0,
-  markerZ: 1050,
-};
 
 // Fit the artwork image area to the artwork's own aspect ratio, then add the
 // frame chrome. This avoids the common portrait-work problem where a border-box
@@ -145,62 +125,41 @@ function getPositionsForWall(list, wallName, aspects = {}) {
   });
 }
 
-// Standing distance from the wall needed so a group spanning `span` px wide
-// comfortably fits within the current viewport's actual horizontal field of view.
-function distanceForSpan(span, perspective, viewportWidth) {
-  const halfFovH = Math.atan(viewportWidth / 2 / perspective);
-  const halfSpan = span / 2 + 60; // group half-span + breathing room
-  const distance = halfSpan / Math.tan(halfFovH * VIEW_COVERAGE);
-  return Math.max(MIN_VIEW_DISTANCE, Math.min(MAX_VIEW_DISTANCE, distance));
+function getFacingRotationForPoint(x, z) {
+  const distances = [
+    { ry: 0, distance: z + ROOM_DEPTH / 2 },
+    { ry: 180, distance: ROOM_DEPTH / 2 - z },
+    { ry: 90, distance: x + ROOM_WIDTH / 2 },
+    { ry: -90, distance: ROOM_WIDTH / 2 - x },
+  ];
+  return distances.reduce((nearest, current) =>
+    current.distance < nearest.distance ? current : nearest,
+  ).ry;
 }
 
-// Group a wall's already-positioned paintings into stands of ~3 works each, and
-// compute one standing viewpoint per group so that group comfortably fits in view.
-function getViewpointsForWall(
-  positioned,
-  wallName,
-  perspective,
-  viewportWidth,
-) {
-  if (positioned.length === 0) return [];
+function getGridViewpoints(artworkCount) {
+  const count = Math.max(1, Math.ceil(artworkCount / ARTWORKS_PER_VIEWPOINT));
+  const cols = Math.ceil(Math.sqrt(count));
+  const rows = Math.ceil(count / cols);
+  const xRange = ROOM_WIDTH - 1300;
+  const zRange = ROOM_DEPTH - 1300;
 
-  const groups = [];
-  for (let i = 0; i < positioned.length; i += ARTWORKS_PER_VIEWPOINT) {
-    groups.push(positioned.slice(i, i + ARTWORKS_PER_VIEWPOINT));
-  }
-
-  const alongAxis = wallName === "front" || wallName === "back" ? "x" : "z";
-  const perpAxis = alongAxis === "x" ? "z" : "x";
-
-  return groups.map((group, idx) => {
-    const starts = group.map((p) => p[alongAxis] - p.frameW / 2);
-    const ends = group.map((p) => p[alongAxis] + p.frameW / 2);
-    const center = (Math.min(...starts) + Math.max(...ends)) / 2;
-    const span = Math.max(...ends) - Math.min(...starts);
-    const distance = distanceForSpan(span, perspective, viewportWidth);
-
-    const wallPerp = group[0][perpAxis];
-    const towardCenter = wallPerp > 0 ? -distance : distance;
-    const viewpointPerp = wallPerp + towardCenter;
-
-    const point =
-      alongAxis === "x"
-        ? { x: center, z: viewpointPerp }
-        : { x: viewpointPerp, z: center };
+  return Array.from({ length: count }, (_, idx) => {
+    const row = Math.floor(idx / cols);
+    const col = idx % cols;
+    const x = cols === 1 ? 0 : -xRange / 2 + (xRange * col) / (cols - 1);
+    const z = rows === 1 ? 0 : -zRange / 2 + (zRange * row) / (rows - 1);
 
     return {
-      id: `${wallName}-${idx}`,
-      name:
-        groups.length > 1
-          ? `${WALL_LABELS[wallName]}展示 ${idx + 1}`
-          : `${WALL_LABELS[wallName]}展示`,
-      x: point.x,
+      id: `stand-${idx}`,
+      name: `立ち位置 ${idx + 1}`,
+      x,
       y: 0,
-      z: point.z,
+      z,
       rx: 0,
-      ry: group[0].ry,
-      markerX: point.x,
-      markerZ: point.z,
+      ry: getFacingRotationForPoint(x, z),
+      markerX: x,
+      markerZ: z,
     };
   });
 }
@@ -220,7 +179,7 @@ export default function Exhibition3DGalleryView({
   const isAnimatingRef = useRef(false);
 
   const [, setAnimating] = useState(false);
-  const [currentViewPoint, setCurrentViewPoint] = useState("entrance");
+  const [currentViewPoint, setCurrentViewPoint] = useState("stand-0");
 
   // Track the real viewport size so standing distances can be computed from the
   // actual horizontal field of view, not just a rough guess.
@@ -284,18 +243,11 @@ export default function Exhibition3DGalleryView({
     [paintingsByWall],
   );
 
-  // One standing spot per group of ~3 artworks, plus the entrance overview spot
-  const viewpoints = useMemo(() => {
-    const wallViewpoints = WALLS.flatMap((wallName) =>
-      getViewpointsForWall(
-        paintingsByWall[wallName],
-        wallName,
-        perspective,
-        viewportSize.width,
-      ),
-    );
-    return [ENTRANCE_VIEWPOINT, ...wallViewpoints];
-  }, [paintingsByWall, perspective, viewportSize.width]);
+  // Roughly one standing spot per three artworks, distributed evenly through the room.
+  const viewpoints = useMemo(
+    () => getGridViewpoints(items.length),
+    [items.length],
+  );
 
   // Camera transition tween handler
   const transitionCamera = useCallback(
@@ -414,25 +366,25 @@ export default function Exhibition3DGalleryView({
     const originalStyle = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    // Set starting position at Entrance
-    const ent = ENTRANCE_VIEWPOINT;
+    // Set starting position at the first room stand.
+    const initialViewpoint = getGridViewpoints(items.length)[0];
     cameraRef.current = {
-      x: ent.x,
-      y: ent.y,
-      z: ent.z,
-      rx: ent.rx,
-      ry: ent.ry,
+      x: initialViewpoint.x,
+      y: initialViewpoint.y,
+      z: initialViewpoint.z,
+      rx: initialViewpoint.rx,
+      ry: initialViewpoint.ry,
     };
 
     if (rigRef.current && roomRef.current) {
-      rigRef.current.style.transform = `translate3d(${-ent.x}px, ${-ent.y}px, ${-ent.z}px)`;
-      roomRef.current.style.transform = `rotateX(${ent.rx}deg) rotateY(${ent.ry}deg)`;
+      rigRef.current.style.transform = `translate3d(${-initialViewpoint.x}px, ${-initialViewpoint.y}px, ${-initialViewpoint.z}px)`;
+      roomRef.current.style.transform = `rotateX(${initialViewpoint.rx}deg) rotateY(${initialViewpoint.ry}deg)`;
     }
 
     return () => {
       document.body.style.overflow = originalStyle;
     };
-  }, []);
+  }, [items.length]);
 
   return (
     <div
@@ -460,7 +412,7 @@ export default function Exhibition3DGalleryView({
                 height: ROOM_DEPTH,
                 left: -ROOM_WIDTH / 2,
                 top: -ROOM_DEPTH / 2,
-                transform: `translateY(250px) rotateX(90deg)`,
+                transform: `translateY(${FLOOR_Y}px) rotateX(90deg)`,
               }}
             />
 
@@ -472,7 +424,7 @@ export default function Exhibition3DGalleryView({
                 height: ROOM_DEPTH,
                 left: -ROOM_WIDTH / 2,
                 top: -ROOM_DEPTH / 2,
-                transform: `translateY(-450px) rotateX(-90deg)`,
+                transform: `translateY(${CEILING_Y}px) rotateX(-90deg)`,
               }}
             />
 
@@ -484,7 +436,7 @@ export default function Exhibition3DGalleryView({
                 height: ROOM_HEIGHT,
                 left: -ROOM_WIDTH / 2,
                 top: -ROOM_HEIGHT / 2,
-                transform: `translate3d(0, -100px, ${-ROOM_DEPTH / 2}px)`,
+                transform: `translate3d(0, ${WALL_CENTER_Y}px, ${-ROOM_DEPTH / 2}px)`,
               }}
             />
 
@@ -496,7 +448,7 @@ export default function Exhibition3DGalleryView({
                 height: ROOM_HEIGHT,
                 left: -ROOM_WIDTH / 2,
                 top: -ROOM_HEIGHT / 2,
-                transform: `translate3d(0, -100px, ${ROOM_DEPTH / 2}px) rotateY(180deg)`,
+                transform: `translate3d(0, ${WALL_CENTER_Y}px, ${ROOM_DEPTH / 2}px) rotateY(180deg)`,
               }}
             />
 
@@ -508,7 +460,7 @@ export default function Exhibition3DGalleryView({
                 height: ROOM_HEIGHT,
                 left: -ROOM_DEPTH / 2,
                 top: -ROOM_HEIGHT / 2,
-                transform: `translate3d(${-ROOM_WIDTH / 2}px, -100px, 0) rotateY(90deg)`,
+                transform: `translate3d(${-ROOM_WIDTH / 2}px, ${WALL_CENTER_Y}px, 0) rotateY(90deg)`,
               }}
             />
 
@@ -520,7 +472,7 @@ export default function Exhibition3DGalleryView({
                 height: ROOM_HEIGHT,
                 left: -ROOM_DEPTH / 2,
                 top: -ROOM_HEIGHT / 2,
-                transform: `translate3d(${ROOM_WIDTH / 2}px, -100px, 0) rotateY(-90deg)`,
+                transform: `translate3d(${ROOM_WIDTH / 2}px, ${WALL_CENTER_Y}px, 0) rotateY(-90deg)`,
               }}
             />
 
@@ -535,7 +487,7 @@ export default function Exhibition3DGalleryView({
                   style={{
                     left: vp.markerX,
                     top: vp.markerZ,
-                    transform: `translate(-50%, -50%) translateY(248px) rotateX(90deg)`,
+                    transform: `translate(-50%, -50%) translateY(${MARKER_FLOOR_Y}px) rotateX(90deg)`,
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
