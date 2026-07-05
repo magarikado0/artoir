@@ -36,12 +36,7 @@
 
 ## モックアップ
 
-`docs/design/mockups/` に格納。
-
-### 現状
+`docs/design/mockups/` に格納。**初期検討時のデモHTMLのアーカイブ**であり、現在のデザインの正は実装（`app/src/`）。
 
 - `index.html`：団体・展覧会の一覧系ページのデモ
-- `Artoir-exhibition.html`：展覧会閲覧ページのデモ
-
-**できていること**：作品の表示
-**できていないこと**：その他すべての機能（作成フロー・認証・カスタマイズ等）
+- `artport-exhibition.html`：展覧会閲覧ページのデモ
