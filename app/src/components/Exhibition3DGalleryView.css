@@ -1,0 +1,452 @@
+/* ── 3D Gallery View Styles ── */
+
+.ui-gallery3d-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 100svh;
+  background-color: #0c0b0a; /* Deep museum dark mood */
+  color: #f7f6f5;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  touch-action: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 3D Viewport */
+.ui-gallery3d-viewport {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+  overflow: hidden;
+}
+
+/* Camera Rig & Room Container */
+.ui-gallery3d-camera-rig {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.ui-gallery3d-room {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Room Walls & Floor/Ceiling */
+.ui-gallery3d-wall {
+  position: absolute;
+  background-color: #efede7; /* Authentic museum warm white */
+  transform-style: preserve-3d;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.12);
+  backface-visibility: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Floor (Wood Grain CSS - Polished and warm) */
+.ui-gallery3d-floor {
+  position: absolute;
+  background-color: #4b3017;
+  background-image: 
+    repeating-linear-gradient(90deg, transparent, transparent 150px, rgba(0,0,0,0.18) 150px, rgba(0,0,0,0.18) 152px),
+    repeating-linear-gradient(0deg, transparent, transparent 400px, rgba(0,0,0,0.12) 400px, rgba(0,0,0,0.12) 401px),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 80%);
+  transform-style: preserve-3d;
+  box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.7);
+  backface-visibility: hidden;
+}
+
+/* Ceiling */
+.ui-gallery3d-ceiling {
+  position: absolute;
+  background-color: #dfdfdb;
+  background-image: radial-gradient(circle at 50% 50%, #ffffff 0%, #cfcfc8 100%);
+  transform-style: preserve-3d;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.25);
+  backface-visibility: hidden;
+}
+
+/* Spotlights glow behind paintings */
+.ui-gallery3d-spotlight-glow {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 252, 215, 0.32) 0%, rgba(255, 255, 255, 0) 65%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+}
+
+/* Artworks */
+.ui-gallery3d-artwork-container {
+  position: absolute;
+  transform-style: preserve-3d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+/* Premium Dynamic Frame - larger and more detailed */
+.ui-gallery3d-frame {
+  position: relative;
+  background-color: #1a1918;
+  border: 15px solid #141312; /* Sleek black-brown gallery frame */
+  box-shadow: 
+    0 30px 60px -15px rgba(0, 0, 0, 0.75), 
+    0 15px 30px -5px rgba(0, 0, 0, 0.5),
+    inset 0 1px 3px rgba(255, 255, 255, 0.08);
+  outline: 1px solid rgba(0, 0, 0, 0.95);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px; /* Passepartout (Mat board) */
+  background: #fbfbf8; /* Crisp off-white mat board */
+}
+
+.ui-gallery3d-artwork-container:hover .ui-gallery3d-frame {
+  transform: scale3d(1.025, 1.025, 1.025) translateZ(10px);
+  box-shadow: 
+    0 40px 75px -10px rgba(0, 0, 0, 0.85), 
+    0 20px 40px -2px rgba(0, 0, 0, 0.6);
+}
+
+.ui-gallery3d-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.15);
+  filter: contrast(1.02) saturate(1.02);
+}
+
+/* Art Plaque (Museum Style) */
+.ui-gallery3d-plaque {
+  margin-top: 14px;
+  background-color: rgba(251, 248, 245, 0.95);
+  border-left: 3px solid #BE553D;
+  padding: 8px 14px;
+  color: #1a1918;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  width: 240px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  transform: translateZ(2px);
+  pointer-events: none;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.ui-gallery3d-plaque-title {
+  font-weight: 600;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ui-gallery3d-plaque-creator {
+  color: #655c54;
+}
+
+/* Floor Clickable Viewpoint Markers */
+.ui-gallery3d-marker {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  transform: translate(-50%, -50%);
+  transform-style: preserve-3d;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.ui-gallery3d-marker-inner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px #ffffff;
+}
+
+/* Hover effect */
+.ui-gallery3d-marker:hover {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: #BE553D;
+  box-shadow: 0 0 25px rgba(190, 85, 61, 0.5);
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+.ui-gallery3d-marker:hover .ui-gallery3d-marker-inner {
+  background: #BE553D;
+  box-shadow: 0 0 12px #BE553D;
+}
+
+/* Active Highlight */
+.ui-gallery3d-marker.is-active {
+  background: rgba(190, 85, 61, 0.2);
+  border-color: #BE553D;
+  box-shadow: 0 0 30px rgba(190, 85, 61, 0.7);
+}
+
+.ui-gallery3d-marker.is-active .ui-gallery3d-marker-inner {
+  background: #BE553D;
+  transform: scale(1.2);
+  box-shadow: 0 0 15px #BE553D;
+}
+
+/* HUD Controls Overlay */
+.ui-gallery3d-controls-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(16px, 3vw, 24px);
+  z-index: 10;
+}
+
+.ui-gallery3d-controls-overlay * {
+  pointer-events: auto;
+}
+
+/* Top bar style */
+.ui-gallery3d-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.ui-gallery3d-title-info {
+  background: rgba(12, 11, 10, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 18px;
+  border-radius: 99px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.ui-gallery3d-title-info h3 {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.05em;
+  color: #fff;
+}
+
+.ui-gallery3d-close-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(12, 11, 10, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.ui-gallery3d-close-btn:hover {
+  background: rgba(190, 85, 61, 0.25);
+  border-color: #BE553D;
+  color: #BE553D;
+  transform: scale(1.05);
+}
+
+/* Help Guide / Instructions (Minimalist and temporary) */
+.ui-gallery3d-instructions {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(12, 11, 10, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  animation: fadeOutFast 4s forwards;
+}
+
+@keyframes fadeOutFast {
+  0% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+/* Detail Panel (Slide in from right) */
+.ui-gallery3d-detail-panel {
+  position: absolute;
+  top: 80px;
+  right: 24px;
+  bottom: 80px;
+  width: 350px;
+  background: rgba(12, 11, 10, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.ui-gallery3d-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 12px;
+}
+
+.ui-gallery3d-detail-title {
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.ui-gallery3d-detail-creators {
+  font-size: 13px;
+  color: #BE553D;
+  font-weight: 500;
+}
+
+.ui-gallery3d-detail-meta {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+}
+
+.ui-gallery3d-detail-description {
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.ui-gallery3d-detail-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.ui-gallery3d-detail-close:hover {
+  color: #fff;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .ui-gallery3d-detail-panel {
+    top: auto;
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
+    width: auto;
+    height: auto;
+    max-height: 40%;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* On-screen Navigation Controls (Virtual Joystick / Buttons) - minimized & styled */
+.ui-gallery3d-navigation-pad {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, 38px);
+  grid-template-rows: repeat(3, 38px);
+  gap: 5px;
+  background: rgba(12, 11, 10, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px;
+  border-radius: 10px;
+  opacity: 0.65;
+  transition: opacity 0.2s ease;
+}
+
+.ui-gallery3d-navigation-pad:hover {
+  opacity: 1;
+}
+
+.ui-gallery3d-nav-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  font-size: 11px;
+}
+
+.ui-gallery3d-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.03);
+}
+
+.ui-gallery3d-nav-btn:active {
+  background: #BE553D;
+  border-color: #BE553D;
+}

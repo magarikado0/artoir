@@ -9,6 +9,7 @@ import FavoriteButton from '../components/FavoriteButton'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
+import Exhibition3DGalleryView from '../components/Exhibition3DGalleryView'
 import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
 import ExhibitionStatusBadge from '../components/ExhibitionStatusBadge'
 import { useGalleryLayout } from '../lib/useGalleryLayout'
@@ -196,8 +197,19 @@ export default function ExhibitionPage() {
           <div className="ui-exhibition-artworks-head">
             {!profileSlug && <div className="ui-section-label">作品</div>}
             {artworks.length > 0 && (
-              <div className="ui-exhibition-artworks-actions">
+              <div className="ui-exhibition-artworks-actions" style={{ gap: 8 }}>
                 <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
+                <button
+                  type="button"
+                  className="ui-immersive-launch"
+                  onClick={() => setViewMode('3d')}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                  <span>3D空間で巡る</span>
+                </button>
                 <button
                   type="button"
                   className="ui-immersive-launch"
@@ -221,6 +233,9 @@ export default function ExhibitionPage() {
         </section>
         {viewMode === 'ribbon' && artworks.length > 0 && (
           <ExhibitionRibbonView artworks={artworks} onClose={() => setViewMode('grid')} />
+        )}
+        {viewMode === '3d' && artworks.length > 0 && (
+          <Exhibition3DGalleryView artworks={artworks} onClose={() => setViewMode('grid')} />
         )}
       </main>
       <ArtworkModal
