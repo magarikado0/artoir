@@ -1,23 +1,29 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../lib/auth'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
 import PublicManageLink from '../components/PublicManageLink'
+import FavoriteButton from '../components/FavoriteButton'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
+import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
+import { useGalleryLayout } from '../lib/useGalleryLayout'
 import { T, externalHost } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 
 export default function ProfilePage() {
   const { profileSlug } = useParams()
+  const { session } = useAuth()
   const [profile, setProfile] = useState(null)
   const [organizations, setOrganizations] = useState([])
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
+  const [galleryLayout, setGalleryLayout] = useGalleryLayout()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -75,14 +81,28 @@ export default function ProfilePage() {
   )
 
   const sns = profile.sns_links || {}
+  // 自分のプロフィール = ログイン中ユーザー自身。ナビ表示や自己ブックマーク抑止に使う。
+  const isOwnProfile = Boolean(session?.user?.id && session.user.id === profile.id)
+  const navTab = isOwnProfile ? 'account' : 'creators'
 
   return (
     <div className="ui-page-shell">
-      <Header activeTab="account" />
+      <Header activeTab={navTab} />
       <main className="ui-app-main">
         <section style={{ marginBottom: 48 }}>
-          <div className="ui-kicker">プロフィール</div>
-          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
+          <div className="ui-profile-name-row">
+            <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
+            {/* 自分のプロフィールは自分をブックマークできないよう非表示。 */}
+            {!isOwnProfile && (
+              <FavoriteButton
+                targetType="profile"
+                targetId={profile.id}
+                kind="bookmark"
+                appearance="icon"
+                className="ui-profile-name-fav"
+              />
+            )}
+          </div>
           <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
           {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 16 }}>{profile.bio}</p>}
           <div className="ui-public-action-row">
@@ -132,18 +152,21 @@ export default function ProfilePage() {
           <>
             <div className="ui-exhibition-artworks-head">
               <div className="ui-section-label">作品</div>
-              <button
-                type="button"
-                className="ui-immersive-launch"
-                onClick={() => setViewMode('ribbon')}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
-                </svg>
-                <span>作品を巡る</span>
-              </button>
+              <div className="ui-exhibition-artworks-actions">
+                <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
+                <button
+                  type="button"
+                  className="ui-immersive-launch"
+                  onClick={() => setViewMode('ribbon')}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+                  </svg>
+                  <span>作品を巡る</span>
+                </button>
+              </div>
             </div>
-            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={setSelectedArtwork} />
+            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={setSelectedArtwork} layout={galleryLayout} />
           </>
         ) : (
           <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>公開中の作品はまだありません</div>
@@ -158,7 +181,7 @@ export default function ProfilePage() {
         onSelectArtwork={setSelectedArtwork}
         onClose={() => setSelectedArtwork(null)}
       />
-      <BottomNav active="account" />
+      <BottomNav active={navTab} />
     </div>
   )
 }

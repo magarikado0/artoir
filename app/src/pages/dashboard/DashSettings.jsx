@@ -196,7 +196,7 @@ export default function DashSettings() {
   }
 
   if (loading) return (
-    <DashShell orgSlug={orgSlug} />
+    <DashShell orgSlug={orgSlug} hideOrgBar />
   )
 
   const nameLabel = '団体名'
@@ -332,7 +332,7 @@ export default function DashSettings() {
   )
 
   if (isDesktop) return (
-    <DashShell orgSlug={orgSlug}>
+    <DashShell orgSlug={orgSlug} hideOrgBar>
       <div style={{ maxWidth: 820, margin: '0 auto' }}>
         {settingsContent}
       </div>
@@ -340,7 +340,7 @@ export default function DashSettings() {
   )
 
   return (
-    <DashShell orgSlug={orgSlug}>
+    <DashShell orgSlug={orgSlug} hideOrgBar>
       {settingsContent}
     </DashShell>
   )

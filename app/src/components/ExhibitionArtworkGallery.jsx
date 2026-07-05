@@ -9,15 +9,15 @@ import { T } from '../lib/tokens'
 // 画像サイズが未計測のあいだの仮サイズ（正方形扱い）。計測後に正しい span へ反映される。
 const FALLBACK_SIZE = { width: 1000, height: 1000 }
 
-// コンテナ幅から列数を決める（スマホ2・小型タブレット3・タブレット4・デスクトップ6）。
-function columnsForWidth(width) {
-  if (width < 420) return 2
-  if (width < 640) return 3
+// コンテナ幅から列数を決める（スマホ3・タブレット4・デスクトップ6）。
+// 均質な行列表示（grid）のみ、スマホは2カラムにする。
+function columnsForWidth(width, layout) {
+  if (width < 640) return layout === 'grid' ? 2 : 3
   if (width < 1024) return 4
   return 6
 }
 
-export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
+export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layout = 'wall' }) {
   const wrapRef = useRef(null)
   const [containerWidth, setContainerWidth] = useState(0)
 
@@ -33,7 +33,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
   }, [])
 
   const gap = containerWidth && containerWidth < 640 ? 8 : 16
-  const columns = columnsForWidth(containerWidth || 1024)
+  const columns = columnsForWidth(containerWidth || 1024, layout)
   // 1 セル（1×1）が正方形になるよう、行高 = 列幅 にそろえる。
   const columnWidth = containerWidth > 0 ? (containerWidth - gap * (columns - 1)) / columns : 0
   const rowHeight = columnWidth > 0 ? columnWidth : 120
@@ -108,8 +108,76 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
     onOpenArtwork(artwork)
   }
 
+  // ウォール（現状）と均質グリッドで描画を共通化する。spanStyle だけが異なる。
+  const renderTile = (artwork, index, spanStyle) => {
+    const id = String(artwork.id)
+    const label = artwork.title?.trim() || `作品 ${index + 1}`
+    return (
+      <div
+        key={id}
+        className={`ui-list-card ui-artwork-wall-card${revealedId === id ? ' is-revealed' : ''}`}
+        style={{ ...spanStyle, minWidth: 0, minHeight: 0 }}
+        onPointerDown={(e) => handlePointerDown(e, id)}
+        onPointerMove={handlePointerMove}
+        onPointerUp={cancelLongPress}
+        onPointerCancel={cancelLongPress}
+        onPointerLeave={cancelLongPress}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        <button
+          type="button"
+          className="ui-artwork-wall-open"
+          onPointerEnter={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
+          onFocus={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
+          onClick={() => handleOpen(artwork)}
+          aria-label={`${label}の詳細を見る`}
+        >
+          <ArtworkMedia
+            src={getWallThumbnailUrl(artwork.image_url)}
+            alt=""
+            decorative
+            loading="lazy"
+            fillHeight
+            fit="contain"
+            wrapperStyle={{ borderRadius: 4, background: T.surfaceMuted, width: '100%', height: '100%' }}
+            // 枠いっぱいに拡大して contain（上下または左右の辺が枠に接する）。
+            // 既定の contain は自然サイズ上限で拡大しないため、明示的に枠を充たす。
+            imageStyle={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 4 }}
+          />
+        </button>
+        <FavoriteButton
+          targetType="artwork"
+          targetId={artwork.id}
+          kind="bookmark"
+          appearance="icon"
+          stopPropagation
+          className="ui-artwork-wall-fav"
+        />
+      </div>
+    )
+  }
+
   if (items.length === 0) return null
 
+  // 均質グリッド: 全作品を 1×1 の正方形セルで並べる（作品の元順）。
+  if (layout === 'grid') {
+    return (
+      <div
+        ref={wrapRef}
+        className="ui-photo-wall"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${columns}, 1fr)`,
+          gridAutoRows: `${rowHeight}px`,
+          gap,
+        }}
+      >
+        {items.map((artwork, index) => renderTile(artwork, index, {}))}
+      </div>
+    )
+  }
+
+  // ウォール（現状）: エンジンが決めた可変サイズ(span)で配置する。
   return (
     <div
       ref={wrapRef}
@@ -125,50 +193,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork }) {
       {layoutItems.map((item, index) => {
         const artwork = artworkById.get(item.id)
         if (!artwork) return null
-        const label = artwork.title?.trim() || `作品 ${index + 1}`
-        return (
-          <div
-            key={item.id}
-            className={`ui-list-card ui-artwork-wall-card${revealedId === item.id ? ' is-revealed' : ''}`}
-            style={{ gridColumn: `span ${item.spanX}`, gridRow: `span ${item.spanY}`, minWidth: 0, minHeight: 0 }}
-            onPointerDown={(e) => handlePointerDown(e, item.id)}
-            onPointerMove={handlePointerMove}
-            onPointerUp={cancelLongPress}
-            onPointerCancel={cancelLongPress}
-            onPointerLeave={cancelLongPress}
-            onContextMenu={(e) => e.preventDefault()}
-          >
-            <button
-              type="button"
-              className="ui-artwork-wall-open"
-              onPointerEnter={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
-              onFocus={() => preloadImageUrl(getModalImageUrl(artwork.image_url))}
-              onClick={() => handleOpen(artwork)}
-              aria-label={`${label}の詳細を見る`}
-            >
-              <ArtworkMedia
-                src={getWallThumbnailUrl(artwork.image_url)}
-                alt=""
-                decorative
-                loading="lazy"
-                fillHeight
-                fit="contain"
-                wrapperStyle={{ borderRadius: 4, background: T.surfaceMuted, width: '100%', height: '100%' }}
-                // 枠いっぱいに拡大して contain（上下または左右の辺が枠に接する）。
-                // 既定の contain は自然サイズ上限で拡大しないため、明示的に枠を充たす。
-                imageStyle={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 4 }}
-              />
-            </button>
-            <FavoriteButton
-              targetType="artwork"
-              targetId={artwork.id}
-              kind="bookmark"
-              appearance="icon"
-              stopPropagation
-              className="ui-artwork-wall-fav"
-            />
-          </div>
-        )
+        return renderTile(artwork, index, { gridColumn: `span ${item.spanX}`, gridRow: `span ${item.spanY}` })
       })}
     </div>
   )

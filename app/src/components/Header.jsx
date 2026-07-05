@@ -1,12 +1,12 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
-import { supabase } from '../lib/supabase'
 import { useAccountDestination } from '../lib/useAccountDestination'
 import { BrandLockup } from './BrandMark'
 
 const TABS = [
   { key: 'top', label: '展覧会', path: '/', icon: 'list' },
   { key: 'orgs', label: '団体', path: '/orgs', icon: 'org' },
+  { key: 'creators', label: '作家', path: '/creators', icon: 'users' },
   { key: 'account', label: 'アカウント', path: '/account', icon: 'user' },
 ]
 
@@ -22,6 +22,18 @@ export function Icon({ name, size = 20 }) {
     <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="12" cy="8" r="4" {...s} />
       <path d="M4 21c1.8-4 4.5-6 8-6s6.2 2 8 6" {...s} />
+    </svg>
+  )
+  if (name === 'users') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="9" cy="8" r="3.2" {...s} />
+      <path d="M3 20c1.3-3.2 3.4-4.8 6-4.8s4.7 1.6 6 4.8" {...s} />
+      <path d="M16 5.2a3.2 3.2 0 0 1 0 6.1M18.5 20c-.5-1.6-1.3-2.9-2.4-3.8" {...s} />
+    </svg>
+  )
+  if (name === 'bookmark') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z" {...s} />
     </svg>
   )
   if (name === 'login') return (
@@ -72,14 +84,7 @@ export function Icon({ name, size = 20 }) {
 
 export default function Header({ activeTab }) {
   const { session } = useAuth()
-  const navigate = useNavigate()
   const accountPath = useAccountDestination()
-
-  async function handleLogout() {
-    if (!supabase) return
-    await supabase.auth.signOut()
-    navigate('/')
-  }
 
   return (
     <header className="ui-topbar">
@@ -106,11 +111,7 @@ export default function Header({ activeTab }) {
         )}
       </nav>
       <div className="ui-topbar-actions">
-        {session ? (
-          <button onClick={handleLogout} className="ui-topbar-icon" aria-label="ログアウト" type="button">
-            <Icon name="logout" size={18} />
-          </button>
-        ) : (
+        {!session && (
           <Link to="/login" className="ui-topbar-icon" aria-label="ログイン">
             <Icon name="login" size={18} />
           </Link>

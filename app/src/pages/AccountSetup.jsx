@@ -116,7 +116,6 @@ export default function AccountSetup() {
   const formContent = (
     <form onSubmit={handleSave}>
       <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
-        <DashSectionLabel>プロフィール</DashSectionLabel>
         <DashField
           label="表示名"
           value={displayName}
@@ -137,7 +136,7 @@ export default function AccountSetup() {
           onChange={setBio}
           placeholder="活動や作品について入力..."
           multiline
-          help="任意。作品の作者表示や将来のプロフィール公開で使います。"
+          help="作品の作者表示やプロフィール公開で使います。"
         />
         <DashSectionLabel>各種リンク</DashSectionLabel>
         <DashField
@@ -193,16 +192,12 @@ export default function AccountSetup() {
 
   const pageHeader = (
     <div className="ui-hero-screen-heading" style={{ marginBottom: isDesktop ? 14 : 0 }}>
-      <div className="ui-kicker">{profile ? 'プロフィール' : 'はじめる'}</div>
       <h1 className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>プロフィールを設定</h1>
-      <p className="ui-screen-subtitle">
-        表示名とIDを決めて、artoirを始めます。
-      </p>
     </div>
   )
 
   return (
-    <DashShell crumbs={['アカウント', 'プロフィール']}>
+    <DashShell>
       <div style={{ maxWidth: isDesktop ? 760 : undefined, margin: isDesktop ? '0 auto' : undefined }}>
         {pageHeader}
         {formContent}

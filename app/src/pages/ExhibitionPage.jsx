@@ -9,18 +9,23 @@ import FavoriteButton from '../components/FavoriteButton'
 import ArtworkModal from '../components/ArtworkModal'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
+import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
+import ExhibitionStatusBadge from '../components/ExhibitionStatusBadge'
+import { useGalleryLayout } from '../lib/useGalleryLayout'
 import LoadingFrames from '../components/LoadingFrames'
 import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
 
-function SummaryItem({ label, value }) {
+function SummaryItem({ label, value, to }) {
   if (!value) return null
   return (
     <div className="ui-exhibition-summary-item">
       <div className="ui-exhibition-summary-label">{label}</div>
-      <div className="ui-exhibition-summary-value">{value}</div>
+      <div className="ui-exhibition-summary-value">
+        {to ? <Link to={to} className="ui-exhibition-summary-link">{value}</Link> : value}
+      </div>
     </div>
   )
 }
@@ -35,6 +40,7 @@ export default function ExhibitionPage() {
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
+  const [galleryLayout, setGalleryLayout] = useGalleryLayout()
   const [loading, setLoading] = useState(true)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
   const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
@@ -146,7 +152,6 @@ export default function ExhibitionPage() {
   const exhibitionManagePath = exhibition?.id
     ? `${dashboardBase}/dashboard/exhibitions/${exhibition.id}/artworks`
     : `${dashboardBase}/dashboard`
-  const ownerPageLabel = profileSlug ? 'プロフィール' : '団体ページ'
   const hostLabel = profileSlug ? '作家' : '主催団体'
   const dateText = exhibition.start_date
     ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}`
@@ -156,12 +161,9 @@ export default function ExhibitionPage() {
     <div className="ui-page-shell">
       <Header activeTab="top" />
       <main className="ui-app-main">
-        <div className="ui-app-topline">
-          <Link to={ownerBase} className="ui-back-link">← {ownerPageLabel}</Link>
-        </div>
-
         <section>
           <div className="ui-exhibition-summary-card">
+            <ExhibitionStatusBadge exhibition={exhibition} className="ui-exhibition-status-eyebrow" />
             <div className="ui-exhibition-title-row">
               <h1 className="ui-screen-title">{exhibition.title}</h1>
               <FavoriteButton
@@ -185,7 +187,7 @@ export default function ExhibitionPage() {
             <div className="ui-exhibition-summary-grid">
               <SummaryItem label="会期" value={dateText} />
               <SummaryItem label="会場" value={exhibition.location} />
-              <SummaryItem label={hostLabel} value={owner?.display_name || owner?.name || ''} />
+              <SummaryItem label={hostLabel} value={owner?.display_name || owner?.name || ''} to={ownerBase} />
             </div>
           </div>
         </section>
@@ -194,20 +196,23 @@ export default function ExhibitionPage() {
           <div className="ui-exhibition-artworks-head">
             {!profileSlug && <div className="ui-section-label">作品</div>}
             {artworks.length > 0 && (
-              <button
-                type="button"
-                className="ui-immersive-launch"
-                onClick={() => setViewMode('ribbon')}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
-                </svg>
-                <span>作品を巡る</span>
-              </button>
+              <div className="ui-exhibition-artworks-actions">
+                <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
+                <button
+                  type="button"
+                  className="ui-immersive-launch"
+                  onClick={() => setViewMode('ribbon')}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+                  </svg>
+                  <span>作品を巡る</span>
+                </button>
+              </div>
             )}
           </div>
           {artworks.length > 0 ? (
-            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={openArtwork} />
+            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={openArtwork} layout={galleryLayout} />
           ) : (
             <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>
               作品がまだありません

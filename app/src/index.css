@@ -203,6 +203,23 @@ a {
   height: 38px;
 }
 
+/* 個人ページ：名前の右に栞アイコン（展覧会タイトルと同じ並び）。 */
+.ui-profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ui-profile-name-row .ui-screen-title {
+  min-width: 0;
+}
+
+.ui-profile-name-fav {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+}
+
 /* 写真ウォール（作品グリッド）のタイル */
 .ui-artwork-wall-card {
   position: relative;
@@ -671,10 +688,9 @@ a {
   right: 0;
   bottom: 0;
   z-index: 70;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 0;
-  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid #E4DDD2;
   background: rgba(245, 241, 235, 0.92);
   backdrop-filter: saturate(180%) blur(16px);
@@ -683,6 +699,8 @@ a {
 
 .ui-bottom-item {
   position: relative;
+  flex: 1 1 0;
+  min-width: 0;
   min-height: 50px;
   border: 0;
   border-radius: 10px;
@@ -697,8 +715,12 @@ a {
 }
 
 .ui-bottom-item span {
+  max-width: 100%;
   font-size: 10px;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ui-bottom-item.is-active {
@@ -1290,9 +1312,9 @@ a {
   order: 2;
   flex: 0 0 clamp(96px, 22%, 128px);
   position: relative;
+  /* カード高さいっぱいに伸ばす（正方形固定をやめる）。本文が高くてもサムネ下端が枠から離れない。 */
   align-self: stretch;
-  aspect-ratio: 1 / 1;
-  max-height: 128px;
+  min-height: clamp(96px, 22vw, 128px);
   background: #ECE5D9;
   overflow: hidden;
 }
@@ -1330,6 +1352,46 @@ a {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+/* 展覧会の開催状態バッジ（言葉＋形アイコン、色は補助）。 */
+.ui-exh-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 22px;
+  padding: 0 10px 0 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.ui-exh-status svg {
+  flex-shrink: 0;
+}
+
+/* 展覧会ページのタイトル上に出すステータス（アイブロウ的に1段上げる）。 */
+.ui-exhibition-status-eyebrow {
+  margin-bottom: 10px;
+}
+
+.ui-exh-status--live {
+  color: #BE553D;
+  background: rgba(190, 85, 61, 0.10);
+}
+
+.ui-exh-status--upcoming {
+  color: #8A6A1F;
+  background: rgba(196, 154, 58, 0.16);
+}
+
+.ui-exh-status--ended {
+  color: #8A8178;
+  background: #F1ECE3;
+  border-color: #E4DDD2;
 }
 
 .ui-exhibition-list-card-tag {
@@ -1412,6 +1474,14 @@ a {
   border-top: 1px solid #ECE5D9;
 }
 
+/* 開催状態バッジ＋会期日付。PC は横並び（バッジが日付の左）。 */
+.ui-exhibition-list-card-period {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .ui-exhibition-list-card-date {
   font-size: 12px;
   color: #8A8178;
@@ -1482,6 +1552,17 @@ a {
   font-size: 14px;
   line-height: 1.7;
   color: #1F1B17;
+}
+
+.ui-exhibition-summary-link {
+  color: #1F1B17;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 140ms ease;
+}
+
+.ui-exhibition-summary-link:hover {
+  border-bottom-color: currentColor;
 }
 
 .ui-org-table {
@@ -1584,6 +1665,69 @@ a {
 
 .ui-org-count {
   text-align: right;
+}
+
+/* 作家一覧（profiles 検索） */
+.ui-creator-list {
+  border-top: 1px solid #ECE5D9;
+}
+
+.ui-creator-row {
+  position: relative;
+  display: block;
+  padding: 16px 56px 16px 20px;
+  border-bottom: 1px solid #ECE5D9;
+  text-decoration: none;
+  transition: background 140ms ease;
+}
+
+.ui-creator-row:hover {
+  background: #FBF8F3;
+}
+
+.ui-creator-row-fav {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+}
+
+.ui-creator-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ui-creator-name {
+  color: #1F1B17;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-creator-handle {
+  color: #8A8178;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.ui-creator-bio {
+  margin-top: 4px;
+  color: #8A8178;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* 団体一覧の各行のお気に入りボタン */
@@ -1979,6 +2123,49 @@ a {
 .ui-exhibition-view-toggle button {
   min-height: 34px;
   padding: 0 14px;
+}
+
+/* 作品一覧の表示方法トグル（ウォール / 均質グリッド）＋「作品を巡る」 */
+.ui-exhibition-artworks-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ui-gallery-layout-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #E4DDD2;
+  border-radius: 999px;
+  background: rgba(251, 248, 243, 0.6);
+}
+
+.ui-gallery-layout-toggle button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #8A8178;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.ui-gallery-layout-toggle button:hover {
+  color: #4A413A;
+}
+
+.ui-gallery-layout-toggle button.is-active {
+  background: #FBF8F3;
+  color: #BE553D;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .ui-immersive-launch {
@@ -3203,6 +3390,18 @@ button.ui-account-org-pick-btn.ui-org-row {
   overflow-wrap: anywhere;
 }
 
+a.ui-settings-member-link {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+a.ui-settings-member-link:hover {
+  color: #BE553D;
+  text-decoration: underline;
+}
+
 .ui-settings-member-role,
 .ui-settings-member-note,
 .ui-settings-member-message {
@@ -3336,6 +3535,10 @@ button.ui-account-org-pick-btn.ui-org-row {
   min-height: 320px;
   height: min(62vh, 620px);
   height: min(62dvh, 620px);
+  /* クロップ中に背後のモーダルがスクロールしてハンドル操作を奪わないようにする。
+     コーナーハンドルは画像の縁より外（レターボックス余白）にもはみ出すため、
+     オーバーレイだけでなくクロップ領域全体でジェスチャを無効化する。 */
+  touch-action: none;
 }
 
 .ui-artwork-crop-control {
@@ -3456,6 +3659,64 @@ button.ui-account-org-pick-btn.ui-org-row {
   cursor: default;
   opacity: 0.4;
 }
+
+/* --- 4隅クロップ（透視補正）UI --- */
+.ui-quad-loupe-wrap {
+  position: absolute;
+  width: 132px;
+  height: 132px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 3px solid #FBF8F3;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  background: #1F1B17;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ui-quad-loupe {
+  display: block;
+  width: 132px;
+  height: 132px;
+}
+
+.ui-quad-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ui-quad-reset,
+.ui-quad-rotate {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid #D8CFC2;
+  border-radius: 8px;
+  background: #FBF8F3;
+  color: #312B27;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.ui-quad-rotate {
+  margin-right: auto; /* 回転は左寄せ、リセットは右寄せ */
+}
+
+.ui-quad-reset:hover:not(:disabled),
+.ui-quad-rotate:hover:not(:disabled) {
+  border-color: #8A8178;
+  background: #F3EEE5;
+}
+
+.ui-quad-reset:disabled,
+.ui-quad-rotate:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
 @media (min-width: 1024px) {
   .ui-exhibition-list-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3576,7 +3837,6 @@ button.ui-account-org-pick-btn.ui-org-row {
 
   .ui-exhibition-list-card-media {
     flex-basis: clamp(92px, 31%, 128px);
-    max-height: 128px;
   }
 
   .ui-exhibition-list-card-body {

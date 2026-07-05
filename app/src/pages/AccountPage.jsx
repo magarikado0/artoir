@@ -27,7 +27,6 @@ function LoggedOut({ isDesktop }) {
 
   const content = (
     <>
-      <div className="ui-kicker">ゲスト</div>
       <div className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>アカウント</div>
       <div className="ui-screen-subtitle" style={{ fontFamily: isDesktop ? T.serifBody : undefined, marginBottom: isDesktop ? 22 : undefined }}>
         ログインすると、プロフィールと団体の展示を管理できます。
@@ -58,7 +57,6 @@ function ProfileSummary({ profile }) {
   return (
     <section className="ui-account-section">
       <div className="ui-account-section-head">
-        <div className="ui-kicker">プロフィール</div>
         <div className="ui-profile-summary-actions">
           <Link to="/account/setup" className="ui-inline-edit-action">
             <span>プロフィール編集</span>
