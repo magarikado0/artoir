@@ -65,15 +65,32 @@ async function collectUrls(env, siteUrl) {
       })
     }
 
+    const profiles = await fetchSupabase(
+      supabaseEnv,
+      'profiles?select=slug&order=slug.asc',
+    )
+    for (const profile of profiles) {
+      if (!profile?.slug) continue
+      urls.push({
+        loc: `${siteUrl}/profile/${encodeURIComponent(profile.slug)}`,
+        changefreq: 'weekly',
+        priority: '0.7',
+      })
+    }
+
     const exhibitions = await fetchSupabase(
       supabaseEnv,
-      'exhibitions?select=slug,organizations(slug)&order=slug.asc',
+      'exhibitions?select=slug,organizations(slug),profiles(slug)&order=slug.asc',
     )
     for (const exhibition of exhibitions) {
       const orgSlug = exhibition?.organizations?.slug
-      if (!orgSlug || !exhibition?.slug) continue
+      const profileSlug = exhibition?.profiles?.slug
+      if (!exhibition?.slug || (!orgSlug && !profileSlug)) continue
+      const ownerPath = profileSlug
+        ? `/profile/${encodeURIComponent(profileSlug)}`
+        : `/${encodeURIComponent(orgSlug)}`
       urls.push({
-        loc: `${siteUrl}/${encodeURIComponent(orgSlug)}/exhibition/${encodeURIComponent(exhibition.slug)}`,
+        loc: `${siteUrl}${ownerPath}/exhibition/${encodeURIComponent(exhibition.slug)}`,
         changefreq: 'weekly',
         priority: '0.9',
       })

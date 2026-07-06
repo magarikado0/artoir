@@ -7,22 +7,23 @@ import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
 import PublicManageLink from '../components/PublicManageLink'
 import FavoriteButton from '../components/FavoriteButton'
-import ArtworkModal from '../components/ArtworkModal'
+import ArtworkViewer from '../components/ArtworkViewer'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
-import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
+import ExhibitionListCard from '../components/ExhibitionListCard'
 import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
 import { useGalleryLayout } from '../lib/useGalleryLayout'
+import { useArtworkViewerHistory } from '../lib/useArtworkViewerHistory'
 import { T, externalHost } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
+import { mapExhibitionListRow } from '../lib/exhibition'
 
 export default function ProfilePage() {
   const { profileSlug } = useParams()
   const { session } = useAuth()
   const [profile, setProfile] = useState(null)
   const [organizations, setOrganizations] = useState([])
+  const [exhibitions, setExhibitions] = useState([])
   const [artworks, setArtworks] = useState([])
-  const [selectedArtwork, setSelectedArtwork] = useState(null)
-  const [viewMode, setViewMode] = useState('grid')
   const [galleryLayout, setGalleryLayout] = useGalleryLayout()
   const [loading, setLoading] = useState(true)
 
@@ -33,12 +34,17 @@ export default function ProfilePage() {
         const { data: profileData } = await supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle()
         if (!profileData) return setLoading(false)
         setProfile(profileData)
-        const [{ data: works }, { data: membershipRows }] = await Promise.all([
+        const [{ data: works }, { data: exhibitionRows }, { data: membershipRows }] = await Promise.all([
           supabase
             .from('artworks')
             .select('id, title, description, image_url, profile_id, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
             .eq('profile_id', profileData.id)
             .order('order'),
+          supabase
+            .from('exhibitions')
+            .select('*, artworks(image_url, order)')
+            .eq('profile_id', profileData.id)
+            .order('start_date', { ascending: false }),
           supabase
             .from('organization_members')
             .select('role, organizations(id, name, slug)')
@@ -55,6 +61,7 @@ export default function ProfilePage() {
             profiles: profileData,
           },
         })).filter((artwork) => artwork?.image_url))
+        setExhibitions((exhibitionRows || []).map(mapExhibitionListRow))
         setOrganizations((membershipRows || []).map((row) => row.organizations).filter((org) => org?.slug))
       } catch {
         /* unavailable */
@@ -69,6 +76,8 @@ export default function ProfilePage() {
     () => artworks.filter((item) => item.image_url),
     [artworks],
   )
+
+  const { selectedArtwork, openArtwork, selectArtwork, closeArtwork } = useArtworkViewerHistory(viewableArtworks)
 
   if (loading) return (
     <div className="ui-page-shell" />
@@ -148,39 +157,46 @@ export default function ProfilePage() {
           )}
         </section>
 
+        {exhibitions.length > 0 && (
+          <section style={{ marginBottom: 64 }}>
+            <div className="ui-section-label">個人展覧会</div>
+            <div className="ui-exhibition-list-grid">
+              {exhibitions.map((exhibition) => (
+                <ExhibitionListCard
+                  key={exhibition.id}
+                  exhibition={exhibition}
+                  profile={profile}
+                  showOrgName={false}
+                  artworkCount={exhibition.artworkCount}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         {artworks.length > 0 ? (
           <>
             <div className="ui-exhibition-artworks-head">
               <div className="ui-section-label">作品</div>
               <div className="ui-exhibition-artworks-actions">
                 <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
-                <button
-                  type="button"
-                  className="ui-immersive-launch"
-                  onClick={() => setViewMode('ribbon')}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
-                  </svg>
-                  <span>作品を巡る</span>
-                </button>
               </div>
             </div>
-            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={setSelectedArtwork} layout={galleryLayout} />
+            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={openArtwork} layout={galleryLayout} />
           </>
         ) : (
           <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>公開中の作品はまだありません</div>
         )}
-        {viewMode === 'ribbon' && viewableArtworks.length > 0 && (
-          <ExhibitionRibbonView artworks={viewableArtworks} onClose={() => setViewMode('grid')} />
-        )}
       </main>
-      <ArtworkModal
-        artwork={selectedArtwork}
-        artworks={viewableArtworks}
-        onSelectArtwork={setSelectedArtwork}
-        onClose={() => setSelectedArtwork(null)}
-      />
+      {selectedArtwork && (
+        <ArtworkViewer
+          artworks={viewableArtworks}
+          initialArtwork={selectedArtwork}
+          onArtworkChange={selectArtwork}
+          onClose={closeArtwork}
+          showCreators={false}
+        />
+      )}
       <BottomNav active={navTab} />
     </div>
   )

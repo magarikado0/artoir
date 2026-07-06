@@ -1,0 +1,195 @@
+.ui-3d-gallery-overlay {
+  position: fixed;
+  inset: 0;
+  /* ArtworkViewer uses z-index: 500 and must appear above artwork clicks from this view. */
+  z-index: 400;
+  width: 100%;
+  height: 100svh;
+  background: #0c0b0a;
+  color: #fbf8f3;
+  overflow: hidden;
+}
+
+.ui-3d-gallery-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.ui-3d-gallery-canvas canvas {
+  touch-action: none;
+}
+
+.ui-3d-gallery-hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) 18px 0;
+  pointer-events: none;
+}
+
+.ui-3d-gallery-pill {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px solid rgba(251, 248, 243, 0.22);
+  border-radius: 999px;
+  background: rgba(12, 11, 10, 0.62);
+  color: #fbf8f3;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.ui-3d-gallery-close {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(251, 248, 243, 0.28);
+  border-radius: 999px;
+  background: rgba(12, 11, 10, 0.62);
+  color: #fbf8f3;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.ui-3d-gallery-close:hover {
+  border-color: rgba(251, 248, 243, 0.72);
+  background: rgba(12, 11, 10, 0.82);
+}
+
+.ui-3d-gallery-help {
+  position: absolute;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 2;
+  max-width: calc(100vw - 32px);
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border: 1px solid rgba(251, 248, 243, 0.18);
+  border-radius: 999px;
+  background: rgba(12, 11, 10, 0.58);
+  color: rgba(251, 248, 243, 0.86);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: nowrap;
+  animation: ui-3d-gallery-help-fade 5.5s ease forwards;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  pointer-events: none;
+}
+
+.ui-3d-gallery-navigation {
+  position: absolute;
+  right: 18px;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+
+.ui-3d-gallery-navigation-button {
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(251, 248, 243, 0.3);
+  border-radius: 999px;
+  background: rgba(12, 11, 10, 0.68);
+  color: #fbf8f3;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.ui-3d-gallery-navigation-button:hover {
+  border-color: rgba(251, 248, 243, 0.72);
+  background: rgba(12, 11, 10, 0.84);
+  transform: translateY(-1px);
+}
+
+.ui-3d-gallery-navigation-button:focus-visible {
+  outline: 2px solid #fbf8f3;
+  outline-offset: 3px;
+}
+
+/* テクスチャロード失敗の可視化。壁から作品が黙って消えると原因調査が
+   できないため、失敗数を必ず画面に出す */
+.ui-3d-gallery-load-warning {
+  position: absolute;
+  top: calc(72px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  max-width: calc(100vw - 32px);
+  padding: 8px 14px;
+  border: 1px solid rgba(214, 134, 60, 0.5);
+  border-radius: 8px;
+  background: rgba(60, 36, 12, 0.82);
+  color: #f5c99a;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ui-3d-gallery-fallback {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.ui-3d-gallery-fallback-panel {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+.ui-3d-gallery-fallback-panel p {
+  color: #fbf8f3;
+  font-size: 14px;
+}
+
+@keyframes ui-3d-gallery-help-fade {
+  0%, 58% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .ui-3d-gallery-hud {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .ui-3d-gallery-help {
+    width: calc(100vw - 28px);
+    border-radius: 10px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .ui-3d-gallery-navigation {
+    right: 14px;
+  }
+}

@@ -5,17 +5,22 @@ import { useResolvedSession } from '../lib/useResolvedSession'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkMedia from '../components/ArtworkMedia'
-import ArtworkModal from '../components/ArtworkModal'
+import ArtworkViewer from '../components/ArtworkViewer'
 import ImageUploader from '../components/ImageUploader'
 import ArtworkCreateModal from '../components/ArtworkCreateModal'
 import ArtworkEditModal from '../components/ArtworkEditModal'
 import LoadingFrames from '../components/LoadingFrames'
+import ExhibitionStatusBadge from '../components/ExhibitionStatusBadge'
+import { ExhibitionCardMedia } from '../components/ExhibitionListCard'
 import { useDelayedLoading } from '../lib/useDelayedLoading'
-import { T, pad2 } from '../lib/tokens'
+import { T, fmtDateRangeShort, pad2 } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { attachNormalizedCreators, normalizeProfile } from '../lib/profile'
 import { getGalleryThumbnailUrl } from '../lib/imageUrl'
 import { getArtworkUploadConfigError, uploadArtworkImage } from '../lib/artworkUpload'
+import { getExhibitionThumbnailUrl, mapExhibitionListRow } from '../lib/exhibition'
+import { deleteExhibition } from '../lib/deleteExhibition'
+import { profilePath } from '../lib/profileRoutes'
 
 function LoggedOut({ isDesktop }) {
   const navigate = useNavigate()
@@ -67,6 +72,47 @@ function ProfileSummary({ profile }) {
       <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
       {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 10 }}>{profile.bio}</p>}
     </section>
+  )
+}
+
+function AccountExhibitionCard({ exhibition, onOpen, onDelete }) {
+  const thumbnailUrl = getExhibitionThumbnailUrl(exhibition)
+  return (
+    <div
+      className="ui-list-card ui-exhibition-list-card"
+      onClick={() => onOpen(exhibition)}
+      style={{ cursor: 'pointer' }}
+    >
+      <div className="ui-exhibition-list-card-media">
+        <ExhibitionCardMedia thumbnailUrl={thumbnailUrl} title={exhibition.title} />
+      </div>
+      <div className="ui-exhibition-list-card-body">
+        <div className="ui-exhibition-list-card-content">
+          <div className="ui-exhibition-list-card-title">{exhibition.title}</div>
+          {exhibition.location?.trim() && (
+            <div className="ui-exhibition-list-card-location">{exhibition.location}</div>
+          )}
+        </div>
+        <div className="ui-exhibition-list-card-footer">
+          <span className="ui-exhibition-list-card-period">
+            <ExhibitionStatusBadge exhibition={exhibition} />
+            <span className="ui-exhibition-list-card-date">
+              {fmtDateRangeShort(exhibition.start_date, exhibition.end_date)}
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              onDelete(exhibition)
+            }}
+            className="ui-artwork-sort-card-delete"
+          >
+            削除
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -162,6 +208,7 @@ export default function AccountPage() {
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [orgs, setOrgs] = useState([])
+  const [exhibitions, setExhibitions] = useState([])
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [createFile, setCreateFile] = useState(null)
@@ -174,12 +221,15 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true)
   const [profileMissing, setProfileMissing] = useState(false)
   const [loadError, setLoadError] = useState('')
+  const [deleteExhibitionTarget, setDeleteExhibitionTarget] = useState(null)
+  const [deletingExhibition, setDeletingExhibition] = useState(false)
 
   useEffect(() => {
     if (!ready) return undefined
     if (!supabase || !session) {
       setProfile(null)
       setOrgs([])
+      setExhibitions([])
       setArtworks([])
       setSelectedArtwork(null)
       setProfileMissing(false)
@@ -192,12 +242,21 @@ export default function AccountPage() {
     setLoading(true)
     async function load() {
       try {
-        const [{ data: profileData, error: profileError }, { data: membershipRows, error: membershipError }] = await Promise.all([
+        const [
+          { data: profileData, error: profileError },
+          { data: membershipRows, error: membershipError },
+          { data: exhibitionRows, error: exhibitionsError },
+        ] = await Promise.all([
           supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
           supabase
             .from('organization_members')
             .select('role, organizations(*)')
             .eq('profile_id', session.user.id),
+          supabase
+            .from('exhibitions')
+            .select('*, artworks(image_url, order)')
+            .eq('profile_id', session.user.id)
+            .order('start_date', { ascending: false }),
         ])
         if (cancelled) return
         if (profileError) {
@@ -205,13 +264,15 @@ export default function AccountPage() {
           setProfileMissing(false)
           setLoadError(profileError.message || 'プロフィールの読み込みに失敗しました。')
           setOrgs([])
+          setExhibitions([])
           setArtworks([])
           return
         }
         setProfile(normalizeProfile(profileData))
         setProfileMissing(!profileData)
-        setLoadError(membershipError?.message || '')
+        setLoadError(membershipError?.message || exhibitionsError?.message || '')
         setOrgs((membershipRows || []).map((row) => row.organizations).filter(Boolean))
+        setExhibitions((exhibitionRows || []).map(mapExhibitionListRow))
         if (profileData?.id) {
           const { data: artworkRows, error: artworkError } = await supabase
             .from('artworks')
@@ -239,6 +300,7 @@ export default function AccountPage() {
         if (!cancelled) {
           setProfile(null)
           setOrgs([])
+          setExhibitions([])
           setArtworks([])
           setProfileMissing(false)
           setLoadError('アカウント情報の読み込みに失敗しました。')
@@ -253,6 +315,30 @@ export default function AccountPage() {
 
   function handleSelectOrg(org) {
     navigate(`/${org.slug}/dashboard`)
+  }
+
+  function openExhibition(exhibition) {
+    navigate(`${profilePath(profile.slug)}/dashboard/exhibitions/${exhibition.id}/artworks`, {
+      state: { showExhibitionPageLoading: true },
+    })
+  }
+
+  async function handleDeleteExhibition() {
+    if (!deleteExhibitionTarget || !supabase) return
+    setDeletingExhibition(true)
+    try {
+      const { error } = await deleteExhibition(supabase, deleteExhibitionTarget.id)
+      if (error) {
+        setLoadError(error.message || '個人展覧会の削除に失敗しました。')
+        return
+      }
+      setExhibitions((prev) => prev.filter((exhibition) => exhibition.id !== deleteExhibitionTarget.id))
+      setDeleteExhibitionTarget(null)
+    } catch (error) {
+      setLoadError(error?.message || '個人展覧会の削除に失敗しました。')
+    } finally {
+      setDeletingExhibition(false)
+    }
   }
 
   async function handleSignOut() {
@@ -363,6 +449,7 @@ export default function AccountPage() {
         {loadError && (
           <div className="ui-alert ui-alert--error" style={{ marginBottom: 16 }}>{loadError}</div>
         )}
+
         <OrganizationSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} />
 
         <section className="ui-account-section">
@@ -389,6 +476,64 @@ export default function AccountPage() {
           )}
         </section>
 
+        <section className="ui-account-section">
+          <div className="ui-account-section-head">
+            <div className="ui-kicker">個人展覧会</div>
+            <button
+              type="button"
+              onClick={() => navigate(`${profilePath(profile.slug)}/dashboard/exhibitions/new`)}
+              className="ui-btn ui-btn--accent"
+            >
+              <Icon name="plus" size={15} />
+              <span>個人展覧会を作成</span>
+            </button>
+          </div>
+
+          {deleteExhibitionTarget && (
+            <div className="ui-confirm" style={{ marginBottom: 16 }}>
+              <div className="ui-kicker">削除の確認</div>
+              <div className="ui-confirm-msg">
+                {deleteExhibitionTarget.title?.trim()
+                  ? `「${deleteExhibitionTarget.title}」と登録済みの作品をすべて削除します。`
+                  : 'この個人展覧会と登録済みの作品をすべて削除します。'}
+              </div>
+              <div className="ui-btn-row" style={{ marginTop: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => setDeleteExhibitionTarget(null)}
+                  disabled={deletingExhibition}
+                  className="ui-btn ui-btn--ghost"
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteExhibition}
+                  disabled={deletingExhibition}
+                  className="ui-btn ui-btn--danger"
+                >
+                  {deletingExhibition ? '削除中…' : '削除する'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {exhibitions.length > 0 ? (
+            <div className="ui-exhibition-list-grid">
+              {exhibitions.map((exhibition) => (
+                <AccountExhibitionCard
+                  key={exhibition.id}
+                  exhibition={exhibition}
+                  onOpen={openExhibition}
+                  onDelete={setDeleteExhibitionTarget}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="ui-panel" style={{ color: T.inkMuted, fontSize: 13 }}>個人展覧会がまだありません</p>
+          )}
+        </section>
+
         <button type="button" onClick={handleSignOut} className="ui-btn ui-btn--ghost" style={{ marginTop: 20 }}>
           ログアウト
         </button>
@@ -400,12 +545,13 @@ export default function AccountPage() {
     <div className="ui-page-shell">
       <Header activeTab="account" />
       <main className="ui-app-main ui-account-main">{renderContent()}</main>
-      <ArtworkModal
-        artwork={selectedArtwork}
-        artworks={artworks}
-        onSelectArtwork={setSelectedArtwork}
-        onClose={() => setSelectedArtwork(null)}
-      />
+      {selectedArtwork && (
+        <ArtworkViewer
+          artworks={[selectedArtwork]}
+          initialArtwork={selectedArtwork}
+          onClose={() => setSelectedArtwork(null)}
+        />
+      )}
       <ArtworkCreateModal
         open={Boolean(createFile)}
         file={createFile}
@@ -446,12 +592,13 @@ export default function AccountPage() {
     <div className="ui-page-shell">
       <Header activeTab="account" />
       <main className="ui-app-main ui-account-main">{renderContent()}</main>
-      <ArtworkModal
-        artwork={selectedArtwork}
-        artworks={artworks}
-        onSelectArtwork={setSelectedArtwork}
-        onClose={() => setSelectedArtwork(null)}
-      />
+      {selectedArtwork && (
+        <ArtworkViewer
+          artworks={[selectedArtwork]}
+          initialArtwork={selectedArtwork}
+          onClose={() => setSelectedArtwork(null)}
+        />
+      )}
       <ArtworkCreateModal
         open={Boolean(createFile)}
         file={createFile}

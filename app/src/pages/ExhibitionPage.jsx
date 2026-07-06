@@ -1,22 +1,24 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Navigate, useParams, Link, useLocation } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
 import PublicManageLink from '../components/PublicManageLink'
 import FavoriteButton from '../components/FavoriteButton'
-import ArtworkModal from '../components/ArtworkModal'
+import ArtworkViewer from '../components/ArtworkViewer'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
-import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
 import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
 import ExhibitionStatusBadge from '../components/ExhibitionStatusBadge'
 import { useGalleryLayout } from '../lib/useGalleryLayout'
+import { useArtworkViewerHistory } from '../lib/useArtworkViewerHistory'
 import LoadingFrames from '../components/LoadingFrames'
 import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
+
+const Exhibition3DGalleryView = lazy(() => import('../components/Exhibition3DGalleryView'))
 
 function SummaryItem({ label, value, to }) {
   if (!value) return null
@@ -38,19 +40,14 @@ export default function ExhibitionPage() {
   const [owner, setOwner] = useState(null)
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
-  const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
   const [galleryLayout, setGalleryLayout] = useGalleryLayout()
   const [loading, setLoading] = useState(true)
+  const gallery3dButtonRef = useRef(null)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
   const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
 
   useEffect(() => {
-    if (profileSlug) {
-      setLoading(false)
-      return undefined
-    }
-
     async function load() {
       if (!supabase) return setLoading(false)
       try {
@@ -91,48 +88,16 @@ export default function ExhibitionPage() {
     load()
   }, [orgSlug, profileSlug, exhibitionSlug])
 
-  useEffect(() => {
-    const handlePopState = (event) => {
-      const artworkId = event.state?.artworkModalArtworkId
-      if (!artworkId) {
-        setSelectedArtwork(null)
-        return
-      }
-      const nextArtwork = artworks.find((artwork) => String(artwork.id) === String(artworkId)) || null
-      setSelectedArtwork(nextArtwork)
-    }
-
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [artworks])
-
   const viewableArtworks = useMemo(
     () => artworks.filter((item) => item.image_url),
     [artworks],
   )
 
-  if (profileSlug) return <Navigate to={profilePath(profileSlug)} replace />
+  const { selectedArtwork, openArtwork, selectArtwork, closeArtwork } = useArtworkViewerHistory(viewableArtworks)
 
-  function openArtwork(artwork) {
-    window.history.pushState({ artworkModalArtworkId: artwork.id }, '', window.location.href)
-    setSelectedArtwork(artwork)
-  }
-
-  function selectArtworkInModal(artwork) {
-    if (window.history.state?.artworkModalArtworkId) {
-      window.history.replaceState({ artworkModalArtworkId: artwork.id }, '', window.location.href)
-    } else {
-      window.history.pushState({ artworkModalArtworkId: artwork.id }, '', window.location.href)
-    }
-    setSelectedArtwork(artwork)
-  }
-
-  function closeArtwork() {
-    if (window.history.state?.artworkModalArtworkId) {
-      window.history.back()
-      return
-    }
-    setSelectedArtwork(null)
+  function close3DGallery() {
+    setViewMode('grid')
+    window.requestAnimationFrame(() => gallery3dButtonRef.current?.focus())
   }
 
   if (showLoader) return (
@@ -194,20 +159,25 @@ export default function ExhibitionPage() {
 
         <section style={{ marginTop: 64 }}>
           <div className="ui-exhibition-artworks-head">
-            {!profileSlug && <div className="ui-section-label">作品</div>}
+            <div className="ui-section-label">作品</div>
             {artworks.length > 0 && (
               <div className="ui-exhibition-artworks-actions">
                 <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
-                <button
-                  type="button"
-                  className="ui-immersive-launch"
-                  onClick={() => setViewMode('ribbon')}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
-                  </svg>
-                  <span>作品を巡る</span>
-                </button>
+                {viewableArtworks.length > 0 && (
+                  <button
+                    ref={gallery3dButtonRef}
+                    type="button"
+                    className="ui-immersive-launch"
+                    onClick={() => setViewMode('3d')}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 11.5 12 4l9 7.5" />
+                      <path d="M5.5 10v9h13v-9" />
+                      <path d="M9 19v-5.5h6V19" />
+                    </svg>
+                    <span>3D空間で巡る</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -219,16 +189,25 @@ export default function ExhibitionPage() {
             </div>
           )}
         </section>
-        {viewMode === 'ribbon' && artworks.length > 0 && (
-          <ExhibitionRibbonView artworks={artworks} onClose={() => setViewMode('grid')} />
+        {viewMode === '3d' && viewableArtworks.length > 0 && (
+          <Suspense fallback={null}>
+            <Exhibition3DGalleryView
+              artworks={viewableArtworks}
+              onClose={close3DGallery}
+              onOpenArtwork={openArtwork}
+              hasOpenArtwork={Boolean(selectedArtwork)}
+            />
+          </Suspense>
         )}
       </main>
-      <ArtworkModal
-        artwork={selectedArtwork}
-        artworks={viewableArtworks}
-        onSelectArtwork={selectArtworkInModal}
-        onClose={closeArtwork}
-      />
+      {selectedArtwork && (
+        <ArtworkViewer
+          artworks={viewableArtworks}
+          initialArtwork={selectedArtwork}
+          onArtworkChange={selectArtwork}
+          onClose={closeArtwork}
+        />
+      )}
       <BottomNav active="top" />
     </div>
   )
