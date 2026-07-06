@@ -1,327 +1,195 @@
-/* ── 3D Gallery View Styles ── */
-
-.ui-gallery3d-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    width: 100vw;
-    height: 100svh;
-    background-color: #0c0b0a; /* Deep museum dark mood */
-    color: #f7f6f5;
-    font-family:
-        system-ui,
-        -apple-system,
-        sans-serif;
-    overflow: hidden;
-    touch-action: none;
-    display: flex;
-    flex-direction: column;
+.ui-3d-gallery-overlay {
+  position: fixed;
+  inset: 0;
+  /* ArtworkModal uses z-index: 500 and must appear above artwork clicks from this view. */
+  z-index: 400;
+  width: 100%;
+  height: 100svh;
+  background: #0c0b0a;
+  color: #fbf8f3;
+  overflow: hidden;
 }
 
-/* 3D Viewport */
-.ui-gallery3d-viewport {
-    position: relative;
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    perspective: 900px;
-    perspective-origin: 50% 50%;
-    overflow: hidden;
+.ui-3d-gallery-canvas {
+  position: absolute;
+  inset: 0;
 }
 
-/* Camera Rig & Room Container */
-.ui-gallery3d-camera-rig {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 0;
-    height: 0;
-    transform-style: preserve-3d;
-    will-change: transform;
+.ui-3d-gallery-canvas canvas {
+  touch-action: none;
 }
 
-.ui-gallery3d-room {
-    position: absolute;
-    width: 0;
-    height: 0;
-    transform-style: preserve-3d;
-    will-change: transform;
+.ui-3d-gallery-hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) 18px 0;
+  pointer-events: none;
 }
 
-/* Room Walls & Floor/Ceiling */
-.ui-gallery3d-wall {
-    position: absolute;
-    background-color: #efede7; /* Authentic museum warm white */
-    transform-style: preserve-3d;
-    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.12);
-    backface-visibility: hidden;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+.ui-3d-gallery-pill {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px solid rgba(251, 248, 243, 0.22);
+  border-radius: 999px;
+  background: rgba(12, 11, 10, 0.62);
+  color: #fbf8f3;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-/* Floor (Wood Grain CSS - Polished and warm) */
-.ui-gallery3d-floor {
-    position: absolute;
-    background-color: #4b3017;
-    background-image:
-        repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 150px,
-            rgba(0, 0, 0, 0.18) 150px,
-            rgba(0, 0, 0, 0.18) 152px
-        ),
-        repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 400px,
-            rgba(0, 0, 0, 0.12) 400px,
-            rgba(0, 0, 0, 0.12) 401px
-        ),
-        radial-gradient(
-            circle at 50% 50%,
-            rgba(255, 255, 255, 0.08) 0%,
-            transparent 80%
-        );
-    transform-style: preserve-3d;
-    box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.7);
-    backface-visibility: hidden;
+.ui-3d-gallery-close {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(251, 248, 243, 0.28);
+  border-radius: 999px;
+  background: rgba(12, 11, 10, 0.62);
+  color: #fbf8f3;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 160ms ease, background 160ms ease;
 }
 
-/* Ceiling */
-.ui-gallery3d-ceiling {
-    position: absolute;
-    background-color: #dfdfdb;
-    background-image: radial-gradient(
-        circle at 50% 50%,
-        #ffffff 0%,
-        #cfcfc8 100%
-    );
-    transform-style: preserve-3d;
-    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.25);
-    backface-visibility: hidden;
+.ui-3d-gallery-close:hover {
+  border-color: rgba(251, 248, 243, 0.72);
+  background: rgba(12, 11, 10, 0.82);
 }
 
-/* Artworks: a single flat 3D element per artwork (no nested preserve-3d wrapper
-   levels), exactly like the room's walls/floor/ceiling. Its declared width/height
-   (box-sizing: border-box, so border + matte are included) is the artwork's own
-   computed size, so the frame's footprint always matches the artwork exactly.
-   The `translate(-50%, -50%)` baked into the JS transform string centers this box
-   on the painting's anchor point, so every artwork's midline lines up on one
-   common hanging line regardless of its own aspect ratio. The plaque is anchored
-   to the frame's own bottom edge (top: 100%) so it never affects that alignment. */
-.ui-gallery3d-artwork-frame {
-    position: absolute;
-    left: 0;
-    top: 0;
-    box-sizing: border-box;
-    background-color: #1a1918;
-    border: 15px solid #141312; /* Sleek black-brown gallery frame */
-    box-shadow:
-        0 30px 60px -15px rgba(0, 0, 0, 0.75),
-        0 15px 30px -5px rgba(0, 0, 0, 0.5),
-        inset 0 1px 3px rgba(255, 255, 255, 0.08);
-    outline: 1px solid rgba(0, 0, 0, 0.95);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px; /* Passepartout (Mat board) */
-    background: #fbfbf8; /* Crisp off-white mat board */
-    cursor: pointer;
+.ui-3d-gallery-help {
+  position: absolute;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  z-index: 2;
+  max-width: calc(100vw - 32px);
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border: 1px solid rgba(251, 248, 243, 0.18);
+  border-radius: 999px;
+  background: rgba(12, 11, 10, 0.58);
+  color: rgba(251, 248, 243, 0.86);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: nowrap;
+  animation: ui-3d-gallery-help-fade 5.5s ease forwards;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  pointer-events: none;
 }
 
-.ui-gallery3d-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.15);
-    filter: contrast(1.02) saturate(1.02);
+.ui-3d-gallery-navigation {
+  position: absolute;
+  right: 18px;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  z-index: 3;
+  display: flex;
+  gap: 8px;
 }
 
-/* Art Plaque (Museum Style), anchored just below the frame's own bottom edge. */
-.ui-gallery3d-plaque {
-    position: absolute;
-    left: 50%;
-    top: 100%;
-    background-color: rgba(251, 248, 245, 0.95);
-    border-left: 3px solid #be553d;
-    padding: 8px 14px;
-    color: #1a1918;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    width: 240px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-    transform: translate(-50%, 14px);
-    pointer-events: none;
-    font-family: inherit;
-    line-height: 1.4;
+.ui-3d-gallery-navigation-button {
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(251, 248, 243, 0.3);
+  border-radius: 999px;
+  background: rgba(12, 11, 10, 0.68);
+  color: #fbf8f3;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
-.ui-gallery3d-plaque-title {
-    font-weight: 600;
-    margin-bottom: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.ui-3d-gallery-navigation-button:hover {
+  border-color: rgba(251, 248, 243, 0.72);
+  background: rgba(12, 11, 10, 0.84);
+  transform: translateY(-1px);
 }
 
-.ui-gallery3d-plaque-creator {
-    color: #655c54;
+.ui-3d-gallery-navigation-button:focus-visible {
+  outline: 2px solid #fbf8f3;
+  outline-offset: 3px;
 }
 
-/* Floor Clickable Viewpoint Markers */
-.ui-gallery3d-marker {
-    position: absolute;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.12);
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    transform: translate(-50%, -50%);
-    transform-style: preserve-3d;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+/* テクスチャロード失敗の可視化。壁から作品が黙って消えると原因調査が
+   できないため、失敗数を必ず画面に出す */
+.ui-3d-gallery-load-warning {
+  position: absolute;
+  top: calc(72px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  max-width: calc(100vw - 32px);
+  padding: 8px 14px;
+  border: 1px solid rgba(214, 134, 60, 0.5);
+  border-radius: 8px;
+  background: rgba(60, 36, 12, 0.82);
+  color: #f5c99a;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.ui-gallery3d-marker-inner {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #ffffff;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px #ffffff;
+.ui-3d-gallery-fallback {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
 }
 
-/* Hover effect */
-.ui-gallery3d-marker:hover {
-    background: rgba(255, 255, 255, 0.24);
-    border-color: #be553d;
-    box-shadow: 0 0 25px rgba(190, 85, 61, 0.5);
-    transform: translate(-50%, -50%) scale(1.15);
+.ui-3d-gallery-fallback-panel {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
 }
 
-.ui-gallery3d-marker:hover .ui-gallery3d-marker-inner {
-    background: #be553d;
-    box-shadow: 0 0 12px #be553d;
+.ui-3d-gallery-fallback-panel p {
+  color: #fbf8f3;
+  font-size: 14px;
 }
 
-/* Active Highlight */
-.ui-gallery3d-marker.is-active {
-    background: rgba(190, 85, 61, 0.2);
-    border-color: #be553d;
-    box-shadow: 0 0 30px rgba(190, 85, 61, 0.7);
+@keyframes ui-3d-gallery-help-fade {
+  0%, 58% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
-.ui-gallery3d-marker.is-active .ui-gallery3d-marker-inner {
-    background: #be553d;
-    transform: scale(1.2);
-    box-shadow: 0 0 15px #be553d;
-}
+@media (max-width: 560px) {
+  .ui-3d-gallery-hud {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
 
-/* HUD Controls Overlay */
-.ui-gallery3d-controls-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: clamp(16px, 3vw, 24px);
-    z-index: 10;
-}
-
-.ui-gallery3d-controls-overlay * {
-    pointer-events: auto;
-}
-
-/* Top bar style */
-.ui-gallery3d-topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.ui-gallery3d-title-info {
-    background: rgba(12, 11, 10, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 8px 18px;
-    border-radius: 99px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.ui-gallery3d-title-info h3 {
-    font-size: 13px;
-    font-weight: 500;
-    margin: 0;
-    letter-spacing: 0.05em;
-    color: #fff;
-}
-
-.ui-gallery3d-close-btn {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: rgba(12, 11, 10, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
-    font-size: 22px;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    transition: all 0.25s ease;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.ui-gallery3d-close-btn:hover {
-    background: rgba(190, 85, 61, 0.25);
-    border-color: #be553d;
-    color: #be553d;
-    transform: scale(1.05);
-}
-
-/* Help Guide / Instructions (Minimalist and temporary) */
-.ui-gallery3d-instructions {
-    position: absolute;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(12, 11, 10, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.85);
+  .ui-3d-gallery-help {
+    width: calc(100vw - 28px);
+    border-radius: 10px;
+    white-space: normal;
     text-align: center;
-    line-height: 1.5;
-    letter-spacing: 0.04em;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    pointer-events: none;
-    animation: fadeOutFast 4s forwards;
-}
+  }
 
-@keyframes fadeOutFast {
-    0% {
-        opacity: 1;
-    }
-    75% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-        pointer-events: none;
-    }
+  .ui-3d-gallery-navigation {
+    right: 14px;
+  }
 }

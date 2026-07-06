@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-// favorites テーブルの target_type。docs/ops/add-favorites.sql と一致させること。
+// favorites テーブルの target_type。docs/sql/add-favorites.sql と一致させること。
 export const FAVORITE_TYPES = ['artwork', 'exhibition', 'organization', 'profile']
 
 /**

@@ -51,6 +51,32 @@ export function getWallThumbnailUrl(url) {
   return getThumbnailUrl(url, 800)
 }
 
+/**
+ * 3D ギャラリーの WebGL テクスチャ専用 URL。
+ * getWallThumbnailUrl と別 URL にするのが要点:
+ *   1) 2D グリッドは同じ 800px 画像を通常の <img>(crossOrigin なし)で読むため、
+ *      同一 URL だとブラウザのキャッシュを WebGL の crossOrigin リクエストが
+ *      流用して tainted 扱いになり、テクスチャが真っ白になる。
+ *   2) f_auto は環境により AVIF を返すが、AVIF は一部 GPU で texImage2D に
+ *      アップロードできず真っ白になる。f_jpg で確実にアップロード可能にする。
+ */
+export function getWallTextureUrl(url) {
+  return getResizedImageUrl(url, {
+    width: 2000,
+    height: 2000,
+    crop: 'limit',
+    quality: 'auto:best',
+    format: 'jpg',
+  })
+}
+
+/** 現在の3D視点にある作品用。詳細画面と同じ元画像を、別キャッシュキーで取得する。 */
+export function getWallTextureHighResolutionUrl(url) {
+  if (!isCloudinaryUrl(url)) return url
+  const separator = url.includes('?') ? '&' : '?'
+  return `${url}${separator}artoir_3d=original`
+}
+
 export function getHeroImageUrl(url, width = 800) {
   return getResizedImageUrl(url, {
     width,

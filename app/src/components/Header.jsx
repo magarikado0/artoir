@@ -110,7 +110,13 @@ export default function Header({ activeTab }) {
           </Link>
         )}
       </nav>
-
+      <div className="ui-topbar-actions">
+        {!session && (
+          <Link to="/login" className="ui-topbar-icon" aria-label="ログイン">
+            <Icon name="login" size={18} />
+          </Link>
+        )}
+      </div>
     </header>
   )
 }

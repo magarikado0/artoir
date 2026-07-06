@@ -58,5 +58,6 @@ https://<project-ref>.supabase.co/auth/v1/callback
 ## Tech Stack
 
 - **Frontend**: React + Vite + Tailwind CSS
-- **Backend**: Supabase
-- **Hosting**: Vercel（Root Directory: `app`）
+- **Backend**: Supabase（DB + Auth）
+- **画像ストレージ**: Cloudinary
+- **Hosting**: Cloudflare Workers（`cd app && npm run deploy`。本番: https://artoir.net）
