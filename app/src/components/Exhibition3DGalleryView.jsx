@@ -105,7 +105,7 @@ export default function Exhibition3DGalleryView({ artworks, onClose, onOpenArtwo
         {renderCloseButton(closeRef)}
       </div>
       <div className="ui-3d-gallery-help">
-        ドラッグで見回す / ← →で移動 / 作品をクリックで詳細
+        ドラッグで見回す / ピンチ・ホイールで拡大 / ← →で移動 / 作品をクリックで詳細
       </div>
       <nav className="ui-3d-gallery-navigation" aria-label="3D空間の視点移動">
         <button

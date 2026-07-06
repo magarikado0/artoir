@@ -1,13 +1,15 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { CanvasTexture, MathUtils, RepeatWrapping, SRGBColorSpace, Vector3 } from 'three'
-import { useCursor } from '@react-three/drei'
 import ArtworkFrame from './ArtworkFrame'
 import { ROOM, createGalleryLayout } from './layout'
 
 const PITCH_LIMIT = MathUtils.degToRad(40)
 const LOOK_SENSITIVITY = 0.005
 const DRAG_THRESHOLD = 6
+const MIN_FOV = 24
+const MAX_FOV = 60
+const WHEEL_ZOOM_SENSITIVITY = 0.025
 const ROOM_EDGE_COLOR = '#d6d1c8'
 const ROOM_EDGE_SIZE = 0.018
 
@@ -68,10 +70,10 @@ function makeWallTexture() {
   for (let y = 0; y < canvas.height; y += 1) {
     for (let x = 0; x < canvas.width; x += 1) {
       const index = (y * canvas.width + x) * 4
-      const noise = ((x * 13 + y * 17 + (x * y) % 19) % 3) - 1
-      image.data[index] = 251 + noise
-      image.data[index + 1] = 250 + noise
-      image.data[index + 2] = 247 + noise
+      const noise = ((x * 13 + y * 17 + (x * y) % 19) % 7) - 3
+      image.data[index] = 250 + noise
+      image.data[index + 1] = 248 + noise
+      image.data[index + 2] = 243 + noise
       image.data[index + 3] = 255
     }
   }
@@ -85,8 +87,8 @@ function makeWallTexture() {
     gradient.addColorStop(
       0,
       patch % 2
-        ? 'rgba(118, 109, 96, 0.014)'
-        : 'rgba(255, 255, 255, 0.1)',
+        ? 'rgba(118, 109, 96, 0.026)'
+        : 'rgba(255, 255, 255, 0.14)',
     )
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
     ctx.fillStyle = gradient
@@ -101,8 +103,8 @@ function makeWallTexture() {
     ctx.moveTo(x, y)
     ctx.lineTo(x + length, y + ((fiber % 3) - 1))
     ctx.strokeStyle = fiber % 2
-      ? 'rgba(126, 119, 108, 0.02)'
-      : 'rgba(255, 255, 255, 0.1)'
+      ? 'rgba(126, 119, 108, 0.035)'
+      : 'rgba(255, 255, 255, 0.14)'
     ctx.lineWidth = 0.7
     ctx.stroke()
   }
@@ -141,19 +143,55 @@ function RoomShell() {
       </mesh>
       <mesh position={[0, ROOM.height / 2, -ROOM.halfDepth]}>
         <planeGeometry args={[ROOM.width, ROOM.height]} />
-        <meshBasicMaterial map={wallTexture} color="#ffffff" toneMapped={false} />
+        <meshStandardMaterial
+          map={wallTexture}
+          bumpMap={wallTexture}
+          bumpScale={0.018}
+          color="#ffffff"
+          emissive="#e8e2d7"
+          emissiveIntensity={0.58}
+          roughness={0.96}
+          metalness={0}
+        />
       </mesh>
       <mesh position={[ROOM.halfWidth, ROOM.height / 2, 0]} rotation={[0, -Math.PI / 2, 0]}>
         <planeGeometry args={[ROOM.depth, ROOM.height]} />
-        <meshBasicMaterial map={wallTexture} color="#ffffff" toneMapped={false} />
+        <meshStandardMaterial
+          map={wallTexture}
+          bumpMap={wallTexture}
+          bumpScale={0.018}
+          color="#ffffff"
+          emissive="#e8e2d7"
+          emissiveIntensity={0.58}
+          roughness={0.96}
+          metalness={0}
+        />
       </mesh>
       <mesh position={[0, ROOM.height / 2, ROOM.halfDepth]} rotation={[0, Math.PI, 0]}>
         <planeGeometry args={[ROOM.width, ROOM.height]} />
-        <meshBasicMaterial map={wallTexture} color="#ffffff" toneMapped={false} />
+        <meshStandardMaterial
+          map={wallTexture}
+          bumpMap={wallTexture}
+          bumpScale={0.018}
+          color="#ffffff"
+          emissive="#e8e2d7"
+          emissiveIntensity={0.58}
+          roughness={0.96}
+          metalness={0}
+        />
       </mesh>
       <mesh position={[-ROOM.halfWidth, ROOM.height / 2, 0]} rotation={[0, Math.PI / 2, 0]}>
         <planeGeometry args={[ROOM.depth, ROOM.height]} />
-        <meshBasicMaterial map={wallTexture} color="#ffffff" toneMapped={false} />
+        <meshStandardMaterial
+          map={wallTexture}
+          bumpMap={wallTexture}
+          bumpScale={0.018}
+          color="#ffffff"
+          emissive="#e8e2d7"
+          emissiveIntensity={0.58}
+          roughness={0.96}
+          metalness={0}
+        />
       </mesh>
 
       {/* 壁と床の境界 */}
@@ -190,38 +228,6 @@ function RoomShell() {
   )
 }
 
-function ViewMarker({ viewpoint, active, disabled, onClick, ignoreNextClickRef }) {
-  const [hovered, setHovered] = useState(false)
-  useCursor(hovered)
-  const [x, , z] = viewpoint.position
-
-  return (
-    <group
-      position={[x, 0.012, z]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      onPointerOver={(e) => {
-        e.stopPropagation()
-        setHovered(true)
-      }}
-      onPointerOut={() => setHovered(false)}
-      onClick={(e) => {
-        e.stopPropagation()
-        if (disabled || ignoreNextClickRef.current) return
-        onClick(viewpoint)
-      }}
-    >
-      <mesh>
-        <circleGeometry args={[0.23, 36]} />
-        <meshBasicMaterial color={active ? '#be553d' : '#ffffff'} transparent opacity={active ? 0.9 : 0.34} />
-      </mesh>
-      <mesh position={[0, 0, 0.003]}>
-        <ringGeometry args={[0.28, 0.34, 36]} />
-        <meshBasicMaterial color={active ? '#be553d' : '#ffffff'} transparent opacity={active ? 0.95 : 0.48} />
-      </mesh>
-    </group>
-  )
-}
-
 const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork, onFailedCountChange }, ref) {
   const { camera, gl } = useThree()
   const [imageSizeMap, setImageSizeMap] = useState({})
@@ -247,8 +253,12 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
     targetYaw: layout.initialViewpoint.yaw,
     pitch: 0,
     targetPitch: 0,
+    fov: camera.fov,
+    targetFov: camera.fov,
   })
   const pointerRef = useRef(null)
+  const touchPointersRef = useRef(new Map())
+  const pinchRef = useRef(null)
   const teleportRef = useRef(null)
   const ignoreNextClickRef = useRef(false)
   const renderedActiveViewpointId = layout.viewpoints.some((viewpoint) => viewpoint.id === activeViewpointId)
@@ -297,6 +307,21 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
     setActiveViewpointId(viewpoint.id)
   }, [])
 
+  const handleArtworkSelect = useCallback((artwork) => {
+    if (teleportRef.current) return
+    const artworkId = String(artwork.id)
+    const targetViewpoint = layout.viewpoints.find(
+      (viewpoint) => viewpoint.artworkIds?.includes(artworkId),
+    )
+
+    if (targetViewpoint && targetViewpoint.id !== renderedActiveViewpointId) {
+      teleportTo(targetViewpoint)
+      return
+    }
+
+    onOpenArtwork?.(artwork)
+  }, [layout.viewpoints, onOpenArtwork, renderedActiveViewpointId, teleportTo])
+
   const navigateBy = useCallback((offset) => {
     if (teleportRef.current || !layout.viewpoints.length) return
     const currentIndex = layout.viewpoints.findIndex((viewpoint) => viewpoint.id === renderedActiveViewpointId)
@@ -312,9 +337,26 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
 
   useEffect(() => {
     const dom = gl.domElement
+    const touchPointers = touchPointersRef.current
 
     const onPointerDown = (e) => {
-      if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+
+      if (e.pointerType === 'touch') {
+        touchPointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+        dom.setPointerCapture?.(e.pointerId)
+        if (touchPointers.size >= 2) {
+          const [first, second] = [...touchPointers.values()]
+          pinchRef.current = {
+            distance: Math.hypot(second.x - first.x, second.y - first.y),
+            fov: cameraStateRef.current.targetFov,
+          }
+          pointerRef.current = null
+          return
+        }
+      }
+
+      if (!e.isPrimary) return
       pointerRef.current = {
         id: e.pointerId,
         startX: e.clientX,
@@ -327,6 +369,22 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
     }
 
     const onPointerMove = (e) => {
+      if (e.pointerType === 'touch' && touchPointers.has(e.pointerId)) {
+        touchPointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+        if (pinchRef.current && touchPointers.size >= 2) {
+          e.preventDefault()
+          const [first, second] = [...touchPointers.values()]
+          const distance = Math.hypot(second.x - first.x, second.y - first.y)
+          const ratio = distance / Math.max(1, pinchRef.current.distance)
+          cameraStateRef.current.targetFov = MathUtils.clamp(
+            pinchRef.current.fov / Math.max(0.1, ratio),
+            MIN_FOV,
+            MAX_FOV,
+          )
+          return
+        }
+      }
+
       const pointer = pointerRef.current
       if (!pointer || pointer.id !== e.pointerId) return
       const dx = e.clientX - pointer.lastX
@@ -341,6 +399,19 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
     }
 
     const onPointerUp = (e) => {
+      if (e.pointerType === 'touch') {
+        touchPointers.delete(e.pointerId)
+        if (pinchRef.current) {
+          pinchRef.current = null
+          pointerRef.current = null
+          ignoreNextClickRef.current = true
+          window.setTimeout(() => {
+            ignoreNextClickRef.current = false
+          }, 0)
+          return
+        }
+      }
+
       const pointer = pointerRef.current
       if (!pointer || pointer.id !== e.pointerId) return
       if (pointer.moved) {
@@ -352,15 +423,30 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
       pointerRef.current = null
     }
 
+    const onWheel = (e) => {
+      e.preventDefault()
+      const state = cameraStateRef.current
+      const sensitivity = e.ctrlKey ? 0.12 : WHEEL_ZOOM_SENSITIVITY
+      state.targetFov = MathUtils.clamp(
+        state.targetFov + e.deltaY * sensitivity,
+        MIN_FOV,
+        MAX_FOV,
+      )
+    }
+
     dom.addEventListener('pointerdown', onPointerDown)
     dom.addEventListener('pointermove', onPointerMove)
     dom.addEventListener('pointerup', onPointerUp)
     dom.addEventListener('pointercancel', onPointerUp)
+    dom.addEventListener('wheel', onWheel, { passive: false })
     return () => {
       dom.removeEventListener('pointerdown', onPointerDown)
       dom.removeEventListener('pointermove', onPointerMove)
       dom.removeEventListener('pointerup', onPointerUp)
       dom.removeEventListener('pointercancel', onPointerUp)
+      dom.removeEventListener('wheel', onWheel)
+      touchPointers.clear()
+      pinchRef.current = null
     }
   }, [gl])
 
@@ -385,8 +471,14 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
       state.pitch += (state.targetPitch - state.pitch) * (1 - Math.exp(-12 * delta))
     }
 
+    state.fov += (state.targetFov - state.fov) * (1 - Math.exp(-12 * delta))
     camera.position.copy(state.position)
     camera.rotation.set(state.pitch, state.yaw, 0, 'YXZ')
+    if (Math.abs(camera.fov - state.fov) > 0.001) {
+      const focalLength = (0.5 * camera.getFilmHeight())
+        / Math.tan(MathUtils.degToRad(state.fov * 0.5))
+      camera.setFocalLength(focalLength)
+    }
   })
 
   return (
@@ -400,19 +492,9 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
           key={frame.id}
           frame={frame}
           highQuality={highQualityArtworkIds.has(frame.id)}
-          onOpenArtwork={onOpenArtwork}
+          onOpenArtwork={handleArtworkSelect}
           onAspectLoaded={handleAspectLoaded}
           onTextureError={handleTextureError}
-          ignoreNextClickRef={ignoreNextClickRef}
-        />
-      ))}
-      {layout.viewpoints.map((viewpoint) => (
-        <ViewMarker
-          key={viewpoint.id}
-          viewpoint={viewpoint}
-          active={viewpoint.id === renderedActiveViewpointId}
-          disabled={isTeleporting}
-          onClick={teleportTo}
           ignoreNextClickRef={ignoreNextClickRef}
         />
       ))}

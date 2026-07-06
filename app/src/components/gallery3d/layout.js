@@ -14,7 +14,7 @@ export const WALL_ORDER = ['front', 'right', 'back', 'left']
 const WALL_SPAN = 10.5
 const WALL_MARGIN = 0.75
 const WALL_OFFSET = 0.02
-const VIEW_DISTANCE = 3.2
+const VIEW_DISTANCE = 2.5
 const DEFAULT_ASPECT = 0.8
 const FRAME_EXTRA = 0.36
 const BASE_GAP = 0.5
@@ -74,8 +74,24 @@ function spanForImageSize(imageSize) {
 
 function frameSizeFor(aspect, span) {
   const isLarge = span.spanX === 3 || span.spanY === 3 || (span.spanX === 2 && span.spanY === 2)
-  const maxOuterWidth = isLarge ? 2.7 : 1.85
-  const maxOuterHeight = isLarge ? 2.7 : 1.95
+  // 縦長(spanY > spanX)は高さ上限を引き上げて、より縦長に見せる
+  const isTall = span.spanY > span.spanX
+  // 横長(spanX > spanY)は大きめに見せる
+  const isWide = span.spanX > span.spanY
+  // 正方形(spanX === spanY)は少し小さめに抑える
+  const isSquare = span.spanX === span.spanY
+  const maxOuterWidth = isSquare
+    ? (isLarge ? 2.25 : 1.55)
+    : isWide
+      ? (isLarge ? 4.0 : 2.75)
+      : (isLarge ? 2.7 : 1.85)
+  const maxOuterHeight = isSquare
+    ? (isLarge ? 2.25 : 1.55)
+    : isTall
+      ? (isLarge ? 2.9 : 2.3)
+      : isWide
+        ? (isLarge ? 2.9 : 2.0)
+        : (isLarge ? 2.7 : 1.95)
   const minOuterWidth = isLarge ? 1.05 : 0.72
   const maxImageWidth = maxOuterWidth - FRAME_EXTRA
   const maxImageHeight = maxOuterHeight - FRAME_EXTRA
@@ -150,18 +166,12 @@ function fitWallItems(rawItems) {
 
 function buildViewpoints(wall, wallItems) {
   const wallDef = WALLS[wall]
-  const groups = []
-  for (let index = 0; index < wallItems.length; index += 3) {
-    groups.push(wallItems.slice(index, index + 3))
-  }
-  return groups.map((group, index) => {
-    const min = Math.min(...group.map((item) => item.u - item.outerWidth / 2))
-    const max = Math.max(...group.map((item) => item.u + item.outerWidth / 2))
-    const u = (min + max) / 2
+  return wallItems.map((item, index) => {
+    const u = item.u
     return {
       id: `${wall}-${index}`,
       wall,
-      artworkIds: group.map((item) => String(item.id)),
+      artworkIds: [String(item.id)],
       position: wallDef.toViewPosition(u),
       yaw: wallDef.yaw,
       targetU: u,

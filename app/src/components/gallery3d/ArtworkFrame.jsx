@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { LinearFilter, SRGBColorSpace, Texture } from 'three'
+import { LinearFilter, LinearMipmapLinearFilter, SRGBColorSpace, Texture } from 'three'
 import { useCursor } from '@react-three/drei'
 import { getWallTextureHighResolutionUrl, getWallTextureUrl } from '../../lib/imageUrl'
 
@@ -11,15 +11,16 @@ export default function ArtworkFrame({
   onTextureError,
   ignoreNextClickRef,
 }) {
-  const { artwork, outerWidth, outerHeight, imageWidth, imageHeight, position, rotation } = frame
+  const { artwork, imageWidth, imageHeight, position, rotation } = frame
   const [texture, setTexture] = useState(null)
   const [hovered, setHovered] = useState(false)
   const imageMaterialRef = useRef(null)
+  const currentTextureRef = useRef(null)
+  const retiredTexturesRef = useRef(new Set())
   useCursor(hovered)
 
   useEffect(() => {
     let cancelled = false
-    let texture
     const url = highQuality
       ? getWallTextureHighResolutionUrl(artwork.image_url)
       : getWallTextureUrl(artwork.image_url)
@@ -39,30 +40,51 @@ export default function ArtworkFrame({
         if (img.naturalWidth && img.naturalHeight) {
           onAspectLoaded?.(artwork.id, img.naturalWidth, img.naturalHeight)
         }
-        texture = new Texture(img)
-        texture.colorSpace = SRGBColorSpace
-        texture.anisotropy = 8
-        // 詳細画面と同じ元画像を常に直接サンプリングする。
-        // mipmap を使うと距離に応じて低解像度層へ落ち、拡大時にぼやける。
-        texture.generateMipmaps = false
-        texture.minFilter = LinearFilter
-        texture.magFilter = LinearFilter
-        texture.needsUpdate = true
-        setTexture(texture)
+        const nextTexture = new Texture(img)
+        nextTexture.colorSpace = SRGBColorSpace
+        nextTexture.anisotropy = 16
+        // 数千pxの元画像を遠距離で直接サンプリングすると細い文字線が欠落する。
+        // trilinear mipmapで縮小時の線を平均化し、拡大時は自動的に元解像度へ戻す。
+        nextTexture.generateMipmaps = true
+        nextTexture.minFilter = LinearMipmapLinearFilter
+        nextTexture.magFilter = LinearFilter
+
+        const previousTexture = currentTextureRef.current
+        if (previousTexture) retiredTexturesRef.current.add(previousTexture)
+
+        // 新TextureがGPUへ上がるまでは旧Textureを破棄しない。
+        // 視点移動時の低解像度→元画像切り替えで黒いフレームが出るのを防ぐ。
+        nextTexture.onUpdate = () => {
+          nextTexture.onUpdate = null
+          retiredTexturesRef.current.forEach((retiredTexture) => retiredTexture.dispose())
+          retiredTexturesRef.current.clear()
+        }
+        nextTexture.needsUpdate = true
+        currentTextureRef.current = nextTexture
+        setTexture(nextTexture)
       })
       .catch(() => {
         if (cancelled) return
         console.warn(`3D gallery: artwork texture failed to decode: ${url}`)
-        setTexture(null)
-        onTextureError?.(artwork.id)
+        // 高画質版だけ失敗した場合は、表示中の低解像度版を維持する。
+        if (!currentTextureRef.current) {
+          setTexture(null)
+          onTextureError?.(artwork.id)
+        }
       })
 
     return () => {
       cancelled = true
       img.src = ''
-      texture?.dispose()
     }
   }, [artwork.id, artwork.image_url, highQuality, onAspectLoaded, onTextureError])
+
+  useEffect(() => () => {
+    currentTextureRef.current?.dispose()
+    currentTextureRef.current = null
+    retiredTexturesRef.current.forEach((retiredTexture) => retiredTexture.dispose())
+    retiredTexturesRef.current.clear()
+  }, [])
 
   useEffect(() => {
     const material = imageMaterialRef.current
@@ -73,7 +95,6 @@ export default function ArtworkFrame({
     material.needsUpdate = true
   }, [texture])
 
-  const matZ = 0.034
   const imageZ = 0.036
 
   return (
@@ -91,10 +112,6 @@ export default function ArtworkFrame({
         onOpenArtwork?.(artwork)
       }}
     >
-      <mesh position={[0, 0, matZ]}>
-        <planeGeometry args={[outerWidth, outerHeight]} />
-        <meshBasicMaterial color="#fbfaf7" toneMapped={false} />
-      </mesh>
       {/* 見切り線: 白地の作品(書道など)が白いマットに溶けて
           空の額に見えるのを防ぐため、画像領域の輪郭を細く示す */}
       <mesh position={[0, 0, imageZ - 0.001]}>
