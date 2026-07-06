@@ -1,7 +1,7 @@
 .ui-3d-gallery-overlay {
   position: fixed;
   inset: 0;
-  /* ArtworkModal uses z-index: 500 and must appear above artwork clicks from this view. */
+  /* ArtworkViewer uses z-index: 500 and must appear above artwork clicks from this view. */
   z-index: 400;
   width: 100%;
   height: 100svh;

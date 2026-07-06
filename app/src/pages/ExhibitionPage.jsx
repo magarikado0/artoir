@@ -6,12 +6,12 @@ import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
 import PublicManageLink from '../components/PublicManageLink'
 import FavoriteButton from '../components/FavoriteButton'
-import ArtworkModal from '../components/ArtworkModal'
+import ArtworkViewer from '../components/ArtworkViewer'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
-import ExhibitionRibbonView from '../components/ExhibitionRibbonView'
 import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
 import ExhibitionStatusBadge from '../components/ExhibitionStatusBadge'
 import { useGalleryLayout } from '../lib/useGalleryLayout'
+import { useArtworkViewerHistory } from '../lib/useArtworkViewerHistory'
 import LoadingFrames from '../components/LoadingFrames'
 import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
@@ -40,7 +40,6 @@ export default function ExhibitionPage() {
   const [owner, setOwner] = useState(null)
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
-  const [selectedArtwork, setSelectedArtwork] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
   const [galleryLayout, setGalleryLayout] = useGalleryLayout()
   const [loading, setLoading] = useState(true)
@@ -94,49 +93,14 @@ export default function ExhibitionPage() {
     load()
   }, [orgSlug, profileSlug, exhibitionSlug])
 
-  useEffect(() => {
-    const handlePopState = (event) => {
-      const artworkId = event.state?.artworkModalArtworkId
-      if (!artworkId) {
-        setSelectedArtwork(null)
-        return
-      }
-      const nextArtwork = artworks.find((artwork) => String(artwork.id) === String(artworkId)) || null
-      setSelectedArtwork(nextArtwork)
-    }
-
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [artworks])
-
   const viewableArtworks = useMemo(
     () => artworks.filter((item) => item.image_url),
     [artworks],
   )
 
+  const { selectedArtwork, openArtwork, selectArtwork, closeArtwork } = useArtworkViewerHistory(viewableArtworks)
+
   if (profileSlug) return <Navigate to={profilePath(profileSlug)} replace />
-
-  function openArtwork(artwork) {
-    window.history.pushState({ artworkModalArtworkId: artwork.id }, '', window.location.href)
-    setSelectedArtwork(artwork)
-  }
-
-  function selectArtworkInModal(artwork) {
-    if (window.history.state?.artworkModalArtworkId) {
-      window.history.replaceState({ artworkModalArtworkId: artwork.id }, '', window.location.href)
-    } else {
-      window.history.pushState({ artworkModalArtworkId: artwork.id }, '', window.location.href)
-    }
-    setSelectedArtwork(artwork)
-  }
-
-  function closeArtwork() {
-    if (window.history.state?.artworkModalArtworkId) {
-      window.history.back()
-      return
-    }
-    setSelectedArtwork(null)
-  }
 
   function close3DGallery() {
     setViewMode('grid')
@@ -221,16 +185,18 @@ export default function ExhibitionPage() {
                     <span>3D空間で巡る</span>
                   </button>
                 )}
-                <button
-                  type="button"
-                  className="ui-immersive-launch"
-                  onClick={() => setViewMode('ribbon')}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
-                  </svg>
-                  <span>作品を巡る</span>
-                </button>
+                {viewableArtworks.length > 0 && (
+                  <button
+                    type="button"
+                    className="ui-immersive-launch"
+                    onClick={() => openArtwork(viewableArtworks[0])}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+                    </svg>
+                    <span>作品を巡る</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -242,9 +208,6 @@ export default function ExhibitionPage() {
             </div>
           )}
         </section>
-        {viewMode === 'ribbon' && artworks.length > 0 && (
-          <ExhibitionRibbonView artworks={artworks} onClose={() => setViewMode('grid')} />
-        )}
         {viewMode === '3d' && viewableArtworks.length > 0 && (
           <Suspense fallback={null}>
             <Exhibition3DGalleryView
@@ -256,12 +219,14 @@ export default function ExhibitionPage() {
           </Suspense>
         )}
       </main>
-      <ArtworkModal
-        artwork={selectedArtwork}
-        artworks={viewableArtworks}
-        onSelectArtwork={selectArtworkInModal}
-        onClose={closeArtwork}
-      />
+      {selectedArtwork && (
+        <ArtworkViewer
+          artworks={viewableArtworks}
+          initialArtwork={selectedArtwork}
+          onArtworkChange={selectArtwork}
+          onClose={closeArtwork}
+        />
+      )}
       <BottomNav active="top" />
     </div>
   )

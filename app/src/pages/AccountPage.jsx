@@ -5,7 +5,7 @@ import { useResolvedSession } from '../lib/useResolvedSession'
 import Header, { Icon } from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ArtworkMedia from '../components/ArtworkMedia'
-import ArtworkModal from '../components/ArtworkModal'
+import ArtworkViewer from '../components/ArtworkViewer'
 import ImageUploader from '../components/ImageUploader'
 import ArtworkCreateModal from '../components/ArtworkCreateModal'
 import ArtworkEditModal from '../components/ArtworkEditModal'
@@ -400,12 +400,13 @@ export default function AccountPage() {
     <div className="ui-page-shell">
       <Header activeTab="account" />
       <main className="ui-app-main ui-account-main">{renderContent()}</main>
-      <ArtworkModal
-        artwork={selectedArtwork}
-        artworks={artworks}
-        onSelectArtwork={setSelectedArtwork}
-        onClose={() => setSelectedArtwork(null)}
-      />
+      {selectedArtwork && (
+        <ArtworkViewer
+          artworks={[selectedArtwork]}
+          initialArtwork={selectedArtwork}
+          onClose={() => setSelectedArtwork(null)}
+        />
+      )}
       <ArtworkCreateModal
         open={Boolean(createFile)}
         file={createFile}
@@ -446,12 +447,13 @@ export default function AccountPage() {
     <div className="ui-page-shell">
       <Header activeTab="account" />
       <main className="ui-app-main ui-account-main">{renderContent()}</main>
-      <ArtworkModal
-        artwork={selectedArtwork}
-        artworks={artworks}
-        onSelectArtwork={setSelectedArtwork}
-        onClose={() => setSelectedArtwork(null)}
-      />
+      {selectedArtwork && (
+        <ArtworkViewer
+          artworks={[selectedArtwork]}
+          initialArtwork={selectedArtwork}
+          onClose={() => setSelectedArtwork(null)}
+        />
+      )}
       <ArtworkCreateModal
         open={Boolean(createFile)}
         file={createFile}
