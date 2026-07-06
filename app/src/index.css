@@ -2492,6 +2492,14 @@ a {
   gap: 6px;
 }
 
+.ui-artwork-viewer-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 12px;
+}
+
 .ui-artwork-viewer-creators a,
 .ui-artwork-viewer-creators span {
   display: inline-flex;

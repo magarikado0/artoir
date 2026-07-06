@@ -795,8 +795,12 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
 
         {hasDetailBody && detailOpen && (
           <div id="artwork-viewer-detail" className="ui-artwork-viewer-detail">
-            {visibleCreators.length > 0 && renderCreators('ui-artwork-viewer-creators')}
-            {meta && <div className="ui-artwork-viewer-meta">{meta}</div>}
+            {(visibleCreators.length > 0 || meta) && (
+              <div className="ui-artwork-viewer-byline">
+                {visibleCreators.length > 0 && renderCreators('ui-artwork-viewer-creators')}
+                {meta && <div className="ui-artwork-viewer-meta">{meta}</div>}
+              </div>
+            )}
             {description && (
               <p className="ui-artwork-viewer-description">{description}</p>
             )}
