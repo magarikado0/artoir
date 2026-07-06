@@ -3,7 +3,7 @@ import { getOrientation, SIZE_PRESETS } from '../../lib/photoWall'
 export const ROOM = {
   width: 12,
   depth: 12,
-  height: 3.2,
+  height: 4.6,
   halfWidth: 6,
   halfDepth: 6,
   eyeHeight: 1.5,
@@ -26,29 +26,29 @@ const WALLS = {
     normal: [0, 0, 1],
     rotationY: 0,
     yaw: 0,
-    toPosition: (u) => [u, ROOM.eyeHeight, -ROOM.halfDepth + WALL_OFFSET],
-    toViewPosition: (u) => [u, ROOM.eyeHeight, -ROOM.halfDepth + VIEW_DISTANCE],
+    toPosition: (u, y = ROOM.eyeHeight) => [u, y, -ROOM.halfDepth + WALL_OFFSET],
+    toViewPosition: (u, y = ROOM.eyeHeight, distance = VIEW_DISTANCE) => [u, y, -ROOM.halfDepth + distance],
   },
   right: {
     normal: [-1, 0, 0],
     rotationY: -Math.PI / 2,
     yaw: -Math.PI / 2,
-    toPosition: (u) => [ROOM.halfWidth - WALL_OFFSET, ROOM.eyeHeight, u],
-    toViewPosition: (u) => [ROOM.halfWidth - VIEW_DISTANCE, ROOM.eyeHeight, u],
+    toPosition: (u, y = ROOM.eyeHeight) => [ROOM.halfWidth - WALL_OFFSET, y, u],
+    toViewPosition: (u, y = ROOM.eyeHeight, distance = VIEW_DISTANCE) => [ROOM.halfWidth - distance, y, u],
   },
   back: {
     normal: [0, 0, -1],
     rotationY: Math.PI,
     yaw: Math.PI,
-    toPosition: (u) => [-u, ROOM.eyeHeight, ROOM.halfDepth - WALL_OFFSET],
-    toViewPosition: (u) => [-u, ROOM.eyeHeight, ROOM.halfDepth - VIEW_DISTANCE],
+    toPosition: (u, y = ROOM.eyeHeight) => [-u, y, ROOM.halfDepth - WALL_OFFSET],
+    toViewPosition: (u, y = ROOM.eyeHeight, distance = VIEW_DISTANCE) => [-u, y, ROOM.halfDepth - distance],
   },
   left: {
     normal: [1, 0, 0],
     rotationY: Math.PI / 2,
     yaw: Math.PI / 2,
-    toPosition: (u) => [-ROOM.halfWidth + WALL_OFFSET, ROOM.eyeHeight, -u],
-    toViewPosition: (u) => [-ROOM.halfWidth + VIEW_DISTANCE, ROOM.eyeHeight, -u],
+    toPosition: (u, y = ROOM.eyeHeight) => [-ROOM.halfWidth + WALL_OFFSET, y, -u],
+    toViewPosition: (u, y = ROOM.eyeHeight, distance = VIEW_DISTANCE) => [-ROOM.halfWidth + distance, y, -u],
   },
 }
 
@@ -73,6 +73,7 @@ function spanForImageSize(imageSize) {
 }
 
 function frameSizeFor(aspect, span) {
+  const isOneByThree = span.spanX === 1 && span.spanY === 3
   const isLarge = span.spanX === 3 || span.spanY === 3 || (span.spanX === 2 && span.spanY === 2)
   // 縦長(spanY > spanX)は高さ上限を引き上げて、より縦長に見せる
   const isTall = span.spanY > span.spanX
@@ -103,7 +104,16 @@ function frameSizeFor(aspect, span) {
     imageWidth = imageHeight * aspect
   }
 
-  const outerWidth = clamp(imageWidth + FRAME_EXTRA, minOuterWidth, maxOuterWidth)
+  if (isOneByThree) {
+    imageWidth *= 1.5
+    imageHeight *= 1.5
+  }
+
+  const outerWidth = clamp(
+    imageWidth + FRAME_EXTRA,
+    minOuterWidth,
+    isOneByThree ? maxOuterWidth * 1.5 : maxOuterWidth,
+  )
   const outerHeight = imageHeight + FRAME_EXTRA
   // 画像サイズは外形から逆算しない。極端な縦長で outerWidth が最小幅に
   // クランプされたとき、逆算すると画像がアスペクト比を失って横に伸びる
@@ -114,6 +124,7 @@ function frameSizeFor(aspect, span) {
     outerHeight,
     spanX: span.spanX,
     spanY: span.spanY,
+    isOneByThree,
     sizeClass: isLarge ? 'large' : 'small',
   }
 }
@@ -164,7 +175,7 @@ function fitWallItems(rawItems) {
   return { gap, scale, items }
 }
 
-function buildViewpoints(wall, wallItems) {
+function buildViewpoints(wall, wallItems, viewDistance) {
   const wallDef = WALLS[wall]
   return wallItems.map((item, index) => {
     const u = item.u
@@ -172,14 +183,14 @@ function buildViewpoints(wall, wallItems) {
       id: `${wall}-${index}`,
       wall,
       artworkIds: [String(item.id)],
-      position: wallDef.toViewPosition(u),
+      position: wallDef.toViewPosition(u, item.centerY, viewDistance),
       yaw: wallDef.yaw,
       targetU: u,
     }
   })
 }
 
-export function createGalleryLayout(artworks = [], imageSizeMap = {}) {
+export function createGalleryLayout(artworks = [], imageSizeMap = {}, options = {}) {
   const items = artworks.filter((artwork) => artwork?.image_url)
   const walls = {}
   const frames = []
@@ -201,12 +212,18 @@ export function createGalleryLayout(artworks = [], imageSizeMap = {}) {
     })
     const fitted = fitWallItems(rawItems)
     const wallDef = WALLS[wall]
-    const wallFrames = fitted.items.map((item) => ({
-      ...item,
-      position: wallDef.toPosition(item.u),
-      rotation: [0, wallDef.rotationY, 0],
-      normal: wallDef.normal,
-    }))
+    const wallFrames = fitted.items.map((item) => {
+      const centerY = item.isOneByThree
+        ? Math.max(ROOM.eyeHeight, item.outerHeight / 2 + 0.12)
+        : ROOM.eyeHeight
+      return {
+        ...item,
+        centerY,
+        position: wallDef.toPosition(item.u, centerY),
+        rotation: [0, wallDef.rotationY, 0],
+        normal: wallDef.normal,
+      }
+    })
     walls[wall] = {
       wall,
       span: WALL_SPAN,
@@ -216,7 +233,7 @@ export function createGalleryLayout(artworks = [], imageSizeMap = {}) {
       frames: wallFrames,
     }
     frames.push(...wallFrames)
-    viewpoints.push(...buildViewpoints(wall, wallFrames))
+    viewpoints.push(...buildViewpoints(wall, wallFrames, options.viewDistance ?? VIEW_DISTANCE))
   })
 
   const safeViewpoints = viewpoints.length

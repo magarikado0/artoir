@@ -229,7 +229,7 @@ function RoomShell() {
 }
 
 const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork, onFailedCountChange }, ref) {
-  const { camera, gl } = useThree()
+  const { camera, gl, size } = useThree()
   const [imageSizeMap, setImageSizeMap] = useState({})
   const [failedIds, setFailedIds] = useState(() => new Set())
   const visibleArtworks = useMemo(
@@ -241,11 +241,13 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
     onFailedCountChange?.(failedIds.size)
   }, [failedIds, onFailedCountChange])
   const layout = useMemo(
-    () => createGalleryLayout(visibleArtworks, imageSizeMap),
-    [visibleArtworks, imageSizeMap],
+    () => createGalleryLayout(visibleArtworks, imageSizeMap, {
+      viewDistance: size.width <= 700 ? 3.25 : 2.5,
+    }),
+    [visibleArtworks, imageSizeMap, size.width],
   )
   const [activeViewpointId, setActiveViewpointId] = useState(layout.initialViewpoint.id)
-  const [isTeleporting, setIsTeleporting] = useState(false)
+  const [, setIsTeleporting] = useState(false)
   const cameraStateRef = useRef({
     position: new Vector3(...layout.initialViewpoint.position),
     targetPosition: new Vector3(...layout.initialViewpoint.position),
@@ -267,10 +269,16 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
   const activeViewpoint = layout.viewpoints.find(
     (viewpoint) => viewpoint.id === renderedActiveViewpointId,
   ) || layout.initialViewpoint
+  const [activeViewX, activeViewY, activeViewZ] = activeViewpoint.position
   const highQualityArtworkIds = useMemo(
     () => new Set(activeViewpoint.artworkIds || []),
     [activeViewpoint],
   )
+
+  useEffect(() => {
+    if (teleportRef.current) return
+    cameraStateRef.current.targetPosition.set(activeViewX, activeViewY, activeViewZ)
+  }, [activeViewX, activeViewY, activeViewZ])
 
   const handleAspectLoaded = useCallback((id, width, height) => {
     setImageSizeMap((prev) => {
