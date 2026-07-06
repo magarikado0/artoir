@@ -138,7 +138,7 @@ function center(a, b) {
  * - onArtworkChange: フォーカスが確定した作品が変わったときに呼ばれる（履歴同期用）
  * - prefers-reduced-motion 時はシリンダー回転を使わないフラット表示になる
  */
-export default function ArtworkViewer({ artworks, initialArtwork = null, onArtworkChange, onClose }) {
+export default function ArtworkViewer({ artworks, initialArtwork = null, onArtworkChange, onClose, showCreators = true }) {
   const items = useMemo(() => artworks.filter((a) => a.image_url), [artworks])
   const N = items.length
 
@@ -162,8 +162,8 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  const [detailOpen, setDetailOpen] = useState(false)
-  const [size, setSize] = useState(() => computeSize(false))
+  const [detailOpen, setDetailOpen] = useState(true)
+  const [size, setSize] = useState(() => computeSize(true))
   const [aspects, setAspects] = useState({})
   useEffect(() => {
     const onResize = () => setSize(computeSize(detailOpen))
@@ -564,7 +564,9 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
   const title = current.title?.trim() ?? ''
   const description = current.description?.trim() ?? ''
   const meta = composeArtworkMeta(current)
-  const visibleCreators = (current.creators || []).filter((c) => c.profile?.display_name)
+  const visibleCreators = showCreators
+    ? (current.creators || []).filter((c) => c.profile?.display_name)
+    : []
   const positionLabel = N > 1 ? `${padNum(focused + 1)} / ${padNum(N)}` : null
 
   const exhibition = current.exhibitions
@@ -583,7 +585,7 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
   const ownerLabel = ownerOrg ? '団体ページ' : 'プロフィール'
   const hasExhibitionLink = Boolean(exhibitionHref)
   const hasOwnerLink = Boolean(ownerHref)
-  const hasDetailBody = Boolean(description || meta || hasExhibitionLink || hasOwnerLink || current.id)
+  const hasDetailBody = Boolean(visibleCreators.length || description || meta || hasExhibitionLink || hasOwnerLink || current.id)
 
   const { maxW, maxH } = size
   const isZoomed = zoomView.zoom > MIN_ZOOM
@@ -769,7 +771,6 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
       <div className="ui-artwork-viewer-caption" onPointerDown={(e) => e.stopPropagation()}>
         <div className="ui-artwork-viewer-caption-summary">
           {title && <h2 id="artwork-viewer-title" className="ui-artwork-viewer-title">{title}</h2>}
-          {visibleCreators.length > 0 && renderCreators('ui-artwork-viewer-creators')}
           {hasDetailBody && (
             <button
               type="button"
@@ -794,6 +795,7 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
 
         {hasDetailBody && detailOpen && (
           <div id="artwork-viewer-detail" className="ui-artwork-viewer-detail">
+            {visibleCreators.length > 0 && renderCreators('ui-artwork-viewer-creators')}
             {meta && <div className="ui-artwork-viewer-meta">{meta}</div>}
             {description && (
               <p className="ui-artwork-viewer-description">{description}</p>

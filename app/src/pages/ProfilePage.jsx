@@ -180,6 +180,7 @@ export default function ProfilePage() {
           initialArtwork={selectedArtwork}
           onArtworkChange={selectArtwork}
           onClose={closeArtwork}
+          showCreators={false}
         />
       )}
       <BottomNav active={navTab} />
