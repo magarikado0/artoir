@@ -27,10 +27,11 @@ Artoir/
 │   ├── public/
 │   └── wrangler.jsonc
 ├── docs/
-│   ├── product/            # コンセプト・機能・ロードマップ
-│   ├── design/             # ガイドライン・モックアップ
-│   ├── marketing/          # ターゲット・アウトリーチ
-│   └── ops/                # インフラ・マネタイズ・スキーマSQL
+│   ├── spec.md             # 実装仕様・インフラ運用
+│   ├── product.md          # コンセプト・ロードマップ・マネタイズ
+│   ├── marketing.md        # ターゲット・広報・アウトリーチ
+│   ├── design.md           # デザインガイドライン
+│   └── sql/                # スキーマSQL(Supabase SQL Editor で適用)
 ├── CLAUDE.md
 └── README.md
 ```
@@ -39,7 +40,7 @@ Artoir/
 
 ## Data Structure
 
-正は `docs/ops/rebuild-profiles-organizations.sql` ほか `docs/ops/*.sql`(Supabase SQL Editor で適用する運用)。
+正は `docs/sql/rebuild-profiles-organizations.sql` ほか `docs/sql/*.sql`(Supabase SQL Editor で適用する運用)。
 
 ```
 auth.users ── profiles(1:1)
@@ -79,7 +80,7 @@ profiles      ──< favorites                    # 保存(対象: artwork/exhi
 
 実装済み: 公開ページ一式、認証、ダッシュボード(団体・個人)、作品アップロード(クライアント側で最大1920pxに圧縮)、お気に入り/コレクション、シェアリンク、sitemap。
 
-未実装(次の焦点): 図録PDF生成と展覧会単位課金(`docs/ops/monetization.md`)、閲覧数アナリティクス。
+未実装(次の焦点): 図録PDF生成と展覧会単位課金(`docs/product.md`)、閲覧数アナリティクス。
 
 ---
 
@@ -87,5 +88,5 @@ profiles      ──< favorites                    # 保存(対象: artwork/exhi
 
 - **作者名の扱い**: artworks に直接持たず `artwork_creators` でプロフィールに紐づけ、`is_visible` で公開/非公開を制御する(旧ルール「作者名は掲載しない」は廃止)
 - シェアリンク(公開ページ)は認証なしで閲覧できること
-- スキーマ変更は `docs/ops/*.sql` にファイルを置き、Supabase SQL Editor で適用する
-- ドキュメント運用は `docs/ops/workflow.md`(議論はNotion、決定事項をmdへ)
+- スキーマ変更は `docs/sql/*.sql` にファイルを置き、Supabase SQL Editor で適用する
+- ドキュメント運用: 議論はNotion、決定事項をmdへ。docs は `spec.md` / `product.md` / `marketing.md` / `design.md` の4ファイル構成を維持し、むやみにファイルを増やさない
