@@ -87,10 +87,6 @@ export default function DashHome() {
           return
         }
         setOwner(ownerData)
-        if (profileSlug) {
-          navigate('/account', { replace: true })
-          return
-        }
         const { data: exhData } = await supabase
           .from('exhibitions')
           .select('*, artworks(image_url, order)')

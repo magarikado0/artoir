@@ -19,14 +19,14 @@ function DashboardSubNav({ dashboardBase, isProfile }) {
   const { pathname } = useLocation()
   const active = getRailActive(pathname, dashboardBase)
   const items = [
-    { key: 'home', to: `${dashboardBase}/dashboard`, label: isProfile ? '作品' : '展覧会', icon: 'list' },
+    { key: 'home', to: `${dashboardBase}/dashboard`, label: '展覧会', icon: 'list' },
     ...(!isProfile ? [
       { key: 'settings', to: `${dashboardBase}/dashboard/settings`, label: '設定', icon: 'user' },
       { key: 'members', to: `${dashboardBase}/dashboard/members`, label: 'メンバー', icon: 'org' },
     ] : []),
   ]
   return (
-    <nav className="ui-dashboard-subnav" aria-label="団体メニュー">
+    <nav className="ui-dashboard-subnav" aria-label={isProfile ? 'プロフィール管理メニュー' : '団体管理メニュー'}>
       {items.map(({ key, to, label, icon }) => (
         <Link
           key={key}

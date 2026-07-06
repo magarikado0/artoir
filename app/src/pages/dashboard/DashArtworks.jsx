@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, useParams, Link, useLocation } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import DashShell from '../../components/DashShell'
@@ -89,10 +89,6 @@ export default function DashArtworks() {
   }, [artworks])
 
   useEffect(() => {
-    if (profileSlug) {
-      setLoading(false)
-      return undefined
-    }
     if (!supabase || !exhibitionId || exhibitionId === 'undefined') return setLoading(false)
     async function load() {
       try {
@@ -285,8 +281,6 @@ export default function DashArtworks() {
     ))
   }
 
-  if (profileSlug) return <Navigate to="/account" replace />
-
   if (showLoader) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <LoadingFrames />
@@ -310,18 +304,18 @@ export default function DashArtworks() {
   }
 
   const dashboardBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
-  const pageTitle = profileSlug ? (memberProfiles[0]?.display_name || 'プロフィール') : (exhibition?.title || '展覧会')
+  const pageTitle = exhibition?.title || '展覧会'
 
   return (
     <>
       <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
         <div className="ui-artworks-heading-block" style={{ marginBottom: 20 }}>
           <section style={{ marginBottom: 10 }}>
-            {!profileSlug && <div className="ui-kicker">展覧会</div>}
-            <h1 className="ui-screen-title" style={{ marginTop: profileSlug ? 0 : 6 }}>{pageTitle}</h1>
+            <div className="ui-kicker">展覧会</div>
+            <h1 className="ui-screen-title" style={{ marginTop: 6 }}>{pageTitle}</h1>
           </section>
           <div className="ui-artworks-header-actions">
-            {!profileSlug && exhibitionId && exhibitionId !== 'undefined' && (
+            {exhibitionId && exhibitionId !== 'undefined' && (
               <Link
                 to={`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/edit`}
                 className="ui-inline-edit-action"

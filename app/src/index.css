@@ -2125,7 +2125,7 @@ a {
   padding: 0 14px;
 }
 
-/* 作品一覧の表示方法トグル（ウォール / 均質グリッド）＋「作品を巡る」 */
+/* 作品一覧の表示方法トグル（ウォール / 均質グリッド）と3D表示 */
 .ui-exhibition-artworks-actions {
   display: inline-flex;
   align-items: center;

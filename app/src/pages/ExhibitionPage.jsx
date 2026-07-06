@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import { Navigate, useParams, Link, useLocation } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
@@ -48,11 +48,6 @@ export default function ExhibitionPage() {
   const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
 
   useEffect(() => {
-    if (profileSlug) {
-      setLoading(false)
-      return undefined
-    }
-
     async function load() {
       if (!supabase) return setLoading(false)
       try {
@@ -99,8 +94,6 @@ export default function ExhibitionPage() {
   )
 
   const { selectedArtwork, openArtwork, selectArtwork, closeArtwork } = useArtworkViewerHistory(viewableArtworks)
-
-  if (profileSlug) return <Navigate to={profilePath(profileSlug)} replace />
 
   function close3DGallery() {
     setViewMode('grid')
@@ -166,7 +159,7 @@ export default function ExhibitionPage() {
 
         <section style={{ marginTop: 64 }}>
           <div className="ui-exhibition-artworks-head">
-            {!profileSlug && <div className="ui-section-label">作品</div>}
+            <div className="ui-section-label">作品</div>
             {artworks.length > 0 && (
               <div className="ui-exhibition-artworks-actions">
                 <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
@@ -183,18 +176,6 @@ export default function ExhibitionPage() {
                       <path d="M9 19v-5.5h6V19" />
                     </svg>
                     <span>3D空間で巡る</span>
-                  </button>
-                )}
-                {viewableArtworks.length > 0 && (
-                  <button
-                    type="button"
-                    className="ui-immersive-launch"
-                    onClick={() => openArtwork(viewableArtworks[0])}
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
-                    </svg>
-                    <span>作品を巡る</span>
                   </button>
                 )}
               </div>
