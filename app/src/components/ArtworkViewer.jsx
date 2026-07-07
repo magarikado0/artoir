@@ -50,6 +50,22 @@ function ViewerNavIcon({ direction }) {
   )
 }
 
+function DetailToggleIcon({ open }) {
+  const s = { stroke: 'currentColor', strokeWidth: 2, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' }
+  return (
+    <svg width={18} height={18} viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" {...s} />
+      <path d="M12 10v6" {...s} />
+      <path d="M12 7.2v.1" {...s} />
+      <path
+        d="M16 14l-4 4-4-4"
+        {...s}
+        style={{ opacity: open ? 1 : 0, transition: 'opacity 140ms ease' }}
+      />
+    </svg>
+  )
+}
+
 function composeArtworkMeta(artwork) {
   const material = artwork?.material || artwork?.medium
   const size = artwork?.size || artwork?.dimensions
@@ -67,10 +83,10 @@ function computeSize(detailOpen) {
   if (typeof window === 'undefined') return { maxW: 480, maxH: 520 }
   const w = window.innerWidth
   const h = window.innerHeight
-  const maxW = Math.max(240, Math.min(w - 64, 1100))
-  // 詳細パネル展開中はステージが狭くなるので作品も小さめに収める
-  const factor = detailOpen ? 0.44 : 0.62
-  const maxH = Math.max(220, Math.min(h * factor, 600))
+  const maxW = Math.max(240, Math.min(w - 48, 1100))
+  // 詳細パネル展開中も作品を主役に残す。下部情報はCSS側で横方向に圧縮する。
+  const factor = detailOpen ? 0.68 : 0.74
+  const maxH = Math.max(300, Math.min(h * factor, 820))
   return { maxW, maxH }
 }
 
@@ -162,8 +178,8 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  const [detailOpen, setDetailOpen] = useState(true)
-  const [size, setSize] = useState(() => computeSize(true))
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [size, setSize] = useState(() => computeSize(false))
   const [aspects, setAspects] = useState({})
   useEffect(() => {
     const onResize = () => setSize(computeSize(detailOpen))
@@ -777,62 +793,56 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
               className="ui-artwork-viewer-detail-toggle"
               aria-expanded={detailOpen}
               aria-controls="artwork-viewer-detail"
+              aria-label={detailOpen ? '作品情報を閉じる' : '作品情報を開く'}
               onClick={() => setDetailOpen((v) => !v)}
             >
-              <span>詳細</span>
-              <svg
-                width={12}
-                height={12}
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                style={{ transform: detailOpen ? 'rotate(180deg)' : undefined, transition: 'transform 160ms ease' }}
-              >
-                <path d="M6 15l6-6 6 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <DetailToggleIcon open={detailOpen} />
             </button>
           )}
         </div>
 
         {hasDetailBody && detailOpen && (
           <div id="artwork-viewer-detail" className="ui-artwork-viewer-detail">
-            {(visibleCreators.length > 0 || meta) && (
-              <div className="ui-artwork-viewer-byline">
-                {visibleCreators.length > 0 && renderCreators('ui-artwork-viewer-creators')}
-                {meta && <div className="ui-artwork-viewer-meta">{meta}</div>}
+            <div className="ui-artwork-viewer-info-row">
+              {(visibleCreators.length > 0 || meta) && (
+                <div className="ui-artwork-viewer-byline">
+                  {visibleCreators.length > 0 && renderCreators('ui-artwork-viewer-creators')}
+                  {meta && <div className="ui-artwork-viewer-meta">{meta}</div>}
+                </div>
+              )}
+              <div className="ui-artwork-viewer-detail-actions">
+                {hasExhibitionLink && (
+                  <Link
+                    to={exhibitionHref}
+                    onClick={() => closeIfCurrentPath(exhibitionHref)}
+                    className="ui-artwork-viewer-exhibition-link"
+                  >
+                    <span>{exhibitionTitle}</span>
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                )}
+                {hasOwnerLink && (
+                  <Link
+                    to={ownerHref}
+                    onClick={() => closeIfCurrentPath(ownerHref)}
+                    className="ui-artwork-viewer-owner-link"
+                  >
+                    <span>{ownerName || ownerLabel}</span>
+                    <span>{ownerLabel}</span>
+                  </Link>
+                )}
+                <FavoriteButton
+                  targetType="artwork"
+                  targetId={current.id}
+                  kind="bookmark"
+                  appearance="icon"
+                  className="ui-artwork-viewer-fav"
+                />
               </div>
-            )}
+            </div>
             {description && (
               <p className="ui-artwork-viewer-description">{description}</p>
             )}
-            <div className="ui-artwork-viewer-detail-actions">
-              {hasExhibitionLink && (
-                <Link
-                  to={exhibitionHref}
-                  onClick={() => closeIfCurrentPath(exhibitionHref)}
-                  className="ui-artwork-viewer-exhibition-link"
-                >
-                  <span>{exhibitionTitle}</span>
-                  <span aria-hidden="true">→</span>
-                </Link>
-              )}
-              {hasOwnerLink && (
-                <Link
-                  to={ownerHref}
-                  onClick={() => closeIfCurrentPath(ownerHref)}
-                  className="ui-artwork-viewer-owner-link"
-                >
-                  <span>{ownerName || ownerLabel}</span>
-                  <span>{ownerLabel}</span>
-                </Link>
-              )}
-              <FavoriteButton
-                targetType="artwork"
-                targetId={current.id}
-                kind="bookmark"
-                appearance="icon"
-                className="ui-artwork-viewer-fav"
-              />
-            </div>
           </div>
         )}
       </div>

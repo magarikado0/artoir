@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import { useFrame, useThree } from '@react-three/fiber'
 import { CanvasTexture, MathUtils, RepeatWrapping, SRGBColorSpace, Vector3 } from 'three'
 import ArtworkFrame from './ArtworkFrame'
-import { ROOM, createGalleryLayout } from './layout'
+import { ROOM, DEFAULT_FOV, createGalleryLayout } from './layout'
 
 const PITCH_LIMIT = MathUtils.degToRad(40)
 const LOOK_SENSITIVITY = 0.005
@@ -242,9 +242,11 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
   }, [failedIds, onFailedCountChange])
   const layout = useMemo(
     () => createGalleryLayout(visibleArtworks, imageSizeMap, {
-      viewDistance: size.width <= 700 ? 3.25 : 2.5,
+      fov: DEFAULT_FOV,
+      // 縦長画面(スマホ)ほど横画角が狭く、横長作品が入りにくいので実アスペクトを渡す
+      aspect: size.height > 0 ? size.width / size.height : undefined,
     }),
-    [visibleArtworks, imageSizeMap, size.width],
+    [visibleArtworks, imageSizeMap, size.width, size.height],
   )
   const [activeViewpointId, setActiveViewpointId] = useState(layout.initialViewpoint.id)
   const [, setIsTeleporting] = useState(false)
@@ -253,8 +255,8 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
     targetPosition: new Vector3(...layout.initialViewpoint.position),
     yaw: layout.initialViewpoint.yaw,
     targetYaw: layout.initialViewpoint.yaw,
-    pitch: 0,
-    targetPitch: 0,
+    pitch: layout.initialViewpoint.pitch ?? 0,
+    targetPitch: layout.initialViewpoint.pitch ?? 0,
     fov: camera.fov,
     targetFov: camera.fov,
   })
@@ -270,6 +272,7 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
     (viewpoint) => viewpoint.id === renderedActiveViewpointId,
   ) || layout.initialViewpoint
   const [activeViewX, activeViewY, activeViewZ] = activeViewpoint.position
+  const activeViewPitch = activeViewpoint.pitch ?? 0
   const highQualityArtworkIds = useMemo(
     () => new Set(activeViewpoint.artworkIds || []),
     [activeViewpoint],
@@ -278,7 +281,8 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
   useEffect(() => {
     if (teleportRef.current) return
     cameraStateRef.current.targetPosition.set(activeViewX, activeViewY, activeViewZ)
-  }, [activeViewX, activeViewY, activeViewZ])
+    cameraStateRef.current.targetPitch = activeViewPitch
+  }, [activeViewX, activeViewY, activeViewZ, activeViewPitch])
 
   const handleAspectLoaded = useCallback((id, width, height) => {
     setImageSizeMap((prev) => {
@@ -310,6 +314,8 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
       toPosition: new Vector3(...viewpoint.position),
       fromYaw: state.yaw,
       yawDelta: shortestYawDelta(state.yaw, viewpoint.yaw),
+      fromPitch: state.pitch,
+      pitchDelta: (viewpoint.pitch ?? 0) - state.pitch,
     }
     setIsTeleporting(true)
     setActiveViewpointId(viewpoint.id)
@@ -469,6 +475,8 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
       state.targetPosition.copy(state.position)
       state.yaw = teleport.fromYaw + teleport.yawDelta * eased
       state.targetYaw = state.yaw
+      state.pitch = teleport.fromPitch + teleport.pitchDelta * eased
+      state.targetPitch = state.pitch
       if (t >= 1) {
         teleportRef.current = null
         setIsTeleporting(false)

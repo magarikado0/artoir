@@ -21,6 +21,23 @@ const BASE_GAP = 0.5
 const MIN_GAP = 0.25
 const SPAN_REFERENCE_SIZE = 800
 
+// 視点(カメラ)関連
+export const DEFAULT_FOV = 55            // Canvas の camera fov と一致させる(縦画角)
+const DEFAULT_VIEWPORT_ASPECT = 1.6      // 画面アスペクト未指定時の既定(幅/高さ)
+const VIEW_MARGIN = 0.35                 // 作品が画面端に張り付かないための余白(m)
+const MIN_VIEW_DISTANCE = 1.6            // これ以上は作品に近づかない
+const MAX_VIEW_DISTANCE = 8.0            // 部屋の奥行き内に収める上限
+const VIEW_DISTANCE_SCALE = 1.3          // 全視点の引き量(大きいほど後ろに下がる)
+// 縦長(狭い)画面では横画角が極端に狭くなり距離が暴走するので、距離計算用に丸める
+const VIEW_ASPECT_MIN = 0.9
+const VIEW_ASPECT_MAX = 2.4
+// 配置・スケール関連
+const FLOOR_MARGIN = 0.35                // 額の下端と床の最小距離
+const CEIL_MARGIN = 0.3                  // 額の上端と天井の最小距離
+const HANG_CENTER_Y = 2.05               // 横長・小型作品が壁の下に寄りすぎないための標準中心高
+const VIEW_EYE_HEIGHT = 2.0              // 3D空間内の視点高。作品中心に近い高さから見る
+const MAX_UPSCALE = 1.25                 // 空いた壁を埋めるための拡大上限
+
 const WALLS = {
   front: {
     normal: [0, 0, 1],
@@ -129,11 +146,22 @@ function frameSizeFor(aspect, span) {
   }
 }
 
-function splitEvenly(items) {
-  const base = Math.floor(items.length / WALL_ORDER.length)
-  const remainder = items.length % WALL_ORDER.length
+// 作品数に応じて使う壁の枚数を決める。少数を4面に薄く散らして
+// 壁がすかすかになるのを避け、少ないときは前面から順に集約する。
+function wallCountForItems(count) {
+  if (count <= 2) return 1
+  if (count <= 4) return 2
+  if (count <= 8) return 3
+  return WALL_ORDER.length
+}
+
+function distributeToWalls(items) {
+  const wallCount = wallCountForItems(items.length)
+  const targetWalls = WALL_ORDER.slice(0, wallCount)
+  const base = Math.floor(items.length / wallCount)
+  const remainder = items.length % wallCount
   let cursor = 0
-  return WALL_ORDER.map((wall, wallIndex) => {
+  return targetWalls.map((wall, wallIndex) => {
     const count = base + (wallIndex < remainder ? 1 : 0)
     const slice = items.slice(cursor, cursor + count)
     cursor += count
@@ -141,7 +169,20 @@ function splitEvenly(items) {
   })
 }
 
-function fitWallItems(rawItems) {
+function maxUpscaleForItemCount(count) {
+  if (count <= 2) return 1
+  if (count <= 4) return 1.08
+  if (count <= 8) return 1.18
+  return MAX_UPSCALE
+}
+
+function viewDistanceScaleForItemCount(count) {
+  if (count <= 2) return 1.08
+  if (count <= 4) return 1.16
+  return VIEW_DISTANCE_SCALE
+}
+
+function fitWallItems(rawItems, itemCount) {
   if (!rawItems.length) return { gap: BASE_GAP, scale: 1, items: [] }
 
   const totalWidth = rawItems.reduce((sum, item) => sum + item.outerWidth, 0)
@@ -150,7 +191,12 @@ function fitWallItems(rawItems) {
   const naturalWidth = totalWidth + baseGaps
   const gap = naturalWidth <= WALL_SPAN ? BASE_GAP : MIN_GAP
   const availableForFrames = Math.max(0.1, WALL_SPAN - (naturalWidth <= WALL_SPAN ? baseGaps : minGaps))
-  const scale = totalWidth > availableForFrames ? availableForFrames / totalWidth : 1
+  // 天井に額が突き抜けないよう、最も背の高い額を基準に拡大上限を作る
+  const tallest = Math.max(...rawItems.map((item) => item.outerHeight))
+  const ceilingScale = (ROOM.height - FLOOR_MARGIN - CEIL_MARGIN) / tallest
+  // 収まらなければ縮小、余れば拡大して壁の空きを埋める。
+  // 少数作品では壁幅いっぱいに拡大すると、視点距離まで不自然に遠くなるため控えめにする。
+  const scale = Math.min(availableForFrames / totalWidth, maxUpscaleForItemCount(itemCount), ceilingScale)
   const fittedWidth = totalWidth * scale + gap * Math.max(0, rawItems.length - 1)
   let cursor = -fittedWidth / 2
 
@@ -175,16 +221,34 @@ function fitWallItems(rawItems) {
   return { gap, scale, items }
 }
 
-function buildViewpoints(wall, wallItems, viewDistance) {
+// 額「自身の大きさ」が画面に収まる距離を逆算する(額の中心を画面中央に見る前提)。
+// 目線高から天辺までを入れようとすると背の高い額で距離が暴走するので、そうしない。
+// 縦横の位置ズレはカメラのピッチ(見上げ/見下ろし)で吸収する。
+function viewDistanceForFrame(item, fov, aspect, itemCount) {
+  const halfTan = Math.tan((fov * Math.PI) / 180 / 2)
+  const effAspect = clamp(aspect, VIEW_ASPECT_MIN, VIEW_ASPECT_MAX)
+  const distV = (item.outerHeight / 2 + VIEW_MARGIN) / halfTan
+  const distH = (item.outerWidth / 2 + VIEW_MARGIN) / (halfTan * effAspect)
+  const distance = Math.max(distV, distH) * viewDistanceScaleForItemCount(itemCount)
+  return clamp(distance, MIN_VIEW_DISTANCE, MAX_VIEW_DISTANCE)
+}
+
+function buildViewpoints(wall, wallItems, fov, aspect, itemCount) {
   const wallDef = WALLS[wall]
   return wallItems.map((item, index) => {
     const u = item.u
+    const distance = viewDistanceForFrame(item, fov, aspect, itemCount)
+    const viewY = Math.min(item.centerY - 0.06, VIEW_EYE_HEIGHT)
+    // カメラは作品中心に近い高さに立ち、額の中心を見上げる/見下ろす角度を向く。
+    // これで距離を伸ばさずに、額を画面中央に収められる。
+    const pitch = Math.atan2(item.centerY - viewY, distance)
     return {
       id: `${wall}-${index}`,
       wall,
       artworkIds: [String(item.id)],
-      position: wallDef.toViewPosition(u, item.centerY, viewDistance),
+      position: wallDef.toViewPosition(u, viewY, distance),
       yaw: wallDef.yaw,
+      pitch,
       targetU: u,
     }
   })
@@ -192,11 +256,14 @@ function buildViewpoints(wall, wallItems, viewDistance) {
 
 export function createGalleryLayout(artworks = [], imageSizeMap = {}, options = {}) {
   const items = artworks.filter((artwork) => artwork?.image_url)
+  const itemCount = items.length
+  const fov = options.fov ?? DEFAULT_FOV
+  const aspect = options.aspect ?? DEFAULT_VIEWPORT_ASPECT
   const walls = {}
   const frames = []
   const viewpoints = []
 
-  splitEvenly(items).forEach(({ wall, items: wallArtworks }) => {
+  distributeToWalls(items).forEach(({ wall, items: wallArtworks }) => {
     const rawItems = wallArtworks.map((artwork, wallIndex) => {
       const imageSize = imageSizeFor(artwork, imageSizeMap)
       const aspect = imageSize.width / imageSize.height
@@ -210,12 +277,14 @@ export function createGalleryLayout(artworks = [], imageSizeMap = {}, options = 
         ...frameSizeFor(aspect, span),
       }
     })
-    const fitted = fitWallItems(rawItems)
+    const fitted = fitWallItems(rawItems, itemCount)
     const wallDef = WALLS[wall]
     const wallFrames = fitted.items.map((item) => {
-      const centerY = item.isOneByThree
-        ? Math.max(ROOM.eyeHeight, item.outerHeight / 2 + 0.12)
-        : ROOM.eyeHeight
+      // 額の中心は標準の掛け位置へ寄せ、背の高い額だけ床・天井の余白に合わせて調整する。
+      // 横長作品が目線高に固定されて壁の下側へ見える問題を避ける。
+      const minCenterY = item.outerHeight / 2 + FLOOR_MARGIN
+      const maxCenterY = ROOM.height - CEIL_MARGIN - item.outerHeight / 2
+      const centerY = clamp(HANG_CENTER_Y, minCenterY, Math.max(minCenterY, maxCenterY))
       return {
         ...item,
         centerY,
@@ -233,12 +302,12 @@ export function createGalleryLayout(artworks = [], imageSizeMap = {}, options = 
       frames: wallFrames,
     }
     frames.push(...wallFrames)
-    viewpoints.push(...buildViewpoints(wall, wallFrames, options.viewDistance ?? VIEW_DISTANCE))
+    viewpoints.push(...buildViewpoints(wall, wallFrames, fov, aspect, itemCount))
   })
 
   const safeViewpoints = viewpoints.length
     ? viewpoints
-    : [{ id: 'center', wall: 'center', position: [0, ROOM.eyeHeight, 0], yaw: 0, targetU: 0 }]
+    : [{ id: 'center', wall: 'center', position: [0, ROOM.eyeHeight, 0], yaw: 0, pitch: 0, targetU: 0 }]
 
   return {
     room: ROOM,
