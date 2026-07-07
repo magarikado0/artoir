@@ -8,8 +8,8 @@ import { layoutPhotoWall } from './photoWall'
  *
  * @param {{id:string,width:number,height:number}[]} photos
  * @param {number} [columns=4] 列数
- * @param {object} [options] レイアウトエンジンの追加オプション（largeBase など）
- * @returns {{ items: {id:string,x:number,y:number,spanX:number,spanY:number}[], columns:number, rows:number }}
+ * @param {object} [options] レイアウトエンジンの追加オプション（areaReference など）
+ * @returns {{ items: {id:string,spanX:number,spanY:number}[], columns:number }}
  */
 export function usePhotoWallLayout(photos, columns = 4, options) {
   return useMemo(

@@ -1,6 +1,6 @@
 /**
- * 作品一覧の表示切り替え（ウォール＝可変サイズ / ウォール(新)＝段組 / 均質な行列）。
- * value: 'wall' | 'justified' | 'grid'、onChange(next) で切り替える。
+ * 作品一覧の表示切り替え（ウォール＝可変サイズ / グリッド＝均質な行列）。
+ * value: 'wall' | 'grid'、onChange(next) で切り替える。
  */
 export default function GalleryLayoutToggle({ value, onChange }) {
   return (
@@ -18,21 +18,6 @@ export default function GalleryLayoutToggle({ value, onChange }) {
           <rect x="13" y="4" width="7" height="6" rx="1" />
           <rect x="4" y="16" width="7" height="4" rx="1" />
           <rect x="13" y="12" width="7" height="8" rx="1" />
-        </svg>
-      </button>
-      <button
-        type="button"
-        className={value === 'justified' ? 'is-active' : ''}
-        aria-pressed={value === 'justified'}
-        aria-label="ウォール(新)"
-        title="ウォール(新)"
-        onClick={() => onChange('justified')}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
-          <rect x="4" y="4" width="9" height="7" rx="1" />
-          <rect x="15" y="4" width="5" height="7" rx="1" />
-          <rect x="4" y="13" width="5" height="7" rx="1" />
-          <rect x="11" y="13" width="9" height="7" rx="1" />
         </svg>
       </button>
       <button

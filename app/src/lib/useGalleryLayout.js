@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 const STORAGE_KEY = 'artoir:galleryLayout'
-const VALID_LAYOUTS = ['wall', 'justified', 'grid']
+const VALID_LAYOUTS = ['wall', 'grid']
 const DEFAULT_LAYOUT = 'wall'
 
 function readStoredLayout() {
@@ -16,7 +16,7 @@ function readStoredLayout() {
 }
 
 /**
- * 作品一覧の並び: 'wall'（現状の可変サイズ）/ 'justified'（段組・Flickr 風）/ 'grid'（均質な行列）。
+ * 作品一覧の並び: 'wall'（可変サイズ）/ 'grid'（均質な行列）。
  * 設定は端末（localStorage）に保持し、展覧会ページ・プロフィールページで共有する。
  */
 export function useGalleryLayout() {

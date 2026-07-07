@@ -37,7 +37,7 @@ export default function ProfilePage() {
         const [{ data: works }, { data: exhibitionRows }, { data: membershipRows }] = await Promise.all([
           supabase
             .from('artworks')
-            .select('id, title, description, image_url, profile_id, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
+            .select('id, title, description, image_url, image_width, image_height, profile_id, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
             .eq('profile_id', profileData.id)
             .order('order'),
           supabase

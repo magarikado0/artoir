@@ -3,7 +3,6 @@ import ArtworkMedia from './ArtworkMedia'
 import { getModalImageUrl, getWallThumbnailUrl, preloadImageUrl } from '../lib/imageUrl'
 import { usePhotoWallLayout } from '../lib/usePhotoWallLayout'
 import { useImageNaturalSizes } from '../lib/useImageNaturalSizes'
-import { computeJustifiedRows } from '../lib/justifiedLayout'
 import FavoriteButton from './FavoriteButton'
 import { T } from '../lib/tokens'
 
@@ -65,23 +64,6 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
 
   const { items: layoutItems } = usePhotoWallLayout(photos, columns)
 
-  // 段組（justified）用のコンテナ幅。1px 単位のリサイズで再レイアウトしないよう 8px に量子化する
-  // （切り捨てにして、実幅を超えて行が折り返す/はみ出すのを防ぐ）。
-  const justifiedWidth = Math.floor((containerWidth || 0) / 8) * 8
-  const justifiedTargetRowHeight = justifiedWidth < 640 ? 160 : 220
-  const justifiedRows = useMemo(() => {
-    if (layout !== 'justified' || justifiedWidth <= 0) return []
-    // アスペクト比の優先順: DB の image_width/height → サムネイルの計測値 → 4:3（計測完了までの仮値）。
-    const inputs = items.map((a) => {
-      const id = String(a.id)
-      if (a.image_width > 0 && a.image_height > 0) return { id, aspectRatio: a.image_width / a.image_height }
-      const measured = sizes.get(id)
-      if (measured) return { id, aspectRatio: measured.width / measured.height }
-      return { id, aspectRatio: 4 / 3 }
-    })
-    return computeJustifiedRows(inputs, justifiedWidth, gap, justifiedTargetRowHeight)
-  }, [layout, items, sizes, justifiedWidth, gap, justifiedTargetRowHeight])
-
   // 未保存作品の栞は既定で隠す。PC はホバー（CSS）、モバイルは長押しで「追加」ボタンを出す。
   // 保存済みは常時表示（CSS の .is-active）。長押し中はこの id のカードに .is-revealed を付ける。
   const [revealedId, setRevealedId] = useState(null)
@@ -126,8 +108,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
     onOpenArtwork(artwork)
   }
 
-  // ウォール（現状）・均質グリッド・段組で描画を共通化する。spanStyle と fit だけが異なる。
-  // fit: 段組では枠が画像比率と一致するため 'cover' で満たす。比率をクランプした作品のみ 'contain'。
+  // ウォール・均質グリッドで描画を共通化する。spanStyle だけが異なる。
   const renderTile = (artwork, index, spanStyle, fit = 'contain') => {
     const id = String(artwork.id)
     const label = artwork.title?.trim() || `作品 ${index + 1}`
@@ -192,34 +173,6 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
         }}
       >
         {items.map((artwork, index) => renderTile(artwork, index, {}))}
-      </div>
-    )
-  }
-
-  // 段組（ウォール(新)）: 目標行高で左から敷き詰め、行ごとに幅ピッタリへ揃える（Flickr 風）。
-  if (layout === 'justified') {
-    // フォールバックラベル「作品 N」用の表示順（段組は items の順序を維持する）。
-    const indexById = new Map(items.map((a, i) => [String(a.id), i]))
-    return (
-      <div
-        ref={wrapRef}
-        className="ui-photo-wall"
-        style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap }}
-      >
-        {justifiedRows.map((row, rowIndex) => (
-          <div key={row[0]?.id ?? rowIndex} style={{ display: 'flex', flexWrap: 'nowrap', gap }}>
-            {row.map((cell) => {
-              const artwork = artworkById.get(cell.id)
-              if (!artwork) return null
-              return renderTile(
-                artwork,
-                indexById.get(cell.id) ?? 0,
-                { width: cell.width, height: cell.height, flex: '0 0 auto' },
-                cell.clamped ? 'contain' : 'cover',
-              )
-            })}
-          </div>
-        ))}
       </div>
     )
   }
