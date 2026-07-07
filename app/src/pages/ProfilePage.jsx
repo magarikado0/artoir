@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
@@ -17,6 +17,8 @@ import { T, externalHost } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 import { mapExhibitionListRow } from '../lib/exhibition'
 
+const Exhibition3DGalleryView = lazy(() => import('../components/Exhibition3DGalleryView'))
+
 export default function ProfilePage() {
   const { profileSlug } = useParams()
   const { session } = useAuth()
@@ -25,7 +27,9 @@ export default function ProfilePage() {
   const [exhibitions, setExhibitions] = useState([])
   const [artworks, setArtworks] = useState([])
   const [galleryLayout, setGalleryLayout] = useGalleryLayout()
+  const [viewMode, setViewMode] = useState('grid')
   const [loading, setLoading] = useState(true)
+  const gallery3dButtonRef = useRef(null)
 
   useEffect(() => {
     async function load() {
@@ -78,6 +82,11 @@ export default function ProfilePage() {
   )
 
   const { selectedArtwork, openArtwork, selectArtwork, closeArtwork } = useArtworkViewerHistory(viewableArtworks)
+
+  function close3DGallery() {
+    setViewMode('grid')
+    window.requestAnimationFrame(() => gallery3dButtonRef.current?.focus())
+  }
 
   if (loading) return (
     <div className="ui-page-shell" />
@@ -180,12 +189,37 @@ export default function ProfilePage() {
               <div className="ui-section-label">作品</div>
               <div className="ui-exhibition-artworks-actions">
                 <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
+                {viewableArtworks.length > 0 && (
+                  <button
+                    ref={gallery3dButtonRef}
+                    type="button"
+                    className="ui-immersive-launch"
+                    onClick={() => setViewMode('3d')}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 11.5 12 4l9 7.5" />
+                      <path d="M5.5 10v9h13v-9" />
+                      <path d="M9 19v-5.5h6V19" />
+                    </svg>
+                    <span>3D空間で巡る</span>
+                  </button>
+                )}
               </div>
             </div>
             <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={openArtwork} layout={galleryLayout} />
           </>
         ) : (
           <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>公開中の作品はまだありません</div>
+        )}
+        {viewMode === '3d' && viewableArtworks.length > 0 && (
+          <Suspense fallback={null}>
+            <Exhibition3DGalleryView
+              artworks={viewableArtworks}
+              onClose={close3DGallery}
+              onOpenArtwork={openArtwork}
+              hasOpenArtwork={Boolean(selectedArtwork)}
+            />
+          </Suspense>
         )}
       </main>
       {selectedArtwork && (
