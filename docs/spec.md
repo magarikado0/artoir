@@ -31,6 +31,7 @@
 - `profile-artworks-without-exhibitions.sql` — プロフィール作品を合成展覧会から `artworks.profile_id` へ移行
 - `add-favorites.sql` — お気に入り
 - `apply-all-table-rls.sql` — 全テーブル RLS
+- `add-artwork-image-dimensions.sql` — artworks に image_width / image_height を追加(段組レイアウト用)
 
 ## データ構造
 
@@ -113,8 +114,11 @@ profiles
 | image_url | string(Cloudinary の secure_url) |
 | file_name / file_size | string / number |
 | order | integer |
+| image_width / image_height | integer(nullable。画像の px 寸法) |
 
 `exhibition_id` XOR `profile_id`(CHECK 制約)。
+
+image_width / image_height は Cloudinary アップロード応答の width/height を保存(段組レイアウトのアスペクト比確定用)。追加 SQL は `docs/sql/add-artwork-image-dimensions.sql`、既存行のバックフィルは `app/scripts/backfill-artwork-dimensions.mjs`(service role キーで実行)。
 
 ### artwork_creators
 

@@ -6,6 +6,11 @@ export function getArtworkUploadConfigError() {
   return ''
 }
 
+/**
+ * Cloudinary へ unsigned アップロードする。
+ * @returns {Promise<{url:string, width:number|null, height:number|null}>}
+ *   url = secure_url。width/height はアップロード応答のピクセル寸法（artworks.image_width/height に保存する）。
+ */
 export function uploadArtworkImage(file, fileName, onProgress) {
   return new Promise((resolve, reject) => {
     if (!CLOUD_NAME || !UPLOAD_PRESET) {
@@ -28,7 +33,11 @@ export function uploadArtworkImage(file, fileName, onProgress) {
       if (xhr.status === 200) {
         try {
           const data = JSON.parse(xhr.responseText)
-          resolve(data.secure_url)
+          resolve({
+            url: data.secure_url,
+            width: Number.isFinite(data.width) ? data.width : null,
+            height: Number.isFinite(data.height) ? data.height : null,
+          })
         } catch {
           reject(new Error('Cloudinary の応答を解析できませんでした'))
         }
@@ -40,4 +49,23 @@ export function uploadArtworkImage(file, fileName, onProgress) {
     xhr.onerror = () => reject(new Error('ネットワークエラーが発生しました'))
     xhr.send(formData)
   })
+}
+
+/**
+ * image_width / image_height カラム未適用の DB に対する insert/update 失敗かを判定する。
+ * docs/sql/add-artwork-image-dimensions.sql 適用後はこのフォールバック（呼び出し側のリトライ）ごと削除可。
+ */
+export function isMissingImageDimensionColumnError(error) {
+  if (!error) return false
+  const code = error.code || ''
+  const message = String(error.message || '')
+  return (code === 'PGRST204' || code === '42703') && /image_(width|height)/.test(message)
+}
+
+/** ペイロードから寸法フィールドを除いたコピーを返す（カラム未適用 DB へのリトライ用）。 */
+export function omitImageDimensionFields(payload) {
+  const rest = { ...payload }
+  delete rest.image_width
+  delete rest.image_height
+  return rest
 }

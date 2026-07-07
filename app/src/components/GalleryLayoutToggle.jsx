@@ -1,6 +1,6 @@
 /**
- * 作品一覧の表示切り替え（ウォール＝可変サイズ / 均質な行列）。
- * value: 'wall' | 'grid'、onChange(next) で切り替える。
+ * 作品一覧の表示切り替え（ウォール＝可変サイズ / ウォール(新)＝段組 / 均質な行列）。
+ * value: 'wall' | 'justified' | 'grid'、onChange(next) で切り替える。
  */
 export default function GalleryLayoutToggle({ value, onChange }) {
   return (
@@ -9,8 +9,8 @@ export default function GalleryLayoutToggle({ value, onChange }) {
         type="button"
         className={value === 'wall' ? 'is-active' : ''}
         aria-pressed={value === 'wall'}
-        aria-label="ウォール表示"
-        title="ウォール表示"
+        aria-label="ウォール"
+        title="ウォール"
         onClick={() => onChange('wall')}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
@@ -22,10 +22,25 @@ export default function GalleryLayoutToggle({ value, onChange }) {
       </button>
       <button
         type="button"
+        className={value === 'justified' ? 'is-active' : ''}
+        aria-pressed={value === 'justified'}
+        aria-label="ウォール(新)"
+        title="ウォール(新)"
+        onClick={() => onChange('justified')}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+          <rect x="4" y="4" width="9" height="7" rx="1" />
+          <rect x="15" y="4" width="5" height="7" rx="1" />
+          <rect x="4" y="13" width="5" height="7" rx="1" />
+          <rect x="11" y="13" width="9" height="7" rx="1" />
+        </svg>
+      </button>
+      <button
+        type="button"
         className={value === 'grid' ? 'is-active' : ''}
         aria-pressed={value === 'grid'}
-        aria-label="均質な行列表示"
-        title="均質な行列表示"
+        aria-label="グリッド"
+        title="グリッド"
         onClick={() => onChange('grid')}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">

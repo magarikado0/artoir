@@ -17,7 +17,7 @@ import { T, fmtDateRangeShort, pad2 } from '../lib/tokens'
 import { useIsDesktop } from '../lib/useIsDesktop'
 import { attachNormalizedCreators, normalizeProfile } from '../lib/profile'
 import { getGalleryThumbnailUrl } from '../lib/imageUrl'
-import { getArtworkUploadConfigError, uploadArtworkImage } from '../lib/artworkUpload'
+import { getArtworkUploadConfigError, isMissingImageDimensionColumnError, omitImageDimensionFields, uploadArtworkImage } from '../lib/artworkUpload'
 import { getExhibitionThumbnailUrl, mapExhibitionListRow } from '../lib/exhibition'
 import { deleteExhibition } from '../lib/deleteExhibition'
 import { profilePath } from '../lib/profileRoutes'
@@ -374,12 +374,16 @@ export default function AccountPage() {
         if (configError) throw new Error(configError)
         const baseName = editTarget.file_name?.replace(/\.[^.]+$/, '') || `artwork-${editTarget.id}`
         const uploadName = `${baseName}-edit.${imageBlob.type === 'image/png' ? 'png' : 'jpg'}`
-        const imageUrl = await uploadArtworkImage(imageBlob, uploadName)
-        imageUpdates = { image_url: imageUrl, file_size: imageBlob.size }
+        const uploaded = await uploadArtworkImage(imageBlob, uploadName)
+        imageUpdates = { image_url: uploaded.url, file_size: imageBlob.size, image_width: uploaded.width, image_height: uploaded.height }
       }
 
       const updates = { title: editTitle.trim(), description: editDescription.trim() || null, ...imageUpdates }
-      const { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
+      let { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
+      if (error && isMissingImageDimensionColumnError(error)) {
+        // 寸法カラム未適用の DB 向けフォールバック（docs/sql/add-artwork-image-dimensions.sql 適用後に削除可）。
+        ;({ error } = await supabase.from('artworks').update(omitImageDimensionFields(updates)).eq('id', editTarget.id))
+      }
       if (error) throw error
 
       const updated = { ...editTarget, ...updates }

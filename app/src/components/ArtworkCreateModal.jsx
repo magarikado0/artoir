@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { getArtworkUploadConfigError, uploadArtworkImage } from '../lib/artworkUpload'
+import { getArtworkUploadConfigError, isMissingImageDimensionColumnError, omitImageDimensionFields, uploadArtworkImage } from '../lib/artworkUpload'
 import { T } from '../lib/tokens'
 import ArtworkImageAdjuster from './ArtworkImageAdjuster'
 
@@ -94,20 +94,26 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, profileId
     try {
       const croppedName = file.name?.replace(/\.[^.]+$/, '') || 'artwork'
       const uploadName = `${croppedName}-crop.${confirmedBlob.type === 'image/png' ? 'png' : 'jpg'}`
-      const imageUrl = await uploadArtworkImage(confirmedBlob, uploadName, setProgress)
+      const uploaded = await uploadArtworkImage(confirmedBlob, uploadName, setProgress)
 
       const payload = {
         exhibition_id: exhibitionId || null,
         profile_id: profileId || null,
-        image_url: imageUrl,
+        image_url: uploaded.url,
         title: title.trim(),
         description: description.trim() || null,
         order: nextOrder,
         file_name: file.name,
         file_size: confirmedBlob.size,
+        image_width: uploaded.width,
+        image_height: uploaded.height,
       }
 
-      const { data: newWork, error: insertError } = await supabase.from('artworks').insert(payload).select().single()
+      let { data: newWork, error: insertError } = await supabase.from('artworks').insert(payload).select().single()
+      if (insertError && isMissingImageDimensionColumnError(insertError)) {
+        // 寸法カラム未適用の DB 向けフォールバック（docs/sql/add-artwork-image-dimensions.sql 適用後に削除可）。
+        ;({ data: newWork, error: insertError } = await supabase.from('artworks').insert(omitImageDimensionFields(payload)).select().single())
+      }
       if (insertError) throw insertError
 
       const creatorRows = selectedCreatorIds.map((profileId, index) => ({

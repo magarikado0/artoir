@@ -12,7 +12,7 @@ import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
 import { getThumbnailUrl } from '../../lib/imageUrl'
-import { getArtworkUploadConfigError, uploadArtworkImage } from '../../lib/artworkUpload'
+import { getArtworkUploadConfigError, isMissingImageDimensionColumnError, omitImageDimensionFields, uploadArtworkImage } from '../../lib/artworkUpload'
 import { persistArtworkOrder, reorderArtworksById } from '../../lib/reorderArtworks'
 import { attachNormalizedCreators } from '../../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../../lib/profileRoutes'
@@ -237,12 +237,16 @@ export default function DashArtworks() {
         if (configError) throw new Error(configError)
         const baseName = editTarget.file_name?.replace(/\.[^.]+$/, '') || `artwork-${editTarget.id}`
         const uploadName = `${baseName}-edit.${imageBlob.type === 'image/png' ? 'png' : 'jpg'}`
-        const imageUrl = await uploadArtworkImage(imageBlob, uploadName)
-        imageUpdates = { image_url: imageUrl, file_size: imageBlob.size }
+        const uploaded = await uploadArtworkImage(imageBlob, uploadName)
+        imageUpdates = { image_url: uploaded.url, file_size: imageBlob.size, image_width: uploaded.width, image_height: uploaded.height }
       }
 
       const updates = { title: editTitle, description: editDesc, ...imageUpdates }
-      const { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
+      let { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
+      if (error && isMissingImageDimensionColumnError(error)) {
+        // 寸法カラム未適用の DB 向けフォールバック（docs/sql/add-artwork-image-dimensions.sql 適用後に削除可）。
+        ;({ error } = await supabase.from('artworks').update(omitImageDimensionFields(updates)).eq('id', editTarget.id))
+      }
       if (error) throw error
 
       await saveArtworkCreators(editTarget.id, editCreatorIds)
