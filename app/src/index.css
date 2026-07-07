@@ -625,30 +625,6 @@ a {
   background: #BE553D;
 }
 
-.ui-topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-}
-
-.ui-topbar-icon {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #E4DDD2;
-  border-radius: 999px;
-  background: transparent;
-  color: #1F1B17;
-  text-decoration: none;
-  cursor: pointer;
-  transition: border-color 160ms ease, color 160ms ease;
-}
-
-.ui-topbar-icon:hover {
-  border-color: #1F1B17;
-}
 
 .ui-mobile-topbar {
   position: sticky;
@@ -666,17 +642,6 @@ a {
   -webkit-backdrop-filter: saturate(180%) blur(16px);
 }
 
-.ui-top-icon {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: transparent;
-  color: #1F1B17;
-  text-decoration: none;
-  transition: color 160ms ease;
-}
 
 .ui-top-icon.is-active {
   color: #BE553D;
