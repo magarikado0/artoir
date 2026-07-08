@@ -78,7 +78,11 @@ function Field({ label, value, onChange, type = 'text', placeholder, required, a
 export default function LoginPage() {
   const isDesktop = useIsDesktop()
   const { session, ready } = useResolvedSession()
-  const [mode, setMode] = useState('login')
+  const [mode, setMode] = useState(() => (
+    typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('mode') === 'signup'
+      ? 'signup'
+      : 'login'
+  ))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')

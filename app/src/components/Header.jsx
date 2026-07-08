@@ -4,7 +4,7 @@ import { useAccountDestination } from '../lib/useAccountDestination'
 import { BrandLockup } from './BrandMark'
 
 const TABS = [
-  { key: 'top', label: '展覧会', path: '/', icon: 'list' },
+  { key: 'top', label: '展覧会', path: '/exhibitions', icon: 'list' },
   { key: 'orgs', label: '団体', path: '/orgs', icon: 'org' },
   { key: 'creators', label: '作家', path: '/creators', icon: 'users' },
   { key: 'account', label: 'アカウント', path: '/account', icon: 'user' },

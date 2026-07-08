@@ -8,6 +8,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 import OAuthReturnRedirect from './components/OAuthReturnRedirect'
 import LoadingFrames from './components/LoadingFrames'
 
+const LandingPage = lazy(() => import('./pages/LandingPage'))
+const PublishPage = lazy(() => import('./pages/PublishPage'))
 const AllExhibitionsPage = lazy(() => import('./pages/AllExhibitionsPage'))
 const OrgsPage = lazy(() => import('./pages/OrgsPage'))
 const CreatorsPage = lazy(() => import('./pages/CreatorsPage'))
@@ -151,7 +153,9 @@ export default function App() {
         <ScrollToTop />
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/" element={<AllExhibitionsPage />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/publish" element={<PublishPage />} />
+            <Route path="/exhibitions" element={<AllExhibitionsPage />} />
             <Route path="/orgs" element={<OrgsPage />} />
             <Route path="/creators" element={<CreatorsPage />} />
             <Route path="/login" element={<LoginPage />} />
