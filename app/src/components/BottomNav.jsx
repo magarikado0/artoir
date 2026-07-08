@@ -6,7 +6,7 @@ import { useAccountDestination } from '../lib/useAccountDestination'
 import { Icon } from './Header'
 
 const ITEMS = [
-  { key: 'top', label: '展覧会', icon: 'list', path: '/' },
+  { key: 'top', label: '展覧会', icon: 'list', path: '/exhibitions' },
   { key: 'orgs', label: '団体', icon: 'org', path: '/orgs' },
   { key: 'creators', label: '作家', icon: 'users', path: '/creators' },
   { key: 'account', label: 'アカウント', icon: 'user', path: '/account' },

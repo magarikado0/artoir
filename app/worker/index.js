@@ -1,7 +1,8 @@
 const CACHE_MAX_AGE = 3600
 
 const STATIC_URLS = [
-  { loc: '/', changefreq: 'daily', priority: '1.0' },
+  { loc: '/', changefreq: 'weekly', priority: '1.0' },
+  { loc: '/exhibitions', changefreq: 'daily', priority: '0.9' },
   { loc: '/orgs', changefreq: 'weekly', priority: '0.8' },
 ]
 

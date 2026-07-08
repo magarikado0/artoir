@@ -1,0 +1,766 @@
+/* ── Landing Page(/)──
+   既存トークン(app/src/lib/tokens.js)のパレットを踏襲:
+   paper #F3EEE5 / card #FBF8F3 / ink #1F1B17 / accent #BE553D */
+
+.lp-page {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background-color: #FAF6F0;
+  background-image: var(--paper-grain);
+  color: #1F1B17;
+  font-family: 'Noto Sans JP', -apple-system, 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+}
+
+.lp-page main {
+  flex: 1;
+}
+
+.lp-container {
+  width: min(100%, 1160px);
+  margin: 0 auto;
+  padding-left: 28px;
+  padding-right: 28px;
+}
+
+.lp-accent {
+  color: #BE553D;
+}
+
+/* ── ボタン ── */
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 26px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.lp-btn--fill {
+  background: #BE553D;
+  border-color: #BE553D;
+  color: #FBF8F3;
+}
+
+.lp-btn--fill:hover {
+  background: #AC4A36;
+  border-color: #AC4A36;
+}
+
+.lp-btn--outline {
+  background: transparent;
+  border-color: #BE553D;
+  color: #BE553D;
+}
+
+.lp-btn--outline:hover {
+  background: rgba(190, 85, 61, 0.08);
+}
+
+.lp-btn--sm {
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+/* ── ヘッダー ── */
+.lp-header {
+  border-bottom: 1px solid #EBE2D4;
+  background: rgba(250, 246, 240, 0.9);
+}
+
+.lp-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  height: 72px;
+}
+
+.lp-header-brand {
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: #1F1B17;
+  display: inline-flex;
+  align-items: center;
+}
+
+.lp-header-nav {
+  display: none;
+  flex: 1 1 auto;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.lp-header-link {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  color: #4A413A;
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  border-radius: 8px;
+  transition: color 160ms ease;
+}
+
+.lp-header-link:hover {
+  color: #BE553D;
+}
+
+.lp-header-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── ヒーロー ── */
+.lp-hero {
+  padding: clamp(56px, 9vw, 112px) 0 clamp(56px, 8vw, 104px);
+}
+
+.lp-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(36px, 5vw, 72px);
+}
+
+.lp-eyebrow {
+  color: #BE553D;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+}
+
+.lp-hero-title {
+  margin-top: 22px;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  font-size: clamp(32px, 4.6vw, 54px);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  color: #1F1B17;
+}
+
+.lp-hero-body {
+  margin-top: 26px;
+  font-size: 15px;
+  line-height: 2.1;
+  letter-spacing: 0.02em;
+  color: #4A413A;
+  max-width: 44em;
+}
+
+.lp-hero-actions {
+  margin-top: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.lp-hero-visual {
+  min-width: 0;
+}
+
+/* ── ギャラリー内観(CSS + SVG のコンポジション) ── */
+.lp-gallery-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 10 / 8;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 28px 64px -28px rgba(31, 27, 23, 0.4);
+}
+
+.lp-gallery-wall {
+  position: absolute;
+  inset: 0 0 17% 0;
+  background:
+    radial-gradient(120% 95% at 32% -6%, rgba(255, 253, 248, 0.95), rgba(255, 253, 248, 0) 58%),
+    linear-gradient(180deg, #FCF8F0 0%, #F1E9DA 100%);
+  border-bottom: 2px solid #E9E0CF;
+}
+
+.lp-gallery-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 17%;
+  background: linear-gradient(180deg, #E1D6C3 0%, #CFC2AB 100%);
+  box-shadow: inset 0 8px 10px -8px rgba(31, 27, 23, 0.3);
+}
+
+.lp-frame {
+  position: absolute;
+  background: #FBF8F3;
+  border-style: solid;
+  border-color: #38312B;
+  box-shadow: 0 16px 30px -12px rgba(31, 27, 23, 0.4);
+}
+
+.lp-frame svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lp-frame--main {
+  left: 9%;
+  top: 15%;
+  width: 45%;
+  border-width: 7px;
+  padding: 4.5%;
+}
+
+.lp-frame--side1 {
+  right: 21%;
+  top: 21%;
+  width: 15%;
+  border-width: 4px;
+  padding: 1.6%;
+}
+
+.lp-frame--side2 {
+  right: 6%;
+  top: 29%;
+  width: 11%;
+  border-width: 4px;
+  padding: 1.3%;
+}
+
+/* ── セクション共通 ── */
+.lp-section {
+  padding: clamp(64px, 9vw, 112px) 0;
+}
+
+.lp-section-title {
+  text-align: center;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  font-size: clamp(24px, 3.2vw, 34px);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #1F1B17;
+}
+
+.lp-heading-rule {
+  position: relative;
+  width: 64px;
+  height: 1px;
+  margin: 22px auto 0;
+  background: #D8CFC2;
+}
+
+.lp-heading-rule::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #BE553D;
+}
+
+.lp-label {
+  color: #BE553D;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+/* ── Artoirでできること ── */
+.lp-feature-grid {
+  margin-top: clamp(44px, 6vw, 72px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 40px 32px;
+}
+
+.lp-feature {
+  text-align: center;
+}
+
+.lp-feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(190, 85, 61, 0.11);
+  color: #BE553D;
+}
+
+.lp-feature-title {
+  margin-top: 20px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #1F1B17;
+}
+
+.lp-feature-body {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.95;
+  letter-spacing: 0.02em;
+  color: #6E655B;
+}
+
+/* ── 掲載事例の帯 ── */
+.lp-cases-band {
+  padding: clamp(64px, 9vw, 108px) 0;
+  background-color: #EFE8DC;
+  background-image: var(--paper-grain);
+  border-top: 1px solid #E6DDCD;
+  border-bottom: 1px solid #E6DDCD;
+}
+
+.lp-cases-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(36px, 5vw, 72px);
+}
+
+.lp-cases-title {
+  margin-top: 18px;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  font-size: clamp(28px, 3.6vw, 42px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #1F1B17;
+}
+
+.lp-cases-sub {
+  margin-top: 12px;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: #8A8178;
+}
+
+.lp-cases-sep {
+  margin: 0 10px;
+  color: #C9BFB1;
+}
+
+.lp-cases-copy .lp-btn {
+  margin-top: 30px;
+}
+
+/* ── デバイスモックアップ ── */
+.lp-devices {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px 20px 44px;
+}
+
+.lp-laptop {
+  width: min(480px, 100%);
+}
+
+.lp-laptop-screen {
+  border: 10px solid #35302A;
+  border-bottom-width: 11px;
+  border-radius: 14px 14px 4px 4px;
+  background: #FBF8F3;
+  overflow: hidden;
+  box-shadow: 0 26px 52px -22px rgba(31, 27, 23, 0.45);
+}
+
+.lp-laptop-base {
+  position: relative;
+  height: 13px;
+  margin: 0 -5.5%;
+  background: linear-gradient(180deg, #4C453D 0%, #2C2722 100%);
+  border-radius: 2px 2px 12px 12px;
+}
+
+.lp-laptop-base::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 88px;
+  height: 4.5px;
+  background: #221E1A;
+  border-radius: 0 0 6px 6px;
+}
+
+.lp-phone {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 104px;
+  border: 5px solid #35302A;
+  border-radius: 16px;
+  background: #FBF8F3;
+  overflow: hidden;
+  box-shadow: 0 18px 36px -14px rgba(31, 27, 23, 0.5);
+}
+
+/* ── ミニチュア展覧会ページ ── */
+.lp-mini {
+  background: #FBF8F3;
+}
+
+.lp-mini-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-bottom: 1px solid #EFE8DC;
+}
+
+.lp-mini-brand {
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: #1F1B17;
+}
+
+.lp-mini-brand span {
+  color: #BE553D;
+}
+
+.lp-mini-navdots {
+  display: inline-flex;
+  align-items: center;
+}
+
+.lp-mini-navdots i {
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  margin-left: 6px;
+  border-radius: 2px;
+  background: #D8CFC2;
+}
+
+.lp-mini-photo {
+  position: relative;
+  aspect-ratio: 16 / 8.2;
+  overflow: hidden;
+}
+
+.lp-mini-photo .lp-gallery-scene {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.lp-gallery-scene--mini .lp-frame--main {
+  border-width: 3px;
+  box-shadow: 0 5px 10px -4px rgba(31, 27, 23, 0.4);
+}
+
+.lp-gallery-scene--mini .lp-frame--side1,
+.lp-gallery-scene--mini .lp-frame--side2 {
+  border-width: 2px;
+  box-shadow: 0 4px 8px -3px rgba(31, 27, 23, 0.4);
+}
+
+.lp-mini-title {
+  padding: 10px 12px 0;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1F1B17;
+}
+
+.lp-mini-date {
+  padding: 3px 12px 0;
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  color: #8A8178;
+}
+
+.lp-mini-thumbs {
+  display: flex;
+  gap: 5px;
+  padding: 9px 12px 13px;
+}
+
+.lp-mini-thumbs i {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 2px;
+}
+
+.lp-mini-thumb--1 { background: linear-gradient(135deg, #BE553D 10%, #E9BDAE 90%); }
+.lp-mini-thumb--2 { background: linear-gradient(160deg, #B8923A 0%, #F1E7CE 100%); }
+.lp-mini-thumb--3 { background: linear-gradient(200deg, #6B7355 0%, #DCE0C4 100%); }
+.lp-mini-thumb--4 { background: linear-gradient(120deg, #4A413A 0%, #A99E92 100%); }
+
+.lp-mini--compact .lp-mini-topbar { padding: 5px 8px; }
+.lp-mini--compact .lp-mini-brand { font-size: 8px; }
+.lp-mini--compact .lp-mini-photo { aspect-ratio: 4 / 3; }
+.lp-mini--compact .lp-mini-title { padding: 7px 8px 0; font-size: 9px; }
+.lp-mini--compact .lp-mini-date { padding: 2px 8px 0; font-size: 6px; }
+.lp-mini--compact .lp-mini-thumbs { gap: 3px; padding: 6px 8px 9px; }
+
+/* ── 掲載団体募集 CTA ── */
+.lp-recruit-card {
+  border: 1px solid rgba(190, 85, 61, 0.55);
+  border-radius: 4px;
+  background: #FBF8F3;
+  background-image: var(--paper-grain);
+  padding: clamp(36px, 6vw, 72px) clamp(24px, 5vw, 64px);
+  text-align: center;
+}
+
+.lp-recruit-title {
+  margin-top: 18px;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+  color: #1F1B17;
+}
+
+.lp-recruit-body {
+  margin-top: 18px;
+  font-size: 14px;
+  line-height: 2;
+  letter-spacing: 0.02em;
+  color: #4A413A;
+}
+
+.lp-recruit-options {
+  margin: 36px auto 0;
+  max-width: 760px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.lp-recruit-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1px solid #E4DBCB;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  text-decoration: none;
+  color: #1F1B17;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.lp-recruit-option:hover {
+  border-color: #BE553D;
+  background: rgba(190, 85, 61, 0.04);
+}
+
+.lp-recruit-option-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(190, 85, 61, 0.11);
+  color: #BE553D;
+}
+
+.lp-recruit-option-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lp-recruit-option-copy strong {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.lp-recruit-option-copy small {
+  font-size: 12px;
+  color: #8A8178;
+}
+
+/* ── フッター ── */
+.lp-footer {
+  border-top: 1px solid #EBE2D4;
+  padding: 44px 0 36px;
+}
+
+.lp-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.lp-footer-brand {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.lp-footer-tagline {
+  margin-top: 10px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #8A8178;
+}
+
+.lp-footer-nav {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 6px;
+}
+
+.lp-footer-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #6E655B;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.lp-footer-link:hover {
+  color: #BE553D;
+}
+
+.lp-footer-social {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lp-footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #E4DBCB;
+  border-radius: 50%;
+  color: #4A413A;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.lp-footer-social-link:hover {
+  border-color: #BE553D;
+  color: #BE553D;
+}
+
+.lp-footer-copyright {
+  margin-top: 28px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #A99E92;
+}
+
+/* ── レスポンシブ ── */
+@media (min-width: 1024px) {
+  .lp-header-nav {
+    display: flex;
+  }
+}
+
+@media (max-width: 1023px) {
+  .lp-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-hero-visual {
+    max-width: 620px;
+  }
+
+  .lp-br-desktop {
+    display: none;
+  }
+
+  .lp-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lp-cases-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-cases-visual {
+    max-width: 620px;
+  }
+}
+
+@media (max-width: 767px) {
+  .lp-recruit-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .lp-footer-nav {
+    justify-content: flex-start;
+    margin-left: -10px;
+  }
+}
+
+@media (max-width: 599px) {
+  .lp-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .lp-header-inner {
+    height: 64px;
+  }
+
+  .lp-header-actions .lp-btn {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .lp-feature-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+  }
+
+  .lp-hero-actions .lp-btn {
+    flex: 1 1 100%;
+  }
+
+  .lp-devices {
+    padding-left: 32px;
+  }
+
+  .lp-phone {
+    width: 88px;
+  }
+}
