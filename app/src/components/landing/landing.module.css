@@ -145,31 +145,6 @@
   position: relative;
 }
 
-.statement {
-  min-height: 72svh;
-  display: grid;
-  align-items: end;
-  padding: 112px clamp(22px, 8vw, 96px) clamp(54px, 8vw, 96px);
-}
-
-.statement h1 {
-  max-width: 11em;
-  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
-  font-size: clamp(44px, 8.4vw, 118px);
-  font-weight: 500;
-  line-height: 1.04;
-  letter-spacing: 0;
-}
-
-.kicker {
-  margin-bottom: 14px;
-  color: #BE553D;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
 .videoWindowSection {
   min-height: calc(100svh + 56px);
   padding: clamp(58px, 6vw, 78px) clamp(18px, 4vw, 52px) clamp(16px, 2vw, 28px);
@@ -417,15 +392,6 @@
 
   .frameButton {
     width: min(86vw, 420px);
-  }
-
-  .statement {
-    min-height: 64svh;
-    padding-top: 84px;
-  }
-
-  .statement h1 {
-    font-size: clamp(42px, 16vw, 76px);
   }
 
   .finalTitle {
