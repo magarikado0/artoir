@@ -171,13 +171,13 @@
 }
 
 .videoWindowSection {
-  min-height: calc(100svh - 64px);
-  padding: clamp(82px, 8vw, 112px) clamp(18px, 4vw, 52px) clamp(24px, 4vw, 52px);
+  min-height: calc(100svh + 56px);
+  padding: clamp(58px, 6vw, 78px) clamp(18px, 4vw, 52px) clamp(16px, 2vw, 28px);
 }
 
 .videoWindowGrid {
   width: min(100%, 1480px);
-  min-height: calc(100svh - 64px - clamp(106px, 12vw, 164px));
+  min-height: calc(100svh - 64px - clamp(58px, 6vw, 86px));
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
