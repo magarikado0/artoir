@@ -88,7 +88,7 @@ export default function Header({ activeTab }) {
 
   return (
     <header className="ui-topbar">
-      <Link to="/" className="ui-topbar-brand" aria-label="Artoir home">
+      <Link to="/lp" className="ui-topbar-brand" aria-label="Artoir LP">
         <BrandLockup />
       </Link>
       <nav className="ui-topbar-nav" aria-label="メインメニュー">

@@ -116,7 +116,7 @@ export default function DashShell({ children, orgSlug, profileSlug, crumbs = [],
             </Link>
           </div>
         ) : (
-          <Link to="/" className="ui-mobile-brand" aria-label="Artoir home">
+          <Link to="/lp" className="ui-mobile-brand" aria-label="Artoir LP">
             <BrandLockup />
           </Link>
         )}
