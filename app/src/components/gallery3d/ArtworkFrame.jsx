@@ -9,6 +9,7 @@ export default function ArtworkFrame({
   onOpenArtwork,
   onAspectLoaded,
   onTextureError,
+  onTextureReady,
   ignoreNextClickRef,
 }) {
   const { artwork, imageWidth, imageHeight, position, rotation } = frame
@@ -62,6 +63,7 @@ export default function ArtworkFrame({
         nextTexture.needsUpdate = true
         currentTextureRef.current = nextTexture
         setTexture(nextTexture)
+        onTextureReady?.(artwork.id, { highQuality })
       })
       .catch(() => {
         if (cancelled) return
@@ -77,7 +79,7 @@ export default function ArtworkFrame({
       cancelled = true
       img.src = ''
     }
-  }, [artwork.id, artwork.image_url, highQuality, onAspectLoaded, onTextureError])
+  }, [artwork.id, artwork.image_url, highQuality, onAspectLoaded, onTextureError, onTextureReady])
 
   useEffect(() => () => {
     currentTextureRef.current?.dispose()

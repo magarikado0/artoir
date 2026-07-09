@@ -100,6 +100,12 @@ export default function ExhibitionPage() {
     window.requestAnimationFrame(() => gallery3dButtonRef.current?.focus())
   }
 
+  // ?reel=1 のときは作品が揃い次第、自動で3Dビューを開く(リール撮影の自動化用)
+  useEffect(() => {
+    const reelMode = new URLSearchParams(window.location.search).get('reel') === '1'
+    if (reelMode && viewableArtworks.length > 0) setViewMode('3d')
+  }, [viewableArtworks.length])
+
   if (showLoader) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <LoadingFrames />

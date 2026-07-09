@@ -254,6 +254,58 @@ function buildViewpoints(wall, wallItems, fov, aspect, itemCount) {
   })
 }
 
+// リール撮影用のカメラ経路(オープンパス。始点=終点=中央なので、ループ再生でも継ぎ目なし)。
+// 3フェーズ構成:
+//   1) 中央でその場一回転して部屋の全体像を見せる
+//   2) 壁沿いを時計回りに一周して作品を見ていく(角丸ループ。部屋の内側で完結=壁に突っ込まない)
+//   3) 中央へ戻る
+// 進行方向へ yaw を少し傾けた「斜めドリー」にして、作品が奥から迫って→通り過ぎる動きを作る。
+const REEL_DEFAULTS = {
+  distance: 2.7,   // 壁からのカメラ距離(小さいほど作品が大きく映る)
+  wallReach: 3.0,  // 各壁を u=±wallReach の範囲で舐める(部屋外へ出ない値にすること)
+  centerHeight: 1.6, // 中央パン時のカメラ高
+  wallHeight: 1.6,   // 壁鑑賞時のカメラ高
+  lookUp: 0.14,    // 作品中心を軽く見上げるピッチ
+  centerPitch: 0.03, // 中央パン時のピッチ(ほぼ水平)
+  lookAhead: 0.5,  // 進行方向へ傾ける角度(rad, 約29°)。斜めドリーの肝
+}
+
+export function createReelPath(layout, options = {}) {
+  const cfg = { ...REEL_DEFAULTS, ...options }
+  const { distance, wallReach, centerHeight, wallHeight, lookUp, centerPitch, lookAhead } = cfg
+  const HALF_TURN = Math.PI / 2
+  const wallsWithFrames = WALL_ORDER.filter((w) => layout?.walls?.[w]?.frames?.length)
+  const center = [0, centerHeight, 0]
+  const waypoints = []
+
+  // --- フェーズ1: 中央でその場一回転(全体像) ---
+  // 同じ位置のまま yaw を 0 → -360° へ。時計回り。
+  for (let k = 0; k <= 4; k += 1) {
+    waypoints.push({ position: center, yaw: -k * HALF_TURN, pitch: centerPitch })
+  }
+
+  // --- フェーズ2: 壁沿いを一周(作品鑑賞) ---
+  // 各壁 3点(-wallReach, 0, +wallReach)。yaw は壁ごとに時計回りへ -90°、
+  // さらに進行方向へ -lookAhead 傾ける。ループ1周目の続き(-360°)から続ける。
+  wallsWithFrames.forEach((wall) => {
+    const wallDef = WALLS[wall]
+    // その壁の正対 yaw を、フェーズ1の -360° に連続する時計回り角度へ写像
+    const wallBaseYaw = -2 * Math.PI - WALL_ORDER.indexOf(wall) * HALF_TURN
+    const yaw = wallBaseYaw - lookAhead
+    ;[-wallReach, 0, wallReach].forEach((u) => {
+      waypoints.push({ position: wallDef.toViewPosition(u, wallHeight, distance), yaw, pitch: lookUp })
+    })
+  })
+
+  // --- フェーズ3: 中央へ戻る ---
+  // 最後の壁 yaw から、正面(≡0)を向く 2π の倍数まで時計回りに回しきって中央へ。
+  const lastYaw = waypoints[waypoints.length - 1].yaw
+  const finalYaw = Math.floor(lastYaw / (2 * Math.PI)) * (2 * Math.PI)
+  waypoints.push({ position: center, yaw: finalYaw, pitch: centerPitch })
+
+  return { loop: true, waypoints }
+}
+
 export function createGalleryLayout(artworks = [], imageSizeMap = {}, options = {}) {
   const items = artworks.filter((artwork) => artwork?.image_url)
   const itemCount = items.length

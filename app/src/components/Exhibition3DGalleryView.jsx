@@ -3,6 +3,11 @@ import { Canvas } from '@react-three/fiber'
 import GalleryScene from './gallery3d/GalleryScene'
 import './Exhibition3DGalleryView.css'
 
+const REEL_CANVAS_WIDTH = 1080
+const REEL_CANVAS_HEIGHT = 1920
+const REEL_DPR = 2
+const DEFAULT_REEL_SECONDS = 14
+
 class GalleryErrorBoundary extends Component {
   constructor(props) {
     super(props)
@@ -19,10 +24,88 @@ class GalleryErrorBoundary extends Component {
   }
 }
 
+// リール撮影(?reel=1)のときだけ、Canvas を 1080x1920 固定の枠で包む。
+// 通常時は素通し(枠で包むと .ui-3d-gallery-canvas の inset:0 が効かず表示が潰れる)。
+function ReelCanvasFrame({ reelMode, children }) {
+  if (!reelMode) return children
+  return (
+    <div style={{ position: 'absolute', top: 0, left: 0, width: REEL_CANVAS_WIDTH, height: REEL_CANVAS_HEIGHT }}>
+      {children}
+    </div>
+  )
+}
+
 export default function Exhibition3DGalleryView({ artworks, onClose, onOpenArtwork, hasOpenArtwork }) {
   const closeRef = useRef(null)
   const sceneRef = useRef(null)
+  const autoRecordStartedRef = useRef(false)
   const [failedCount, setFailedCount] = useState(0)
+  // ?reel=1 のときだけ、リール撮影用の縦動画モード(1080x1920 固定 + 録画API)を有効化
+  const reelMode = typeof window !== 'undefined'
+    && new URLSearchParams(window.location.search).get('reel') === '1'
+  const autoRecordMode = typeof window !== 'undefined'
+    && new URLSearchParams(window.location.search).get('record') === '1'
+
+  useEffect(() => {
+    if (!reelMode) return undefined
+    const supported = typeof MediaRecorder !== 'undefined'
+    document.documentElement.dataset.artoirReel = 'ready'
+    document.documentElement.dataset.artoirReelRecorder = supported ? 'supported' : 'missing'
+    window.__artoirReel = {
+      supported,
+      // MediaRecorder で録画(webm 自動DL)。使える環境向け。
+      record: (opts) => (
+        sceneRef.current?.startReel
+          ? sceneRef.current.startReel(opts)
+          : Promise.reject(new Error('3D scene not ready'))
+      ),
+      getCanvas: () => document.querySelector('.ui-3d-gallery-overlay canvas'),
+      // 決定論フレーム取得 API。driver が seek→toDataURL でフレーム収集し ffmpeg 連結。
+      beginCapture: () => sceneRef.current?.beginReelCapture?.() ?? { ok: false },
+      seek: (progress) => sceneRef.current?.seekReel?.(progress),
+      endCapture: () => sceneRef.current?.endReelCapture?.(),
+    }
+    return () => {
+      delete window.__artoirReel
+      delete document.documentElement.dataset.artoirReel
+      delete document.documentElement.dataset.artoirReelRecorder
+    }
+  }, [reelMode])
+
+  useEffect(() => {
+    if (!reelMode || !autoRecordMode || autoRecordStartedRef.current) return undefined
+
+    const params = new URLSearchParams(window.location.search)
+    const seconds = Number(params.get('seconds')) || DEFAULT_REEL_SECONDS
+    const fps = Number(params.get('fps')) || undefined
+    const videoBitsPerSecond = Number(params.get('bitrate')) || undefined
+    const textureTimeoutMs = Number(params.get('textureTimeoutMs')) || undefined
+    let cancelled = false
+
+    const startWhenReady = () => {
+      if (cancelled || autoRecordStartedRef.current) return
+      if (!sceneRef.current?.startReel) {
+        window.setTimeout(startWhenReady, 150)
+        return
+      }
+      autoRecordStartedRef.current = true
+      document.documentElement.dataset.artoirReelRecording = 'started'
+      sceneRef.current.startReel({ seconds, fps, videoBitsPerSecond, textureTimeoutMs })
+        .then((result) => {
+          document.documentElement.dataset.artoirReelRecording = result?.ok ? 'done' : 'failed'
+        })
+        .catch((err) => {
+          console.error('[reel] auto recording failed:', err)
+          document.documentElement.dataset.artoirReelRecording = 'failed'
+        })
+    }
+
+    startWhenReady()
+    return () => {
+      cancelled = true
+      delete document.documentElement.dataset.artoirReelRecording
+    }
+  }, [autoRecordMode, reelMode])
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -83,23 +166,29 @@ export default function Exhibition3DGalleryView({ artworks, onClose, onOpenArtwo
           </div>
         )}
       >
-        <Canvas
-          className="ui-3d-gallery-canvas"
-          dpr={[1, 3]}
-          gl={{ antialias: true, powerPreference: 'high-performance' }}
-          camera={{ fov: 55, near: 0.1, far: 50 }}
-        >
-          <Suspense fallback={null}>
-            <GalleryScene
-              ref={sceneRef}
-              artworks={artworks}
-              onOpenArtwork={onOpenArtwork}
-              onFailedCountChange={setFailedCount}
-            />
-          </Suspense>
-        </Canvas>
+        <ReelCanvasFrame reelMode={reelMode}>
+          <Canvas
+            className={reelMode ? undefined : 'ui-3d-gallery-canvas'}
+            style={reelMode ? { width: '100%', height: '100%' } : undefined}
+            dpr={reelMode ? REEL_DPR : [1, 3]}
+            gl={{ antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: reelMode }}
+            camera={{ fov: 55, near: 0.1, far: 50 }}
+          >
+            <Suspense fallback={null}>
+              <GalleryScene
+                ref={sceneRef}
+                artworks={artworks}
+                onOpenArtwork={onOpenArtwork}
+                onFailedCountChange={setFailedCount}
+                reelMode={reelMode}
+              />
+            </Suspense>
+          </Canvas>
+        </ReelCanvasFrame>
       </GalleryErrorBoundary>
 
+      {reelMode ? null : (
+      <>
       <div className="ui-3d-gallery-hud">
         <div className="ui-3d-gallery-pill">3D空間を巡る</div>
         {renderCloseButton(closeRef)}
@@ -129,6 +218,8 @@ export default function Exhibition3DGalleryView({ artworks, onClose, onOpenArtwo
         <div className="ui-3d-gallery-load-warning" role="status">
           {failedCount}点の作品画像を読み込めませんでした(ページを再読み込みすると再試行します)
         </div>
+      )}
+      </>
       )}
     </div>
   )

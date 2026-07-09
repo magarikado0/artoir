@@ -2,7 +2,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import { useFrame, useThree } from '@react-three/fiber'
 import { CanvasTexture, MathUtils, RepeatWrapping, SRGBColorSpace, Vector3 } from 'three'
 import ArtworkFrame from './ArtworkFrame'
-import { ROOM, DEFAULT_FOV, createGalleryLayout } from './layout'
+import { ROOM, DEFAULT_FOV, createGalleryLayout, createReelPath } from './layout'
 
 const PITCH_LIMIT = MathUtils.degToRad(40)
 const LOOK_SENSITIVITY = 0.005
@@ -10,6 +10,8 @@ const DRAG_THRESHOLD = 6
 const MIN_FOV = 24
 const MAX_FOV = 60
 const WHEEL_ZOOM_SENSITIVITY = 0.025
+const REEL_DEFAULT_FPS = 30
+const REEL_DEFAULT_BITRATE = 45_000_000
 const ROOM_EDGE_COLOR = '#d6d1c8'
 const ROOM_EDGE_SIZE = 0.018
 
@@ -127,6 +129,79 @@ function easeOutCubic(t) {
   return 1 - Math.pow(1 - t, 3)
 }
 
+function lerp(a, b, t) {
+  return a + (b - a) * t
+}
+
+function catmullRomComponent(p0, p1, p2, p3, t) {
+  const t2 = t * t
+  const t3 = t2 * t
+  return 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3)
+}
+
+function sampleCatmull(out, p0, p1, p2, p3, t) {
+  out.x = catmullRomComponent(p0.x, p1.x, p2.x, p3.x, t)
+  out.y = catmullRomComponent(p0.y, p1.y, p2.y, p3.y, t)
+  out.z = catmullRomComponent(p0.z, p1.z, p2.z, p3.z, t)
+}
+
+function pickReelMimeType() {
+  const candidates = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']
+  for (const mime of candidates) {
+    if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(mime)) return mime
+  }
+  return ''
+}
+
+// createReelPath の waypoints から、補間しやすい形(Vector3 点列 + yaw/pitch 配列)を作る。
+// オープンパス(始点=終点=中央)なのでループの継ぎ足しはしない。
+function buildReelSpline(layout) {
+  const reelPath = createReelPath(layout)
+  return {
+    pts: reelPath.waypoints.map((w) => new Vector3(...w.position)),
+    yaws: reelPath.waypoints.map((w) => w.yaw),
+    pitches: reelPath.waypoints.map((w) => w.pitch),
+    n: reelPath.waypoints.length,
+  }
+}
+
+// パス上の進行度 progress(0..1)からカメラ姿勢を state に書き込む。
+// 端点は複製(clamp)して端の接線を安定させる = 壁への突っ込み(オーバーシュート)を抑える。
+function sampleReelPose(spline, progress, state) {
+  const { pts, yaws, pitches, n } = spline
+  if (n < 2) {
+    state.position.copy(pts[0])
+    state.yaw = yaws[0]
+    state.pitch = pitches[0]
+    return
+  }
+  const clamped = Math.min(1, Math.max(0, progress))
+  const fseg = clamped * (n - 1)
+  const seg = Math.min(n - 2, Math.floor(fseg))
+  const t = fseg - seg
+  sampleCatmull(
+    state.position,
+    pts[Math.max(0, seg - 1)],
+    pts[seg],
+    pts[seg + 1],
+    pts[Math.min(n - 1, seg + 2)],
+    t,
+  )
+  state.yaw = lerp(yaws[seg], yaws[seg + 1], t)
+  state.pitch = lerp(pitches[seg], pitches[seg + 1], t)
+}
+
+function downloadBlob(blob, name) {
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = name
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
 function RoomShell() {
   const edgeX = ROOM.halfWidth - ROOM_EDGE_SIZE / 2
   const edgeZ = ROOM.halfDepth - ROOM_EDGE_SIZE / 2
@@ -228,7 +303,7 @@ function RoomShell() {
   )
 }
 
-const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork, onFailedCountChange }, ref) {
+const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork, onFailedCountChange, reelMode = false }, ref) {
   const { camera, gl, size } = useThree()
   const [imageSizeMap, setImageSizeMap] = useState({})
   const [failedIds, setFailedIds] = useState(() => new Set())
@@ -264,6 +339,8 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
   const touchPointersRef = useRef(new Map())
   const pinchRef = useRef(null)
   const teleportRef = useRef(null)
+  const reelRef = useRef(null)
+  const reelTextureReadyIdsRef = useRef(new Set())
   const ignoreNextClickRef = useRef(false)
   const renderedActiveViewpointId = layout.viewpoints.some((viewpoint) => viewpoint.id === activeViewpointId)
     ? activeViewpointId
@@ -274,8 +351,11 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
   const [activeViewX, activeViewY, activeViewZ] = activeViewpoint.position
   const activeViewPitch = activeViewpoint.pitch ?? 0
   const highQualityArtworkIds = useMemo(
-    () => new Set(activeViewpoint.artworkIds || []),
-    [activeViewpoint],
+    () => {
+      if (reelMode) return new Set(layout.frames.map((frame) => frame.id))
+      return new Set(activeViewpoint.artworkIds || [])
+    },
+    [activeViewpoint, layout.frames, reelMode],
   )
 
   useEffect(() => {
@@ -283,6 +363,14 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
     cameraStateRef.current.targetPosition.set(activeViewX, activeViewY, activeViewZ)
     cameraStateRef.current.targetPitch = activeViewPitch
   }, [activeViewX, activeViewY, activeViewZ, activeViewPitch])
+
+  useEffect(() => {
+    if (!reelMode) return
+    const frameIds = new Set(layout.frames.map((frame) => frame.id))
+    reelTextureReadyIdsRef.current = new Set(
+      [...reelTextureReadyIdsRef.current].filter((id) => frameIds.has(id)),
+    )
+  }, [layout.frames, reelMode])
 
   const handleAspectLoaded = useCallback((id, width, height) => {
     setImageSizeMap((prev) => {
@@ -302,6 +390,11 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
       next.add(key)
       return next
     })
+  }, [])
+
+  const handleTextureReady = useCallback((id, { highQuality } = {}) => {
+    if (!highQuality) return
+    reelTextureReadyIdsRef.current.add(String(id))
   }, [])
 
   const teleportTo = useCallback((viewpoint) => {
@@ -344,10 +437,100 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
     teleportTo(layout.viewpoints[nextIndex])
   }, [layout.viewpoints, renderedActiveViewpointId, teleportTo])
 
+  // リール撮影(リアルタイム録画): 周回パスに沿ってカメラを連続移動させつつ、
+  // WebGL キャンバスを captureStream + MediaRecorder でそのまま録画する。完了時に webm を自動DL。
+  // ※MediaRecorder が使える環境向け(通常の Chrome / 本番)。
+  const waitForReelTextures = useCallback((timeoutMs = 8000) => new Promise((resolve) => {
+    if (!reelMode) {
+      resolve({ ready: true })
+      return
+    }
+
+    const startedAt = Date.now()
+    const check = () => {
+      const frameIds = layout.frames.map((frame) => frame.id)
+      const readyCount = frameIds.filter((id) => reelTextureReadyIdsRef.current.has(id)).length
+      if (readyCount >= frameIds.length || Date.now() - startedAt >= timeoutMs) {
+        resolve({ ready: readyCount >= frameIds.length, readyCount, total: frameIds.length })
+        return
+      }
+      window.setTimeout(check, 100)
+    }
+    check()
+  }), [layout.frames, reelMode])
+
+  const startReel = useCallback(({
+    seconds = 14,
+    fps = REEL_DEFAULT_FPS,
+    videoBitsPerSecond = REEL_DEFAULT_BITRATE,
+    textureTimeoutMs = 8000,
+  } = {}) => new Promise((resolve) => {
+    teleportRef.current = null
+    const spline = buildReelSpline(layout)
+    if (!spline.n) {
+      resolve({ ok: false, reason: 'empty-path' })
+      return
+    }
+
+    waitForReelTextures(textureTimeoutMs).then((textureWait) => {
+      let recorder = null
+      const chunks = []
+      try {
+        const stream = gl.domElement.captureStream(fps)
+        recorder = new MediaRecorder(stream, {
+          mimeType: pickReelMimeType(),
+          videoBitsPerSecond,
+        })
+        recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data) }
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: chunks[0]?.type || 'video/webm' })
+          downloadBlob(blob, `artoir-reel-${Date.now()}.webm`)
+          resolve({ ok: true, bytes: blob.size, textureWait })
+        }
+        recorder.start()
+      } catch (err) {
+        console.error('[reel] recording unavailable:', err)
+        recorder = null
+      }
+
+      reelRef.current = {
+        mode: 'realtime',
+        elapsed: 0,
+        duration: Math.max(1, seconds),
+        fps,
+        spline,
+        recorder,
+        resolve,
+        textureWait,
+      }
+    })
+  }), [layout, gl, waitForReelTextures])
+
+  // リール撮影(決定論フレーム取得): 進行度 progress を外部から与えて1フレームずつ
+  // レンダリングさせ、driver 側で toDataURL → ffmpeg 連結する。MediaRecorder 非対応環境向け。
+  const beginReelCapture = useCallback(() => {
+    teleportRef.current = null
+    const spline = buildReelSpline(layout)
+    if (!spline.n) return { ok: false, reason: 'empty-path' }
+    reelRef.current = { mode: 'seek', spline, progress: 0 }
+    return { ok: true, segments: spline.n }
+  }, [layout])
+
+  const seekReel = useCallback((progress) => {
+    if (reelRef.current?.mode === 'seek') reelRef.current.progress = progress
+  }, [])
+
+  const endReelCapture = useCallback(() => { reelRef.current = null }, [])
+
   useImperativeHandle(ref, () => ({
     previous: () => navigateBy(-1),
     next: () => navigateBy(1),
-  }), [navigateBy])
+    startReel,
+    beginReelCapture,
+    seekReel,
+    endReelCapture,
+    reelSupported: typeof MediaRecorder !== 'undefined',
+  }), [navigateBy, startReel, beginReelCapture, seekReel, endReelCapture])
 
   useEffect(() => {
     const dom = gl.domElement
@@ -466,6 +649,32 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
 
   useFrame((_, delta) => {
     const state = cameraStateRef.current
+    const reel = reelRef.current
+    if (reel) {
+      if (reel.mode === 'seek') {
+        // 外部から与えられた progress(0..1)をそのまま姿勢へ反映(時間で進めない)。
+        // Instagram のループ再生で継ぎ目が跳ねないよう、等速(線形)にする。
+        sampleReelPose(reel.spline, reel.progress, state)
+      } else {
+        reel.elapsed += delta
+        const progress = Math.min(1, reel.elapsed / reel.duration)
+        sampleReelPose(reel.spline, progress, state)
+        if (progress >= 1) {
+          reelRef.current = null
+          if (reel.recorder && reel.recorder.state !== 'inactive') {
+            reel.recorder.stop()
+          } else {
+            reel.resolve?.({ ok: false, reason: 'no-recorder' })
+          }
+        }
+      }
+      state.targetPosition.copy(state.position)
+      state.targetYaw = state.yaw
+      state.targetPitch = state.pitch
+      camera.position.copy(state.position)
+      camera.rotation.set(state.pitch, state.yaw, 0, 'YXZ')
+      return
+    }
     const teleport = teleportRef.current
     if (teleport) {
       teleport.elapsed += delta
@@ -511,6 +720,7 @@ const GalleryScene = forwardRef(function GalleryScene({ artworks, onOpenArtwork,
           onOpenArtwork={handleArtworkSelect}
           onAspectLoaded={handleAspectLoaded}
           onTextureError={handleTextureError}
+          onTextureReady={handleTextureReady}
           ignoreNextClickRef={ignoreNextClickRef}
         />
       ))}
