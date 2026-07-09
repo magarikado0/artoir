@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AnimatePresence } from 'motion/react'
 import { BrandLockup } from '../BrandMark'
 import { Icon } from '../Header'
 import FrameIntro from './FrameIntro'
@@ -44,15 +43,7 @@ export default function LandingPage() {
         </nav>
       </header>
 
-      <AnimatePresence>
-        {!introComplete && (
-          <div
-            key="intro"
-          >
-            <FrameIntro onComplete={() => setIntroComplete(true)} />
-          </div>
-        )}
-      </AnimatePresence>
+      {!introComplete && <FrameIntro onComplete={() => setIntroComplete(true)} />}
 
       <main ref={contentRef} className={styles.mainContent}>
         <HorizontalFeatureSection />

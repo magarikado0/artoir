@@ -170,115 +170,69 @@
   text-transform: uppercase;
 }
 
-.horizontalSection {
-  height: 400svh;
-  position: relative;
+.videoWindowSection {
+  min-height: calc(100svh - 64px);
+  padding: clamp(82px, 8vw, 112px) clamp(18px, 4vw, 52px) clamp(24px, 4vw, 52px);
 }
 
-.stickyViewport {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  overflow: hidden;
-}
-
-.slideTrack {
-  height: 100%;
-  display: flex;
-  will-change: transform;
-}
-
-.trackItem {
-  width: 100vw;
-  min-width: 100vw;
-  height: 100svh;
-}
-
-.videoSlide,
-.audienceSlide {
-  width: 100%;
-  min-height: 100svh;
+.videoWindowGrid {
+  width: min(100%, 1480px);
+  min-height: calc(100svh - 64px - clamp(106px, 12vw, 164px));
+  margin: 0 auto;
   display: grid;
-  align-items: center;
-  gap: clamp(28px, 5vw, 72px);
-  padding: clamp(82px, 10vw, 130px) clamp(22px, 7vw, 92px) clamp(46px, 6vw, 78px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(230px, 1fr);
+  gap: clamp(12px, 1.5vw, 20px);
 }
 
-.videoSlide {
-  grid-template-columns: minmax(220px, 0.7fr) minmax(360px, 1.35fr);
-}
-
-.videoSlideRight {
-  grid-template-columns: minmax(360px, 1.35fr) minmax(220px, 0.7fr);
-}
-
-.videoSlideRight .slideCopy {
-  order: 2;
-}
-
-.videoSlideRight .videoShell {
-  order: 1;
-}
-
-.toneLight {
-  background: transparent;
-}
-
-.toneDark {
-  background: #1F1B17;
-  color: #FBF8F3;
-}
-
-.toneDark .slideCopy p,
-.toneDark .kicker {
-  color: rgba(251, 248, 243, 0.72);
-}
-
-.slideCopy {
-  max-width: 440px;
-}
-
-.slideCopy h2,
-.audienceHeader h2 {
-  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
-  font-size: clamp(34px, 5vw, 72px);
-  font-weight: 500;
-  line-height: 1.08;
-  letter-spacing: 0;
-}
-
-.slideCopy p,
-.audienceHeader p {
-  margin-top: 18px;
-  color: #4A413A;
-  font-size: clamp(14px, 1.5vw, 17px);
-  line-height: 1.9;
-}
-
-.videoShell {
+.videoWindow {
   position: relative;
-  aspect-ratio: 16 / 10;
   min-height: 0;
   overflow: hidden;
+  border: 1px solid rgba(31, 27, 23, 0.13);
   border-radius: 8px;
-  background: #DED5C8;
-  box-shadow: 0 24px 70px rgba(31, 27, 23, 0.16);
+  background: #D8CFC1;
+  box-shadow: 0 18px 54px rgba(31, 27, 23, 0.1);
+  cursor: default;
+  isolation: isolate;
 }
 
-.featureVideo,
+.videoWindow:focus-visible {
+  outline: 2px solid #BE553D;
+  outline-offset: 3px;
+}
+
+.windowVideo,
+.windowPoster,
 .finalVideo {
   position: absolute;
   inset: 0;
-  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.videoFallback {
+.windowVideo {
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.videoWindowPlaying .windowVideo,
+.videoWindow:hover .windowVideo,
+.videoWindow:focus-within .windowVideo {
+  opacity: 1;
+}
+
+.windowPoster {
+  z-index: 1;
+}
+
+.windowFallback {
   position: absolute;
   inset: 0;
+  z-index: 0;
   display: grid;
   place-items: center;
   padding: 24px;
@@ -294,56 +248,36 @@
   line-height: 1.15;
 }
 
-.featureVideo + .videoFallback {
-  z-index: 0;
-}
-
-.audienceSlide {
-  background: #FBF8F3;
-}
-
-.audienceHeader {
-  max-width: 760px;
-}
-
-.audienceGrid {
+.windowOverlay {
+  position: absolute;
+  left: clamp(14px, 1.8vw, 26px);
+  right: clamp(14px, 1.8vw, 26px);
+  bottom: clamp(14px, 1.8vw, 24px);
+  z-index: 3;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 5px;
+  color: #FBF8F3;
+  text-shadow: 0 2px 18px rgba(31, 27, 23, 0.46);
 }
 
-.audienceCard {
-  min-height: 220px;
-  padding: 22px;
-  border: 1px solid #E4DDD2;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  background: #F3EEE5;
-}
-
-.audienceIcon {
-  width: 46px;
-  height: 46px;
-  display: grid;
-  place-items: center;
-  margin-bottom: auto;
-  border: 1px solid #1F1B17;
+.windowOverlay span {
+  width: fit-content;
+  padding: 5px 8px;
+  border: 1px solid rgba(251, 248, 243, 0.42);
   border-radius: 999px;
+  background: rgba(31, 27, 23, 0.26);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.14em;
 }
 
-.audienceCard h3 {
-  margin-top: 34px;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.audienceCard p {
-  margin-top: 8px;
-  color: #4A413A;
-  font-size: 13px;
-  line-height: 1.65;
+.windowOverlay strong {
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: clamp(18px, 2.2vw, 34px);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: 0;
 }
 
 .finalCta {
@@ -450,53 +384,19 @@
   background: currentColor;
 }
 
-.reducedFeatureStack {
-  display: grid;
-}
-
 @media (max-width: 900px) {
-  .horizontalSection {
-    height: auto;
+  .videoWindowSection {
+    padding-top: 86px;
   }
 
-  .stickyViewport {
-    position: static;
-    height: auto;
-    overflow: visible;
-  }
-
-  .slideTrack {
-    width: auto !important;
-    display: block;
-    transform: none !important;
-  }
-
-  .trackItem {
-    width: 100%;
-    min-width: 0;
-    height: auto;
-  }
-
-  .videoSlide,
-  .videoSlideRight,
-  .audienceSlide {
-    min-height: auto;
+  .videoWindowGrid {
+    min-height: 0;
     grid-template-columns: 1fr;
-    padding-top: 92px;
-    padding-bottom: 56px;
+    grid-auto-rows: auto;
   }
 
-  .videoSlideRight .slideCopy,
-  .videoSlideRight .videoShell {
-    order: initial;
-  }
-
-  .videoShell {
+  .videoWindow {
     aspect-ratio: 4 / 5;
-  }
-
-  .audienceGrid {
-    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -546,21 +446,8 @@
     height: clamp(29px, 10.4vw, 52px);
   }
 
-  .slideCopy h2,
-  .audienceHeader h2 {
-    font-size: clamp(34px, 11vw, 58px);
-  }
-
-  .audienceGrid {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    scroll-snap-type: x proximity;
-  }
-
-  .audienceCard {
-    min-width: min(78vw, 280px);
-    scroll-snap-align: start;
+  .videoWindowSection {
+    padding-inline: 14px;
   }
 
   .finalActions {
@@ -570,8 +457,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .slideTrack,
-  .featureVideo,
+  .windowVideo,
   .finalVideo {
     will-change: auto;
   }

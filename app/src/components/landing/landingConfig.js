@@ -19,6 +19,11 @@ export const LANDING_MEDIA = {
     mobileVideoSrc: '/videos/gallery-tour-mobile.mp4',
     posterSrc: '/images/gallery-tour-poster.webp',
   },
+  forCreators: {
+    videoSrc: '/videos/for-creators.mp4',
+    mobileVideoSrc: '/videos/for-creators-mobile.mp4',
+    posterSrc: '/images/for-creators-poster.webp',
+  },
   final: {
     videoSrc: '/videos/final-gallery.mp4',
     mobileVideoSrc: '/videos/final-gallery-mobile.mp4',
