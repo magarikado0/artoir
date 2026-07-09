@@ -152,8 +152,7 @@
   padding: 112px clamp(22px, 8vw, 96px) clamp(54px, 8vw, 96px);
 }
 
-.statement h1,
-.finalContent h2 {
+.statement h1 {
   max-width: 11em;
   font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
   font-size: clamp(44px, 8.4vw, 118px);
@@ -372,6 +371,40 @@
   z-index: 2;
 }
 
+.finalTitle {
+  max-width: 12em;
+  display: grid;
+  gap: 16px;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: clamp(34px, 5.6vw, 82px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.finalBrandLine {
+  display: inline-flex;
+  align-items: center;
+}
+
+.finalBrandLine :global(.ui-brand-lockup) {
+  color: #FBF8F3;
+}
+
+.finalBrandLine :global(.ui-brand-lockup-mark) {
+  width: clamp(28px, 3.3vw, 44px);
+  height: clamp(28px, 3.3vw, 44px);
+}
+
+.finalBrandLine :global(.ui-brand-mark-lockup) {
+  width: clamp(24px, 2.9vw, 38px);
+  height: clamp(24px, 2.9vw, 38px);
+}
+
+.finalBrandLine :global(.ui-brand-lockup-word) {
+  font-size: clamp(30px, 5.1vw, 76px);
+}
+
 .finalActions {
   display: flex;
   flex-wrap: wrap;
@@ -383,6 +416,38 @@
   border-color: rgba(251, 248, 243, 0.48);
   color: #FBF8F3;
   background: rgba(251, 248, 243, 0.08);
+}
+
+.instagramIcon {
+  width: 17px;
+  height: 17px;
+  border: 1.7px solid currentColor;
+  border-radius: 5px;
+  display: inline-block;
+  position: relative;
+}
+
+.instagramIcon::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.instagramIcon::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 .reducedFeatureStack {
@@ -459,9 +524,16 @@
     padding-top: 84px;
   }
 
-  .statement h1,
-  .finalContent h2 {
+  .statement h1 {
     font-size: clamp(42px, 16vw, 76px);
+  }
+
+  .finalTitle {
+    font-size: clamp(32px, 12vw, 58px);
+  }
+
+  .finalBrandLine :global(.ui-brand-lockup-word) {
+    font-size: clamp(30px, 11vw, 54px);
   }
 
   .slideCopy h2,

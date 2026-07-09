@@ -595,7 +595,7 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
         ? profileExhibitionPath(ownerProfile.slug, exhibition.slug)
         : ''
     : ''
-  const exhibitionTitle = exhibition?.title?.trim() || '展示を見る'
+  const exhibitionTitle = exhibition?.title?.trim() || '展覧会を見る'
   const ownerHref = ownerProfile?.slug ? profilePath(ownerProfile.slug) : ownerOrg?.slug ? `/${ownerOrg.slug}` : ''
   const ownerName = ownerOrg?.name || ownerProfile?.display_name || ''
   const ownerLabel = ownerOrg ? '団体ページ' : 'プロフィール'

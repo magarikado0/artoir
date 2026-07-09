@@ -34,7 +34,7 @@ function LoggedOut({ isDesktop }) {
     <>
       <div className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>アカウント</div>
       <div className="ui-screen-subtitle" style={{ fontFamily: isDesktop ? T.serifBody : undefined, marginBottom: isDesktop ? 22 : undefined }}>
-        ログインすると、プロフィールと団体の展示を管理できます。
+        ログインすると、プロフィールと団体の展覧会を管理できます。
       </div>
       <button onClick={() => navigate('/login')} className="ui-btn ui-btn--primary ui-btn-block" style={{ marginTop: isDesktop ? 0 : 22, justifyContent: 'space-between' }}>
         <span>ログイン / 新規登録</span>

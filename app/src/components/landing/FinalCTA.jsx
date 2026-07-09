@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
+import { BrandLockup } from '../BrandMark'
 import { Icon } from '../Header'
 import useVideoVisibility from '../../hooks/useVideoVisibility'
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference'
@@ -53,7 +54,12 @@ export default function FinalCTA() {
         viewport={{ once: true, amount: 0.55 }}
         transition={{ duration: 0.6 }}
       >
-        <h2 id="landing-final-title">あなたの作品を、展覧会に。</h2>
+        <h2 id="landing-final-title" className={styles.finalTitle}>
+          <span>展覧会アーカイブサイト</span>
+          <span className={styles.finalBrandLine}>
+            <BrandLockup />
+          </span>
+        </h2>
         <div className={styles.finalActions}>
           <Link to={LANDING_LINKS.viewExhibitions} className="ui-btn ui-btn--ghost">
             <Icon name="list" size={17} />
@@ -61,8 +67,18 @@ export default function FinalCTA() {
           </Link>
           <Link to={LANDING_LINKS.createExhibition} className="ui-btn ui-btn--accent">
             <Icon name="plus" size={17} />
-            <span>展示をつくる</span>
+            <span>展覧会を作成</span>
           </Link>
+          <a
+            href="https://www.instagram.com/artoir_net/"
+            target="_blank"
+            rel="noreferrer"
+            className="ui-btn ui-btn--ghost"
+            aria-label="Artoir の Instagram を開く"
+          >
+            <span className={styles.instagramIcon} aria-hidden="true" />
+            <span>Instagram</span>
+          </a>
         </div>
       </MotionDiv>
     </section>

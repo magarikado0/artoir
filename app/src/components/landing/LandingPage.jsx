@@ -35,10 +35,13 @@ export default function LandingPage() {
           <BrandLockup />
         </Link>
         <nav className={styles.headerNav} aria-label="ランディングページ">
-          <Link to={LANDING_LINKS.viewExhibitions}>見る</Link>
+          <Link to={LANDING_LINKS.viewExhibitions} className="ui-btn ui-btn--ghost">
+            <Icon name="list" size={17} />
+            <span>展覧会を見る</span>
+          </Link>
           <Link to={LANDING_LINKS.createExhibition} className={styles.headerCta}>
             <Icon name="plus" size={16} />
-            <span>つくる</span>
+            <span>展覧会を作成</span>
           </Link>
         </nav>
       </header>

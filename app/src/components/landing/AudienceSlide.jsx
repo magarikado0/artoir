@@ -25,7 +25,6 @@ export default function AudienceSlide() {
         viewport={{ once: true, amount: 0.5 }}
         transition={{ duration: 0.5 }}
       >
-        <p className={styles.kicker}>For creators</p>
         <h2 id="landing-audience-title">作品を見せたい人へ。</h2>
       </MotionDiv>
 
