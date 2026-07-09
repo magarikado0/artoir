@@ -113,24 +113,23 @@ export default function FrameIntro({ onComplete }) {
         >
           <span className={styles.frameInner}>
             <span className={styles.frameMat}>
-              <span className={styles.frameArt} />
+              <span className={styles.frameArt}>
+                <MotionDiv
+                  className={styles.frameLogo}
+                  aria-hidden={phase === 'waiting' || phase === 'dragging'}
+                  initial={false}
+                  animate={{
+                    opacity: ['logoAppearing', 'logoEnteringFrame', 'completed'].includes(phase) ? 1 : 0,
+                    scale: phase === 'logoEnteringFrame' || phase === 'completed' ? 1 : 0.92,
+                  }}
+                  transition={{ duration: prefersReducedMotion ? 0.2 : 0.55, ease: 'easeOut' }}
+                >
+                  <BrandLockup />
+                </MotionDiv>
+              </span>
             </span>
           </span>
         </MotionButton>
-
-        <MotionDiv
-          className={styles.introLogo}
-          aria-hidden={phase === 'waiting' || phase === 'dragging'}
-          initial={false}
-          animate={{
-            opacity: ['logoAppearing', 'logoEnteringFrame', 'completed'].includes(phase) ? 1 : 0,
-            y: phase === 'logoEnteringFrame' || phase === 'completed' ? 0 : 92,
-            scale: phase === 'logoEnteringFrame' || phase === 'completed' ? 0.86 : 1,
-          }}
-          transition={{ duration: prefersReducedMotion ? 0.2 : 0.7, ease: 'easeInOut' }}
-        >
-          <BrandLockup />
-        </MotionDiv>
       </div>
     </section>
   )
