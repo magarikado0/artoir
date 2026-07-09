@@ -159,6 +159,13 @@
   position: relative;
 }
 
+.landingLoading {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 96px 24px 32px;
+}
+
 .videoWindowSection {
   min-height: calc(100svh + 56px);
   padding: clamp(58px, 6vw, 78px) clamp(18px, 4vw, 52px) clamp(16px, 2vw, 28px);

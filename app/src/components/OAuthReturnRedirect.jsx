@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import {
   OAUTH_RETURN_KEY,
+  DEFAULT_POST_LOGIN_PATH,
   peekOAuthRedirectPending,
   normalizeOAuthReturnPath,
   clearOAuthReturnState,
@@ -24,7 +25,7 @@ export default function OAuthReturnRedirect() {
     let cancelled = false
 
     async function redirect() {
-      let target = '/account'
+      let target = DEFAULT_POST_LOGIN_PATH
       try {
         const stored = sessionStorage.getItem(OAUTH_RETURN_KEY)
         if (stored) target = normalizeOAuthReturnPath(stored)

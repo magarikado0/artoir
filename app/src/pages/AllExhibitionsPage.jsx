@@ -72,7 +72,7 @@ export default function AllExhibitionsPage() {
           <input className="ui-search-input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="展覧会を検索" />
           <button
             type="button"
-            onClick={() => navigate(session ? '/account' : '/login')}
+            onClick={() => navigate(session ? '/account' : '/login', session ? undefined : { state: { from: '/account' } })}
             className="ui-pill-action ui-pill-action--accent"
           >
             <Icon name="plus" size={16} />

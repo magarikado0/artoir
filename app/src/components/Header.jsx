@@ -4,7 +4,7 @@ import { useAccountDestination } from '../lib/useAccountDestination'
 import { BrandLockup } from './BrandMark'
 
 const TABS = [
-  { key: 'top', label: '展覧会', path: '/', icon: 'list' },
+  { key: 'top', label: '展覧会', path: '/exhibitions', icon: 'list' },
   { key: 'orgs', label: '団体', path: '/orgs', icon: 'org' },
   { key: 'creators', label: '作家', path: '/creators', icon: 'users' },
   { key: 'account', label: 'アカウント', path: '/account', icon: 'user' },
@@ -85,10 +85,11 @@ export function Icon({ name, size = 20 }) {
 export default function Header({ activeTab }) {
   const { session } = useAuth()
   const accountPath = useAccountDestination()
+  const brandPath = session ? '/exhibitions' : '/'
 
   return (
     <header className="ui-topbar">
-      <Link to="/lp" className="ui-topbar-brand" aria-label="Artoir LP">
+      <Link to={brandPath} className="ui-topbar-brand" aria-label="Artoir">
         <BrandLockup />
       </Link>
       <nav className="ui-topbar-nav" aria-label="メインメニュー">

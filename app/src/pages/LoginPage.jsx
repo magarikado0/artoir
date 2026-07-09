@@ -91,7 +91,7 @@ export default function LoginPage() {
   const location = useLocation()
   const rawFrom = location.state?.from
   const from = !rawFrom
-    ? '/account'
+    ? '/exhibitions'
     : typeof rawFrom === 'string'
       ? rawFrom
       : `${rawFrom.pathname || ''}${rawFrom.search || ''}${rawFrom.hash || ''}`
@@ -288,7 +288,7 @@ export default function LoginPage() {
       <section className="ui-auth-login-surface">
         {isDesktop && (
           <div className="ui-auth-login-top">
-            <Link to="/" className="ui-auth-brand-link" style={{ textDecoration: 'none' }} aria-label="Artoir home">
+            <Link to="/" className="ui-auth-brand-link" style={{ textDecoration: 'none' }} aria-label="Artoir">
               <span className="ui-auth-mark">
                 <BrandMark size="auth" />
               </span>

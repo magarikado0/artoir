@@ -1,6 +1,8 @@
 export const LANDING_LINKS = {
-  viewExhibitions: '/',
-  createExhibition: '/account',
+  viewExhibitions: '/exhibitions',
+  login: '/login',
+  createExhibition: '/login',
+  createAfterLogin: '/account',
 }
 
 export const LANDING_MEDIA = {

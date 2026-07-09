@@ -65,9 +65,17 @@ export default function FinalCTA() {
             <Icon name="list" size={17} />
             <span>展覧会を見る</span>
           </Link>
-          <Link to={LANDING_LINKS.createExhibition} className="ui-btn ui-btn--accent">
+          <Link to={LANDING_LINKS.login} className="ui-btn ui-btn--ghost">
+            <Icon name="login" size={17} />
+            <span>ログイン</span>
+          </Link>
+          <Link
+            to={LANDING_LINKS.createExhibition}
+            state={{ from: LANDING_LINKS.createAfterLogin }}
+            className="ui-btn ui-btn--accent"
+          >
             <Icon name="plus" size={17} />
-            <span>展覧会を作成</span>
+            <span>展示をつくる</span>
           </Link>
           <a
             href="https://www.instagram.com/artoir_net/"

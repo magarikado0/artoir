@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import { peekSupabaseAuthUrlErrorFromWindow, isGoogleExchangeExternalCodeError, getSupabaseAuthCallbackUrlForGoogle } from './lib/oauthUrlError'
@@ -152,8 +152,9 @@ export default function App() {
         <ScrollToTop />
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/" element={<AllExhibitionsPage />} />
-            <Route path="/lp" element={<LandingPage />} />
+            <Route path="/" element={session ? <Navigate to="/exhibitions" replace /> : <LandingPage />} />
+            <Route path="/lp" element={<Navigate to={session ? '/exhibitions' : '/'} replace />} />
+            <Route path="/exhibitions" element={<AllExhibitionsPage />} />
             <Route path="/orgs" element={<OrgsPage />} />
             <Route path="/creators" element={<CreatorsPage />} />
             <Route path="/login" element={<LoginPage />} />

@@ -1,14 +1,15 @@
 export const OAUTH_RETURN_KEY = 'oauthReturnTo'
 export const OAUTH_PENDING_KEY = 'oauthPending'
+export const DEFAULT_POST_LOGIN_PATH = '/exhibitions'
 
 /** 「Google で続ける」の保留状態の最大寿命（過去のフラグ残骸で誤遷移しないため） */
 export const OAUTH_PENDING_TTL_MS = 15 * 60 * 1000
 
 /** Same-origin pathname only — blocks `//evil` open redirects */
 export function normalizeOAuthReturnPath(path) {
-  if (!path || typeof path !== 'string') return '/account'
-  if (!path.startsWith('/') || path.startsWith('//')) return '/account'
-  if (path === '/login') return '/account'
+  if (!path || typeof path !== 'string') return DEFAULT_POST_LOGIN_PATH
+  if (!path.startsWith('/') || path.startsWith('//')) return DEFAULT_POST_LOGIN_PATH
+  if (path === '/' || path === '/lp' || path === '/login') return DEFAULT_POST_LOGIN_PATH
   return path
 }
 
