@@ -55,10 +55,6 @@ export default function LandingPage() {
             <Icon name="list" size={17} />
             <span>展覧会を見る</span>
           </Link>
-          <Link to={LANDING_LINKS.login} className="ui-btn ui-btn--ghost">
-            <Icon name="login" size={17} />
-            <span>ログイン</span>
-          </Link>
           <Link
             to={LANDING_LINKS.createExhibition}
             state={{ from: LANDING_LINKS.createAfterLogin }}
