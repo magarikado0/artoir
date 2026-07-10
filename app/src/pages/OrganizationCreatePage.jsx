@@ -51,6 +51,7 @@ export default function OrganizationCreatePage() {
     setError('')
     const finalSlug = slugifyProfileId(slug) || slug.trim()
     let nextPath = null
+    let nextState = null
     try {
       const { data: newOrg, error: orgErr } = await supabase
         .from('organizations')
@@ -78,14 +79,15 @@ export default function OrganizationCreatePage() {
         return
       }
 
-      nextPath = `/${newOrg.slug || finalSlug}/dashboard`
+      nextPath = `/account/organizations/${newOrg.slug || finalSlug}/links`
+      nextState = { orgId: newOrg.id }
     } catch {
       setError('通信に失敗しました。時間をおいて再度お試しください。')
     } finally {
       setSaving(false)
     }
 
-    if (nextPath) navigate(nextPath, { replace: true })
+    if (nextPath) navigate(nextPath, { replace: true, state: nextState })
   }
 
   if (loading) return (
@@ -107,7 +109,7 @@ export default function OrganizationCreatePage() {
               label="ID"
               value={slug}
               onChange={(value) => setSlug(slugifyProfileId(value))}
-              placeholder="artoir_academy"
+              placeholder="例: artoir_academy"
               mono
               help="英数字・ハイフン・アンダースコアが使えます。"
             />

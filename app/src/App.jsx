@@ -162,6 +162,7 @@ export default function App() {
             <Route path="/collection" element={<ProtectedRoute><CollectionPage /></ProtectedRoute>} />
             <Route path="/account/setup" element={<AccountSetup />} />
             <Route path="/account/organizations/new" element={<OrganizationCreatePage />} />
+            <Route path="/account/organizations/:orgSlug/links" element={<AccountSetupLinks />} />
             <Route path="/account/setup/links" element={<AccountSetupLinks />} />
             <Route path="/profile/:profileSlug" element={<ProfilePage />} />
             <Route path="/@:profileSlug" element={<ProfilePage />} />

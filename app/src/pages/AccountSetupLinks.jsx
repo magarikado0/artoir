@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import DashShell, { DashField, DashSectionLabel } from '../components/DashShell'
@@ -36,21 +36,83 @@ export default function AccountSetupLinks() {
   const { session } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const { orgSlug: routeOrgSlug } = useParams()
   const isDesktop = useIsDesktop()
 
-  const orgSlug = location.state?.orgSlug
-  const orgId = location.state?.orgId
-
+  const [org, setOrg] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [instagram, setInstagram] = useState('')
   const [twitter, setTwitter] = useState('')
   const [homepageUrl, setHomepageUrl] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  if (!session) return <Navigate to="/login" state={{ from: '/account' }} replace />
-  if (!orgSlug || !orgId) return <Navigate to="/account" replace />
+  const stateOrgSlug = location.state?.orgSlug
+  const stateOrgId = location.state?.orgId
+  const orgSlug = routeOrgSlug || stateOrgSlug
 
-  const dashboardPath = `/${orgSlug}/dashboard`
+  useEffect(() => {
+    if (!session || !supabase || (!orgSlug && !stateOrgId)) {
+      setLoading(false)
+      return undefined
+    }
+    let cancelled = false
+    async function loadOrg() {
+      setLoading(true)
+      setError('')
+      try {
+        let query = supabase.from('organizations').select('*')
+        query = stateOrgId ? query.eq('id', stateOrgId) : query.eq('slug', orgSlug)
+        const { data: orgData, error: orgError } = await query.maybeSingle()
+        if (cancelled) return
+        if (orgError) {
+          setError(orgError.message || '団体の読み込みに失敗しました。')
+          setOrg(null)
+          return
+        }
+        if (!orgData) {
+          setOrg(null)
+          return
+        }
+
+        const { data: memberData, error: memberError } = await supabase
+          .from('organization_members')
+          .select('role')
+          .eq('organization_id', orgData.id)
+          .eq('profile_id', session.user.id)
+          .maybeSingle()
+        if (cancelled) return
+        if (memberError) {
+          setError(memberError.message || '団体メンバーの確認に失敗しました。')
+          setOrg(null)
+          return
+        }
+        if (!memberData) {
+          setOrg(null)
+          return
+        }
+
+        setOrg(orgData)
+        setInstagram(normalizeSnsValue(orgData.sns_links?.instagram || '', 'instagram.com'))
+        setTwitter(normalizeSnsValue(orgData.sns_links?.x || '', 'x.com'))
+        setHomepageUrl(orgData.homepage_url || '')
+      } catch {
+        if (!cancelled) {
+          setError('通信に失敗しました。時間をおいて再度お試しください。')
+          setOrg(null)
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    loadOrg()
+    return () => { cancelled = true }
+  }, [orgSlug, session, stateOrgId])
+
+  if (!session) return <Navigate to="/login" state={{ from: '/account' }} replace />
+  if (!loading && ((!orgSlug && !stateOrgId) || !org)) return <Navigate to="/account" replace />
+
+  const dashboardPath = `/${org?.slug || orgSlug}/dashboard`
 
   function handleSkip() {
     navigate(dashboardPath, { replace: true })
@@ -72,7 +134,7 @@ export default function AccountSetupLinks() {
       const { error: updateErr } = await supabase
         .from('organizations')
         .update(updates)
-        .eq('id', orgId)
+        .eq('id', org.id)
       if (updateErr) {
         setError(updateErr.message)
         return
@@ -150,12 +212,19 @@ export default function AccountSetupLinks() {
     <div className="ui-hero-screen-heading" style={{ marginBottom: isDesktop ? 14 : 0 }}>
       <h1 className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>SNSリンクを登録</h1>
       <p className="ui-screen-subtitle">
-        公開ページに表示されるSNSやウェブサイトのリンクを登録できます。あとから設定画面で変更・追加できます。
+        {org?.name ? `${org.name}の公開ページに表示されるSNSやウェブサイトのリンクを登録できます。` : '公開ページに表示されるSNSやウェブサイトのリンクを登録できます。'}
+        あとから設定画面で変更・追加できます。
       </p>
     </div>
   )
 
   const crumbs = ['ACCOUNT', 'SETUP', 'LINKS']
+
+  if (loading) return (
+    <DashShell crumbs={crumbs}>
+      <div className="ui-page-shell" />
+    </DashShell>
+  )
 
   if (isDesktop) {
     return (
