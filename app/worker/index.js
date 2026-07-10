@@ -80,7 +80,7 @@ async function collectUrls(env, siteUrl) {
 
     const exhibitions = await fetchSupabase(
       supabaseEnv,
-      'exhibitions?select=slug,organizations(slug),profiles(slug)&order=slug.asc',
+      'exhibitions?select=slug,organizations(slug),profiles(slug)&visibility=eq.public&order=slug.asc',
     )
     for (const exhibition of exhibitions) {
       const orgSlug = exhibition?.organizations?.slug

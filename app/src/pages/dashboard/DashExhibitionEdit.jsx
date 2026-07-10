@@ -8,8 +8,12 @@ import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
 import { useIsDesktop } from '../../lib/useIsDesktop'
 import {
+  EXHIBITION_VISIBILITY,
+  EXHIBITION_VISIBILITY_OPTIONS,
+  getExhibitionVisibilityLabel,
   getExhibitionPeriodText,
   getExhibitionThumbnailUrlFromRecord,
+  normalizeExhibitionVisibility,
 } from '../../lib/exhibition'
 import { getThumbnailUrl } from '../../lib/imageUrl'
 import { deleteExhibition } from '../../lib/deleteExhibition'
@@ -80,6 +84,29 @@ function ExhibitionItem({ id, label, value, mono, editChildren, editSection, onB
   )
 }
 
+function VisibilityPicker({ value, onChange }) {
+  return (
+    <div className="ui-visibility-options" role="radiogroup" aria-label="公開設定">
+      {EXHIBITION_VISIBILITY_OPTIONS.map((option) => {
+        const active = value === option.value
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            className={`ui-visibility-option ${active ? 'is-active' : ''}`}
+            onClick={() => onChange(option.value)}
+          >
+            <span className="ui-visibility-option-label">{option.label}</span>
+            <span className="ui-visibility-option-description">{option.description}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function DashExhibitionEdit() {
   const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionId } = useParams()
   const navigate = useNavigate()
@@ -109,6 +136,7 @@ export default function DashExhibitionEdit() {
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
   const [thumbnailUrl, setThumbnailUrl] = useState('')
+  const [visibility, setVisibility] = useState(EXHIBITION_VISIBILITY.PUBLIC)
 
   function onStartDateChange(next) {
     setStartDate(next)
@@ -164,6 +192,7 @@ export default function DashExhibitionEdit() {
             setLocation(exh.location || '')
             setDescription(exh.description || '')
             setThumbnailUrl(getExhibitionThumbnailUrlFromRecord(exh))
+            setVisibility(normalizeExhibitionVisibility(exh.visibility))
           }
         }
       } catch (error) {
@@ -207,6 +236,7 @@ export default function DashExhibitionEdit() {
         location,
         description,
         thumbnail_url: thumbnailUrl || null,
+        visibility,
         organization_id: profileSlug ? null : owner.id,
         profile_id: profileSlug ? owner.id : null,
       }
@@ -253,6 +283,7 @@ export default function DashExhibitionEdit() {
     setLocation(exhibition.location || '')
     setDescription(exhibition.description || '')
     setThumbnailUrl(getExhibitionThumbnailUrlFromRecord(exhibition))
+    setVisibility(normalizeExhibitionVisibility(exhibition.visibility))
   }
 
   function handleCancelEdit() {
@@ -345,6 +376,9 @@ export default function DashExhibitionEdit() {
         placeholder="展覧会の説明文を入力..."
         help="公開ページのヒーロー下に表示されます（最大 400 文字）。"
       />
+
+      <DashSectionLabel>公開設定</DashSectionLabel>
+      <VisibilityPicker value={visibility} onChange={setVisibility} />
 
       <DashSectionLabel>サムネイル</DashSectionLabel>
       <div style={{ display: 'grid', gap: 12 }}>
@@ -503,6 +537,20 @@ export default function DashExhibitionEdit() {
               multiline
               placeholder="展覧会の説明文を入力..."
             />
+            <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
+          </>
+        )}
+      />
+
+      <ExhibitionItem
+        editSection={editSection}
+        onBeginEdit={beginEditSection}
+        id="visibility"
+        label="公開設定"
+        value={getExhibitionVisibilityLabel(exhibition)}
+        editChildren={(
+          <>
+            <VisibilityPicker value={visibility} onChange={setVisibility} />
             <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
           </>
         )}

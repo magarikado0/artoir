@@ -62,6 +62,7 @@ export default function ExhibitionPage() {
           .select('*')
           .eq('slug', exhibitionSlug)
           .eq(profileSlug ? 'profile_id' : 'organization_id', ownerData.id)
+          .eq('visibility', 'public')
           .maybeSingle()
         if (!exhData) return setLoading(false)
         setExhibition(exhData)

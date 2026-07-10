@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import DashShell, { StatusBadge } from '../../components/DashShell'
-import { exhStatus, getExhibitionThumbnailUrl, mapExhibitionListRow } from '../../lib/exhibition'
+import { exhStatus, getExhibitionThumbnailUrl, getExhibitionVisibilityLabel, isPublicExhibition, mapExhibitionListRow } from '../../lib/exhibition'
 import { ExhibitionCardMedia } from '../../components/ExhibitionListCard'
 import { T, fmtDateRangeShort } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
@@ -25,6 +25,9 @@ function DashExhibitionCard({ exh, dashboardBase, navigate, onDelete, artworkCou
       <div className="ui-exhibition-list-card-body">
         <div className="ui-exhibition-list-card-meta">
           <StatusBadge kind={status} className="ui-exhibition-list-card-badge" />
+          {!isPublicExhibition(exh) && (
+            <span className="ui-visibility-badge">{getExhibitionVisibilityLabel(exh)}</span>
+          )}
         </div>
         <div className="ui-exhibition-list-card-content">
           <div className="ui-exhibition-list-card-title">{exh.title}</div>

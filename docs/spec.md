@@ -99,8 +99,11 @@ profiles
 | location | string |
 | description | text |
 | thumbnail_url | string(未設定なら先頭作品の画像で代替) |
+| visibility | string(`public` / `private` / `draft` / `unlisted`) |
 
 `organization_id` XOR `profile_id`(CHECK 制約)。料金系フィールド(fee_type / fee_detail)は存在しない。
+
+公開ページと公開一覧に表示するのは `visibility = 'public'` の展覧会のみ。管理画面では所有者が全状態を確認・編集できる。
 
 ### artworks
 

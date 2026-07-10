@@ -48,6 +48,7 @@ export default function ProfilePage() {
             .from('exhibitions')
             .select('*, artworks(image_url, order)')
             .eq('profile_id', profileData.id)
+            .eq('visibility', 'public')
             .order('start_date', { ascending: false }),
           supabase
             .from('organization_members')

@@ -33,6 +33,7 @@ export default function OrgPage() {
           .from('exhibitions')
           .select('*, artworks(image_url, order)')
           .eq('organization_id', orgData.id)
+          .eq('visibility', 'public')
           .order('start_date', { ascending: false })
         setExhibitions((exhData || []).map(mapExhibitionListRow))
       } catch {

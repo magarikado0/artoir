@@ -6,6 +6,47 @@ export function exhStatus(exh) {
   return 'ended'
 }
 
+export const EXHIBITION_VISIBILITY = {
+  PUBLIC: 'public',
+  PRIVATE: 'private',
+  DRAFT: 'draft',
+  UNLISTED: 'unlisted',
+}
+
+export const EXHIBITION_VISIBILITY_OPTIONS = [
+  {
+    value: EXHIBITION_VISIBILITY.PUBLIC,
+    label: '公開',
+    description: '公開ページ、一覧、検索に表示されます。',
+  },
+  {
+    value: EXHIBITION_VISIBILITY.PRIVATE,
+    label: '非公開',
+    description: '管理画面だけで表示されます。',
+  },
+]
+
+export function normalizeExhibitionVisibility(visibility) {
+  return Object.values(EXHIBITION_VISIBILITY).includes(visibility)
+    ? visibility
+    : EXHIBITION_VISIBILITY.PUBLIC
+}
+
+export function isPublicExhibition(exhibition) {
+  return normalizeExhibitionVisibility(exhibition?.visibility) === EXHIBITION_VISIBILITY.PUBLIC
+}
+
+export function getExhibitionVisibilityLabel(exhibition) {
+  const visibility = normalizeExhibitionVisibility(exhibition?.visibility)
+  const labels = {
+    [EXHIBITION_VISIBILITY.PUBLIC]: '公開',
+    [EXHIBITION_VISIBILITY.PRIVATE]: '非公開',
+    [EXHIBITION_VISIBILITY.DRAFT]: '下書き',
+    [EXHIBITION_VISIBILITY.UNLISTED]: '限定公開',
+  }
+  return labels[visibility] || labels[EXHIBITION_VISIBILITY.PUBLIC]
+}
+
 export function getExhibitionPeriodText(exhibition) {
   if (!exhibition) return '未設定'
   return [

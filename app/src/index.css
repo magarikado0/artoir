@@ -1359,6 +1359,20 @@ a {
   border-color: #E4DDD2;
 }
 
+.ui-visibility-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #D8D0C6;
+  background: #FFFBF6;
+  color: #6E655D;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .ui-exhibition-list-card-tag {
   display: inline-flex;
   align-items: center;
@@ -3330,6 +3344,48 @@ a.ui-settings-member-link:hover {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+}
+
+.ui-visibility-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ui-visibility-option {
+  appearance: none;
+  border: 1px solid #E4DDD2;
+  border-radius: 8px;
+  background: #FFFCF7;
+  color: #4A413A;
+  padding: 13px 14px;
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ui-visibility-option.is-active {
+  border-color: #BE553D;
+  background: rgba(190, 85, 61, 0.08);
+}
+
+.ui-visibility-option:focus-visible {
+  outline: 2px solid rgba(190, 85, 61, 0.35);
+  outline-offset: 2px;
+}
+
+.ui-visibility-option-label {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: #2F2923;
+}
+
+.ui-visibility-option-description {
+  color: #8A8178;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .ui-status-badge {

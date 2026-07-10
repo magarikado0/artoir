@@ -13,6 +13,7 @@ async function fetchExhibitionRows() {
   const { data, error } = await supabase
     .from('exhibitions')
     .select('*, organizations(id, name, slug), profiles(id, display_name, slug), artworks(image_url, order)')
+    .eq('visibility', 'public')
     .order('start_date', { ascending: false })
   if (error) throw error
   return data || []

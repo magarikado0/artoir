@@ -18,7 +18,7 @@ import { useIsDesktop } from '../lib/useIsDesktop'
 import { attachNormalizedCreators, normalizeProfile } from '../lib/profile'
 import { getGalleryThumbnailUrl } from '../lib/imageUrl'
 import { getArtworkUploadConfigError, isMissingImageDimensionColumnError, omitImageDimensionFields, uploadArtworkImage } from '../lib/artworkUpload'
-import { getExhibitionThumbnailUrl, mapExhibitionListRow } from '../lib/exhibition'
+import { getExhibitionThumbnailUrl, getExhibitionVisibilityLabel, isPublicExhibition, mapExhibitionListRow } from '../lib/exhibition'
 import { deleteExhibition } from '../lib/deleteExhibition'
 import { profilePath } from '../lib/profileRoutes'
 
@@ -87,6 +87,11 @@ function AccountExhibitionCard({ exhibition, onOpen, onDelete }) {
         <ExhibitionCardMedia thumbnailUrl={thumbnailUrl} title={exhibition.title} />
       </div>
       <div className="ui-exhibition-list-card-body">
+        {!isPublicExhibition(exhibition) && (
+          <div className="ui-exhibition-list-card-meta">
+            <span className="ui-visibility-badge">{getExhibitionVisibilityLabel(exhibition)}</span>
+          </div>
+        )}
         <div className="ui-exhibition-list-card-content">
           <div className="ui-exhibition-list-card-title">{exhibition.title}</div>
           {exhibition.location?.trim() && (
