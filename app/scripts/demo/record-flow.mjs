@@ -30,11 +30,19 @@ function easeInOutCubic(t) {
 }
 
 const cursorInitScript = () => {
+  if (window.__demoCursorReady && window.__demoCursor) {
+    window.__demoCursor.ensure()
+    return
+  }
+  window.__demoCursorReady = false
+
   const CURSOR_ID = 'demo-cursor'
   const RIPPLE_ID = 'demo-click-ripple'
   const STYLE_ID = 'demo-cursor-style'
 
   function ensureCursorOverlay() {
+    if (!document.documentElement) return
+
     if (!document.getElementById(STYLE_ID)) {
       const style = document.createElement('style')
       style.id = STYLE_ID
@@ -91,7 +99,7 @@ const cursorInitScript = () => {
           100% { opacity: 0; transform: translate3d(var(--demo-ripple-x), var(--demo-ripple-y), 0) scale(3.2); }
         }
       `
-      document.head.appendChild(style)
+      ;(document.head || document.documentElement).appendChild(style)
     }
 
     document.documentElement.classList.add('demo-hide-native-cursor')
@@ -128,6 +136,8 @@ const cursorInitScript = () => {
         </svg>
       `
       ;(document.body || document.documentElement).appendChild(cursor)
+    } else if (document.body && cursor.parentElement !== document.body) {
+      document.body.appendChild(cursor)
     }
 
     if (!document.getElementById(RIPPLE_ID)) {
@@ -135,13 +145,11 @@ const cursorInitScript = () => {
       ripple.id = RIPPLE_ID
       ripple.setAttribute('aria-hidden', 'true')
       ;(document.body || document.documentElement).appendChild(ripple)
+    } else {
+      const ripple = document.getElementById(RIPPLE_ID)
+      if (document.body && ripple.parentElement !== document.body) document.body.appendChild(ripple)
     }
   }
-
-  ensureCursorOverlay()
-
-  const observer = new MutationObserver(() => ensureCursorOverlay())
-  observer.observe(document.documentElement, { childList: true, subtree: true })
 
   window.__demoCursor = {
     ensure: ensureCursorOverlay,
@@ -165,6 +173,22 @@ const cursorInitScript = () => {
       ripple.classList.add('is-active')
     },
   }
+  window.__demoCursorReady = true
+
+  function safeEnsure() {
+    try {
+      ensureCursorOverlay()
+    } catch {
+      window.setTimeout(safeEnsure, 50)
+    }
+  }
+
+  safeEnsure()
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', safeEnsure, { once: true })
+  }
+  const observer = new MutationObserver(() => safeEnsure())
+  observer.observe(document.documentElement, { childList: true, subtree: true })
 }
 
 class DemoDriver {
@@ -175,8 +199,15 @@ class DemoDriver {
   }
 
   async ensureCursor() {
-    await this.page.evaluate(() => window.__demoCursor?.ensure?.())
-    await this.page.evaluate(({ x, y }) => window.__demoCursor?.setPosition?.(x, y), { x: this.x, y: this.y })
+    await this.page.evaluate(cursorInitScript)
+    await this.page.evaluate(() => window.__demoCursor.ensure())
+    await this.page.evaluate(({ x, y }) => window.__demoCursor.setPosition(x, y), { x: this.x, y: this.y })
+    const visible = await this.page.locator('#demo-cursor').evaluate((node) => {
+      const styles = window.getComputedStyle(node)
+      const rect = node.getBoundingClientRect()
+      return styles.display !== 'none' && styles.visibility !== 'hidden' && rect.width > 0 && rect.height > 0
+    }).catch(() => false)
+    if (!visible) throw new Error('Demo cursor overlay was not injected.')
   }
 
   async centerOf(locator) {
@@ -204,7 +235,8 @@ class DemoDriver {
       const x = startX + (targetX - startX) * t
       const y = startY + (targetY - startY) * t
       await this.page.mouse.move(x, y)
-      await this.page.evaluate((point) => window.__demoCursor?.setPosition?.(point.x, point.y), { x, y })
+      await this.page.evaluate(cursorInitScript)
+      await this.page.evaluate((point) => window.__demoCursor.setPosition(point.x, point.y), { x, y })
       await delay(duration / steps)
     }
 
@@ -215,12 +247,13 @@ class DemoDriver {
   async click(locator, options = {}) {
     await this.moveTo(locator, { duration: options.moveDuration ?? 680 })
     await delay(options.before ?? 120)
-    await this.page.evaluate(() => window.__demoCursor?.setPressed?.(true))
+    await this.page.evaluate(cursorInitScript)
+    await this.page.evaluate(() => window.__demoCursor.setPressed(true))
     await this.page.mouse.down()
     await delay(options.hold ?? 95)
-    await this.page.evaluate(({ x, y }) => window.__demoCursor?.ripple?.(x, y), { x: this.x, y: this.y })
+    await this.page.evaluate(({ x, y }) => window.__demoCursor.ripple(x, y), { x: this.x, y: this.y })
     await this.page.mouse.up()
-    await this.page.evaluate(() => window.__demoCursor?.setPressed?.(false))
+    await this.page.evaluate(() => window.__demoCursor.setPressed(false))
     await delay(options.after ?? 360)
   }
 
@@ -340,7 +373,7 @@ await waitForScreen(page, '団体を作成')
 await delay(700)
 await demo.fill(field(page, '団体名'), 'Artoir同好会')
 await demo.fill(field(page, 'ID'), 'artoir_net')
-await demo.fill(field(page, '説明文'), '学生の展示活動と作品記録をまとめるための団体ページです。')
+await demo.fill(field(page, '説明文'), '展覧会と作品記録をまとめるための団体です。')
 await demo.click(page.getByRole('button', { name: /作成する/ }), { moveDuration: 760, after: 900 })
 
 await waitForScreen(page, 'SNSリンクを登録')
@@ -352,30 +385,6 @@ await demo.click(page.getByRole('button', { name: /保存して次へ/ }), { mov
 
 await waitForScreen(page, '展覧会')
 await delay(800)
-await demo.click(page.getByRole('button', { name: /展覧会を作成/ }), { moveDuration: 720, after: 900 })
-
-await waitForScreen(page, '新しい展覧会')
-await delay(600)
-await demo.fill(field(page, 'タイトル'), 'Artoir研究会')
-await demo.fill(field(page, 'START').first(), '2026-10-11', { keyDelay: 45 })
-await demo.fill(field(page, 'START TIME'), '10:00', { keyDelay: 45 })
-await demo.fill(field(page, 'END').first(), '2026-10-12', { keyDelay: 45 })
-await demo.fill(field(page, 'END TIME'), '18:00', { keyDelay: 45 })
-await demo.fill(field(page, '会場'), 'オンラインギャラリー')
-await demo.fill(field(page, '説明文'), '研究会メンバーによる試作と記録を公開する小さな展覧会です。')
-await demo.click(page.getByRole('button', { name: /^保存$/ }), { moveDuration: 760, after: 1200 })
-
-await clickFirstVisible(demo, [
-  page.getByRole('button', { name: /作品を管理/ }),
-  page.getByText('作品を管理', { exact: true }),
-])
-await waitForScreen(page, '作品')
-await delay(900)
-
-const addArtwork = page.getByLabel('作品追加').or(page.getByText('作品追加', { exact: true })).first()
-const chooserPromise = page.waitForEvent('filechooser', { timeout: 6000 }).catch(() => null)
-await demo.click(addArtwork, { moveDuration: 760, after: 900 })
-await chooserPromise
 
 if (process.env.DEMO_KEEP_OPEN === '1') {
   console.log('Demo finished. Browser will stay open because DEMO_KEEP_OPEN=1.')
