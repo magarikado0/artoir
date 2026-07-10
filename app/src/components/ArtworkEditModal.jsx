@@ -37,7 +37,6 @@ export default function ArtworkEditModal({
       <div className="ui-app-card ui-artwork-edit-card">
         <div style={{ padding: '18px 20px 16px', borderBottom: `1px solid ${T.lineSoft}`, display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center' }}>
           <div>
-            <div className="ui-kicker">作品</div>
             <div id="artwork-edit-title" className="ui-screen-title" style={{ fontSize: 22, marginTop: 6 }}>作品を編集</div>
           </div>
           <button onClick={onClose} disabled={disabled} className="ui-modal-close" type="button">

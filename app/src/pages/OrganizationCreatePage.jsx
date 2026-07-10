@@ -96,24 +96,22 @@ export default function OrganizationCreatePage() {
     <DashShell crumbs={['アカウント', '団体']}>
       <div style={{ maxWidth: isDesktop ? 760 : undefined, margin: isDesktop ? '0 auto' : undefined }}>
         <div className="ui-hero-screen-heading" style={{ marginBottom: isDesktop ? 14 : 0 }}>
-          <div className="ui-kicker">新しい団体</div>
           <h1 className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>団体を作成</h1>
           <p className="ui-screen-subtitle">展示活動をまとめる団体ページを作成します。</p>
         </div>
 
         <form onSubmit={handleSave}>
           <div style={{ padding: isDesktop ? '28px 0' : '16px 16px' }}>
-            <DashSectionLabel>基本情報</DashSectionLabel>
-            <DashField label="団体名" value={name} onChange={handleNameChange} placeholder="例: 多摩美術大学 書道部" />
+            <DashField label="団体名" value={name} onChange={handleNameChange} placeholder="例: Artoir.同好会" />
             <DashField
               label="ID"
               value={slug}
               onChange={(value) => setSlug(slugifyProfileId(value))}
-              placeholder="tamabi-shodo"
+              placeholder="artoir_academy"
               mono
               help="英数字・ハイフン・アンダースコアが使えます。"
             />
-            <DashField label="説明文" value={description} onChange={setDescription} placeholder="団体の説明文を入力..." multiline help="任意。団体ページに表示されます。" />
+            <DashField label="説明文" value={description} onChange={setDescription} placeholder="団体の説明文を入力..." multiline help="団体ページに表示されます。" />
 
             {error && (
               <div className="ui-alert ui-alert--error" style={{ marginBottom: 16 }}>
