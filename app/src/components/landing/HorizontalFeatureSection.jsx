@@ -66,6 +66,7 @@ function VideoWindow({ item, prefersReducedMotion }) {
         <video
           ref={videoRef}
           className={styles.windowVideo}
+          src={item.mobileVideoSrc ? undefined : item.videoSrc}
           poster={item.posterSrc}
           muted
           loop
@@ -74,8 +75,12 @@ function VideoWindow({ item, prefersReducedMotion }) {
           aria-hidden="true"
           onError={() => setHasVideoError(true)}
         >
-          <source src={item.mobileVideoSrc || item.videoSrc} media="(max-width: 720px)" type="video/mp4" />
-          <source src={item.videoSrc} type="video/mp4" />
+          {item.mobileVideoSrc && (
+            <>
+              <source src={item.mobileVideoSrc} media="(max-width: 720px)" type="video/mp4" />
+              <source src={item.videoSrc} type="video/mp4" />
+            </>
+          )}
         </video>
       )}
       <img

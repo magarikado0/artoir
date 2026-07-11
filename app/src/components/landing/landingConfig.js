@@ -8,7 +8,7 @@ export const LANDING_LINKS = {
 export const LANDING_MEDIA = {
   createExhibition: {
     videoSrc: '/videos/create-exhibition.mp4',
-    mobileVideoSrc: '/videos/create-exhibition-mobile.mp4',
+    mobileVideoSrc: null,
     posterSrc: '/images/create-exhibition-poster.webp',
   },
   addArtwork: {
