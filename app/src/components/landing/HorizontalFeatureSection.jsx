@@ -61,17 +61,22 @@ function VideoWindow({ item, prefersReducedMotion }) {
           )}
         </video>
       )}
-      <img
-        className={`${styles.windowPoster} ${isStaticImage ? styles.staticWindowImage : ''}`}
-        src={item.posterSrc}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        aria-hidden="true"
-        onError={(event) => {
-          event.currentTarget.style.display = 'none'
-        }}
-      />
+      <picture>
+        {item.mobilePosterSrc && (
+          <source media="(max-width: 900px)" srcSet={item.mobilePosterSrc} />
+        )}
+        <img
+          className={`${styles.windowPoster} ${isStaticImage ? styles.staticWindowImage : ''}`}
+          src={item.posterSrc}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          aria-hidden="true"
+          onError={(event) => {
+            event.currentTarget.style.display = 'none'
+          }}
+        />
+      </picture>
       {!isStaticImage && <div className={styles.windowFallback} aria-hidden="true" />}
       <div className={styles.windowOverlay}>
         <strong>{item.title}</strong>
