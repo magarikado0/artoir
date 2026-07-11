@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "demo:record": "node --experimental-strip-types scripts/record-organization-demo.ts",
+    "demo:record-mobile": "node --experimental-strip-types scripts/record-organization-mobile-demo.ts",
     "demo:record-exhibition": "node --experimental-strip-types scripts/record-exhibition-demo.ts",
     "demo:record-gallery": "node --experimental-strip-types scripts/record-gallery-demo.ts",
     "demo:record-flow": "node scripts/demo/record-flow.mjs",
