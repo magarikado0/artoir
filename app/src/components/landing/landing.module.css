@@ -509,9 +509,6 @@
     aspect-ratio: 4 / 5;
   }
 
-  .staticImageWindow {
-    aspect-ratio: 958 / 742;
-  }
 }
 
 @media (max-width: 620px) {

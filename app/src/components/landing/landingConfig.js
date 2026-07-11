@@ -10,11 +10,13 @@ export const LANDING_MEDIA = {
     videoSrc: '/videos/create-organization.mp4',
     mobileVideoSrc: null,
     posterSrc: '/images/create-organization-poster.png',
+    mobilePosterSrc: '/images/create-organization-poster-mobile.png',
   },
   createExhibition: {
     videoSrc: '/videos/create-exhibition-v2.mp4',
     mobileVideoSrc: null,
     posterSrc: '/images/create-exhibition-poster.png',
+    mobilePosterSrc: '/images/create-exhibition-poster-mobile.png',
   },
   addArtwork: {
     videoSrc: '/videos/add-artwork.mp4',
@@ -25,10 +27,12 @@ export const LANDING_MEDIA = {
     videoSrc: '/videos/gallery-tour.mp4',
     mobileVideoSrc: null,
     posterSrc: '/images/gallery-tour-poster.png',
+    mobilePosterSrc: '/images/gallery-tour-poster-mobile.png',
   },
   forCreators: {
     mediaType: 'image',
     posterSrc: '/images/for-creators.png',
+    mobilePosterSrc: '/images/for-creators-mobile.png',
   },
   final: {
     videoSrc: '/videos/final-gallery.mp4',
