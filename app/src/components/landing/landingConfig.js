@@ -23,7 +23,7 @@ export const LANDING_MEDIA = {
   },
   galleryTour: {
     videoSrc: '/videos/gallery-tour.mp4',
-    mobileVideoSrc: '/videos/gallery-tour-mobile.mp4',
+    mobileVideoSrc: null,
     posterSrc: '/images/gallery-tour-poster.webp',
   },
   forCreators: {
