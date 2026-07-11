@@ -6,8 +6,13 @@ export const LANDING_LINKS = {
 }
 
 export const LANDING_MEDIA = {
+  createOrganization: {
+    videoSrc: '/videos/create-organization.mp4',
+    mobileVideoSrc: null,
+    posterSrc: '/images/create-organization-poster.webp',
+  },
   createExhibition: {
-    videoSrc: '/videos/create-exhibition.mp4',
+    videoSrc: '/videos/create-exhibition-v2.mp4',
     mobileVideoSrc: null,
     posterSrc: '/images/create-exhibition-poster.webp',
   },

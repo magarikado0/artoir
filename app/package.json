@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "demo:record": "node --experimental-strip-types scripts/record-organization-demo.ts",
+    "demo:record-exhibition": "node --experimental-strip-types scripts/record-exhibition-demo.ts",
     "demo:record-flow": "node scripts/demo/record-flow.mjs",
     "build": "vite build",
     "lint": "eslint .",

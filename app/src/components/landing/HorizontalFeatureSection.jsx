@@ -1,25 +1,25 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference'
 import { LANDING_MEDIA } from './landingConfig'
 import styles from './landing.module.css'
 
 const WINDOWS = [
   {
-    key: 'create',
+    key: 'organization',
+    label: 'ORGANIZATION',
+    title: '団体をつくる',
+    ...LANDING_MEDIA.createOrganization,
+  },
+  {
+    key: 'exhibition',
     label: 'CREATE',
     title: '展覧会をつくる',
     ...LANDING_MEDIA.createExhibition,
   },
   {
-    key: 'artwork',
-    label: 'ARTWORK',
-    title: '作品を加える',
-    ...LANDING_MEDIA.addArtwork,
-  },
-  {
     key: 'gallery',
     label: '3D GALLERY',
-    title: '空間で見せる',
+    title: '3D空間',
     ...LANDING_MEDIA.galleryTour,
   },
   {
@@ -31,43 +31,20 @@ const WINDOWS = [
 ]
 
 function VideoWindow({ item, prefersReducedMotion }) {
-  const videoRef = useRef(null)
   const [hasVideoError, setHasVideoError] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
-
-  const play = () => {
-    if (prefersReducedMotion || hasVideoError) return
-    const video = videoRef.current
-    if (!video) return
-    const playPromise = video.play()
-    if (playPromise?.catch) playPromise.catch(() => {})
-    setIsPlaying(true)
-  }
-
-  const pause = () => {
-    const video = videoRef.current
-    if (!video) return
-    video.pause()
-    setIsPlaying(false)
-  }
 
   return (
     <article
-      className={`${styles.videoWindow} ${isPlaying ? styles.videoWindowPlaying : ''}`}
+      className={styles.videoWindow}
       tabIndex={0}
-      onMouseEnter={play}
-      onMouseLeave={pause}
-      onFocus={play}
-      onBlur={pause}
-      onTouchStart={play}
       aria-label={`${item.label}: ${item.title}`}
     >
       {!hasVideoError && !prefersReducedMotion && (
         <video
-          ref={videoRef}
           className={styles.windowVideo}
           src={item.mobileVideoSrc ? undefined : item.videoSrc}
           poster={item.posterSrc}
+          autoPlay
           muted
           loop
           playsInline
@@ -96,7 +73,6 @@ function VideoWindow({ item, prefersReducedMotion }) {
       />
       <div className={styles.windowFallback} aria-hidden="true" />
       <div className={styles.windowOverlay}>
-        <span>{item.label}</span>
         <strong>{item.title}</strong>
       </div>
     </article>

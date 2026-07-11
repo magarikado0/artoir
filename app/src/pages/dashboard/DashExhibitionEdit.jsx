@@ -347,7 +347,7 @@ export default function DashExhibitionEdit() {
           {saveError}
         </div>
       )}
-      <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
+      <DashField label="タイトル" value={title} onChange={setTitle} placeholder="" />
       <DashField
         label="URL"
         prefix={`${publicBase}/exhibition/`}
@@ -482,7 +482,7 @@ export default function DashExhibitionEdit() {
         value={fieldValue(exhibition?.title)}
         editChildren={(
           <>
-            <DashField label="タイトル" value={title} onChange={setTitle} placeholder="例: 静かな気配" />
+            <DashField label="タイトル" value={title} onChange={setTitle} placeholder="" />
             <ExhibitionSaveActions onCancel={handleCancelEdit} onSave={handleSave} saving={saving} deleting={deleting} />
           </>
         )}
