@@ -32,14 +32,15 @@ const WINDOWS = [
 
 function VideoWindow({ item, prefersReducedMotion }) {
   const [hasVideoError, setHasVideoError] = useState(false)
+  const isStaticImage = item.mediaType === 'image'
 
   return (
     <article
-      className={styles.videoWindow}
+      className={`${styles.videoWindow} ${isStaticImage ? styles.staticImageWindow : ''}`}
       tabIndex={0}
       aria-label={`${item.label}: ${item.title}`}
     >
-      {!hasVideoError && !prefersReducedMotion && (
+      {!isStaticImage && !hasVideoError && !prefersReducedMotion && (
         <video
           className={styles.windowVideo}
           src={item.mobileVideoSrc ? undefined : item.videoSrc}
@@ -61,7 +62,7 @@ function VideoWindow({ item, prefersReducedMotion }) {
         </video>
       )}
       <img
-        className={styles.windowPoster}
+        className={`${styles.windowPoster} ${isStaticImage ? styles.staticWindowImage : ''}`}
         src={item.posterSrc}
         alt=""
         loading="lazy"
@@ -71,7 +72,7 @@ function VideoWindow({ item, prefersReducedMotion }) {
           event.currentTarget.style.display = 'none'
         }}
       />
-      <div className={styles.windowFallback} aria-hidden="true" />
+      {!isStaticImage && <div className={styles.windowFallback} aria-hidden="true" />}
       <div className={styles.windowOverlay}>
         <strong>{item.title}</strong>
       </div>
