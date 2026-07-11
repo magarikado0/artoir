@@ -29,3 +29,8 @@ dist-ssr
 !.dev.vars.example
 .env*
 !.env.example
+
+#photo
+comparison
+comparison-adjusted
+frames
