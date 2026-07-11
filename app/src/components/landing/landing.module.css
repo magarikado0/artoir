@@ -78,18 +78,62 @@
   min-height: min(70svh, 720px);
   display: grid;
   place-items: center;
+  perspective: 1200px;
+}
+
+.wall::before {
+  content: '';
+  position: absolute;
+  inset: 2% 8% 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 36%, rgba(255, 252, 241, 0.72), rgba(255, 250, 235, 0.18) 38%, transparent 72%);
+  filter: blur(2px);
 }
 
 .frameButton {
+  position: relative;
+  isolation: isolate;
   width: min(64vw, 520px);
   aspect-ratio: 4 / 3;
-  padding: clamp(12px, 2.4vw, 22px);
-  border: 0;
-  border-radius: 7px;
-  background: linear-gradient(135deg, #372A21, #8A5D3E 42%, #2A241F);
+  padding: clamp(19px, 3vw, 30px);
+  border: 1px solid rgba(15, 12, 9, 0.84);
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(94deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(4deg, rgba(8, 6, 4, 0.15) 0 1px, transparent 1px 11px),
+    linear-gradient(135deg, #171411 0%, #3a2a20 20%, #201914 46%, #57402d 70%, #17120f 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 240, 213, 0.09),
+    inset 0 0 0 7px rgba(7, 5, 4, 0.32),
+    0 2px 2px rgba(255,255,255,0.12);
   cursor: grab;
   touch-action: none;
   transform-origin: 50% 48%;
+}
+
+.frameButton::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  z-index: -1;
+  border: 1px solid rgba(205, 167, 101, 0.36);
+  box-shadow:
+    inset 0 0 0 2px rgba(0,0,0,0.38),
+    0 0 14px rgba(0,0,0,0.2);
+  pointer-events: none;
+}
+
+.frameButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,0.16), transparent 14% 74%, rgba(255,255,255,0.04)),
+    linear-gradient(180deg, rgba(0,0,0,0.05), transparent 20%, rgba(0,0,0,0.24));
+  mix-blend-mode: screen;
+  opacity: 0.72;
 }
 
 .frameButton:active {
@@ -101,36 +145,97 @@
 }
 
 .frameInner {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
-  padding: clamp(12px, 2vw, 22px);
-  border-radius: 4px;
-  background: #CFAE72;
+  padding: clamp(8px, 1.25vw, 13px);
+  border: 1px solid #755831;
+  border-radius: 1px;
+  background:
+    linear-gradient(90deg, #8a682f, #d4b66d 12%, #8f6b30 49%, #e0c77e 72%, #795822),
+    #aa8546;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 235, 175, 0.42),
+    inset 0 0 8px rgba(41, 27, 10, 0.58),
+    0 0 0 2px rgba(7, 5, 3, 0.58);
 }
 
 .frameMat {
+  position: relative;
   display: grid;
   width: 100%;
   height: 100%;
-  padding: clamp(18px, 3.4vw, 40px);
+  padding: clamp(24px, 4.2vw, 48px);
   place-items: center;
-  background: #F8F4EC;
-  box-shadow: inset 0 0 0 1px rgba(31, 27, 23, 0.14);
+  background:
+    repeating-linear-gradient(8deg, rgba(72, 58, 38, 0.018) 0 1px, transparent 1px 4px),
+    linear-gradient(145deg, #fbf8ee, #eee7d9 62%, #f8f3e8);
+  box-shadow:
+    inset 0 0 0 1px rgba(67, 52, 34, 0.28),
+    inset 8px 9px 14px rgba(78, 63, 42, 0.08),
+    0 0 0 1px rgba(255,255,255,0.62);
+}
+
+.frameMat::after {
+  content: '';
+  position: absolute;
+  inset: clamp(24px, 4.2vw, 48px);
+  pointer-events: none;
+  border: 1px solid rgba(55, 42, 28, 0.2);
+  box-shadow:
+    3px 3px 5px rgba(45, 34, 22, 0.18),
+    -1px -1px 0 rgba(255,255,255,0.9);
 }
 
 .frameArt {
+  position: relative;
+  overflow: hidden;
   display: grid;
   place-items: center;
   width: 100%;
   height: 100%;
   background:
-    linear-gradient(140deg, rgba(190, 85, 61, 0.18), transparent 36%),
-    linear-gradient(40deg, rgba(31, 27, 23, 0.18), transparent 46%),
-    #E6DED1;
+    radial-gradient(circle at 24% 28%, rgba(255,255,255,0.26), transparent 30%),
+    linear-gradient(140deg, rgba(190, 85, 61, 0.22), transparent 38%),
+    linear-gradient(35deg, rgba(31, 27, 23, 0.22), transparent 48%),
+    #ded4c6;
+  box-shadow:
+    inset 7px 8px 13px rgba(25, 19, 14, 0.28),
+    inset -2px -2px 4px rgba(255,255,255,0.52);
+}
+
+.frameArt::before {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  inset: -25% -55%;
+  pointer-events: none;
+  background: linear-gradient(108deg, transparent 38%, rgba(255,255,255,0.04) 44%, rgba(255,255,255,0.34) 49%, rgba(255,255,255,0.06) 54%, transparent 60%);
+  transform: translateX(-34%);
+  animation: frameGlassGlint 4.8s cubic-bezier(.22,1,.36,1) 0.6s both;
+}
+
+.frameArt::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid rgba(255,255,255,0.38);
+  background: linear-gradient(145deg, rgba(255,255,255,0.1), transparent 32% 76%, rgba(29,22,16,0.08));
+}
+
+@keyframes frameGlassGlint {
+  0%, 18% { transform: translateX(-34%); opacity: 0; }
+  30% { opacity: 0.9; }
+  68%, 100% { transform: translateX(34%); opacity: 0; }
 }
 
 .frameLogo {
+  position: relative;
+  z-index: 4;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -444,6 +549,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .frameArt::before {
+    animation: none;
+    opacity: 0.14;
+    transform: translateX(0);
+  }
+
   .windowVideo,
   .finalVideo {
     will-change: auto;

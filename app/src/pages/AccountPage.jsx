@@ -349,7 +349,7 @@ export default function AccountPage() {
   async function handleSignOut() {
     if (!supabase) return
     await supabase.auth.signOut()
-    navigate('/')
+    navigate('/exhibitions')
   }
 
   async function handleAddWork(file) {

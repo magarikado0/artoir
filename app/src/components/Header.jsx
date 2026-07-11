@@ -85,7 +85,7 @@ export function Icon({ name, size = 20 }) {
 export default function Header({ activeTab }) {
   const { session } = useAuth()
   const accountPath = useAccountDestination()
-  const brandPath = session ? '/exhibitions' : '/'
+  const brandPath = '/exhibitions'
 
   return (
     <header className="ui-topbar">

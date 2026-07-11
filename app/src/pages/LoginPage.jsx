@@ -288,7 +288,7 @@ export default function LoginPage() {
       <section className="ui-auth-login-surface">
         {isDesktop && (
           <div className="ui-auth-login-top">
-            <Link to="/" className="ui-auth-brand-link" style={{ textDecoration: 'none' }} aria-label="Artoir">
+            <Link to="/exhibitions" className="ui-auth-brand-link" style={{ textDecoration: 'none' }} aria-label="Artoir">
               <span className="ui-auth-mark">
                 <BrandMark size="auth" />
               </span>

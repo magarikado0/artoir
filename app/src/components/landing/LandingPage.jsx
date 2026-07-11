@@ -47,7 +47,7 @@ export default function LandingPage() {
   return (
     <div className={styles.landingPage}>
       <header className={styles.landingHeader}>
-        <Link to="/" className={styles.headerBrand} aria-label="Artoir">
+        <Link to="/exhibitions" className={styles.headerBrand} aria-label="Artoir">
           <BrandLockup />
         </Link>
         <nav className={styles.headerNav} aria-label="ランディングページ">

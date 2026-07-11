@@ -26,7 +26,6 @@ const CollectionPage = lazy(() => import('./pages/CollectionPage'))
 const AccountSetup = lazy(() => import('./pages/AccountSetup'))
 const OrganizationCreatePage = lazy(() => import('./pages/OrganizationCreatePage'))
 const AccountSetupLinks = lazy(() => import('./pages/AccountSetupLinks'))
-const LandingPage = lazy(() => import('./components/landing/LandingPage'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -152,8 +151,8 @@ export default function App() {
         <ScrollToTop />
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/" element={session ? <Navigate to="/exhibitions" replace /> : <LandingPage />} />
-            <Route path="/lp" element={<Navigate to={session ? '/exhibitions' : '/'} replace />} />
+            <Route path="/" element={<Navigate to="/exhibitions" replace />} />
+            <Route path="/lp" element={<Navigate to="/exhibitions" replace />} />
             <Route path="/exhibitions" element={<AllExhibitionsPage />} />
             <Route path="/orgs" element={<OrgsPage />} />
             <Route path="/creators" element={<CreatorsPage />} />

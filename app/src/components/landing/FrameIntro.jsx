@@ -14,7 +14,7 @@ const MotionP = motion.p
 export default function FrameIntro({ onComplete }) {
   const prefersReducedMotion = useReducedMotionPreference()
   const rotation = useMotionValue(INITIAL_ROTATION)
-  const shadow = useTransform(rotation, [-12, 0, 12], ['-18px 22px 30px rgba(31, 27, 23, 0.18)', '0 24px 42px rgba(31, 27, 23, 0.16)', '18px 22px 30px rgba(31, 27, 23, 0.18)'])
+  const shadow = useTransform(rotation, [-12, 0, 12], ['drop-shadow(-18px 22px 22px rgba(31, 27, 23, 0.2))', 'drop-shadow(0 24px 28px rgba(31, 27, 23, 0.18))', 'drop-shadow(18px 22px 22px rgba(31, 27, 23, 0.2))'])
   const [phase, setPhase] = useState('waiting')
   const [hasInteracted, setHasInteracted] = useState(false)
   const pointerStartRef = useRef({ x: 0, rotation: INITIAL_ROTATION })
@@ -102,7 +102,7 @@ export default function FrameIntro({ onComplete }) {
         <MotionButton
           type="button"
           className={styles.frameButton}
-          style={{ rotate: rotation, boxShadow: shadow }}
+          style={{ rotate: rotation, filter: shadow }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
