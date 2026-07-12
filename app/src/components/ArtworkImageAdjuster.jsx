@@ -5,7 +5,7 @@ import { T } from '../lib/tokens'
 // クアッドの頂点順は [左上, 右上, 右下, 左下]（TL, TR, BR, BL）。
 const HANDLE_LABELS = ['左上', '右上', '右下', '左下']
 const LOUPE_SIZE = 132
-const LOUPE_ZOOM = 3
+const LOUPE_ZOOM = 2.5
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
