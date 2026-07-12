@@ -2,45 +2,21 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandLockup } from '../BrandMark'
 import { Icon } from '../Header'
-import LoadingFrames from '../LoadingFrames'
 import FrameIntro from './FrameIntro'
 import HorizontalFeatureSection from './HorizontalFeatureSection'
 import FinalCTA from './FinalCTA'
 import { LANDING_LINKS } from './landingConfig'
 import styles from './landing.module.css'
 
-const INTRO_SEEN_KEY = 'artoir-lp-intro-seen'
-
 export default function LandingPage() {
-  const [introMode, setIntroMode] = useState('checking')
+  const [introMode, setIntroMode] = useState('full')
 
   useEffect(() => {
     document.title = 'Artoir | あなたの作品を、展覧会に。'
     return () => { document.title = 'Artoir' }
   }, [])
 
-  useEffect(() => {
-    let nextMode = 'skipped'
-    try {
-      const seen = window.sessionStorage.getItem(INTRO_SEEN_KEY) === 'true'
-      const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-      if (seen || reduceMotion) {
-        window.sessionStorage.setItem(INTRO_SEEN_KEY, 'true')
-        nextMode = 'skipped'
-      } else {
-        nextMode = 'full'
-      }
-    } catch {
-      nextMode = 'skipped'
-    }
-    const timer = window.setTimeout(() => setIntroMode(nextMode), 0)
-    return () => window.clearTimeout(timer)
-  }, [])
-
   function handleIntroComplete() {
-    try {
-      window.sessionStorage.setItem(INTRO_SEEN_KEY, 'true')
-    } catch { /* ignore */ }
     setIntroMode('skipped')
   }
 
@@ -66,11 +42,6 @@ export default function LandingPage() {
         </nav>
       </header>
 
-      {introMode === 'checking' && (
-        <div className={styles.landingLoading}>
-          <LoadingFrames />
-        </div>
-      )}
       {introMode === 'full' && <FrameIntro onComplete={handleIntroComplete} />}
 
       {introMode === 'skipped' && (

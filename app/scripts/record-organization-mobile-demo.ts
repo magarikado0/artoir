@@ -3,13 +3,14 @@ import { mkdir, copyFile } from 'node:fs/promises'
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
-const baseURL = process.env.DEMO_BASE_URL || 'http://127.0.0.1:5173'
-const viewport = { width: 1080, height: 1350 }
+const baseURL = process.env.DEMO_BASE_URL || 'http://localhost:5173'
+const viewport = { width: 390, height: 488 }
 const outputDir = resolve('artifacts/demo')
 const rawVideo = resolve(outputDir, 'artoir-organization-mobile-demo.webm')
 const finalVideo = resolve('public/videos/create-organization-mobile.mp4')
 const profileDir = resolve(process.env.DEMO_USER_DATA_DIR || '.playwright-demo-profile')
 const typeDelay = Number(process.env.DEMO_TYPE_DELAY || 32)
+const existingOrgSlug = process.env.DEMO_EXISTING_ORG_SLUG || ''
 
 await mkdir(outputDir, { recursive: true })
 
@@ -31,21 +32,21 @@ class DemoFinger {
           left: 0;
           top: 0;
           z-index: 2147483647;
-          width: 76px;
-          height: 88px;
+          width: 38px;
+          height: 44px;
           pointer-events: none;
-          transform: translate3d(940px, 1200px, 0);
+          transform: translate3d(330px, 420px, 0);
           transition: transform var(--move-duration, 420ms) cubic-bezier(.22, 1, .36, 1);
           filter: drop-shadow(0 6px 8px rgba(31, 27, 23, .28));
-          transform-origin: 38px 10px;
+          transform-origin: 19px 5px;
         }
         #demo-finger svg { display: block; width: 100%; height: 100%; }
         #demo-touch-ring {
           position: fixed;
           z-index: 2147483646;
-          width: 30px;
-          height: 30px;
-          border: 4px solid #BE553D;
+          width: 18px;
+          height: 18px;
+          border: 2px solid #BE553D;
           border-radius: 999px;
           opacity: 0;
           pointer-events: none;
@@ -81,8 +82,8 @@ class DemoFinger {
     await locator.scrollIntoViewIfNeeded()
     const box = await locator.boundingBox()
     if (!box) throw new Error('Finger target has no bounding box')
-    const x = box.x + box.width / 2 - 38
-    const y = box.y + box.height / 2 - 10
+    const x = box.x + box.width / 2 - 19
+    const y = box.y + box.height / 2 - 5
     await this.page.evaluate(({ x, y, duration }) => {
       const finger = document.querySelector<HTMLElement>('#demo-finger')!
       finger.style.setProperty('--move-duration', `${duration}ms`)
@@ -127,6 +128,30 @@ async function firstVisible(locators: Locator[]) {
   return null
 }
 
+async function ensureSignedIn() {
+  const authContext = await chromium.launchPersistentContext(profileDir, {
+    headless: false,
+    viewport: { width: 390, height: 720 },
+    deviceScaleFactor: 1,
+    args: ['--disable-blink-features=AutomationControlled'],
+  })
+  try {
+    const authPage = authContext.pages()[0] || await authContext.newPage()
+    await authPage.goto(`${baseURL}/account`, { waitUntil: 'networkidle' })
+    const createOrganization = authPage.locator('a[href="/account/organizations/new"]')
+    if (await createOrganization.count() && await createOrganization.isVisible()) return
+
+    console.log('録画専用Chromeでログインしてください。ログイン完了後、自動で録画を開始します。')
+    const login = authPage.getByRole('button', { name: 'ログイン / 新規登録', exact: true })
+    if (await login.count() && await login.isVisible()) await login.click()
+    await createOrganization.waitFor({ state: 'visible', timeout: 300000 })
+  } finally {
+    await authContext.close()
+  }
+}
+
+await ensureSignedIn()
+
 const context = await chromium.launchPersistentContext(profileDir, {
   headless: false,
   viewport,
@@ -148,14 +173,29 @@ try {
 
   const account = await firstVisible([
     page.getByRole('link', { name: 'アカウント', exact: true }),
+    page.getByRole('button', { name: 'アカウント', exact: true }),
     page.getByText('アカウント', { exact: true }),
   ])
   if (!account) throw new Error('「アカウント」が見つかりません')
   await Promise.all([
-    page.waitForURL(/\/account(?:\?.*)?$/, { timeout: 15000 }),
+    page.waitForURL(/\/(?:account|profile\/[^/?]+)(?:\?.*)?$/, { timeout: 15000 }),
     finger.tap(account, 650),
   ])
   await finger.init()
+
+  if (!/\/account(?:\?.*)?$/.test(page.url())) {
+    await page.getByRole('link', { name: '管理', exact: true }).waitFor({ state: 'visible', timeout: 20000 })
+    const manage = await firstVisible([
+      page.getByRole('link', { name: '管理', exact: true }),
+      page.getByText('管理', { exact: true }),
+    ])
+    if (!manage) throw new Error('「管理」が見つかりません')
+    await Promise.all([
+      page.waitForURL(/\/account(?:\?.*)?$/, { timeout: 15000 }),
+      finger.tap(manage, 650),
+    ])
+    await finger.init()
+  }
 
   await page.getByRole('link', { name: /団体を作成/ }).waitFor({ state: 'visible', timeout: 20000 })
 
@@ -180,10 +220,16 @@ try {
   await finger.fill(description, '展覧会と作品登録をまとめるための団体です。')
 
   const create = page.getByRole('button', { name: '作成する', exact: true })
-  await Promise.all([
-    page.waitForURL(/\/account\/organizations\/[^/]+\/links/, { timeout: 20000 }),
-    finger.tap(create, 700),
-  ])
+  if (existingOrgSlug) {
+    await finger.tap(create, 120)
+    await page.goto(`${baseURL}/account/organizations/${existingOrgSlug}/links`, { waitUntil: 'networkidle' })
+    await page.waitForTimeout(580)
+  } else {
+    await Promise.all([
+      page.waitForURL(/\/account\/organizations\/[^/]+\/links/, { timeout: 20000 }),
+      finger.tap(create, 700),
+    ])
+  }
   await finger.init()
 
   const instagram = page.locator('.ui-form-field').filter({ hasText: 'INSTAGRAM' }).getByPlaceholder('username')
