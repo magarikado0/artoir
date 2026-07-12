@@ -48,6 +48,7 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
   const [error, setError] = useState('')
   const [limitError, setLimitError] = useState('')
   const [images, setImages] = useState([])
+  const [galleryImageId, setGalleryImageId] = useState('')
 
   useEffect(() => {
     if (!open) {
@@ -63,6 +64,7 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
       setError('')
       setLimitError('')
       setImages([])
+      setGalleryImageId('')
       return undefined
     }
     const initial = filesToArtworkImages(files || (file ? [file] : []))
@@ -219,10 +221,17 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
         throw imageError
       }
       const coverImage = imageRows?.[0]
+      const galleryIndex = images.findIndex((image) => image.id === galleryImageId)
+      const galleryImage = galleryIndex >= 0 ? imageRows?.[galleryIndex] : null
       if (coverImage?.id) {
-        const { error: coverError } = await supabase.from('artworks').update({ cover_image_id: coverImage.id }).eq('id', newWork.id)
+        const imageSelectionUpdates = {
+          cover_image_id: coverImage.id,
+          gallery_image_id: galleryImage?.id || null,
+        }
+        const { error: coverError } = await supabase.from('artworks').update(imageSelectionUpdates).eq('id', newWork.id)
         if (coverError) throw coverError
         newWork.cover_image_id = coverImage.id
+        newWork.gallery_image_id = galleryImage?.id || null
       }
       newWork.artwork_images = imageRows || []
 
@@ -281,6 +290,8 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
           <div className="ui-artwork-create-details">
             <ArtworkImageField
               images={images}
+              galleryImageId={galleryImageId}
+              onGalleryImageChange={setGalleryImageId}
               onChange={setImages}
               onAddFiles={addFiles}
               onRecrop={recrop}

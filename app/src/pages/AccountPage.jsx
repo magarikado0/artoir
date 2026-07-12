@@ -281,7 +281,7 @@ export default function AccountPage() {
         if (profileData?.id) {
           const { data: artworkRows, error: artworkError } = await supabase
             .from('artworks')
-            .select('id, title, description, image_url, file_name, file_size, order, cover_image_id, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
+            .select('id, title, description, image_url, file_name, file_size, order, cover_image_id, gallery_image_id, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
             .eq('profile_id', profileData.id)
             .order('order')
           if (cancelled) return
@@ -368,7 +368,7 @@ export default function AccountPage() {
     setEditError('')
   }
 
-  async function handleEditSave(imageBlob) {
+  async function handleEditSave(imageBlob, galleryImageId) {
     if (!editTarget || !supabase) return
     setEditSaving(true)
     setEditError('')
@@ -383,7 +383,7 @@ export default function AccountPage() {
         imageUpdates = { image_url: uploaded.url, file_size: imageBlob.size, image_width: uploaded.width, image_height: uploaded.height }
       }
 
-      const updates = { title: editTitle.trim(), description: editDescription.trim() || null, ...imageUpdates }
+      const updates = { title: editTitle.trim(), description: editDescription.trim() || null, gallery_image_id: galleryImageId || null, ...imageUpdates }
       let { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
       if (error && isMissingImageDimensionColumnError(error)) {
         // 寸法カラム未適用の DB 向けフォールバック（docs/sql/add-artwork-image-dimensions.sql 適用後に削除可）。
@@ -598,6 +598,7 @@ export default function AccountPage() {
       />
       {editTarget && (
         <ArtworkEditModal
+          key={editTarget.id}
           artwork={editTarget}
           title={editTitle}
           description={editDescription}
@@ -645,6 +646,7 @@ export default function AccountPage() {
       />
       {editTarget && (
         <ArtworkEditModal
+          key={editTarget.id}
           artwork={editTarget}
           title={editTitle}
           description={editDescription}

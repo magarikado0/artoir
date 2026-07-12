@@ -16,9 +16,9 @@
 .ui-multi-image-card.is-cover { border-color: #be553d; }
 .ui-multi-image-preview { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 6px; background: #eee9e1; }
 .ui-multi-image-preview img { width: 100%; height: 100%; object-fit: contain; }
-.ui-multi-image-order, .ui-multi-image-cover { position: absolute; top: 7px; padding: 4px 7px; border-radius: 999px; font-size: 10px; line-height: 1; }
-.ui-multi-image-order { left: 7px; background: rgba(31,27,23,.82); color: white; }
-.ui-multi-image-cover { right: 7px; background: #be553d; color: white; }
+.ui-multi-image-cover { position: absolute; top: 7px; right: 7px; padding: 4px 7px; border-radius: 999px; background: #be553d; color: white; font-size: 10px; line-height: 1; }
+.ui-multi-image-gallery { position: absolute; right: 7px; bottom: 7px; padding: 4px 7px; border: 1px solid #1f1b17; border-radius: 999px; background: rgba(255,255,255,.92); color: #1f1b17; font-size: 10px; line-height: 1; cursor: pointer; }
+.ui-multi-image-gallery.is-selected { background: #1f1b17; color: white; }
 .ui-multi-image-controls { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; margin-top: 8px; }
 .ui-multi-image-controls select { min-width: 0; border: 1px solid #ded5ca; border-radius: 5px; padding: 7px; background: white; }
 .ui-multi-image-menu summary { list-style: none; width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #ded5ca; border-radius: 5px; cursor: pointer; }
@@ -26,6 +26,11 @@
 .ui-multi-image-menu > div { position: absolute; right: 0; z-index: 20; width: 175px; display: grid; padding: 5px; border: 1px solid #ded5ca; border-radius: 7px; background: white; box-shadow: 0 10px 28px rgba(31,27,23,.13); }
 .ui-multi-image-menu button, .ui-multi-image-menu label { border: 0; padding: 9px; background: transparent; color: inherit; text-align: left; font: inherit; font-size: 12px; cursor: pointer; }
 .ui-multi-image-menu button:hover, .ui-multi-image-menu label:hover { background: #f2ede6; }
+.ui-multi-image-menu-trigger { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid #ded5ca; border-radius: 6px; background: #fbf8f3; color: #1f1b17; cursor: pointer; }
+.ui-multi-image-menu-popover { position: fixed; z-index: 1000; width: 182px; display: grid; padding: 6px; border: 1px solid #ded5ca; border-radius: 8px; background: #fff; box-shadow: 0 14px 38px rgba(31,27,23,.22); }
+.ui-multi-image-menu-popover button { border: 0; padding: 10px 12px; background: transparent; color: #1f1b17; text-align: left; font-size: 12px; cursor: pointer; }
+.ui-multi-image-menu-popover button:hover:not(:disabled), .ui-multi-image-menu-popover button:focus-visible { background: #f2ede6; }
+.ui-multi-image-menu-popover button:disabled { opacity: .42; cursor: default; }
 .ui-multi-image-move { display: flex; align-items: center; gap: 5px; margin-top: 7px; color: #8a8178; font-size: 10px; }
 .ui-multi-image-move span { margin-right: auto; }
 .ui-multi-image-move button { width: 28px; height: 26px; border: 1px solid #ded5ca; border-radius: 4px; background: transparent; }
@@ -59,6 +64,13 @@
 .ui-multi-image-add-card { min-height: 190px; border: 1px dashed #cfc4b6; border-radius: 9px; background: transparent; display: grid; place-content: center; gap: 6px; color: #8a8178; cursor: pointer; }
 .ui-multi-image-add-card span:first-child { font-size: 24px; line-height: 1; }
 .ui-multi-image-limit-error { color: #be553d; font-size: 12px; }
+.ui-edit-gallery-picker { margin-top: 16px; display: grid; gap: 8px; }
+.ui-edit-gallery-picker-list { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; }
+.ui-edit-gallery-picker-card { position: relative; flex: 0 0 78px; border: 1px solid #ded5ca; border-radius: 7px; padding: 4px; background: #fbf8f3; }
+.ui-edit-gallery-picker-card.is-selected { border-color: #1f1b17; }
+.ui-edit-gallery-picker-card > img { display: block; width: 68px; height: 68px; border-radius: 4px; object-fit: cover; }
+.ui-edit-gallery-toggle { position: absolute; right: 7px; bottom: 7px; padding: 3px 6px; border: 1px solid #1f1b17; border-radius: 999px; background: rgba(255,255,255,.92); color: #1f1b17; font-size: 9px; line-height: 1; cursor: pointer; }
+.ui-edit-gallery-toggle.is-selected { background: #1f1b17; color: white; }
 
 @media (min-width: 720px) {
   .ui-multi-image-grid { display: flex; gap: 14px; overflow-x: auto; padding: 3px 3px 12px; scroll-snap-type: x proximity; }

@@ -219,7 +219,7 @@ export default function DashArtworks() {
     handle.addEventListener('pointercancel', onPointerEnd)
   }
 
-  async function handleEditSave(imageBlob) {
+  async function handleEditSave(imageBlob, galleryImageId) {
     if (!editTarget || !supabase) return
     setEditSaving(true)
     setEditError('')
@@ -235,7 +235,7 @@ export default function DashArtworks() {
         imageUpdates = { image_url: uploaded.url, file_size: imageBlob.size, image_width: uploaded.width, image_height: uploaded.height }
       }
 
-      const updates = { title: editTitle, description: editDesc, ...imageUpdates }
+      const updates = { title: editTitle, description: editDesc, gallery_image_id: galleryImageId || null, ...imageUpdates }
       let { error } = await supabase.from('artworks').update(updates).eq('id', editTarget.id)
       if (error && isMissingImageDimensionColumnError(error)) {
         // 寸法カラム未適用の DB 向けフォールバック（docs/sql/add-artwork-image-dimensions.sql 適用後に削除可）。
@@ -451,6 +451,7 @@ export default function DashArtworks() {
 
       {editTarget && (
         <ArtworkEditModal
+          key={editTarget.id}
           artwork={editTarget}
           title={editTitle}
           description={editDesc}

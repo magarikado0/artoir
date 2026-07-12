@@ -1,16 +1,37 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const MAX_IMAGES = 5
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
-export default function ArtworkImageField({ images, onChange, onAddFiles, onRecrop, onDuplicateRecrop, disabled = false, limitError = '' }) {
+export default function ArtworkImageField({ images, galleryImageId, onGalleryImageChange, onChange, onAddFiles, onRecrop, onDuplicateRecrop, disabled = false, limitError = '' }) {
   const [draggedId, setDraggedId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
+  const [openMenu, setOpenMenu] = useState(null)
   const inputRef = useRef(null)
   const longPressTimerRef = useRef(null)
   const touchDragIdRef = useRef(null)
   const touchStartRef = useRef(null)
+
+  useEffect(() => {
+    if (!openMenu) return undefined
+    const closeOnOutside = (event) => {
+      if (event.target.closest?.('.ui-multi-image-menu-popover, .ui-multi-image-menu-trigger')) return
+      setOpenMenu(null)
+    }
+    const closeOnEscape = (event) => { if (event.key === 'Escape') setOpenMenu(null) }
+    const close = () => setOpenMenu(null)
+    document.addEventListener('pointerdown', closeOnOutside)
+    document.addEventListener('keydown', closeOnEscape)
+    window.addEventListener('resize', close)
+    window.addEventListener('scroll', close, true)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutside)
+      document.removeEventListener('keydown', closeOnEscape)
+      window.removeEventListener('resize', close)
+      window.removeEventListener('scroll', close, true)
+    }
+  }, [openMenu])
 
   function validateAndAdd(files) {
     const candidates = Array.from(files || [])
@@ -25,6 +46,7 @@ export default function ArtworkImageField({ images, onChange, onAddFiles, onRecr
 
   function removeImage(id) {
     if (!window.confirm('この画像を削除しますか？')) return
+    if (id === galleryImageId) onGalleryImageChange('')
     onChange(images.filter((image) => image.id !== id))
   }
 
@@ -115,19 +137,39 @@ export default function ArtworkImageField({ images, onChange, onAddFiles, onRecr
           >
             <div className="ui-multi-image-preview">
               <img src={image.previewUrl} alt={`作品画像 ${index + 1}`} />
-              <span className="ui-multi-image-order" aria-label={`順番 ${index + 1}`}>{index + 1}</span>
               {index === 0 && <span className="ui-multi-image-cover">カバー</span>}
+              {images.length > 1 && (
+                <button
+                  type="button"
+                  className={`ui-multi-image-gallery${image.id === galleryImageId ? ' is-selected' : ''}`}
+                  aria-pressed={image.id === galleryImageId}
+                  aria-label={image.id === galleryImageId ? `画像${index + 1}の3D指定を解除` : `画像${index + 1}を3D展示に使用`}
+                  disabled={disabled}
+                  onClick={() => onGalleryImageChange(image.id === galleryImageId ? '' : image.id)}
+                >
+                  3D
+                </button>
+              )}
             </div>
             <div className="ui-multi-image-card-footer">
               <span className="ui-multi-image-drag-label" aria-hidden="true">⋮⋮ ドラッグ</span>
-              <details className="ui-multi-image-menu">
-                <summary aria-label={`画像${index + 1}の操作`}>⋮</summary>
-                <div>
-                  <button type="button" onClick={() => onRecrop(image.id)} disabled={disabled}>再クロップ</button>
-                  <button type="button" onClick={() => onDuplicateRecrop(image.id)} disabled={disabled || images.length >= MAX_IMAGES}>複製して再クロップ</button>
-                  <button type="button" onClick={() => removeImage(image.id)} disabled={disabled}>削除</button>
-                </div>
-              </details>
+              <button
+                type="button"
+                className="ui-multi-image-menu-trigger"
+                aria-label={`画像${index + 1}の操作`}
+                aria-expanded={openMenu?.id === image.id}
+                disabled={disabled}
+                onClick={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect()
+                  setOpenMenu((current) => current?.id === image.id ? null : {
+                    id: image.id,
+                    top: Math.min(window.innerHeight - 164, rect.bottom + 6),
+                    left: Math.max(8, Math.min(window.innerWidth - 190, rect.right - 182)),
+                  })
+                }}
+              >
+                ⋮
+              </button>
             </div>
             {image.progress !== null && <div className="ui-multi-image-status">アップロード中… {image.progress}%</div>}
             {image.error && (
@@ -148,6 +190,17 @@ export default function ArtworkImageField({ images, onChange, onAddFiles, onRecr
       </div>
 
       {limitError && <p className="ui-multi-image-limit-error" role="alert">{limitError}</p>}
+      {openMenu && (() => {
+        const image = images.find((item) => item.id === openMenu.id)
+        if (!image) return null
+        return (
+          <div className="ui-multi-image-menu-popover" style={{ top: openMenu.top, left: openMenu.left }} role="menu">
+            <button type="button" role="menuitem" onClick={() => { setOpenMenu(null); onRecrop(image.id) }}>再クロップ</button>
+            <button type="button" role="menuitem" disabled={images.length >= MAX_IMAGES} onClick={() => { setOpenMenu(null); onDuplicateRecrop(image.id) }}>複製して再クロップ</button>
+            <button type="button" role="menuitem" onClick={() => { setOpenMenu(null); removeImage(image.id) }}>削除</button>
+          </div>
+        )
+      })()}
       <input ref={inputRef} type="file" multiple accept="image/*" hidden onChange={(event) => { validateAndAdd(event.target.files); event.target.value = '' }} />
     </div>
   )

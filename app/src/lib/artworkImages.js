@@ -28,6 +28,11 @@ export function getArtworkCoverImage(artwork) {
   return images.find((image) => String(image.id) === String(artwork?.cover_image_id)) || images[0] || null
 }
 
+export function getArtwork3DImage(artwork) {
+  const images = getArtworkImages(artwork)
+  return images.find((image) => String(image.id) === String(artwork?.gallery_image_id)) || images[0] || null
+}
+
 export function getArtworkImageCount(artwork) {
   return getArtworkImages(artwork).length
 }
