@@ -37,21 +37,14 @@ export function artworkImageTypeLabel(type) {
 }
 
 export function filesToArtworkImages(files, existing = []) {
-  const known = new Set(existing.map((item) => `${item.file?.name}:${item.file?.size}:${item.file?.lastModified}`))
-  const next = []
-  for (const file of Array.from(files || [])) {
-    const key = `${file.name}:${file.size}:${file.lastModified}`
-    if (known.has(key)) continue
-    known.add(key)
-    next.push({
-      id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${next.length}`,
+  const next = Array.from(files || []).map((file, index) => ({
+      id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${index}`,
       file,
       previewUrl: URL.createObjectURL(file),
-      type: existing.length === 0 && next.length === 0 ? 'full' : '',
+      croppedBlob: null,
       caption: '',
       progress: null,
       error: '',
-    })
-  }
+    }))
   return [...existing, ...next].slice(0, 5)
 }

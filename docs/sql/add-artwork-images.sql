@@ -20,9 +20,11 @@ create table if not exists public.artwork_images (
   created_at timestamptz not null default now(),
   constraint artwork_images_order_check check ("order" between 1 and 5),
   constraint artwork_images_type_check check (type is null or type in ('full', 'detail', 'side', 'back', 'installation', 'process', 'other')),
-  constraint artwork_images_artwork_order_key unique (artwork_id, "order"),
-  constraint artwork_images_artwork_url_key unique (artwork_id, url)
+  constraint artwork_images_artwork_order_key unique (artwork_id, "order")
 );
+
+-- 同じ元画像を異なるクロップで複数登録できるよう、URLの一意制約は持たせない。
+alter table public.artwork_images drop constraint if exists artwork_images_artwork_url_key;
 
 alter table public.artworks add column if not exists cover_image_id uuid;
 
