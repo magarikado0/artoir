@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference'
 import { LANDING_MEDIA } from './landingConfig'
 import styles from './landing.module.css'
@@ -32,7 +32,22 @@ const WINDOWS = [
 
 function VideoWindow({ item, prefersReducedMotion }) {
   const [hasVideoError, setHasVideoError] = useState(false)
+  const [isMobileVideo, setIsMobileVideo] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 720px)').matches
+  ))
   const isStaticImage = item.mediaType === 'image'
+  const videoSrc = isMobileVideo && item.mobileVideoSrc ? item.mobileVideoSrc : item.videoSrc
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 720px)')
+    const handleChange = () => {
+      setIsMobileVideo(media.matches)
+      setHasVideoError(false)
+    }
+    handleChange()
+    media.addEventListener('change', handleChange)
+    return () => media.removeEventListener('change', handleChange)
+  }, [])
 
   return (
     <article
@@ -42,8 +57,9 @@ function VideoWindow({ item, prefersReducedMotion }) {
     >
       {!isStaticImage && !hasVideoError && !prefersReducedMotion && (
         <video
+          key={videoSrc}
           className={styles.windowVideo}
-          src={item.mobileVideoSrc ? undefined : item.videoSrc}
+          src={videoSrc}
           poster={item.posterSrc}
           autoPlay
           muted
@@ -52,14 +68,7 @@ function VideoWindow({ item, prefersReducedMotion }) {
           preload="metadata"
           aria-hidden="true"
           onError={() => setHasVideoError(true)}
-        >
-          {item.mobileVideoSrc && (
-            <>
-              <source src={item.mobileVideoSrc} media="(max-width: 720px)" type="video/mp4" />
-              <source src={item.videoSrc} type="video/mp4" />
-            </>
-          )}
-        </video>
+        />
       )}
       <picture>
         {item.mobilePosterSrc && (

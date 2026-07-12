@@ -32,34 +32,36 @@ class DemoFinger {
           left: 0;
           top: 0;
           z-index: 2147483647;
-          width: 38px;
-          height: 44px;
+          width: 27px;
+          height: 31px;
           pointer-events: none;
           transform: translate3d(330px, 420px, 0);
-          transition: transform var(--move-duration, 420ms) cubic-bezier(.22, 1, .36, 1);
-          filter: drop-shadow(0 6px 8px rgba(31, 27, 23, .28));
-          transform-origin: 19px 5px;
+          opacity: 0;
+          transition: transform var(--move-duration, 460ms) cubic-bezier(.22, 1, .36, 1), opacity 120ms ease;
+          filter: drop-shadow(0 2px 4px rgba(31, 27, 23, .16));
+          transform-origin: 12px 3px;
         }
         #demo-finger svg { display: block; width: 100%; height: 100%; }
         #demo-touch-ring {
           position: fixed;
           z-index: 2147483646;
-          width: 18px;
-          height: 18px;
-          border: 2px solid #BE553D;
+          width: 14px;
+          height: 14px;
+          border: 1px solid rgba(190, 85, 61, .55);
           border-radius: 999px;
           opacity: 0;
           pointer-events: none;
         }
         #demo-finger.demo-tap { animation: demo-finger-tap 280ms ease-out; }
         #demo-touch-ring.demo-tap { animation: demo-touch-ring 520ms ease-out; }
+        .demo-target-pressed { filter: brightness(.94) !important; transition: filter 180ms ease !important; }
         @keyframes demo-finger-tap {
           0%, 100% { scale: 1; }
-          45% { scale: .82; }
+          45% { scale: .95; }
         }
         @keyframes demo-touch-ring {
-          0% { opacity: .85; transform: translate(-50%, -50%) scale(.35); }
-          100% { opacity: 0; transform: translate(-50%, -50%) scale(2.8); }
+          0% { opacity: .5; transform: translate(-50%, -50%) scale(.45); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(2.2); }
         }
       `
       document.head.appendChild(style)
@@ -67,8 +69,8 @@ class DemoFinger {
       finger.id = 'demo-finger'
       finger.innerHTML = `
         <svg viewBox="0 0 76 88" aria-hidden="true">
-          <path d="M34 8c5 0 9 4 9 9v24l4-12c2-5 9-6 12-2 2 2 2 5 1 8l-8 28c-2 8-9 14-18 14h-5c-8 0-15-5-18-12L3 47c-2-5 0-10 5-12 4-1 8 1 10 5l7 12V17c0-5 4-9 9-9Z" fill="#FBF8F3" stroke="#1F1B17" stroke-width="3.5" stroke-linejoin="round"/>
-          <path d="M34 8v42" fill="none" stroke="#1F1B17" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M34 8c5 0 9 4 9 9v24l4-12c2-5 9-6 12-2 2 2 2 5 1 8l-8 28c-2 8-9 14-18 14h-5c-8 0-15-5-18-12L3 47c-2-5 0-10 5-12 4-1 8 1 10 5l7 12V17c0-5 4-9 9-9Z" fill="#F7F3EC" stroke="#4A413A" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M34 8v42" fill="none" stroke="#4A413A" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
       `
       document.body.appendChild(finger)
@@ -78,46 +80,71 @@ class DemoFinger {
     })
   }
 
-  async moveTo(locator: Locator, duration = 420) {
+  async moveTo(locator: Locator, duration = 460, placement: 'center' | 'text-start' | 'icon' = 'center') {
     await locator.scrollIntoViewIfNeeded()
-    const box = await locator.boundingBox()
+    let box = await locator.boundingBox()
     if (!box) throw new Error('Finger target has no bounding box')
-    const x = box.x + box.width / 2 - 19
-    const y = box.y + box.height / 2 - 5
+    if (placement === 'icon') {
+      const icon = locator.locator('svg')
+      if (await icon.count()) box = await icon.first().boundingBox() || box
+    }
+    const tipX = placement === 'text-start'
+      ? box.x + Math.min(22, Math.max(14, box.width * .08))
+      : box.x + box.width / 2
+    const tipY = box.y + box.height / 2
+    const x = tipX - 12
+    const y = tipY - 3
     await this.page.evaluate(({ x, y, duration }) => {
       const finger = document.querySelector<HTMLElement>('#demo-finger')!
       finger.style.setProperty('--move-duration', `${duration}ms`)
+      finger.style.opacity = '1'
       finger.style.transform = `translate3d(${x}px, ${y}px, 0)`
     }, { x, y, duration })
-    await this.page.waitForTimeout(duration + 100)
+    await this.page.waitForTimeout(duration + 70)
+    return { box, tipX, tipY }
   }
 
-  async tap(locator: Locator, after = 500) {
-    await this.moveTo(locator)
-    const box = await locator.boundingBox()
-    if (!box) throw new Error('Tap target has no bounding box')
-    await this.page.evaluate(({ x, y }) => {
+  async tap(locator: Locator, after = 500, placement: 'center' | 'icon' = 'center') {
+    const { tipX, tipY } = await this.moveTo(locator, 460, placement)
+    await this.page.evaluate(({ x, y, element }) => {
       const finger = document.querySelector<HTMLElement>('#demo-finger')!
       const ring = document.querySelector<HTMLElement>('#demo-touch-ring')!
       ring.style.left = `${x}px`
       ring.style.top = `${y}px`
+      element.classList.add('demo-target-pressed')
       finger.classList.remove('demo-tap')
       ring.classList.remove('demo-tap')
       void finger.offsetWidth
       finger.classList.add('demo-tap')
       ring.classList.add('demo-tap')
-    }, { x: box.x + box.width / 2, y: box.y + box.height / 2 })
-    await this.page.waitForTimeout(120)
+    }, { x: tipX, y: tipY, element: await locator.elementHandle() })
+    await this.page.waitForTimeout(190)
     await locator.click()
+    await locator.evaluate((element) => element.classList.remove('demo-target-pressed')).catch(() => {})
     await this.page.waitForTimeout(after)
   }
 
   async fill(locator: Locator, value: string) {
-    await this.moveTo(locator, 320)
-    await locator.click()
+    const { box, tipX, tipY } = await this.moveTo(locator, 380, 'text-start')
+    await this.page.evaluate(({ x, y, element }) => {
+      const finger = document.querySelector<HTMLElement>('#demo-finger')!
+      const ring = document.querySelector<HTMLElement>('#demo-touch-ring')!
+      ring.style.left = `${x}px`
+      ring.style.top = `${y}px`
+      element.classList.add('demo-target-pressed')
+      finger.classList.remove('demo-tap')
+      ring.classList.remove('demo-tap')
+      void finger.offsetWidth
+      finger.classList.add('demo-tap')
+      ring.classList.add('demo-tap')
+    }, { x: tipX, y: tipY, element: await locator.elementHandle() })
+    await this.page.waitForTimeout(180)
+    await locator.click({ position: { x: tipX - box.x, y: tipY - box.y } })
+    await locator.evaluate((element) => element.classList.remove('demo-target-pressed'))
+    await this.page.evaluate(() => { document.querySelector<HTMLElement>('#demo-finger')!.style.opacity = '0' })
     await locator.fill('')
     await locator.pressSequentially(value, { delay: typeDelay })
-    await this.page.waitForTimeout(180)
+    await this.page.waitForTimeout(140)
   }
 }
 
@@ -169,7 +196,7 @@ try {
 
   const finger = new DemoFinger(page)
   await finger.init()
-  await page.waitForTimeout(700)
+  await page.waitForTimeout(140)
 
   const account = await firstVisible([
     page.getByRole('link', { name: 'アカウント', exact: true }),
@@ -179,7 +206,7 @@ try {
   if (!account) throw new Error('「アカウント」が見つかりません')
   await Promise.all([
     page.waitForURL(/\/(?:account|profile\/[^/?]+)(?:\?.*)?$/, { timeout: 15000 }),
-    finger.tap(account, 650),
+    finger.tap(account, 650, 'icon'),
   ])
   await finger.init()
 
@@ -256,6 +283,7 @@ if (!recordedPath) throw new Error('Playwright did not produce a video')
 await copyFile(recordedPath, rawVideo)
 const ffmpeg = spawnSync('ffmpeg', [
   '-y',
+  '-ss', '0.65',
   '-i', rawVideo,
   '-vf', 'fps=30,scale=1080:1350:flags=lanczos,format=yuv420p',
   '-c:v', 'libx264',
