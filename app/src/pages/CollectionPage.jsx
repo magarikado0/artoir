@@ -110,7 +110,7 @@ export default function CollectionPage() {
       const [aw, exh, orgs, profs] = await Promise.all([
         q('artworks',
           // artworks→profiles は直接(profile_id)と artwork_creators 経由の 2 経路があり曖昧になるため、FK を明示する。
-          'id, title, image_url, exhibition_id, profile_id, exhibitions(slug, organizations(slug), profiles!exhibitions_profile_id_fkey(slug)), owner_profile:profiles!artworks_profile_id_fkey(slug), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))',
+          'id, title, image_url, cover_image_id, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), exhibition_id, profile_id, exhibitions(slug, organizations(slug), profiles!exhibitions_profile_id_fkey(slug)), owner_profile:profiles!artworks_profile_id_fkey(slug), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))',
           idsByType.artwork),
         q('exhibitions',
           // exhibitions→profiles は直接(profile_id)と artworks 経由の 2 経路があり曖昧になるため、FK を明示する。

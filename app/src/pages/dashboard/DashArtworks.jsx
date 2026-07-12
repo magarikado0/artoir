@@ -76,7 +76,7 @@ export default function DashArtworks() {
   const [editCreatorIds, setEditCreatorIds] = useState([])
   const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState('')
-  const [createFile, setCreateFile] = useState(null)
+  const [createFiles, setCreateFiles] = useState([])
   const [deleting, setDeleting] = useState(false)
   const [draggingId, setDraggingId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
@@ -117,7 +117,7 @@ export default function DashArtworks() {
         setExhibition(exh)
         const { data: works } = await supabase
           .from('artworks')
-          .select('*, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
+          .select('*, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
           .eq('exhibition_id', exhibitionId)
           .order('order')
         setArtworks((works || []).map(attachNormalizedCreators))
@@ -130,14 +130,8 @@ export default function DashArtworks() {
     load()
   }, [orgSlug, profileSlug, exhibitionId, session])
 
-  function handleBeforeUpload(file) {
-    const dup = artworks.find((a) => a.file_name === file.name && Number(a.file_size) === file.size)
-    if (dup) return window.confirm(`同じファイル「${file.name}」がこの展覧会に既に登録されています。続行しますか？`)
-    return true
-  }
-
-  function handleCreateFile(file) {
-    setCreateFile(file)
+  function handleCreateFiles(files) {
+    setCreateFiles(files)
   }
 
   async function handleDelete() {
@@ -249,13 +243,29 @@ export default function DashArtworks() {
       }
       if (error) throw error
 
+      let nextArtworkImages = editTarget.artwork_images
+      if (imageUpdates.image_url) {
+        const coverImageId = editTarget.cover_image_id || editTarget.artwork_images?.[0]?.id
+        if (coverImageId) {
+          const imageRowUpdates = {
+            url: imageUpdates.image_url,
+            width: imageUpdates.image_width,
+            height: imageUpdates.image_height,
+            file_size: imageUpdates.file_size,
+          }
+          const { error: imageRowError } = await supabase.from('artwork_images').update(imageRowUpdates).eq('id', coverImageId)
+          if (imageRowError) throw imageRowError
+          nextArtworkImages = (editTarget.artwork_images || []).map((image) => image.id === coverImageId ? { ...image, ...imageRowUpdates } : image)
+        }
+      }
+
       await saveArtworkCreators(editTarget.id, editCreatorIds)
       const creators = editCreatorIds.map((profileId, index) => ({
         profile_id: profileId,
         display_order: index,
         profile: memberProfiles.find((profile) => profile.id === profileId),
       })).filter((creator) => creator.profile)
-      setArtworks((prev) => prev.map((a) => a.id === editTarget.id ? { ...a, ...updates, creators } : a))
+      setArtworks((prev) => prev.map((a) => a.id === editTarget.id ? { ...a, ...updates, artwork_images: nextArtworkImages, creators } : a))
       setEditTarget(null)
     } catch (error) {
       setEditError(error?.message || '保存に失敗しました。')
@@ -331,10 +341,10 @@ export default function DashArtworks() {
             )}
             <ImageUploader
               variant="button"
+              multiple
               buttonClassName="ui-pill-action--accent ui-artworks-add-desktop"
               buttonLabel="作品追加"
-              onBeforeUpload={handleBeforeUpload}
-              onFileSelected={handleCreateFile}
+              onFilesSelected={handleCreateFiles}
             >
               <Icon name="plus" size={16} />
               <span>作品追加</span>
@@ -416,26 +426,26 @@ export default function DashArtworks() {
 
       <ImageUploader
         variant="fab"
+        multiple
         wrapperClassName="ui-artworks-add-mobile"
         buttonLabel="作品追加"
-        onBeforeUpload={handleBeforeUpload}
-        onFileSelected={handleCreateFile}
+        onFilesSelected={handleCreateFiles}
       >
         <Icon name="plus" size={22} />
       </ImageUploader>
 
       <ArtworkCreateModal
-        open={Boolean(createFile)}
-        file={createFile}
+        open={createFiles.length > 0}
+        files={createFiles}
         exhibitionId={exhibitionId}
         nextOrder={artworks.length > 0 ? Math.max(...artworks.map((a) => a.order ?? 0)) + 1 : 1}
         creatorOptions={memberProfiles}
         defaultCreatorIds={defaultCreatorIds}
-        onClose={() => setCreateFile(null)}
+        onClose={() => setCreateFiles([])}
         onCreated={(newWork) => {
           if (!newWork) return
           setArtworks((prev) => [...prev, newWork])
-          setCreateFile(null)
+          setCreateFiles([])
         }}
       />
 

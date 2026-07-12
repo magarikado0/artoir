@@ -68,7 +68,7 @@ export default function ExhibitionPage() {
         setExhibition(exhData)
         const { data: awData } = await supabase
           .from('artworks')
-          .select('*, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
+          .select('*, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
           .eq('exhibition_id', exhData.id)
           .order('order')
         const exhibitionForArtwork = {

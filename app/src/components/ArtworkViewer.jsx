@@ -5,6 +5,7 @@ import FavoriteButton from './FavoriteButton'
 import { getArtworkHighResolutionUrl, getGalleryThumbnailUrl, getModalImageUrl, preloadImageUrl } from '../lib/imageUrl'
 import { profileExhibitionPath, profilePath } from '../lib/profileRoutes'
 import { useHorizontalSwipe } from '../lib/useHorizontalSwipe'
+import { artworkImageTypeLabel, getArtworkImages } from '../lib/artworkImages'
 
 const SLOT_BG = '#F7F8F6'
 const DRAG_PX_PER_ITEM = 150
@@ -179,6 +180,7 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
   }, [])
 
   const [detailOpen, setDetailOpen] = useState(false)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [size, setSize] = useState(() => computeSize(false))
   const [aspects, setAspects] = useState({})
   useEffect(() => {
@@ -248,6 +250,9 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
 
   useEffect(() => {
     focusedRef.current = focused
+  }, [focused])
+  useEffect(() => {
+    setSelectedImageIndex(0)
   }, [focused])
 
   // フォーカス確定の通知（初期表示分は通知しない）
@@ -368,6 +373,13 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
     targetRef.current = (current + delta) * th
   }, [N, reducedMotion])
 
+  const stepArtworkImage = useCallback((delta) => {
+    const imageCount = getArtworkImages(items[focusedRef.current]).length
+    if (imageCount <= 1) return false
+    setSelectedImageIndex((index) => (index + delta + imageCount) % imageCount)
+    return true
+  }, [items])
+
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'Escape') {
@@ -375,15 +387,15 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
         onClose?.()
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault()
-        goTo(-1)
+        if (!stepArtworkImage(-1)) goTo(-1)
       } else if (e.key === 'ArrowRight') {
         e.preventDefault()
-        goTo(1)
+        if (!stepArtworkImage(1)) goTo(1)
       }
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [onClose, goTo])
+  }, [onClose, goTo, stepArtworkImage])
 
   useEffect(() => {
     if (N === 0) return
@@ -557,16 +569,16 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
   // フラット表示（reduced-motion）では左右スワイプで前後の作品へ
   const swipePrev = useCallback(() => {
     if (zoomRef.current > MIN_ZOOM) return
-    goTo(-1)
-  }, [goTo])
+    if (!stepArtworkImage(-1)) goTo(-1)
+  }, [goTo, stepArtworkImage])
   const swipeNext = useCallback(() => {
     if (zoomRef.current > MIN_ZOOM) return
-    goTo(1)
-  }, [goTo])
+    if (!stepArtworkImage(1)) goTo(1)
+  }, [goTo, stepArtworkImage])
   useHorizontalSwipe(stageRef, {
     onPrev: swipePrev,
     onNext: swipeNext,
-    enabled: reducedMotion && N > 1,
+    enabled: (reducedMotion && N > 1) || getArtworkImages(items[focused] || items[0]).length > 1,
   })
 
   const closeIfCurrentPath = useCallback((to) => {
@@ -577,6 +589,9 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
   if (N === 0) return null
 
   const current = items[focused] || items[0]
+  const currentImages = getArtworkImages(current)
+  const currentImage = currentImages[selectedImageIndex] || currentImages[0]
+  const currentImageUrl = currentImage?.url || current.image_url
   const title = current.title?.trim() ?? ''
   const description = current.description?.trim() ?? ''
   const meta = composeArtworkMeta(current)
@@ -682,9 +697,9 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
             >
               <ArtworkMedia
                 className="ui-artwork-viewer-card-media"
-                src={getModalImageUrl(current.image_url)}
-                finalSrc={getArtworkHighResolutionUrl(current.image_url)}
-                placeholderSrc={getGalleryThumbnailUrl(current.image_url)}
+                src={getModalImageUrl(currentImageUrl)}
+                finalSrc={getArtworkHighResolutionUrl(currentImageUrl)}
+                placeholderSrc={getGalleryThumbnailUrl(currentImageUrl)}
                 alt={current.title || '作品画像'}
                 label={current.title}
                 loading="eager"
@@ -706,7 +721,8 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
                 return null
               }
               const isFocused = i === focused
-              const src = getModalImageUrl(artwork.image_url)
+              const focusedImageUrl = isFocused ? currentImageUrl : artwork.image_url
+              const src = getModalImageUrl(focusedImageUrl)
               const label = artwork.title?.trim() || `作品 ${i + 1}`
               const ar = aspects[artwork.id] ?? DEFAULT_AR
               const { w, h } = fitCardToBox(ar, maxW, maxH)
@@ -742,8 +758,8 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
                     <ArtworkMedia
                       className="ui-artwork-viewer-card-media"
                       src={src}
-                      finalSrc={isFocused ? getArtworkHighResolutionUrl(artwork.image_url) : undefined}
-                      placeholderSrc={getGalleryThumbnailUrl(artwork.image_url)}
+                      finalSrc={isFocused ? getArtworkHighResolutionUrl(focusedImageUrl) : undefined}
+                      placeholderSrc={getGalleryThumbnailUrl(focusedImageUrl)}
                       alt={artwork.title || '作品画像'}
                       label={artwork.title}
                       loading={isFocused ? 'eager' : 'lazy'}
@@ -782,6 +798,24 @@ export default function ArtworkViewer({ artworks, initialArtwork = null, onArtwo
           </>
         )}
       </div>
+
+      {currentImages.length > 1 && (
+        <div className="ui-artwork-viewer-images" onPointerDown={(event) => event.stopPropagation()}>
+          {currentImages.map((image, index) => (
+            <button
+              key={image.id}
+              type="button"
+              className={index === selectedImageIndex ? 'is-selected' : ''}
+              onClick={() => setSelectedImageIndex(index)}
+              aria-label={`画像${index + 1}を表示${image.type ? `（${artworkImageTypeLabel(image.type)}）` : ''}`}
+              aria-current={index === selectedImageIndex ? 'true' : undefined}
+            >
+              <img src={getGalleryThumbnailUrl(image.url)} alt="" />
+              {image.type && <span>{artworkImageTypeLabel(image.type)}</span>}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 情報パネル。ドラッグ/ズームのジェスチャに巻き込まれないよう伝播を止める */}
       <div className="ui-artwork-viewer-caption" onPointerDown={(e) => e.stopPropagation()}>
