@@ -2,6 +2,39 @@ import { useEffect, useState } from 'react'
 import ArtworkImageAdjuster from './ArtworkImageAdjuster'
 import ArtworkMedia from './ArtworkMedia'
 import { T } from '../lib/tokens'
+import { getArtworkImages } from '../lib/artworkImages'
+import { getGalleryThumbnailUrl } from '../lib/imageUrl'
+
+function GalleryImagePicker({ artwork, value, onChange, disabled }) {
+  const images = getArtworkImages(artwork)
+  if (images.length <= 1) return null
+  return (
+    <div className="ui-edit-gallery-picker">
+      <div className="ui-form-label">3D展示画像</div>
+      <div className="ui-edit-gallery-picker-list">
+        {images.map((image, index) => {
+          const selected = String(image.id) === String(value)
+          return (
+            <div key={image.id} className={`ui-edit-gallery-picker-card${selected ? ' is-selected' : ''}`}>
+              <img src={getGalleryThumbnailUrl(image.url)} alt={`作品画像 ${index + 1}`} />
+              <button
+                type="button"
+                className={`ui-edit-gallery-toggle${selected ? ' is-selected' : ''}`}
+                aria-pressed={selected}
+                aria-label={selected ? `画像${index + 1}の3D指定を解除` : `画像${index + 1}を3D展示に使用`}
+                disabled={disabled}
+                onClick={() => onChange(selected ? '' : image.id)}
+              >
+                3D
+              </button>
+            </div>
+          )
+        })}
+      </div>
+      {!value && <div className="ui-field-help">未指定のため、先頭のカバー画像を使用します。</div>}
+    </div>
+  )
+}
 
 export default function ArtworkEditModal({
   artwork,
@@ -21,6 +54,7 @@ export default function ArtworkEditModal({
   const [imageBusy, setImageBusy] = useState(false)
   const [pendingImageBlob, setPendingImageBlob] = useState(null)
   const [pendingImagePreviewUrl, setPendingImagePreviewUrl] = useState('')
+  const [galleryImageId, setGalleryImageId] = useState(artwork?.gallery_image_id || '')
 
   useEffect(() => {
     if (!pendingImagePreviewUrl) return undefined
@@ -92,6 +126,7 @@ export default function ArtworkEditModal({
                 >
                   画像を調整
                 </button>
+                <GalleryImagePicker artwork={artwork} value={galleryImageId} onChange={setGalleryImageId} disabled={disabled} />
               </div>
 
               <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -105,7 +140,7 @@ export default function ArtworkEditModal({
                 {error && <div className="ui-alert ui-alert--error">{error}</div>}
                 <div className="ui-btn-row ui-artwork-create-actions" style={{ marginTop: 'auto' }}>
                   <button type="button" onClick={onClose} disabled={disabled} className="ui-btn ui-btn--ghost">閉じる</button>
-                  <button type="button" onClick={() => onSave(pendingImageBlob)} disabled={disabled} className="ui-btn ui-btn--accent">
+                  <button type="button" onClick={() => onSave(pendingImageBlob, galleryImageId || null)} disabled={disabled} className="ui-btn ui-btn--accent">
                     {saving ? '保存中…' : '保存する'}
                   </button>
                 </div>

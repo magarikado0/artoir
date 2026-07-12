@@ -1,4 +1,5 @@
 import { getOrientation, SIZE_PRESETS } from '../../lib/photoWall'
+import { getArtwork3DImage } from '../../lib/artworkImages'
 
 export const ROOM = {
   width: 12,
@@ -307,7 +308,7 @@ export function createReelPath(layout, options = {}) {
 }
 
 export function createGalleryLayout(artworks = [], imageSizeMap = {}, options = {}) {
-  const items = artworks.filter((artwork) => artwork?.image_url)
+  const items = artworks.filter((artwork) => getArtwork3DImage(artwork)?.url || artwork?.image_url)
   const itemCount = items.length
   const fov = options.fov ?? DEFAULT_FOV
   const aspect = options.aspect ?? DEFAULT_VIEWPORT_ASPECT

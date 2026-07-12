@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { LinearFilter, LinearMipmapLinearFilter, SRGBColorSpace, Texture } from 'three'
 import { useCursor } from '@react-three/drei'
 import { getWallTextureHighResolutionUrl, getWallTextureUrl } from '../../lib/imageUrl'
+import { getArtwork3DImage } from '../../lib/artworkImages'
 
 export default function ArtworkFrame({
   frame,
@@ -19,12 +20,13 @@ export default function ArtworkFrame({
   const currentTextureRef = useRef(null)
   const retiredTexturesRef = useRef(new Set())
   useCursor(hovered)
+  const galleryImageUrl = getArtwork3DImage(artwork)?.url || artwork.image_url
 
   useEffect(() => {
     let cancelled = false
     const url = highQuality
-      ? getWallTextureHighResolutionUrl(artwork.image_url)
-      : getWallTextureUrl(artwork.image_url)
+      ? getWallTextureHighResolutionUrl(galleryImageUrl)
+      : getWallTextureUrl(galleryImageUrl)
 
     // 重要: three の TextureLoader は img の load 時点で GPU へアップロードするが、
     // 2D グリッドが 36 枚を先にデコード中だと load がデコード完了前に発火し、
@@ -79,7 +81,7 @@ export default function ArtworkFrame({
       cancelled = true
       img.src = ''
     }
-  }, [artwork.id, artwork.image_url, highQuality, onAspectLoaded, onTextureError, onTextureReady])
+  }, [artwork.id, galleryImageUrl, highQuality, onAspectLoaded, onTextureError, onTextureReady])
 
   useEffect(() => () => {
     currentTextureRef.current?.dispose()
