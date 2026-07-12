@@ -8,7 +8,7 @@ export const LANDING_LINKS = {
 export const LANDING_MEDIA = {
   createOrganization: {
     videoSrc: '/videos/create-organization.mp4',
-    mobileVideoSrc: null,
+    mobileVideoSrc: '/videos/create-organization-mobile.mp4',
     posterSrc: '/images/create-organization-poster.png',
     mobilePosterSrc: '/images/create-organization-poster-mobile.png',
   },
