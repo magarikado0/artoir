@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getArtworkUploadConfigError, isMissingImageDimensionColumnError, omitImageDimensionFields, uploadArtworkImage } from '../lib/artworkUpload'
+import { compressImageFile } from '../lib/imageCompress'
+import { filesToArtworkImages } from '../lib/artworkImages'
 import { T } from '../lib/tokens'
-import ArtworkImageAdjuster from './ArtworkImageAdjuster'
+import ArtworkImageField from './ArtworkImageField'
 
 function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator }) {
   if (!creatorOptions?.length) {
@@ -28,55 +30,43 @@ function CreatorPicker({ creatorOptions, selectedCreatorIds, onToggleCreator }) 
   )
 }
 
-export default function ArtworkCreateModal({ open, file, exhibitionId, profileId, nextOrder, creatorOptions = [], defaultCreatorIds = [], showCreatorPicker = true, onClose, onCreated }) {
-  const [step, setStep] = useState('crop')
+export default function ArtworkCreateModal({ open, file, files, exhibitionId, profileId, nextOrder, creatorOptions = [], defaultCreatorIds = [], showCreatorPicker = true, onClose, onCreated }) {
+  const defaultCreatorKey = defaultCreatorIds.join('|')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [selectedCreatorIds, setSelectedCreatorIds] = useState([])
   const [saving, setSaving] = useState(false)
-  const [progress, setProgress] = useState(null)
   const [error, setError] = useState('')
-  const [previewUrl, setPreviewUrl] = useState('')
-  const [confirmedBlob, setConfirmedBlob] = useState(null)
-  const [confirmedPreviewUrl, setConfirmedPreviewUrl] = useState('')
-  const [confirming, setConfirming] = useState(false)
+  const [images, setImages] = useState([])
+  const [coverId, setCoverId] = useState('')
 
   useEffect(() => {
-    if (!open || !file) {
-      setStep('crop')
+    if (!open) {
       setTitle('')
       setDescription('')
       setSelectedCreatorIds([])
       setSaving(false)
-      setProgress(null)
       setError('')
-      setPreviewUrl('')
-      setConfirmedBlob(null)
-      setConfirmedPreviewUrl('')
-      setConfirming(false)
+      setImages([])
+      setCoverId('')
       return undefined
     }
-
-    const url = URL.createObjectURL(file)
-    setSelectedCreatorIds(defaultCreatorIds)
-    setPreviewUrl(url)
-    return () => URL.revokeObjectURL(url)
-  }, [open, file, defaultCreatorIds])
-
-  useEffect(() => {
-    if (!confirmedPreviewUrl) return undefined
-    return () => URL.revokeObjectURL(confirmedPreviewUrl)
-  }, [confirmedPreviewUrl])
+    const initial = filesToArtworkImages(files || (file ? [file] : []))
+    setSelectedCreatorIds(defaultCreatorKey ? defaultCreatorKey.split('|') : [])
+    setImages(initial)
+    setCoverId(initial[0]?.id || '')
+    return () => initial.forEach((image) => URL.revokeObjectURL(image.previewUrl))
+  }, [open, file, files, defaultCreatorKey])
 
   useEffect(() => {
     if (!open) return undefined
-    const handler = (e) => { if (e.key === 'Escape' && !saving && !confirming) onClose() }
+    const handler = (e) => { if (e.key === 'Escape' && !saving) onClose() }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [confirming, open, onClose, saving])
+  }, [open, onClose, saving])
 
   async function handleSave() {
-    if (!open || !file || !confirmedBlob || saving) return
+    if (!open || images.length === 0 || !coverId || saving) return
     if (!supabase) {
       setError('Supabase が未設定です')
       return
@@ -89,24 +79,38 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, profileId
 
     setSaving(true)
     setError('')
-    setProgress(0)
 
     try {
-      const croppedName = file.name?.replace(/\.[^.]+$/, '') || 'artwork'
-      const uploadName = `${croppedName}-crop.${confirmedBlob.type === 'image/png' ? 'png' : 'jpg'}`
-      const uploaded = await uploadArtworkImage(confirmedBlob, uploadName, setProgress)
+      const uploadedImages = []
+      for (const image of images) {
+        setImages((prev) => prev.map((item) => item.id === image.id ? { ...item, progress: 0, error: '' } : item))
+        try {
+          const compressed = await compressImageFile(image.file, { maxDimension: 1920 })
+          const baseName = image.file.name?.replace(/\.[^.]+$/, '') || 'artwork'
+          const uploadName = `${baseName}.${compressed.type === 'image/png' ? 'png' : 'jpg'}`
+          const uploaded = await uploadArtworkImage(compressed, uploadName, (progress) => {
+            setImages((prev) => prev.map((item) => item.id === image.id ? { ...item, progress } : item))
+          })
+          uploadedImages.push({ ...uploaded, clientId: image.id, file: image.file, type: image.type || null, caption: image.caption || null, fileSize: compressed.size })
+          setImages((prev) => prev.map((item) => item.id === image.id ? { ...item, progress: null } : item))
+        } catch (uploadError) {
+          setImages((prev) => prev.map((item) => item.id === image.id ? { ...item, progress: null, error: uploadError?.message || 'upload failed' } : item))
+          throw uploadError
+        }
+      }
+      const cover = uploadedImages.find((image) => image.clientId === coverId) || uploadedImages[0]
 
       const payload = {
         exhibition_id: exhibitionId || null,
         profile_id: profileId || null,
-        image_url: uploaded.url,
+        image_url: cover.url,
         title: title.trim(),
         description: description.trim() || null,
         order: nextOrder,
-        file_name: file.name,
-        file_size: confirmedBlob.size,
-        image_width: uploaded.width,
-        image_height: uploaded.height,
+        file_name: cover.file.name,
+        file_size: cover.fileSize,
+        image_width: cover.width,
+        image_height: cover.height,
       }
 
       let { data: newWork, error: insertError } = await supabase.from('artworks').insert(payload).select().single()
@@ -115,6 +119,31 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, profileId
         ;({ data: newWork, error: insertError } = await supabase.from('artworks').insert(omitImageDimensionFields(payload)).select().single())
       }
       if (insertError) throw insertError
+
+      const imagePayload = uploadedImages.map((image, index) => ({
+        artwork_id: newWork.id,
+        url: image.url,
+        order: index + 1,
+        type: image.type,
+        caption: image.caption,
+        width: image.width,
+        height: image.height,
+        file_name: image.file.name,
+        file_size: image.fileSize,
+      }))
+      const { data: imageRows, error: imageError } = await supabase.from('artwork_images').insert(imagePayload).select()
+      if (imageError) {
+        await supabase.from('artworks').delete().eq('id', newWork.id)
+        throw imageError
+      }
+      const coverIndex = uploadedImages.findIndex((image) => image.clientId === coverId)
+      const coverImage = imageRows?.[coverIndex >= 0 ? coverIndex : 0]
+      if (coverImage?.id) {
+        const { error: coverError } = await supabase.from('artworks').update({ cover_image_id: coverImage.id }).eq('id', newWork.id)
+        if (coverError) throw coverError
+        newWork.cover_image_id = coverImage.id
+      }
+      newWork.artwork_images = imageRows || []
 
       const creatorRows = selectedCreatorIds.map((profileId, index) => ({
         artwork_id: newWork.id,
@@ -138,13 +167,12 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, profileId
       setError(err?.message || '作品の作成に失敗しました')
     } finally {
       setSaving(false)
-      setProgress(null)
     }
   }
 
-  if (!open || !file) return null
+  if (!open) return null
 
-  const canSave = Boolean(confirmedBlob) && !saving
+  const canSave = images.length > 0 && images.length <= 5 && Boolean(coverId) && !saving && images.every((image) => !image.error)
 
   function toggleCreator(profileId) {
     setSelectedCreatorIds((prev) => (
@@ -162,48 +190,14 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, profileId
             <div className="ui-kicker">作品</div>
             <div id="artwork-create-title" className="ui-screen-title" style={{ fontSize: 22, marginTop: 6 }}>作品を追加</div>
           </div>
-          <button onClick={onClose} disabled={saving || confirming} className="ui-modal-close" type="button">
+          <button onClick={onClose} disabled={saving} className="ui-modal-close" type="button">
             ×
           </button>
         </div>
 
-        <div className={`ui-artwork-create-layout ${step === 'crop' ? 'is-crop-step' : ''}`}>
-          {step === 'crop' ? (
-            <ArtworkImageAdjuster
-              sourceUrl={previewUrl}
-              sourceType={file.type}
-              confirmLabel="画像を確定"
-              confirmingLabel="確定中…"
-              onBusyChange={setConfirming}
-              onConfirm={(croppedBlob) => {
-                setConfirmedBlob(croppedBlob)
-                setConfirmedPreviewUrl(URL.createObjectURL(croppedBlob))
-                setStep('details')
-              }}
-              secondaryAction={
-                <button onClick={onClose} disabled={confirming} className="ui-btn ui-btn--ghost">閉じる</button>
-              }
-            />
-          ) : (
+        <div className="ui-artwork-create-layout">
             <>
-              <div style={{ minWidth: 0 }}>
-                <div className="ui-artwork-confirmed-preview">
-                  <img src={confirmedPreviewUrl} alt="" />
-                </div>
-                <button
-                  type="button"
-                  className="ui-artwork-adjust-button"
-                  disabled={saving}
-                  onClick={() => {
-                    setError('')
-                    setProgress(null)
-                    setStep('crop')
-                  }}
-                >
-                  画像を調整し直す
-                </button>
-              </div>
-
+              <ArtworkImageField images={images} coverId={coverId} onChange={setImages} onCoverChange={setCoverId} disabled={saving} />
               <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div className="ui-input-wrap">
                   <input
@@ -233,22 +227,12 @@ export default function ArtworkCreateModal({ open, file, exhibitionId, profileId
 
                 {error && <div className="ui-alert ui-alert--error">{error}</div>}
 
-                {progress !== null && (
-                  <div style={{ padding: '10px 12px', border: `1px solid ${T.lineSoft}`, background: T.card }}>
-                    <div style={{ height: 4, borderRadius: 999, background: T.paperAlt, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${progress}%`, background: T.accent }} />
-                    </div>
-                    <div style={{ marginTop: 8, fontSize: 12, color: T.inkMuted }}>{progress}%</div>
-                  </div>
-                )}
-
                 <div className="ui-btn-row ui-artwork-create-actions" style={{ marginTop: 'auto' }}>
                   <button onClick={onClose} disabled={saving} className="ui-btn ui-btn--ghost">閉じる</button>
-                  <button onClick={handleSave} disabled={!canSave} className="ui-btn ui-btn--accent">保存する</button>
+                  <button onClick={handleSave} disabled={!canSave} className="ui-btn ui-btn--accent">{saving ? '保存中…' : '保存する'}</button>
                 </div>
               </div>
             </>
-          )}
         </div>
       </div>
     </div>

@@ -216,7 +216,7 @@ export default function AccountPage() {
   const [exhibitions, setExhibitions] = useState([])
   const [artworks, setArtworks] = useState([])
   const [selectedArtwork, setSelectedArtwork] = useState(null)
-  const [createFile, setCreateFile] = useState(null)
+  const [createFiles, setCreateFiles] = useState([])
   const [editTarget, setEditTarget] = useState(null)
   const [editTitle, setEditTitle] = useState('')
   const [editDescription, setEditDescription] = useState('')
@@ -281,7 +281,7 @@ export default function AccountPage() {
         if (profileData?.id) {
           const { data: artworkRows, error: artworkError } = await supabase
             .from('artworks')
-            .select('id, title, description, image_url, file_name, file_size, order, artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
+            .select('id, title, description, image_url, file_name, file_size, order, cover_image_id, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
             .eq('profile_id', profileData.id)
             .order('order')
           if (cancelled) return
@@ -352,12 +352,12 @@ export default function AccountPage() {
     navigate('/')
   }
 
-  async function handleAddWork(file) {
+  async function handleAddWork(files) {
     if (!profile?.id) {
       setLoadError('プロフィールを読み込めていません。')
       return false
     }
-    if (file instanceof File) setCreateFile(file)
+    setCreateFiles(Array.from(files || []).slice(0, 5))
     return true
   }
 
@@ -391,7 +391,23 @@ export default function AccountPage() {
       }
       if (error) throw error
 
-      const updated = { ...editTarget, ...updates }
+      let nextArtworkImages = editTarget.artwork_images
+      if (imageUpdates.image_url) {
+        const coverImageId = editTarget.cover_image_id || editTarget.artwork_images?.[0]?.id
+        if (coverImageId) {
+          const imageRowUpdates = {
+            url: imageUpdates.image_url,
+            width: imageUpdates.image_width,
+            height: imageUpdates.image_height,
+            file_size: imageUpdates.file_size,
+          }
+          const { error: imageRowError } = await supabase.from('artwork_images').update(imageRowUpdates).eq('id', coverImageId)
+          if (imageRowError) throw imageRowError
+          nextArtworkImages = (editTarget.artwork_images || []).map((image) => image.id === coverImageId ? { ...image, ...imageRowUpdates } : image)
+        }
+      }
+
+      const updated = { ...editTarget, ...updates, artwork_images: nextArtworkImages }
       setArtworks((prev) => prev.map((artwork) => artwork.id === editTarget.id ? updated : artwork))
       setSelectedArtwork((prev) => prev?.id === editTarget.id ? updated : prev)
       setEditTarget(null)
@@ -466,9 +482,10 @@ export default function AccountPage() {
             <div className="ui-kicker">作品</div>
             <ImageUploader
               variant="button"
+              multiple
               buttonClassName="ui-pill-action--accent"
               buttonLabel="作品を追加"
-              onFileSelected={handleAddWork}
+              onFilesSelected={handleAddWork}
             >
               <Icon name="plus" size={15} />
               <span>作品を追加</span>
@@ -562,21 +579,21 @@ export default function AccountPage() {
         />
       )}
       <ArtworkCreateModal
-        open={Boolean(createFile)}
-        file={createFile}
+        open={createFiles.length > 0}
+        files={createFiles}
         profileId={profile?.id}
         nextOrder={artworks.length > 0 ? Math.max(...artworks.map((artwork) => artwork.order ?? 0)) + 1 : 1}
         creatorOptions={profile ? [profile] : []}
         defaultCreatorIds={profile ? [profile.id] : []}
         showCreatorPicker={false}
-        onClose={() => setCreateFile(null)}
+        onClose={() => setCreateFiles([])}
         onCreated={(newWork) => {
           if (!newWork) return
           setArtworks((prev) => [...prev, {
             ...newWork,
             exhibitions: { id: null, title: '', slug: '', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug, display_name: profile.display_name } },
           }])
-          setCreateFile(null)
+          setCreateFiles([])
         }}
       />
       {editTarget && (
@@ -609,21 +626,21 @@ export default function AccountPage() {
         />
       )}
       <ArtworkCreateModal
-        open={Boolean(createFile)}
-        file={createFile}
+        open={createFiles.length > 0}
+        files={createFiles}
         profileId={profile?.id}
         nextOrder={artworks.length > 0 ? Math.max(...artworks.map((artwork) => artwork.order ?? 0)) + 1 : 1}
         creatorOptions={profile ? [profile] : []}
         defaultCreatorIds={profile ? [profile.id] : []}
         showCreatorPicker={false}
-        onClose={() => setCreateFile(null)}
+        onClose={() => setCreateFiles([])}
         onCreated={(newWork) => {
           if (!newWork) return
           setArtworks((prev) => [...prev, {
             ...newWork,
             exhibitions: { id: null, title: '', slug: '', profile_id: profile.id, profiles: { id: profile.id, slug: profile.slug, display_name: profile.display_name } },
           }])
-          setCreateFile(null)
+          setCreateFiles([])
         }}
       />
       {editTarget && (

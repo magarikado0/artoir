@@ -10,6 +10,9 @@ export default function ImageUploader({
   onUploaded,
   onBeforeUpload,
   onFileSelected,
+  onFilesSelected,
+  multiple = false,
+  maxFiles = 5,
   compressMaxDimension = 1920,
   variant = 'dropzone',
   buttonClassName = '',
@@ -69,16 +72,21 @@ export default function ImageUploader({
   }
 
   async function handleFiles(files) {
-    const file = files[0]
-    if (!file) return
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    const selected = Array.from(files || []).slice(0, maxFiles)
+    if (!selected.length) return
+    if (selected.some((file) => !ALLOWED_TYPES.includes(file.type))) {
       setError('画像ファイルを選択してください')
       return
     }
-    if (file.size > MAX_FILE_SIZE) {
+    if (selected.some((file) => file.size > MAX_FILE_SIZE)) {
       setError('画像サイズは10MB以下にしてください')
       return
     }
+    if (onFilesSelected) {
+      onFilesSelected(selected)
+      return
+    }
+    const file = selected[0]
     if (onBeforeUpload) {
       try {
         const ok = await onBeforeUpload(file)
@@ -203,8 +211,9 @@ export default function ImageUploader({
         ref={inputRef}
         type="file"
         accept="image/*"
+        multiple={multiple}
         style={{ display: 'none' }}
-        onChange={(e) => { void handleFiles(e.target.files) }}
+        onChange={(e) => { void handleFiles(e.target.files); e.target.value = '' }}
       />
     </div>
   )

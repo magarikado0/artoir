@@ -5,6 +5,7 @@ import { usePhotoWallLayout } from '../lib/usePhotoWallLayout'
 import { useImageNaturalSizes } from '../lib/useImageNaturalSizes'
 import FavoriteButton from './FavoriteButton'
 import { T } from '../lib/tokens'
+import { getArtworkImageCount } from '../lib/artworkImages'
 
 // 画像サイズが未計測のあいだの仮サイズ（正方形扱い）。計測後に正しい span へ反映される。
 const FALLBACK_SIZE = { width: 1000, height: 1000 }
@@ -112,6 +113,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
   const renderTile = (artwork, index, spanStyle, fit = 'contain') => {
     const id = String(artwork.id)
     const label = artwork.title?.trim() || `作品 ${index + 1}`
+    const imageCount = getArtworkImageCount(artwork)
     return (
       <div
         key={id}
@@ -145,6 +147,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
             imageStyle={{ width: '100%', height: '100%', objectFit: fit, borderRadius: 4 }}
           />
         </button>
+        {imageCount > 1 && <span className="ui-artwork-image-count" aria-label={`${imageCount}枚の画像`}>▣ {imageCount}</span>}
         <FavoriteButton
           targetType="artwork"
           targetId={artwork.id}
