@@ -72,7 +72,12 @@ export default function ImageUploader({
   }
 
   async function handleFiles(files) {
-    const selected = Array.from(files || []).slice(0, maxFiles)
+    const allSelected = Array.from(files || [])
+    if (multiple && allSelected.length > maxFiles) {
+      setError('画像は最大5枚まで追加できます')
+      return
+    }
+    const selected = allSelected.slice(0, maxFiles)
     if (!selected.length) return
     if (selected.some((file) => !ALLOWED_TYPES.includes(file.type))) {
       setError('画像ファイルを選択してください')
