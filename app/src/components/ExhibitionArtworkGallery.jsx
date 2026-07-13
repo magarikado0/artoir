@@ -6,6 +6,7 @@ import { useImageNaturalSizes } from '../lib/useImageNaturalSizes'
 import FavoriteButton from './FavoriteButton'
 import { T } from '../lib/tokens'
 import { getArtworkImageCount } from '../lib/artworkImages'
+import { completeExhibitionLayout, exhibitionCanvasHeight, LAYOUT_PAGE_SIZE } from '../lib/exhibitionLayout'
 
 // 画像サイズが未計測のあいだの仮サイズ（正方形扱い）。計測後に正しい span へ反映される。
 const FALLBACK_SIZE = { width: 1000, height: 1000 }
@@ -18,20 +19,21 @@ function columnsForWidth(width, layout) {
   return 6
 }
 
-export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layout = 'wall' }) {
-  const wrapRef = useRef(null)
+export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layout = 'wall', savedLayout = [] }) {
+  const [wrapNode, setWrapNode] = useState(null)
   const [containerWidth, setContainerWidth] = useState(0)
+  const [visibleLimit, setVisibleLimit] = useState(LAYOUT_PAGE_SIZE)
 
   // 実際の表示幅を計測し、列幅に合わせて行高を決める（タイルの比率を画面サイズに依らず一定に保つ）。
   useLayoutEffect(() => {
-    const el = wrapRef.current
+    const el = wrapNode
     if (!el) return undefined
     const update = () => setContainerWidth(el.clientWidth)
     update()
     const ro = new ResizeObserver(update)
     ro.observe(el)
     return () => ro.disconnect()
-  }, [])
+  }, [wrapNode])
 
   const gap = containerWidth && containerWidth < 640 ? 8 : 16
   const columns = columnsForWidth(containerWidth || 1024, layout)
@@ -39,7 +41,8 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
   const columnWidth = containerWidth > 0 ? (containerWidth - gap * (columns - 1)) / columns : 0
   const rowHeight = columnWidth > 0 ? columnWidth : 120
 
-  const items = useMemo(() => artworks.filter((a) => a.image_url), [artworks])
+  const allItems = useMemo(() => artworks.filter((a) => a.image_url), [artworks])
+  const items = useMemo(() => allItems.slice(0, visibleLimit), [allItems, visibleLimit])
 
   // サムネイルの自然サイズを計測（DB に幅高さが無いため）。
   const sources = useMemo(
@@ -64,6 +67,10 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
   }, [items])
 
   const { items: layoutItems } = usePhotoWallLayout(photos, columns)
+  const composition = useMemo(
+    () => completeExhibitionLayout(items, savedLayout).filter((item) => item.is_visible),
+    [items, savedLayout],
+  )
 
   // 未保存作品の栞は既定で隠す。PC はホバー（CSS）、モバイルは長押しで「追加」ボタンを出す。
   // 保存済みは常時表示（CSS の .is-active）。長押し中はこの id のカードに .is-revealed を付ける。
@@ -162,11 +169,47 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
 
   if (items.length === 0) return null
 
+  const renderMore = () => allItems.length > items.length && (
+    <button type="button" className="ui-gallery-load-more" onClick={() => setVisibleLimit((count) => count + LAYOUT_PAGE_SIZE)}>
+      続きを表示（残り{allItems.length - items.length}作品）
+    </button>
+  )
+
+  // 保存配置はPCのウォール表示だけで再現する。モバイルは既存の安全な自動配置へ戻す。
+  if (layout === 'curated' && savedLayout.length > 0 && containerWidth >= 640) {
+    const placementById = new Map(composition.map((item) => [String(item.artwork_id), item]))
+    return (
+      <>
+        <div
+          ref={setWrapNode}
+          className="ui-curated-gallery"
+          style={{ height: exhibitionCanvasHeight(composition) * containerWidth }}
+        >
+          {items.map((artwork, index) => {
+            const item = placementById.get(String(artwork.id))
+            if (!item) return null
+            return renderTile(artwork, index, {
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              width: item.width * containerWidth,
+              height: item.height * containerWidth,
+              zIndex: item.z_index,
+              transform: `translate3d(${item.x * containerWidth}px, ${item.y * containerWidth}px, 0) rotate(${item.rotation}deg)`,
+            })
+          })}
+        </div>
+        {renderMore()}
+      </>
+    )
+  }
+
   // 均質グリッド: 全作品を 1×1 の正方形セルで並べる（作品の元順）。
   if (layout === 'grid') {
     return (
+      <>
       <div
-        ref={wrapRef}
+        ref={setWrapNode}
         className="ui-photo-wall"
         style={{
           display: 'grid',
@@ -177,13 +220,16 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
       >
         {items.map((artwork, index) => renderTile(artwork, index, {}))}
       </div>
+      {renderMore()}
+      </>
     )
   }
 
   // ウォール（現状）: エンジンが決めた可変サイズ(span)で配置する。
   return (
+    <>
     <div
-      ref={wrapRef}
+      ref={setWrapNode}
       className="ui-photo-wall"
       style={{
         display: 'grid',
@@ -199,5 +245,7 @@ export default function ExhibitionArtworkGallery({ artworks, onOpenArtwork, layo
         return renderTile(artwork, index, { gridColumn: `span ${item.spanX}`, gridRow: `span ${item.spanY}` })
       })}
     </div>
+    {renderMore()}
+    </>
   )
 }

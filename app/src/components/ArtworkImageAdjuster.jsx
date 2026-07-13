@@ -37,7 +37,7 @@ function rotateToCanvas(source, rotation) {
 }
 
 /** ドラッグ中のハンドル周辺を拡大表示するルーペ。 */
-function Loupe({ bitmap, point }) {
+function Loupe({ bitmap, point, exposure }) {
   const canvasRef = useRef(null)
 
   useEffect(() => {
@@ -61,14 +61,22 @@ function Loupe({ bitmap, point }) {
     ctx.stroke()
   }, [bitmap, point])
 
-  return <canvas ref={canvasRef} width={LOUPE_SIZE} height={LOUPE_SIZE} className="ui-quad-loupe" />
+  return (
+    <canvas
+      ref={canvasRef}
+      width={LOUPE_SIZE}
+      height={LOUPE_SIZE}
+      className="ui-quad-loupe"
+      style={{ filter: `brightness(${2 ** exposure})` }}
+    />
+  )
 }
 
 /**
  * 4 隅を個別にドラッグして被写体に合わせるクロップ UI（controlled）。
  * Pointer Events でマウス・タッチ両対応。プレビューは縮小画像で行う。
  */
-function QuadCropper({ bitmap, quad, onQuadChange, busy }) {
+function QuadCropper({ bitmap, quad, onQuadChange, busy, exposure }) {
   const containerRef = useRef(null)
   const overlayRef = useRef(null)
   const canvasRef = useRef(null)
@@ -182,7 +190,15 @@ function QuadCropper({ bitmap, quad, onQuadChange, busy }) {
           ref={overlayRef}
           style={{ position: 'relative', width: displaySize.width, height: displaySize.height, touchAction: 'none' }}
         >
-          <canvas ref={canvasRef} style={{ display: 'block', width: displaySize.width, height: displaySize.height }} />
+          <canvas
+            ref={canvasRef}
+            style={{
+              display: 'block',
+              width: displaySize.width,
+              height: displaySize.height,
+              filter: `brightness(${2 ** exposure})`,
+            }}
+          />
           <svg
             width={displaySize.width}
             height={displaySize.height}
@@ -228,7 +244,7 @@ function QuadCropper({ bitmap, quad, onQuadChange, busy }) {
           </svg>
           {loupeStyle && (
             <div className="ui-quad-loupe-wrap" style={loupeStyle}>
-              <Loupe bitmap={bitmap} point={quad[activeHandle]} />
+              <Loupe bitmap={bitmap} point={quad[activeHandle]} exposure={exposure} />
             </div>
           )}
         </div>
@@ -256,6 +272,7 @@ export default function ArtworkImageAdjuster({
   const [bitmap, setBitmap] = useState(null)
   const [rotation, setRotation] = useState(0)
   const [quad, setQuad] = useState(null)
+  const [exposure, setExposure] = useState(0)
   const [loading, setLoading] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState('')
@@ -264,6 +281,7 @@ export default function ArtworkImageAdjuster({
     setBitmap(null)
     setRotation(0)
     setQuad(null)
+    setExposure(0)
     setConfirming(false)
     setError('')
     if (!sourceUrl) return undefined
@@ -324,7 +342,7 @@ export default function ArtworkImageAdjuster({
     setConfirming(true)
     setError('')
     try {
-      const blob = await warpQuadToBlob(workBitmap, quad, { mimeType: sourceType })
+      const blob = await warpQuadToBlob(workBitmap, quad, { mimeType: sourceType, exposure })
       await onConfirm?.(blob)
     } catch (err) {
       setError(err?.message || '画像の反映に失敗しました')
@@ -339,7 +357,32 @@ export default function ArtworkImageAdjuster({
 
   return (
     <div style={{ minWidth: 0 }}>
-      <QuadCropper bitmap={workBitmap} quad={quad} onQuadChange={setQuad} busy={busy} />
+      <QuadCropper bitmap={workBitmap} quad={quad} onQuadChange={setQuad} busy={busy} exposure={exposure} />
+
+      <div className="ui-exposure-control">
+        <div className="ui-exposure-heading">
+          <label htmlFor="artwork-image-exposure">明るさ</label>
+          <output htmlFor="artwork-image-exposure" aria-live="polite">
+            {exposure === 0 ? '0.0' : `${exposure > 0 ? '+' : ''}${exposure.toFixed(1)}`} EV
+          </output>
+        </div>
+        <div className="ui-exposure-slider-row">
+          <span aria-hidden="true">−</span>
+          <input
+            id="artwork-image-exposure"
+            type="range"
+            min="-2"
+            max="2"
+            step="0.1"
+            value={exposure}
+            disabled={!workBitmap || busy}
+            onChange={(event) => setExposure(Number(event.target.value))}
+            aria-label="写真の明るさ"
+            aria-valuetext={`${exposure > 0 ? '+' : ''}${exposure.toFixed(1)} EV`}
+          />
+          <span aria-hidden="true">＋</span>
+        </div>
+      </div>
 
       <div className="ui-quad-toolbar">
         <button

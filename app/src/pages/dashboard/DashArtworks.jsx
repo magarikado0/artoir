@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { useParams, Link, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
@@ -16,6 +16,8 @@ import { getArtworkUploadConfigError, isMissingImageDimensionColumnError, omitIm
 import { persistArtworkOrder, reorderArtworksById } from '../../lib/reorderArtworks'
 import { attachNormalizedCreators } from '../../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../../lib/profileRoutes'
+
+const ExhibitionLayoutEditor = lazy(() => import('../../components/ExhibitionLayoutEditor'))
 
 function DragHandleIcon() {
   const s = { stroke: 'currentColor', strokeWidth: 1.8, fill: 'none', strokeLinecap: 'round' }
@@ -81,6 +83,7 @@ export default function DashArtworks() {
   const [draggingId, setDraggingId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
   const [reordering, setReordering] = useState(false)
+  const [layoutEditing, setLayoutEditing] = useState(false)
   const dragOverIdRef = useRef(null)
   const artworksRef = useRef(artworks)
 
@@ -329,6 +332,16 @@ export default function DashArtworks() {
             <h1 className="ui-screen-title" style={{ marginTop: 6 }}>{pageTitle}</h1>
           </section>
           <div className="ui-artworks-header-actions">
+            {artworks.length > 0 && (
+              <button
+                type="button"
+                className="ui-inline-edit-action"
+                onClick={() => setLayoutEditing((current) => !current)}
+              >
+                <Icon name="edit" size={15} />
+                <span>{layoutEditing ? '作品一覧' : '展示レイアウト'}</span>
+              </button>
+            )}
             {exhibitionId && exhibitionId !== 'undefined' && (
               <Link
                 to={`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/edit`}
@@ -352,6 +365,16 @@ export default function DashArtworks() {
           </div>
         </div>
 
+        {layoutEditing ? (
+          <Suspense fallback={<div className="ui-panel">レイアウト編集を読み込んでいます…</div>}>
+            <ExhibitionLayoutEditor
+              exhibitionId={exhibitionId}
+              artworks={artworks}
+              supabase={supabase}
+              onClose={() => setLayoutEditing(false)}
+            />
+          </Suspense>
+        ) : <>
         {deleteTarget && (
           <div className="ui-confirm" style={{ marginBottom: 16 }}>
             <div className="ui-kicker">削除の確認</div>
@@ -422,6 +445,7 @@ export default function DashArtworks() {
           })}
         </div>
         {artworks.length === 0 && <div className="ui-panel" style={{ color: T.inkMuted, fontSize: 13 }}>作品がまだありません</div>}
+        </>}
       </DashShell>
 
       <ImageUploader

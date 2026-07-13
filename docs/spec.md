@@ -32,6 +32,8 @@
 - `add-favorites.sql` — お気に入り
 - `apply-all-table-rls.sql` — 全テーブル RLS
 - `add-artwork-image-dimensions.sql` — artworks に image_width / image_height を追加(段組レイアウト用)
+- `add-exhibition-artwork-layouts.sql` — 展覧会ごとの自由配置(正規化座標・RLS)
+- `fix-artwork-creators-personal-exhibitions.sql` — 個人展覧会の作者紐付けRLS判定を修正
 
 ## データ構造
 
@@ -46,9 +48,10 @@ profiles
   └── organization_members
         └── organizations
               └── exhibitions
-                    └── artworks
+                    ├── artworks
                           └── artwork_creators
                                 └── profiles
+                    └── exhibition_artwork_layouts
 ```
 
 ### profiles
@@ -123,6 +126,10 @@ profiles
 
 image_width / image_height は Cloudinary アップロード応答の width/height を保存(段組レイアウトのアスペクト比確定用)。追加 SQL は `docs/sql/add-artwork-image-dimensions.sql`、既存行のバックフィルは `app/scripts/backfill-artwork-dimensions.mjs`(service role キーで実行)。
 
+### exhibition_artwork_layouts
+
+展覧会と作品の関連に属する自由配置。`exhibition_id + artwork_id` が主キー。`x / y / width / height` はキャンバス幅を 1 とする正規化値で、`z_index / rotation / is_visible` も保持する。公開画面では自由配置・従来ウォール・均等グリッドを切替可能。未設定時とスマートフォン表示は既存の自動配置へフォールバックする。
+
 ### artwork_creators
 
 | カラム | 型 |
@@ -189,14 +196,14 @@ image_width / image_height は Cloudinary アップロード応答の width/heig
 - **団体一覧 / 団体ページ**: 名前・説明・SNS/HPリンク・展覧会一覧(サムネイル・会期・場所・開催状況バッジ)
 - **作家一覧**: 作家(プロフィール)をカードで一覧表示、検索付き
 - **プロフィールページ**: 表示名・bio・アバター・SNS/HP・作品・所属団体・個人の展覧会
-- **展覧会ページ**: タイトル・会期(日付+時刻)・場所・説明・開催状況バッジ、作品ギャラリー(グリッド/リボンのレイアウト切替)、作品モーダル(画像・タイトル・説明・表示ONの作者)、シェアボタン、主体ページへの戻り導線
+- **展覧会ページ**: タイトル・会期(日付+時刻)・場所・説明・開催状況バッジ、作品ギャラリー(PCの保存済み自由配置 / 自動ウォール / グリッド)、作品モーダル(画像・タイトル・説明・表示ONの作者)、シェアボタン、主体ページへの戻り導線
 - **お気に入り**: 作品・展覧会・団体・プロフィールをブックマーク保存(長押し対応)、`/collection` で一覧
 - ナビゲーション: ヘッダー + ボトムナビ(展覧会 / 団体 / 作家 / コレクション※ログイン時のみ / アカウント)
 
 ### 管理側
 
 - **アカウント**: プロフィール設定・編集、所属団体一覧、団体作成、ログアウト
-- **ダッシュボード(団体・個人共通の構成)**: 展覧会一覧(開催状況バッジ)、展覧会の作成・編集・削除、作品のアップロード・編集・並べ替え・削除、作者の紐づけと表示切り替え
+- **ダッシュボード(団体・個人共通の構成)**: 展覧会一覧(開催状況バッジ)、展覧会の作成・編集・削除、作品のアップロード・編集・並べ替え・削除、作者の紐づけと表示切り替え、展覧会内の自由配置編集
 - **団体のみ**: 団体設定、メンバー管理(owner が追加・削除・ロール変更)
 
 ### 画像アップロード

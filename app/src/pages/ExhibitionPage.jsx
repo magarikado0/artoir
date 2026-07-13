@@ -40,6 +40,8 @@ export default function ExhibitionPage() {
   const [owner, setOwner] = useState(null)
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
+  const [artworkLayout, setArtworkLayout] = useState([])
+  const [exhibitionGalleryLayout, setExhibitionGalleryLayout] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
   const [galleryLayout, setGalleryLayout] = useGalleryLayout()
   const [loading, setLoading] = useState(true)
@@ -80,6 +82,14 @@ export default function ExhibitionPage() {
           ...artwork,
           exhibitions: exhibitionForArtwork,
         })))
+        const { data: layoutData } = await supabase
+          .from('exhibition_artwork_layouts')
+          .select('*')
+          .eq('exhibition_id', exhData.id)
+          .order('z_index')
+        const nextLayout = layoutData || []
+        setArtworkLayout(nextLayout)
+        setExhibitionGalleryLayout(nextLayout.length > 0 ? 'curated' : null)
       } catch {
         /* unavailable */
       } finally {
@@ -169,7 +179,14 @@ export default function ExhibitionPage() {
             <div className="ui-section-label">作品</div>
             {artworks.length > 0 && (
               <div className="ui-exhibition-artworks-actions">
-                <GalleryLayoutToggle value={galleryLayout} onChange={setGalleryLayout} />
+                <GalleryLayoutToggle
+                  value={exhibitionGalleryLayout || galleryLayout}
+                  showCurated={artworkLayout.length > 0}
+                  onChange={(next) => {
+                    setExhibitionGalleryLayout(next)
+                    if (next !== 'curated') setGalleryLayout(next)
+                  }}
+                />
                 {viewableArtworks.length > 0 && (
                   <button
                     ref={gallery3dButtonRef}
@@ -189,7 +206,12 @@ export default function ExhibitionPage() {
             )}
           </div>
           {artworks.length > 0 ? (
-            <ExhibitionArtworkGallery artworks={artworks} onOpenArtwork={openArtwork} layout={galleryLayout} />
+            <ExhibitionArtworkGallery
+              artworks={artworks}
+              onOpenArtwork={openArtwork}
+              layout={exhibitionGalleryLayout || galleryLayout}
+              savedLayout={artworkLayout}
+            />
           ) : (
             <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>
               作品がまだありません

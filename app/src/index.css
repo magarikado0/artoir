@@ -324,6 +324,33 @@ a {
   opacity: 0.92;
 }
 
+/* 保存済みの展覧会レイアウト（閲覧専用）。編集用の枠・ハンドルは持たない。 */
+.ui-curated-gallery {
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+  overflow: hidden;
+}
+
+.ui-curated-gallery .ui-artwork-wall-card {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  will-change: transform;
+}
+
+.ui-gallery-load-more {
+  display: block;
+  min-height: 42px;
+  margin: 24px auto 0;
+  padding: 0 20px;
+  border: 1px solid #D8CFC2;
+  border-radius: 999px;
+  background: transparent;
+  color: #4A413A;
+  cursor: pointer;
+}
+
 /* 各作品タイルの左下のお気に入り（栞）。
    未保存は既定で隠し、保存済み(.is-active)は常時表示。
    未保存の「追加」はホバー(PC)・フォーカス・長押し(.is-revealed)でのみ出す。 */
@@ -2765,6 +2792,177 @@ a {
   color: #BE553D;
 }
 
+/* 展覧会ごとの作品配置エディタ。公開側とはDOMもスタイルも分離する。 */
+.ui-layout-editor {
+  display: grid;
+  gap: 14px;
+}
+
+.ui-layout-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 18px 20px;
+  border: 1px solid #E4DDD2;
+  border-radius: 10px;
+  background: #FBF8F3;
+}
+
+.ui-layout-editor-header h2 {
+  margin: 5px 0 4px;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.ui-layout-editor-header p {
+  margin: 0;
+  color: #8A8178;
+  font-size: 12px;
+}
+
+.ui-layout-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ui-layout-editor-message {
+  padding: 10px 14px;
+  border-left: 3px solid #BE553D;
+  background: #FBF8F3;
+  color: #655C54;
+  font-size: 12px;
+}
+
+.ui-layout-editor-toolbar {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px 7px 14px;
+  border: 1px solid #E4DDD2;
+  border-radius: 8px;
+  background: #FBF8F3;
+}
+
+.ui-layout-editor-toolbar span {
+  min-width: 0;
+  margin-right: auto;
+  overflow: hidden;
+  color: #4A413A;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-layout-editor-toolbar button,
+.ui-layout-editor-tray button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid #D8CFC2;
+  border-radius: 999px;
+  background: transparent;
+  color: #655C54;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ui-layout-editor-toolbar button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ui-layout-editor-scroll {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid #D8CFC2;
+  border-radius: 10px;
+  background: #EDE7DD;
+}
+
+.ui-layout-editor-canvas {
+  position: relative;
+  width: 100%;
+  min-width: 760px;
+  min-height: 540px;
+  overflow: hidden;
+  background-color: #F7F4EE;
+  background-image: linear-gradient(rgba(138, 129, 120, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(138, 129, 120, .08) 1px, transparent 1px);
+  background-size: 5% 5%;
+}
+
+.ui-layout-editor-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  background: #F2EEE7;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.ui-layout-editor-item:active {
+  cursor: grabbing;
+}
+
+.ui-layout-editor-item.is-selected {
+  border-color: #BE553D;
+  box-shadow: 0 0 0 2px rgba(190, 85, 61, .2);
+}
+
+.ui-layout-resize-handle {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 3px solid #F7F4EE;
+  border-radius: 999px;
+  background: #BE553D;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.ui-layout-editor-tray {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px dashed #CFC4B6;
+  border-radius: 8px;
+  color: #8A8178;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .ui-layout-editor-header {
+    display: grid;
+    padding: 14px;
+  }
+
+  .ui-layout-editor-actions {
+    justify-content: flex-start;
+  }
+
+  .ui-layout-editor-toolbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .ui-layout-editor-toolbar span {
+    flex-basis: 100%;
+  }
+}
+
 .ui-modal-close {
   flex: 0 0 auto;
   width: 44px;
@@ -3664,6 +3862,52 @@ a.ui-settings-member-link:hover {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 12px;
+}
+
+.ui-exposure-control {
+  margin-top: 14px;
+  padding: 12px 14px 10px;
+  border: 1px solid #E1D9CE;
+  border-radius: 10px;
+  background: #FBF8F3;
+}
+
+.ui-exposure-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: #312B27;
+  font-size: 12px;
+}
+
+.ui-exposure-heading output {
+  min-width: 64px;
+  color: #6F675F;
+  font-family: ui-monospace, monospace;
+  text-align: right;
+}
+
+.ui-exposure-slider-row {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+  color: #8A8178;
+  font-size: 15px;
+  text-align: center;
+}
+
+.ui-exposure-slider-row input[type='range'] {
+  width: 100%;
+  accent-color: #BE553D;
+  cursor: pointer;
+}
+
+.ui-exposure-slider-row input[type='range']:disabled {
+  cursor: default;
+  opacity: 0.45;
 }
 
 .ui-quad-reset,

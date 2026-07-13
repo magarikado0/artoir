@@ -105,6 +105,18 @@ function canvasToBlob(canvas, mimeType, quality) {
   })
 }
 
+// EV 値を写真へ反映する。1 EV ごとに光量を倍／半分にする。
+function applyExposure(canvas, exposure) {
+  if (!exposure) return canvas
+  const adjusted = document.createElement('canvas')
+  adjusted.width = canvas.width
+  adjusted.height = canvas.height
+  const ctx = adjusted.getContext('2d')
+  ctx.filter = `brightness(${2 ** exposure})`
+  ctx.drawImage(canvas, 0, 0)
+  return adjusted
+}
+
 const VERT_SRC = `
 attribute vec2 aPos;
 attribute vec2 aUV;
@@ -281,6 +293,7 @@ export async function warpQuadToBlob(source, quad, options = {}) {
     mimeType = 'image/jpeg',
     maxPixels = DEFAULT_MAX_PIXELS,
     quality = DEFAULT_QUALITY,
+    exposure = 0,
   } = options
 
   const srcW = source.width || source.naturalWidth
@@ -309,7 +322,7 @@ export async function warpQuadToBlob(source, quad, options = {}) {
   }
   if (!canvas) canvas = warpCPU(source, srcW, srcH, quad, outW, outH)
 
-  return canvasToBlob(canvas, targetMime, quality_)
+  return canvasToBlob(applyExposure(canvas, exposure), targetMime, quality_)
 }
 
 function loadImageElement(url) {
