@@ -43,8 +43,9 @@ const LayoutTile = memo(function LayoutTile({ artwork, item, selected, canvasWid
   )
 })
 
-export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabase, onClose }) {
+export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabase }) {
   const canvasRef = useRef(null)
+  const artworksRef = useRef(artworks)
   const [canvasWidth, setCanvasWidth] = useState(900)
   const [saved, setSaved] = useState([])
   const [draft, setDraft] = useState([])
@@ -54,6 +55,13 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
   const [message, setMessage] = useState('')
 
   const artworkById = useMemo(() => new Map(artworks.map((artwork) => [String(artwork.id), artwork])), [artworks])
+  const resolvedDraft = useMemo(() => completeExhibitionLayout(artworks, draft), [artworks, draft])
+  const resolvedSaved = useMemo(() => completeExhibitionLayout(artworks, saved), [artworks, saved])
+  const hasUnplacedNewArtwork = artworks.some((artwork) => !draft.some((item) => String(item.artwork_id) === String(artwork.id)))
+
+  useEffect(() => {
+    artworksRef.current = artworks
+  }, [artworks])
 
   useEffect(() => {
     let active = true
@@ -67,7 +75,8 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
       if (error) {
         setMessage('配置テーブルを読み込めません。SQLの適用を確認してください。')
       }
-      const complete = completeExhibitionLayout(artworks, data || [])
+      const currentArtworks = artworksRef.current
+      const complete = completeExhibitionLayout(currentArtworks, data || [])
       setSaved(complete)
       setDraft(complete)
       setSelectedId(complete.find((item) => item.is_visible)?.artwork_id || null)
@@ -75,7 +84,7 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
     }
     load()
     return () => { active = false }
-  }, [artworks, exhibitionId, supabase])
+  }, [exhibitionId, supabase])
 
   useEffect(() => {
     const node = canvasRef.current
@@ -88,7 +97,7 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
   }, [loading])
 
   const updateItem = useCallback((artworkId, updater) => {
-    setDraft((current) => current.map((item) => (
+    setDraft((current) => completeExhibitionLayout(artworksRef.current, current).map((item) => (
       String(item.artwork_id) === String(artworkId) ? updater(item) : item
     )))
   }, [])
@@ -130,14 +139,14 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
   const handleResizeStart = useCallback((event, item) => startPointerOperation(event, item, 'resize'), [startPointerOperation])
   const handleSelect = useCallback((id) => setSelectedId(id), [])
 
-  const selected = draft.find((item) => String(item.artwork_id) === String(selectedId))
-  const visible = draft.filter((item) => item.is_visible)
-  const excluded = draft.filter((item) => !item.is_visible)
-  const canvasHeight = exhibitionCanvasHeight(draft) * canvasWidth
+  const selected = resolvedDraft.find((item) => String(item.artwork_id) === String(selectedId))
+  const visible = resolvedDraft.filter((item) => item.is_visible)
+  const excluded = resolvedDraft.filter((item) => !item.is_visible)
+  const canvasHeight = exhibitionCanvasHeight(resolvedDraft) * canvasWidth
 
   function changeLayer(direction) {
     if (!selected) return
-    const zValues = draft.map((item) => item.z_index)
+    const zValues = resolvedDraft.map((item) => item.z_index)
     const nextZ = direction === 'front' ? Math.max(...zValues) + 1 : Math.min(...zValues) - 1
     updateItem(selected.artwork_id, (item) => ({ ...item, z_index: nextZ }))
   }
@@ -149,7 +158,7 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
   }
 
   function restoreItem(item) {
-    const bottom = exhibitionCanvasHeight(draft)
+    const bottom = exhibitionCanvasHeight(resolvedDraft)
     updateItem(item.artwork_id, (current) => clampPlacement({ ...current, x: 0.025, y: bottom, is_visible: true }))
     setSelectedId(item.artwork_id)
   }
@@ -157,7 +166,7 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
   async function save() {
     setSaving(true)
     setMessage('')
-    const rows = draft.map((item) => ({ ...item, exhibition_id: exhibitionId, updated_at: new Date().toISOString() }))
+    const rows = resolvedDraft.map((item) => ({ ...item, exhibition_id: exhibitionId, updated_at: new Date().toISOString() }))
     const { error } = await supabase
       .from('exhibition_artwork_layouts')
       .upsert(rows, { onConflict: 'exhibition_id,artwork_id' })
@@ -166,7 +175,8 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
       setMessage(`保存できませんでした: ${error.message}`)
       return
     }
-    setSaved(draft)
+    setDraft(resolvedDraft)
+    setSaved(resolvedDraft)
     setMessage('配置を保存しました')
   }
 
@@ -188,14 +198,17 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
           <p>ドラッグで移動、右下の点で比率を保ったまま拡大・縮小できます。</p>
         </div>
         <div className="ui-layout-editor-actions">
-          <button type="button" className="ui-btn ui-btn--ghost" onClick={() => { setDraft(saved); setMessage('編集前の配置に戻しました。') }}>編集前に戻す</button>
+          <button type="button" className="ui-btn ui-btn--ghost" onClick={() => { setDraft(resolvedSaved); setMessage('編集前の配置に戻しました。') }}>編集前に戻す</button>
           <button type="button" className="ui-btn ui-btn--ghost" onClick={resetAutomatic}>初期配置</button>
           <button type="button" className="ui-btn ui-btn--primary" disabled={saving} onClick={save}>{saving ? '保存中…' : '配置を保存'}</button>
-          <button type="button" className="ui-btn ui-btn--ghost" onClick={onClose}>一覧へ戻る</button>
         </div>
       </div>
 
-      {message && <div className="ui-layout-editor-message" role="status">{message}</div>}
+      {(message || hasUnplacedNewArtwork) && (
+        <div className="ui-layout-editor-message" role="status">
+          {hasUnplacedNewArtwork ? '追加した作品を初期配置しました。配置を保存してください。' : message}
+        </div>
+      )}
 
       <div className="ui-layout-editor-toolbar" aria-label="選択した作品の操作">
         <span>{selected ? artworkById.get(String(selected.artwork_id))?.title || 'タイトルなし' : '作品を選択してください'}</span>

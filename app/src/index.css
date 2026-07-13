@@ -2682,6 +2682,52 @@ a {
   margin-top: 10px;
 }
 
+.ui-artworks-workspace {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.ui-artworks-library {
+  position: sticky;
+  top: 20px;
+  min-width: 0;
+  max-height: calc(100vh - 40px);
+  padding: 14px;
+  overflow-y: auto;
+  border: 1px solid #E4DDD2;
+  border-radius: 10px;
+  background: rgba(251, 248, 243, .58);
+}
+
+.ui-artworks-library-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ui-artworks-library-head .ui-section-label {
+  margin: 0;
+}
+
+.ui-artworks-library-head > span {
+  color: #8A8178;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.ui-artworks-workspace .ui-artworks-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ui-artworks-workspace .ui-artwork-sort-card-title {
+  font-size: 12px;
+}
+
 .ui-artworks-sort-hint {
   margin: 0 0 14px;
   font-size: 12px;
@@ -2886,7 +2932,7 @@ a {
 .ui-layout-editor-canvas {
   position: relative;
   width: 100%;
-  min-width: 760px;
+  min-width: 620px;
   min-height: 540px;
   overflow: hidden;
   background-color: #F7F4EE;
@@ -2960,6 +3006,17 @@ a {
 
   .ui-layout-editor-toolbar span {
     flex-basis: 100%;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ui-artworks-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ui-artworks-library {
+    position: static;
+    max-height: none;
   }
 }
 

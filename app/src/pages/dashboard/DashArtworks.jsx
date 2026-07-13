@@ -83,7 +83,6 @@ export default function DashArtworks() {
   const [draggingId, setDraggingId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
   const [reordering, setReordering] = useState(false)
-  const [layoutEditing, setLayoutEditing] = useState(false)
   const dragOverIdRef = useRef(null)
   const artworksRef = useRef(artworks)
 
@@ -332,16 +331,6 @@ export default function DashArtworks() {
             <h1 className="ui-screen-title" style={{ marginTop: 6 }}>{pageTitle}</h1>
           </section>
           <div className="ui-artworks-header-actions">
-            {artworks.length > 0 && (
-              <button
-                type="button"
-                className="ui-inline-edit-action"
-                onClick={() => setLayoutEditing((current) => !current)}
-              >
-                <Icon name="edit" size={15} />
-                <span>{layoutEditing ? '作品一覧' : '展示レイアウト'}</span>
-              </button>
-            )}
             {exhibitionId && exhibitionId !== 'undefined' && (
               <Link
                 to={`${dashboardBase}/dashboard/exhibitions/${exhibitionId}/edit`}
@@ -365,16 +354,12 @@ export default function DashArtworks() {
           </div>
         </div>
 
-        {layoutEditing ? (
-          <Suspense fallback={<div className="ui-panel">レイアウト編集を読み込んでいます…</div>}>
-            <ExhibitionLayoutEditor
-              exhibitionId={exhibitionId}
-              artworks={artworks}
-              supabase={supabase}
-              onClose={() => setLayoutEditing(false)}
-            />
-          </Suspense>
-        ) : <>
+        <div className="ui-artworks-workspace">
+          <section className="ui-artworks-library" aria-label="作品一覧">
+            <div className="ui-artworks-library-head">
+              <div className="ui-section-label">作品一覧</div>
+              <span>{artworks.length}作品</span>
+            </div>
         {deleteTarget && (
           <div className="ui-confirm" style={{ marginBottom: 16 }}>
             <div className="ui-kicker">削除の確認</div>
@@ -445,7 +430,18 @@ export default function DashArtworks() {
           })}
         </div>
         {artworks.length === 0 && <div className="ui-panel" style={{ color: T.inkMuted, fontSize: 13 }}>作品がまだありません</div>}
-        </>}
+          </section>
+
+          {artworks.length > 0 && (
+            <Suspense fallback={<div className="ui-panel">レイアウト編集を読み込んでいます…</div>}>
+              <ExhibitionLayoutEditor
+                exhibitionId={exhibitionId}
+                artworks={artworks}
+                supabase={supabase}
+              />
+            </Suspense>
+          )}
+        </div>
       </DashShell>
 
       <ImageUploader
