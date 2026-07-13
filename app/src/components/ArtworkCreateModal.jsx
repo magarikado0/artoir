@@ -238,7 +238,11 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
       const creatorRows = selectedCreatorIds.map((creatorProfileId, index) => ({ artwork_id: newWork.id, profile_id: creatorProfileId, display_order: index }))
       if (creatorRows.length > 0) {
         const { error: creatorError } = await supabase.from('artwork_creators').insert(creatorRows)
-        if (creatorError) throw creatorError
+        if (creatorError) {
+          // 作者登録まで完了して初めて作品作成成功とする。失敗時の重複作品を残さない。
+          await supabase.from('artworks').delete().eq('id', newWork.id)
+          throw creatorError
+        }
       }
       const creators = selectedCreatorIds.map((creatorProfileId, index) => ({
         profile_id: creatorProfileId,

@@ -31,7 +31,7 @@ export default function OrgPage() {
         setOrg(orgData)
         const { data: exhData } = await supabase
           .from('exhibitions')
-          .select('*, artworks(image_url, order)')
+          .select('*, artworks!artworks_exhibition_id_fkey(image_url, order)')
           .eq('organization_id', orgData.id)
           .eq('visibility', 'public')
           .order('start_date', { ascending: false })
