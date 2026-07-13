@@ -12,7 +12,7 @@ import { isProfileWorksExhibition } from '../lib/profileWorks'
 async function fetchExhibitionRows() {
   const { data, error } = await supabase
     .from('exhibitions')
-    .select('*, organizations(id, name, slug), profiles(id, display_name, slug), artworks(image_url, order)')
+    .select('*, organizations(id, name, slug), profiles!exhibitions_profile_id_fkey(id, display_name, slug), artworks!artworks_exhibition_id_fkey(image_url, order)')
     .eq('visibility', 'public')
     .order('start_date', { ascending: false })
   if (error) throw error

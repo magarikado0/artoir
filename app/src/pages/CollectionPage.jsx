@@ -114,7 +114,7 @@ export default function CollectionPage() {
           idsByType.artwork),
         q('exhibitions',
           // exhibitions→profiles は直接(profile_id)と artworks 経由の 2 経路があり曖昧になるため、FK を明示する。
-          'id, title, slug, thumbnail_url, organization_id, profile_id, organizations(slug, name), profiles!exhibitions_profile_id_fkey(slug, display_name), artworks(image_url, order)',
+          'id, title, slug, thumbnail_url, organization_id, profile_id, organizations(slug, name), profiles!exhibitions_profile_id_fkey(slug, display_name), artworks!artworks_exhibition_id_fkey(image_url, order)',
           idsByType.exhibition),
         q('organizations', 'id, name, slug', idsByType.organization),
         q('profiles', 'id, display_name, slug', idsByType.profile),
