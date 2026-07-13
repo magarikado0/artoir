@@ -85,6 +85,7 @@ export default function DashArtworks() {
   const [reordering, setReordering] = useState(false)
   const dragOverIdRef = useRef(null)
   const artworksRef = useRef(artworks)
+  const artworkUploaderRef = useRef(null)
 
   useEffect(() => {
     artworksRef.current = artworks
@@ -341,25 +342,9 @@ export default function DashArtworks() {
                 <span>情報を編集</span>
               </Link>
             )}
-            <ImageUploader
-              variant="button"
-              multiple
-              buttonClassName="ui-pill-action--accent ui-artworks-add-desktop"
-              buttonLabel="作品追加"
-              onFilesSelected={handleCreateFiles}
-            >
-              <Icon name="plus" size={16} />
-              <span>作品追加</span>
-            </ImageUploader>
           </div>
         </div>
 
-        <div className="ui-artworks-workspace">
-          <section className="ui-artworks-library" aria-label="作品一覧">
-            <div className="ui-artworks-library-head">
-              <div className="ui-section-label">作品一覧</div>
-              <span>{artworks.length}作品</span>
-            </div>
         {deleteTarget && (
           <div className="ui-confirm" style={{ marginBottom: 16 }}>
             <div className="ui-kicker">削除の確認</div>
@@ -371,88 +356,88 @@ export default function DashArtworks() {
           </div>
         )}
 
-        {artworks.length > 1 && (
-          <p className="ui-artworks-sort-hint">
-            グリップ（⋮⋮）をドラッグして並び順を変更できます
-          </p>
-        )}
+        <Suspense fallback={<div className="ui-panel">レイアウト編集を読み込んでいます…</div>}>
+          <ExhibitionLayoutEditor
+            exhibitionId={exhibitionId}
+            artworks={artworks}
+            supabase={supabase}
+            onEditArtwork={editWork}
+            onDeleteArtwork={requestDelete}
+            onRequestAdd={() => artworkUploaderRef.current?.open()}
+          />
+        </Suspense>
 
-        <div
-          className={['ui-artworks-grid', reordering && 'ui-artworks-grid--busy'].filter(Boolean).join(' ')}
-          aria-busy={reordering || undefined}
-        >
-          {artworks.map((w) => {
-            const isDragging = String(draggingId) === String(w.id)
-            const isDragOver = String(dragOverId) === String(w.id) && draggingId && !isDragging
-            return (
+        {artworks.length > 0 && (
+          <details className="ui-artworks-drawer">
+            <summary>
+              <span>作品トレイ</span>
+              <small>{artworks.length}作品・従来ウォールの並び順</small>
+            </summary>
+            <div className="ui-artworks-drawer-body">
+              {artworks.length > 1 && (
+                <p className="ui-artworks-sort-hint">グリップ（⋮⋮）をドラッグして並び順を変更できます</p>
+              )}
               <div
-                key={w.id}
-                data-artwork-id={w.id}
-                className={[
-                  'ui-list-card',
-                  'ui-artwork-sort-card',
-                  isDragging && 'is-dragging',
-                  isDragOver && 'is-drag-over',
-                ].filter(Boolean).join(' ')}
+                className={['ui-artworks-grid', reordering && 'ui-artworks-grid--busy'].filter(Boolean).join(' ')}
+                aria-busy={reordering || undefined}
               >
-                {artworks.length > 1 && (
-                  <button
-                    type="button"
-                    className="ui-artwork-drag-handle"
-                    aria-label={`「${w.title || 'タイトルなし'}」の並び順を変更`}
-                    disabled={reordering}
-                    onPointerDown={(event) => handleDragHandlePointerDown(event, w.id)}
-                  >
-                    <DragHandleIcon />
-                  </button>
-                )}
-                <button type="button" onClick={() => editWork(w)} className="ui-artwork-sort-card-media">
-                  <ArtworkMedia
-                    src={getThumbnailUrl(w.image_url)}
-                    alt=""
-                    decorative
-                    loading="lazy"
-                    fillHeight
-                    aspectRatio="1 / 1"
-                    fit="contain"
-                    wrapperStyle={{ borderRadius: 7 }}
-                    imageStyle={{ borderRadius: 7 }}
-                  />
-                </button>
-                <div className="ui-artwork-sort-card-footer">
-                  {w.title?.trim() && <div className="ui-artwork-sort-card-title">{w.title}</div>}
-                  <button type="button" onClick={() => requestDelete(w)} className="ui-artwork-sort-card-delete">
-                    削除
-                  </button>
-                </div>
+                {artworks.map((w) => {
+                  const isDragging = String(draggingId) === String(w.id)
+                  const isDragOver = String(dragOverId) === String(w.id) && draggingId && !isDragging
+                  return (
+                    <div
+                      key={w.id}
+                      data-artwork-id={w.id}
+                      className={[
+                        'ui-list-card',
+                        'ui-artwork-sort-card',
+                        isDragging && 'is-dragging',
+                        isDragOver && 'is-drag-over',
+                      ].filter(Boolean).join(' ')}
+                    >
+                      {artworks.length > 1 && (
+                        <button
+                          type="button"
+                          className="ui-artwork-drag-handle"
+                          aria-label={`「${w.title || 'タイトルなし'}」の並び順を変更`}
+                          disabled={reordering}
+                          onPointerDown={(event) => handleDragHandlePointerDown(event, w.id)}
+                        >
+                          <DragHandleIcon />
+                        </button>
+                      )}
+                      <button type="button" onClick={() => editWork(w)} className="ui-artwork-sort-card-media">
+                        <ArtworkMedia
+                          src={getThumbnailUrl(w.image_url)}
+                          alt=""
+                          decorative
+                          loading="lazy"
+                          fillHeight
+                          aspectRatio="1 / 1"
+                          fit="contain"
+                          wrapperStyle={{ borderRadius: 7 }}
+                          imageStyle={{ borderRadius: 7 }}
+                        />
+                      </button>
+                      <div className="ui-artwork-sort-card-footer">
+                        {w.title?.trim() && <div className="ui-artwork-sort-card-title">{w.title}</div>}
+                        <button type="button" onClick={() => requestDelete(w)} className="ui-artwork-sort-card-delete">削除</button>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            )
-          })}
-        </div>
-        {artworks.length === 0 && <div className="ui-panel" style={{ color: T.inkMuted, fontSize: 13 }}>作品がまだありません</div>}
-          </section>
-
-          {artworks.length > 0 && (
-            <Suspense fallback={<div className="ui-panel">レイアウト編集を読み込んでいます…</div>}>
-              <ExhibitionLayoutEditor
-                exhibitionId={exhibitionId}
-                artworks={artworks}
-                supabase={supabase}
-              />
-            </Suspense>
-          )}
-        </div>
+            </div>
+          </details>
+        )}
       </DashShell>
 
       <ImageUploader
-        variant="fab"
+        ref={artworkUploaderRef}
+        renderTrigger={false}
         multiple
-        wrapperClassName="ui-artworks-add-mobile"
-        buttonLabel="作品追加"
         onFilesSelected={handleCreateFiles}
-      >
-        <Icon name="plus" size={22} />
-      </ImageUploader>
+      />
 
       <ArtworkCreateModal
         open={createFiles.length > 0}
