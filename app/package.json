@@ -10,6 +10,7 @@
     "demo:record-exhibition": "node --experimental-strip-types scripts/record-exhibition-demo.ts",
     "demo:record-exhibition-mobile": "node --experimental-strip-types scripts/record-exhibition-mobile-demo.ts",
     "demo:record-gallery": "node --experimental-strip-types scripts/record-gallery-demo.ts",
+    "demo:record-gallery-mobile": "node --experimental-strip-types scripts/record-gallery-mobile-demo.ts",
     "demo:record-flow": "node scripts/demo/record-flow.mjs",
     "build": "vite build",
     "lint": "eslint .",

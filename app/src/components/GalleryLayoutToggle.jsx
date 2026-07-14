@@ -1,10 +1,25 @@
 /**
- * 作品一覧の表示切り替え（ウォール＝可変サイズ / グリッド＝均質な行列）。
- * value: 'wall' | 'grid'、onChange(next) で切り替える。
+ * 作品一覧の表示切り替え。保存配置がある展覧会だけ curated を追加する。
  */
-export default function GalleryLayoutToggle({ value, onChange }) {
+export default function GalleryLayoutToggle({ value, onChange, showCurated = false }) {
   return (
     <div className="ui-gallery-layout-toggle" role="group" aria-label="作品の表示方法">
+      {showCurated && (
+        <button
+          type="button"
+          className={value === 'curated' ? 'is-active' : ''}
+          aria-pressed={value === 'curated'}
+          aria-label="自由配置"
+          title="自由配置"
+          onClick={() => onChange('curated')}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+            <rect x="3" y="5" width="9" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="11" rx="1" />
+            <rect x="6" y="15" width="11" height="6" rx="1" />
+          </svg>
+        </button>
+      )}
       <button
         type="button"
         className={value === 'wall' ? 'is-active' : ''}

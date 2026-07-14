@@ -324,6 +324,33 @@ a {
   opacity: 0.92;
 }
 
+/* 保存済みの展覧会レイアウト（閲覧専用）。編集用の枠・ハンドルは持たない。 */
+.ui-curated-gallery {
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+  overflow: hidden;
+}
+
+.ui-curated-gallery .ui-artwork-wall-card {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  will-change: transform;
+}
+
+.ui-gallery-load-more {
+  display: block;
+  min-height: 42px;
+  margin: 24px auto 0;
+  padding: 0 20px;
+  border: 1px solid #D8CFC2;
+  border-radius: 999px;
+  background: transparent;
+  color: #4A413A;
+  cursor: pointer;
+}
+
 /* 各作品タイルの左下のお気に入り（栞）。
    未保存は既定で隠し、保存済み(.is-active)は常時表示。
    未保存の「追加」はホバー(PC)・フォーカス・長押し(.is-revealed)でのみ出す。 */
@@ -2655,6 +2682,55 @@ a {
   margin-top: 10px;
 }
 
+.ui-artworks-drawer {
+  margin-top: 18px;
+  border: 1px solid #E4DDD2;
+  border-radius: 10px;
+  background: rgba(251, 248, 243, .58);
+  overflow: hidden;
+}
+
+.ui-artworks-drawer > summary {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  list-style: none;
+  color: #4A413A;
+  cursor: pointer;
+}
+
+.ui-artworks-drawer > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ui-artworks-drawer > summary span {
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: 15px;
+}
+
+.ui-artworks-drawer > summary small {
+  margin-right: auto;
+  color: #8A8178;
+  font-size: 11px;
+}
+
+.ui-artworks-drawer > summary::after {
+  content: '＋';
+  color: #8A8178;
+  font-size: 18px;
+}
+
+.ui-artworks-drawer[open] > summary::after {
+  content: '−';
+}
+
+.ui-artworks-drawer-body {
+  padding: 16px;
+  border-top: 1px solid #E4DDD2;
+}
+
 .ui-artworks-sort-hint {
   margin: 0 0 14px;
   font-size: 12px;
@@ -2763,6 +2839,253 @@ a {
 
 .ui-artwork-sort-card-delete:hover {
   color: #BE553D;
+}
+
+/* 展覧会ごとの作品配置エディタ。公開側とはDOMもスタイルも分離する。 */
+.ui-layout-editor {
+  display: grid;
+  gap: 14px;
+}
+
+.ui-layout-canvas-toolbar {
+  position: sticky;
+  left: 0;
+  z-index: 30;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px 8px 16px;
+  border-bottom: 1px solid #D8CFC2;
+  background: rgba(251, 248, 243, .96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ui-layout-canvas-title {
+  min-width: 0;
+  overflow: hidden;
+  color: #655C54;
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-layout-canvas-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ui-layout-canvas-icon,
+.ui-layout-canvas-save {
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #D8CFC2;
+  border-radius: 7px;
+  background: transparent;
+  color: #4A413A;
+  cursor: pointer;
+}
+
+.ui-layout-canvas-icon:hover:not(:disabled) {
+  border-color: #8A8178;
+  background: #ECE5D9;
+}
+
+.ui-layout-canvas-save {
+  gap: 6px;
+  min-width: 78px;
+  padding: 0 13px;
+  border-color: #1F1B17;
+  background: #1F1B17;
+  color: #FBF8F3;
+  font-size: 12px;
+}
+
+.ui-layout-canvas-icon:disabled,
+.ui-layout-canvas-save:disabled {
+  opacity: .35;
+  cursor: default;
+}
+
+.ui-layout-editor-message {
+  padding: 10px 14px;
+  border-left: 3px solid #BE553D;
+  background: #FBF8F3;
+  color: #655C54;
+  font-size: 12px;
+}
+
+.ui-layout-editor-tray button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid #D8CFC2;
+  border-radius: 999px;
+  background: transparent;
+  color: #655C54;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.ui-layout-context-menu {
+  position: fixed;
+  z-index: 1200;
+  width: 210px;
+  padding: 6px;
+  border: 1px solid #D8CFC2;
+  border-radius: 9px;
+  background: #FBF8F3;
+  box-shadow: 0 16px 42px rgba(31, 27, 23, .2);
+}
+
+.ui-layout-context-menu--canvas {
+  width: 190px;
+}
+
+.ui-layout-context-menu-title {
+  padding: 8px 10px 7px;
+  overflow: hidden;
+  border-bottom: 1px solid #E4DDD2;
+  color: #8A8178;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-layout-context-menu button {
+  width: 100%;
+  min-height: 36px;
+  display: block;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #4A413A;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ui-layout-context-menu button:hover,
+.ui-layout-context-menu button:focus-visible {
+  background: #ECE5D9;
+}
+
+.ui-layout-context-menu button.is-danger {
+  margin-top: 4px;
+  border-top: 1px solid #E4DDD2;
+  border-radius: 0 0 5px 5px;
+  color: #BE553D;
+}
+
+.ui-layout-editor-scroll {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid #D8CFC2;
+  border-radius: 10px;
+  background: #EDE7DD;
+}
+
+.ui-layout-editor-canvas {
+  position: relative;
+  width: 100%;
+  min-width: 620px;
+  min-height: 540px;
+  overflow: hidden;
+  background-color: #F7F4EE;
+  background-image: linear-gradient(rgba(138, 129, 120, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(138, 129, 120, .08) 1px, transparent 1px);
+  background-size: 5% 5%;
+}
+
+.ui-layout-editor-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  background: #F2EEE7;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.ui-layout-editor-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: #8A8178;
+  text-align: center;
+  pointer-events: none;
+}
+
+.ui-layout-editor-empty strong {
+  color: #4A413A;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.ui-layout-editor-empty span {
+  font-size: 12px;
+}
+
+.ui-layout-editor-empty .ui-btn {
+  justify-self: center;
+  margin-top: 8px;
+  pointer-events: auto;
+}
+
+.ui-layout-editor-item:active {
+  cursor: grabbing;
+}
+
+.ui-layout-editor-item.is-selected {
+  border-color: #BE553D;
+  box-shadow: 0 0 0 2px rgba(190, 85, 61, .2);
+}
+
+.ui-layout-resize-handle {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 3px solid #F7F4EE;
+  border-radius: 999px;
+  background: #BE553D;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.ui-layout-editor-tray {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px dashed #CFC4B6;
+  border-radius: 8px;
+  color: #8A8178;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .ui-layout-canvas-toolbar {
+    padding-left: 12px;
+  }
+
 }
 
 .ui-modal-close {
@@ -3664,6 +3987,52 @@ a.ui-settings-member-link:hover {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 12px;
+}
+
+.ui-exposure-control {
+  margin-top: 14px;
+  padding: 12px 14px 10px;
+  border: 1px solid #E1D9CE;
+  border-radius: 10px;
+  background: #FBF8F3;
+}
+
+.ui-exposure-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: #312B27;
+  font-size: 12px;
+}
+
+.ui-exposure-heading output {
+  min-width: 64px;
+  color: #6F675F;
+  font-family: ui-monospace, monospace;
+  text-align: right;
+}
+
+.ui-exposure-slider-row {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+  color: #8A8178;
+  font-size: 15px;
+  text-align: center;
+}
+
+.ui-exposure-slider-row input[type='range'] {
+  width: 100%;
+  accent-color: #BE553D;
+  cursor: pointer;
+}
+
+.ui-exposure-slider-row input[type='range']:disabled {
+  cursor: default;
+  opacity: 0.45;
 }
 
 .ui-quad-reset,

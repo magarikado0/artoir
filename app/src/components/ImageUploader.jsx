@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { compressImageFile } from '../lib/imageCompress'
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
@@ -6,7 +6,7 @@ const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 
-export default function ImageUploader({
+const ImageUploader = forwardRef(function ImageUploader({
   onUploaded,
   onBeforeUpload,
   onFileSelected,
@@ -18,13 +18,24 @@ export default function ImageUploader({
   buttonClassName = '',
   wrapperClassName = '',
   buttonLabel = '',
+  renderTrigger = true,
   children,
-}) {
+}, ref) {
   const [dragging, setDragging] = useState(false)
   const [progress, setProgress] = useState(null) // 0-100 or null
   const [error, setError] = useState('')
   const inputRef = useRef(null)
   const hasUploadConfig = Boolean(CLOUD_NAME && UPLOAD_PRESET)
+
+  useImperativeHandle(ref, () => ({
+    open() {
+      if (!hasUploadConfig) {
+        setError('Cloudinary の設定が不足しています')
+        return
+      }
+      inputRef.current?.click()
+    },
+  }), [hasUploadConfig])
 
   async function upload(file) {
     if (!file) return
@@ -128,7 +139,7 @@ export default function ImageUploader({
   return (
     <div className={[isFab ? 'ui-floating-upload' : undefined, wrapperClassName].filter(Boolean).join(' ') || undefined}>
       {isFab && error && <p className="ui-floating-upload-error">{error}</p>}
-      <div
+      {renderTrigger && <div
         role="button"
         tabIndex={0}
         aria-disabled={!hasUploadConfig}
@@ -203,11 +214,11 @@ export default function ImageUploader({
             クリックまたはドラッグ&ドロップで画像を選択
           </span>
         ) : null}
-      </div>
-      {error && !isFab && (
+      </div>}
+      {renderTrigger && error && !isFab && (
         <p style={{ fontSize: '0.75rem', color: '#BE553D', marginTop: '0.5rem' }}>{error}</p>
       )}
-      {!hasUploadConfig && !isFab && (
+      {renderTrigger && !hasUploadConfig && !isFab && (
         <p style={{ fontSize: '0.75rem', color: '#8A8178', marginTop: '0.5rem' }}>
           Cloudinary 側の unsigned preset はアップロード先フォルダ・形式・サイズ制限を必ず設定してください。
         </p>
@@ -222,4 +233,6 @@ export default function ImageUploader({
       />
     </div>
   )
-}
+})
+
+export default ImageUploader
