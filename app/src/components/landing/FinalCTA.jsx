@@ -1,51 +1,18 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { BrandLockup } from '../BrandMark'
 import { Icon } from '../Header'
-import useVideoVisibility from '../../hooks/useVideoVisibility'
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference'
-import { LANDING_LINKS, LANDING_MEDIA } from './landingConfig'
+import { LANDING_LINKS } from './landingConfig'
 import styles from './landing.module.css'
 
 const MotionDiv = motion.div
 
 export default function FinalCTA() {
-  const videoRef = useRef(null)
-  const [hasVideoError, setHasVideoError] = useState(false)
-  const { ref, isVisible } = useVideoVisibility({ threshold: 0.35 })
   const prefersReducedMotion = useReducedMotionPreference()
 
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video || hasVideoError || prefersReducedMotion) return undefined
-    if (isVisible) {
-      const playPromise = video.play()
-      if (playPromise?.catch) playPromise.catch(() => {})
-    } else {
-      video.pause()
-    }
-    return undefined
-  }, [hasVideoError, isVisible, prefersReducedMotion])
-
   return (
-    <section ref={ref} className={styles.finalCta} aria-labelledby="landing-final-title">
-      {!hasVideoError && !prefersReducedMotion && (
-        <video
-          ref={videoRef}
-          className={styles.finalVideo}
-          poster={LANDING_MEDIA.final.posterSrc}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-          onError={() => setHasVideoError(true)}
-        >
-          <source src={LANDING_MEDIA.final.mobileVideoSrc} media="(max-width: 720px)" type="video/mp4" />
-          <source src={LANDING_MEDIA.final.videoSrc} type="video/mp4" />
-        </video>
-      )}
+    <section className={styles.finalCta} aria-labelledby="landing-final-title">
       <div className={styles.finalBackdrop} aria-hidden="true" />
       <MotionDiv
         className={styles.finalContent}

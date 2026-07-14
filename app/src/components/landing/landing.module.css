@@ -199,8 +199,7 @@
 }
 
 .windowVideo,
-.windowPoster,
-.finalVideo {
+.windowPoster {
   position: absolute;
   inset: 0;
   display: block;
@@ -454,8 +453,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .windowVideo,
-  .finalVideo {
+  .windowVideo {
     will-change: auto;
   }
 }
