@@ -92,7 +92,7 @@ export default function DashHome() {
         setOwner(ownerData)
         const { data: exhData } = await supabase
           .from('exhibitions')
-          .select('*, artworks(image_url, order)')
+          .select('*, artworks!artworks_exhibition_id_fkey(image_url, order)')
           .eq(profileSlug ? 'profile_id' : 'organization_id', ownerData.id)
           .order('start_date', { ascending: false })
         setExhibitions((exhData || []).map(mapExhibitionListRow))

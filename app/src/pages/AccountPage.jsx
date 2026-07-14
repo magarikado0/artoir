@@ -259,7 +259,7 @@ export default function AccountPage() {
             .eq('profile_id', session.user.id),
           supabase
             .from('exhibitions')
-            .select('*, artworks(image_url, order)')
+            .select('*, artworks!artworks_exhibition_id_fkey(image_url, order)')
             .eq('profile_id', session.user.id)
             .order('start_date', { ascending: false }),
         ])
