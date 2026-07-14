@@ -25,7 +25,7 @@ export const LANDING_MEDIA = {
   },
   galleryTour: {
     videoSrc: '/videos/gallery-tour.mp4',
-    mobileVideoSrc: null,
+    mobileVideoSrc: '/videos/gallery-tour-mobile.mp4',
     posterSrc: '/images/gallery-tour-poster.png',
     mobilePosterSrc: '/images/gallery-tour-poster-mobile.png',
   },
