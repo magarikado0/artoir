@@ -90,8 +90,33 @@ for each row execute function public.validate_artwork_cover_image();
 alter table public.artwork_images enable row level security;
 
 drop policy if exists "Public can read artwork images" on public.artwork_images;
-create policy "Public can read artwork images"
-  on public.artwork_images for select using (true);
+drop policy if exists "Public can read public artwork images" on public.artwork_images;
+create policy "Public can read public artwork images"
+  on public.artwork_images for select
+  using (exists (
+    select 1
+    from public.artworks a
+    left join public.exhibitions e on e.id = a.exhibition_id
+    where a.id = artwork_id
+      and (a.profile_id is not null or e.visibility = 'public')
+  ));
+
+drop policy if exists "Owners can read artwork images" on public.artwork_images;
+create policy "Owners can read artwork images"
+  on public.artwork_images for select to authenticated
+  using (exists (
+    select 1
+    from public.artworks a
+    left join public.exhibitions e on e.id = a.exhibition_id
+    where a.id = artwork_id and (
+      a.profile_id = auth.uid()
+      or e.profile_id = auth.uid()
+      or exists (
+        select 1 from public.organization_members om
+        where om.organization_id = e.organization_id and om.profile_id = auth.uid()
+      )
+    )
+  ));
 
 drop policy if exists "Owners can insert artwork images" on public.artwork_images;
 create policy "Owners can insert artwork images"

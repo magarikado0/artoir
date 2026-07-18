@@ -20,6 +20,20 @@ import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoute
 
 const Exhibition3DGalleryView = lazy(() => import('../components/Exhibition3DGalleryView'))
 
+function useSupportsCuratedLayout() {
+  const [supported, setSupported] = useState(() => window.innerWidth >= 640)
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 640px)')
+    const update = () => setSupported(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
+  return supported
+}
+
 function SummaryItem({ label, value, to }) {
   if (!value) return null
   return (
@@ -44,6 +58,7 @@ export default function ExhibitionPage() {
   const [exhibitionGalleryLayout, setExhibitionGalleryLayout] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
   const [galleryLayout, setGalleryLayout] = useGalleryLayout()
+  const supportsCuratedLayout = useSupportsCuratedLayout()
   const [loading, setLoading] = useState(true)
   const gallery3dButtonRef = useRef(null)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
@@ -138,6 +153,10 @@ export default function ExhibitionPage() {
   const dateText = exhibition.start_date
     ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}`
     : ''
+  const hasCuratedLayout = artworkLayout.length > 0
+  const activeGalleryLayout = supportsCuratedLayout && hasCuratedLayout && exhibitionGalleryLayout === 'curated'
+    ? 'curated'
+    : galleryLayout
 
   return (
     <div className="ui-page-shell">
@@ -180,8 +199,8 @@ export default function ExhibitionPage() {
             {artworks.length > 0 && (
               <div className="ui-exhibition-artworks-actions">
                 <GalleryLayoutToggle
-                  value={exhibitionGalleryLayout || galleryLayout}
-                  showCurated={artworkLayout.length > 0}
+                  value={activeGalleryLayout}
+                  showCurated={supportsCuratedLayout && hasCuratedLayout}
                   onChange={(next) => {
                     setExhibitionGalleryLayout(next)
                     if (next !== 'curated') setGalleryLayout(next)
@@ -209,7 +228,7 @@ export default function ExhibitionPage() {
             <ExhibitionArtworkGallery
               artworks={artworks}
               onOpenArtwork={openArtwork}
-              layout={exhibitionGalleryLayout || galleryLayout}
+              layout={activeGalleryLayout}
               savedLayout={artworkLayout}
             />
           ) : (

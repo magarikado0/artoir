@@ -165,6 +165,7 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
     if (configError) { setError(configError); return }
     setSaving(true)
     setError('')
+    let createdArtworkId = null
 
     try {
       const uploadedImages = []
@@ -203,6 +204,7 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
         ;({ data: newWork, error: insertError } = await supabase.from('artworks').insert(omitImageDimensionFields(payload)).select().single())
       }
       if (insertError) throw insertError
+      createdArtworkId = newWork.id
 
       const imagePayload = uploadedImages.map((image, index) => ({
         artwork_id: newWork.id,
@@ -216,10 +218,7 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
         file_size: image.fileSize,
       }))
       const { data: imageRows, error: imageError } = await supabase.from('artwork_images').insert(imagePayload).select()
-      if (imageError) {
-        await supabase.from('artworks').delete().eq('id', newWork.id)
-        throw imageError
-      }
+      if (imageError) throw imageError
       const coverImage = imageRows?.[0]
       const galleryIndex = images.findIndex((image) => image.id === galleryImageId)
       const galleryImage = galleryIndex >= 0 ? imageRows?.[galleryIndex] : null
@@ -238,11 +237,7 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
       const creatorRows = selectedCreatorIds.map((creatorProfileId, index) => ({ artwork_id: newWork.id, profile_id: creatorProfileId, display_order: index }))
       if (creatorRows.length > 0) {
         const { error: creatorError } = await supabase.from('artwork_creators').insert(creatorRows)
-        if (creatorError) {
-          // 作者登録まで完了して初めて作品作成成功とする。失敗時の重複作品を残さない。
-          await supabase.from('artworks').delete().eq('id', newWork.id)
-          throw creatorError
-        }
+        if (creatorError) throw creatorError
       }
       const creators = selectedCreatorIds.map((creatorProfileId, index) => ({
         profile_id: creatorProfileId,
@@ -250,10 +245,16 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
         profile: creatorOptions.find((profile) => profile.id === creatorProfileId),
       })).filter((creator) => creator.profile)
 
+      createdArtworkId = null
       onCreated?.({ ...newWork, creators })
       onClose()
     } catch (saveError) {
-      setError(saveError?.message || '作品の作成に失敗しました')
+      let message = saveError?.message || '作品の作成に失敗しました'
+      if (createdArtworkId) {
+        const { error: rollbackError } = await supabase.from('artworks').delete().eq('id', createdArtworkId)
+        if (rollbackError) message += `（作成途中のデータ削除にも失敗しました: ${rollbackError.message}）`
+      }
+      setError(message)
     } finally {
       setSaving(false)
     }
