@@ -184,7 +184,7 @@ export default function ArtworkImageField({ images, galleryImageId, onGalleryIma
         {images.length < MAX_IMAGES && (
           <button type="button" className="ui-multi-image-add-card" onClick={() => inputRef.current?.click()} disabled={disabled}>
             <span aria-hidden="true">＋</span>
-            <span>追加</span>
+            <span>別アングル・詳細を追加</span>
           </button>
         )}
       </div>
