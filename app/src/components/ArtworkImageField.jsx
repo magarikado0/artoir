@@ -98,6 +98,10 @@ export default function ArtworkImageField({ images, galleryImageId, onGalleryIma
     if (sourceId && dragOverId) dropOn(dragOverId, sourceId)
   }
 
+  const resolvedGalleryImageId = images.some((image) => image.id === galleryImageId)
+    ? galleryImageId
+    : images[0]?.id
+
   return (
     <div className="ui-multi-image-field">
       <div className="ui-multi-image-heading">
@@ -120,7 +124,12 @@ export default function ArtworkImageField({ images, galleryImageId, onGalleryIma
           <article
             key={image.id}
             data-artwork-image-id={image.id}
-            className={['ui-multi-image-card', index === 0 && 'is-cover', dragOverId === image.id && draggedId !== image.id && 'is-drag-over'].filter(Boolean).join(' ')}
+            className={[
+              'ui-multi-image-card',
+              index === 0 && 'is-cover',
+              images.length > 1 && image.id === resolvedGalleryImageId && 'is-gallery-selected',
+              dragOverId === image.id && draggedId !== image.id && 'is-drag-over',
+            ].filter(Boolean).join(' ')}
             draggable={!disabled}
             onDragStart={() => setDraggedId(image.id)}
             onDragEnd={() => { setDraggedId(null); setDragOverId(null) }}
@@ -141,13 +150,12 @@ export default function ArtworkImageField({ images, galleryImageId, onGalleryIma
               {images.length > 1 && (
                 <button
                   type="button"
-                  className={`ui-multi-image-gallery${image.id === galleryImageId ? ' is-selected' : ''}`}
-                  aria-pressed={image.id === galleryImageId}
-                  aria-label={image.id === galleryImageId ? `画像${index + 1}の3D指定を解除` : `画像${index + 1}を3D展示に使用`}
+                  className={`ui-multi-image-gallery${image.id === resolvedGalleryImageId ? ' is-selected' : ''}`}
+                  aria-pressed={image.id === resolvedGalleryImageId}
                   disabled={disabled}
-                  onClick={() => onGalleryImageChange(image.id === galleryImageId ? '' : image.id)}
+                  onClick={() => onGalleryImageChange(image.id)}
                 >
-                  3D
+                  {image.id === resolvedGalleryImageId ? '3D展示に使用中' : '3D展示に使う'}
                 </button>
               )}
             </div>
