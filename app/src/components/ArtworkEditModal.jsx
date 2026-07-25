@@ -8,30 +8,33 @@ import { getGalleryThumbnailUrl } from '../lib/imageUrl'
 function GalleryImagePicker({ artwork, value, onChange, disabled }) {
   const images = getArtworkImages(artwork)
   if (images.length <= 1) return null
+  const resolvedValue = images.some((image) => String(image.id) === String(value))
+    ? value
+    : images[0]?.id
+
   return (
     <div className="ui-edit-gallery-picker">
-      <div className="ui-form-label">3D展示画像</div>
       <div className="ui-edit-gallery-picker-list">
         {images.map((image, index) => {
-          const selected = String(image.id) === String(value)
+          const selected = String(image.id) === String(resolvedValue)
           return (
             <div key={image.id} className={`ui-edit-gallery-picker-card${selected ? ' is-selected' : ''}`}>
-              <img src={getGalleryThumbnailUrl(image.url)} alt={`作品画像 ${index + 1}`} />
-              <button
-                type="button"
-                className={`ui-edit-gallery-toggle${selected ? ' is-selected' : ''}`}
-                aria-pressed={selected}
-                aria-label={selected ? `画像${index + 1}の3D指定を解除` : `画像${index + 1}を3D展示に使用`}
-                disabled={disabled}
-                onClick={() => onChange(selected ? '' : image.id)}
-              >
-                3D
-              </button>
+              <div className="ui-edit-gallery-picker-preview">
+                <img src={getGalleryThumbnailUrl(image.url)} alt={`作品画像 ${index + 1}`} />
+                <button
+                  type="button"
+                  className={`ui-edit-gallery-toggle${selected ? ' is-selected' : ''}`}
+                  aria-pressed={selected}
+                  disabled={disabled}
+                  onClick={() => onChange(image.id)}
+                >
+                  {selected ? '3D展示に使用中' : '3D展示に使う'}
+                </button>
+              </div>
             </div>
           )
         })}
       </div>
-      {!value && <div className="ui-field-help">未指定のため、先頭のカバー画像を使用します。</div>}
     </div>
   )
 }
