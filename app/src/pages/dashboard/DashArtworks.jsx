@@ -8,6 +8,7 @@ import { useDelayedLoading } from '../../lib/useDelayedLoading'
 import ImageUploader from '../../components/ImageUploader'
 import ArtworkCreateModal from '../../components/ArtworkCreateModal'
 import ArtworkEditModal from '../../components/ArtworkEditModal'
+import GalleryViewSettings from '../../components/GalleryViewSettings'
 import ArtworkMedia from '../../components/ArtworkMedia'
 import { T } from '../../lib/tokens'
 import { Icon } from '../../components/Header'
@@ -16,6 +17,7 @@ import { getArtworkUploadConfigError, isMissingImageDimensionColumnError, omitIm
 import { persistArtworkOrder, reorderArtworksById } from '../../lib/reorderArtworks'
 import { attachNormalizedCreators } from '../../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../../lib/profileRoutes'
+import { normalizeGalleryViewSettings } from '../../lib/galleryViewSettings'
 
 const ExhibitionLayoutEditor = lazy(() => import('../../components/ExhibitionLayoutEditor'))
 
@@ -83,6 +85,8 @@ export default function DashArtworks() {
   const [draggingId, setDraggingId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
   const [reordering, setReordering] = useState(false)
+  const [hasSavedLayout, setHasSavedLayout] = useState(false)
+  const [layoutEditorVersion, setLayoutEditorVersion] = useState(0)
   const dragOverIdRef = useRef(null)
   const artworksRef = useRef(artworks)
   const artworkUploaderRef = useRef(null)
@@ -155,6 +159,38 @@ export default function DashArtworks() {
   function requestDelete(work) {
     setEditTarget(null)
     setDeleteTarget(work)
+  }
+
+  async function deleteSavedLayout() {
+    if (!supabase || !exhibition?.id) return { error: new Error('展覧会を読み込めません') }
+    const settings = normalizeGalleryViewSettings(exhibition)
+    const nextModes = settings.modes.filter((mode) => mode !== 'curated')
+    const safeModes = nextModes.length > 0 ? nextModes : ['wall']
+    const nextDefault = safeModes.includes(settings.defaultView) ? settings.defaultView : safeModes[0]
+
+    const { error: settingError } = await supabase
+      .from('exhibitions')
+      .update({
+        gallery_view_modes: safeModes,
+        gallery_default_view: nextDefault,
+      })
+      .eq('id', exhibition.id)
+    if (settingError) return { error: settingError }
+    setExhibition((current) => ({
+      ...current,
+      gallery_view_modes: safeModes,
+      gallery_default_view: nextDefault,
+    }))
+
+    const { error: layoutError } = await supabase
+      .from('exhibition_artwork_layouts')
+      .delete()
+      .eq('exhibition_id', exhibition.id)
+    if (layoutError) return { error: layoutError }
+
+    setHasSavedLayout(false)
+    setLayoutEditorVersion((version) => version + 1)
+    return { error: null }
   }
 
   function updateDragOver(targetId) {
@@ -358,14 +394,26 @@ export default function DashArtworks() {
 
         <Suspense fallback={<div className="ui-panel">レイアウト編集を読み込んでいます…</div>}>
           <ExhibitionLayoutEditor
+            key={`${exhibitionId}-${layoutEditorVersion}`}
             exhibitionId={exhibitionId}
             artworks={artworks}
             supabase={supabase}
             onEditArtwork={editWork}
             onDeleteArtwork={requestDelete}
             onRequestAdd={() => artworkUploaderRef.current?.open()}
+            onSavedLayoutChange={setHasSavedLayout}
           />
         </Suspense>
+
+        {exhibition && (
+          <GalleryViewSettings
+            exhibition={exhibition}
+            hasSavedLayout={hasSavedLayout}
+            supabase={supabase}
+            onExhibitionChange={setExhibition}
+            onDeleteSavedLayout={deleteSavedLayout}
+          />
+        )}
 
         {artworks.length > 0 && (
           <details className="ui-artworks-drawer">

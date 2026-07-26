@@ -17,6 +17,7 @@ import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
+import { getAvailableGalleryViews, normalizeGalleryViewSettings } from '../lib/galleryViewSettings'
 
 const Exhibition3DGalleryView = lazy(() => import('../components/Exhibition3DGalleryView'))
 
@@ -57,7 +58,7 @@ export default function ExhibitionPage() {
   const [artworkLayout, setArtworkLayout] = useState([])
   const [exhibitionGalleryLayout, setExhibitionGalleryLayout] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
-  const [galleryLayout, setGalleryLayout] = useGalleryLayout()
+  const [, setGalleryLayout] = useGalleryLayout()
   const supportsCuratedLayout = useSupportsCuratedLayout()
   const [loading, setLoading] = useState(true)
   const gallery3dButtonRef = useRef(null)
@@ -83,6 +84,7 @@ export default function ExhibitionPage() {
           .maybeSingle()
         if (!exhData) return setLoading(false)
         setExhibition(exhData)
+        setExhibitionGalleryLayout(normalizeGalleryViewSettings(exhData).defaultView)
         const { data: awData } = await supabase
           .from('artworks')
           .select('*, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
@@ -104,7 +106,6 @@ export default function ExhibitionPage() {
           .order('z_index')
         const nextLayout = layoutData || []
         setArtworkLayout(nextLayout)
-        setExhibitionGalleryLayout(nextLayout.length > 0 ? 'curated' : null)
       } catch {
         /* unavailable */
       } finally {
@@ -154,9 +155,13 @@ export default function ExhibitionPage() {
     ? `${fmtDateDot(exhibition.start_date)}${exhibition.start_time ? ` ${fmtTime(exhibition.start_time)}` : ''} - ${fmtDateDot(exhibition.end_date)}${exhibition.end_time ? ` ${fmtTime(exhibition.end_time)}` : ''}`
     : ''
   const hasCuratedLayout = artworkLayout.length > 0
-  const activeGalleryLayout = supportsCuratedLayout && hasCuratedLayout && exhibitionGalleryLayout === 'curated'
-    ? 'curated'
-    : galleryLayout
+  const availableGalleryViews = getAvailableGalleryViews(exhibition, {
+    hasCuratedLayout,
+    supportsCuratedLayout,
+  })
+  const activeGalleryLayout = availableGalleryViews.modes.includes(exhibitionGalleryLayout)
+    ? exhibitionGalleryLayout
+    : availableGalleryViews.defaultView
 
   return (
     <div className="ui-page-shell">
@@ -200,7 +205,7 @@ export default function ExhibitionPage() {
               <div className="ui-exhibition-artworks-actions">
                 <GalleryLayoutToggle
                   value={activeGalleryLayout}
-                  showCurated={supportsCuratedLayout && hasCuratedLayout}
+                  modes={availableGalleryViews.modes}
                   onChange={(next) => {
                     setExhibitionGalleryLayout(next)
                     if (next !== 'curated') setGalleryLayout(next)

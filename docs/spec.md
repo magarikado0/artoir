@@ -33,6 +33,7 @@
 - `apply-all-table-rls.sql` — 全テーブル RLS
 - `add-artwork-image-dimensions.sql` — artworks に image_width / image_height を追加(段組レイアウト用)
 - `add-exhibition-artwork-layouts.sql` — 展覧会ごとの自由配置(正規化座標・RLS)
+- `add-exhibition-gallery-view-settings.sql` — 公開ページに表示する作品レイアウトと初期表示
 - `fix-artwork-creators-personal-exhibitions.sql` — 個人展覧会の作者紐付けRLS判定を修正
 
 ## データ構造
@@ -103,6 +104,8 @@ profiles
 | description | text |
 | thumbnail_url | string(未設定なら先頭作品の画像で代替) |
 | visibility | string(`public` / `private` / `draft` / `unlisted`) |
+| gallery_view_modes | text[](`curated` / `wall` / `grid` のうち公開する表示) |
+| gallery_default_view | string(公開ページの初期表示) |
 
 `organization_id` XOR `profile_id`(CHECK 制約)。料金系フィールド(fee_type / fee_detail)は存在しない。
 
@@ -128,7 +131,7 @@ image_width / image_height は Cloudinary アップロード応答の width/heig
 
 ### exhibition_artwork_layouts
 
-展覧会と作品の関連に属する自由配置。`exhibition_id + artwork_id` が主キー。`x / y / width / height` はキャンバス幅を 1 とする正規化値で、`z_index / rotation / is_visible` も保持する。公開画面では自由配置・従来ウォール・均等グリッドを切替可能。未設定時とスマートフォン表示は既存の自動配置へフォールバックする。
+展覧会と作品の関連に属する自由配置。`exhibition_id + artwork_id` が主キー。`x / y / width / height` はキャンバス幅を 1 とする正規化値で、`z_index / rotation / is_visible` も保持する。公開画面では自由配置・従来ウォール・均等グリッドを切替可能。`exhibitions.gallery_view_modes` で公開する切替を、`gallery_default_view` で初期表示を指定する。自由配置データの削除と公開停止は別操作とし、未設定時・非公開時・スマートフォン表示は公開中の自動配置へフォールバックする。
 
 ### artwork_creators
 
