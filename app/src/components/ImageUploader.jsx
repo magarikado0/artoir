@@ -1,5 +1,6 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { compressImageFile } from '../lib/imageCompress'
+import { openImageFilePicker } from '../lib/imageFilePicker'
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
@@ -26,16 +27,6 @@ const ImageUploader = forwardRef(function ImageUploader({
   const [error, setError] = useState('')
   const inputRef = useRef(null)
   const hasUploadConfig = Boolean(CLOUD_NAME && UPLOAD_PRESET)
-
-  useImperativeHandle(ref, () => ({
-    open() {
-      if (!hasUploadConfig) {
-        setError('Cloudinary の設定が不足しています')
-        return
-      }
-      inputRef.current?.click()
-    },
-  }), [hasUploadConfig])
 
   async function upload(file) {
     if (!file) return
@@ -124,6 +115,24 @@ const ImageUploader = forwardRef(function ImageUploader({
     }
   }
 
+  async function openPicker() {
+    const selected = await openImageFilePicker({
+      multiple,
+      fallbackInput: inputRef.current,
+    })
+    if (selected) await handleFiles(selected)
+  }
+
+  useImperativeHandle(ref, () => ({
+    open() {
+      if (!hasUploadConfig) {
+        setError('Cloudinary の設定が不足しています')
+        return
+      }
+      void openPicker()
+    },
+  }))
+
   const isButton = variant === 'button'
   const isFab = variant === 'fab'
   const isCompactTrigger = isButton || isFab
@@ -151,12 +160,12 @@ const ImageUploader = forwardRef(function ImageUploader({
             setError('Cloudinary の設定が不足しています')
             return
           }
-          inputRef.current?.click()
+          void openPicker()
         }}
         onKeyDown={(e) => {
           if ((e.key === 'Enter' || e.key === ' ') && hasUploadConfig) {
             e.preventDefault()
-            inputRef.current?.click()
+            void openPicker()
           }
         }}
         onDragOver={isCompactTrigger ? undefined : (e) => { e.preventDefault(); setDragging(true) }}

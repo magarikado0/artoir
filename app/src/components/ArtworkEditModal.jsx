@@ -103,7 +103,7 @@ export default function ArtworkEditModal({
             />
           ) : (
             <>
-              <div style={{ minWidth: 0 }}>
+              <div className="ui-artwork-edit-media">
                 <div className="ui-artwork-confirmed-preview">
                   <ArtworkMedia
                     src={previewUrl}
@@ -115,24 +115,24 @@ export default function ArtworkEditModal({
                     wrapperStyle={{ width: '100%', height: '100%', borderRadius: 12, background: 'transparent' }}
                     imageStyle={{ borderRadius: 12, objectFit: 'contain' }}
                   />
+                  <button
+                    type="button"
+                    className="ui-artwork-adjust-button"
+                    disabled={disabled}
+                    onClick={() => setAdjusting(true)}
+                  >
+                    画像を再調整
+                  </button>
                 </div>
                 {pendingImageBlob && (
                   <div className="ui-field-help" style={{ marginTop: 8 }}>
                     調整後の画像です。保存するとこの画像に更新されます。
                   </div>
                 )}
-                <button
-                  type="button"
-                  className="ui-artwork-adjust-button"
-                  disabled={disabled}
-                  onClick={() => setAdjusting(true)}
-                >
-                  画像を調整
-                </button>
                 <GalleryImagePicker artwork={artwork} value={galleryImageId} onChange={setGalleryImageId} disabled={disabled} />
               </div>
 
-              <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="ui-artwork-edit-fields">
                 <div className="ui-input-wrap">
                   <input value={title} onChange={(e) => onTitleChange(e.target.value)} placeholder="作品名を入力" />
                 </div>
@@ -141,17 +141,20 @@ export default function ArtworkEditModal({
                 </div>
                 {children}
                 {error && <div className="ui-alert ui-alert--error">{error}</div>}
-                <div className="ui-btn-row ui-artwork-create-actions" style={{ marginTop: 'auto' }}>
-                  <button type="button" onClick={onClose} disabled={disabled} className="ui-btn ui-btn--ghost">閉じる</button>
-                  <button type="button" onClick={() => onSave(pendingImageBlob, galleryImageId || null)} disabled={disabled} className="ui-btn ui-btn--accent">
-                    {saving ? '保存中…' : '保存する'}
-                  </button>
-                </div>
+              </div>
+
+              <div className="ui-artwork-edit-footer">
                 {onDelete && (
-                  <button type="button" onClick={onDelete} disabled={disabled} className="ui-btn ui-btn--danger ui-btn-block">
+                  <button type="button" onClick={onDelete} disabled={disabled} className="ui-artwork-edit-delete">
                     {deleting ? '削除中…' : '作品を削除'}
                   </button>
                 )}
+                <div className="ui-artwork-edit-footer-actions">
+                  <button type="button" onClick={onClose} disabled={disabled} className="ui-btn ui-btn--ghost">キャンセル</button>
+                  <button type="button" onClick={() => onSave(pendingImageBlob, galleryImageId || null)} disabled={disabled} className="ui-btn ui-btn--accent">
+                    {saving ? '保存中…' : '変更を保存'}
+                  </button>
+                </div>
               </div>
             </>
           )}
