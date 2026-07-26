@@ -435,7 +435,6 @@ export default function DashArtworks() {
       <ImageUploader
         ref={artworkUploaderRef}
         renderTrigger={false}
-        multiple
         onFilesSelected={handleCreateFiles}
       />
 

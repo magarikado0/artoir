@@ -208,6 +208,7 @@ image_width / image_height は Cloudinary アップロード応答の width/heig
 
 ### 画像アップロード
 
+- 新規作品の入口ではカバー画像を1枚だけ選択する。作品情報画面では、カバー画像の元データから詳細を再クロップするか、別アングル・背面・展示風景などの写真を残り枚数まで複数追加できる。カバー元画像からの再クロップは、元データを保持している新規作成中のみ対応する
 - アップロード前にクライアント側で圧縮: 長辺 1920px に縮小、JPEG quality 0.82、400KB 未満はスキップ(`app/src/lib/imageCompress.js`)
 - 圧縮後 Cloudinary に直接アップロード。**元解像度は保存されない**(図録印刷対応の際は要変更 → `product.md` 未決事項)
 - トリミング・位置調整 UI あり(react-easy-crop / react-image-crop)。四隅指定の遠近補正(quad crop、`app/src/lib/perspectiveWarp.js`)に対応 — 展示壁面を斜めから撮った写真を正面化できる

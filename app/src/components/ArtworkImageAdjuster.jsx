@@ -359,31 +359,6 @@ export default function ArtworkImageAdjuster({
     <div style={{ minWidth: 0 }}>
       <QuadCropper bitmap={workBitmap} quad={quad} onQuadChange={setQuad} busy={busy} exposure={exposure} />
 
-      <div className="ui-exposure-control">
-        <div className="ui-exposure-heading">
-          <label htmlFor="artwork-image-exposure">明るさ</label>
-          <output htmlFor="artwork-image-exposure" aria-live="polite">
-            {exposure === 0 ? '0.0' : `${exposure > 0 ? '+' : ''}${exposure.toFixed(1)}`} EV
-          </output>
-        </div>
-        <div className="ui-exposure-slider-row">
-          <span aria-hidden="true">−</span>
-          <input
-            id="artwork-image-exposure"
-            type="range"
-            min="-2"
-            max="2"
-            step="0.1"
-            value={exposure}
-            disabled={!workBitmap || busy}
-            onChange={(event) => setExposure(Number(event.target.value))}
-            aria-label="写真の明るさ"
-            aria-valuetext={`${exposure > 0 ? '+' : ''}${exposure.toFixed(1)} EV`}
-          />
-          <span aria-hidden="true">＋</span>
-        </div>
-      </div>
-
       <div className="ui-quad-toolbar">
         <button
           type="button"
@@ -395,6 +370,21 @@ export default function ArtworkImageAdjuster({
         >
           <span aria-hidden="true">↻</span> 90°
         </button>
+        <div className="ui-exposure-control">
+          <label htmlFor="artwork-image-exposure">明るさ</label>
+          <input
+            id="artwork-image-exposure"
+            type="range"
+            min="-2"
+            max="2"
+            step="0.1"
+            value={exposure}
+            disabled={!workBitmap || busy}
+            onChange={(event) => setExposure(Number(event.target.value))}
+            aria-label="写真の明るさ"
+            aria-valuetext={`${exposure > 0 ? '+' : ''}${exposure.toFixed(1)}`}
+          />
+        </div>
         <button
           type="button"
           className="ui-quad-reset"

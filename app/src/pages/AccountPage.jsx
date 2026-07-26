@@ -482,7 +482,6 @@ export default function AccountPage() {
             <div className="ui-kicker">作品</div>
             <ImageUploader
               variant="button"
-              multiple
               buttonClassName="ui-pill-action--accent"
               buttonLabel="作品を追加"
               onFilesSelected={handleAddWork}

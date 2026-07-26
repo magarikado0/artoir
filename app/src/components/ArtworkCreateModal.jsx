@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getArtworkUploadConfigError, isMissingImageDimensionColumnError, omitImageDimensionFields, uploadArtworkImage } from '../lib/artworkUpload'
 import { compressImageFile } from '../lib/imageCompress'
@@ -40,6 +40,8 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
   const [cropQueue, setCropQueue] = useState([])
   const [cropIndex, setCropIndex] = useState(0)
   const [cropReturnsToDetails, setCropReturnsToDetails] = useState(false)
+  const [cropIntent, setCropIntent] = useState('initial')
+  const [provisionalImageIds, setProvisionalImageIds] = useState([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [selectedCreatorIds, setSelectedCreatorIds] = useState([])
@@ -56,6 +58,8 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
       setCropQueue([])
       setCropIndex(0)
       setCropReturnsToDetails(false)
+      setCropIntent('initial')
+      setProvisionalImageIds([])
       setTitle('')
       setDescription('')
       setSelectedCreatorIds([])
@@ -74,29 +78,22 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
     setCropQueue(initial.map((image) => image.id))
     setCropIndex(0)
     setCropReturnsToDetails(false)
+    setCropIntent('initial')
+    setProvisionalImageIds([])
     setPhase(initial.length ? 'crop' : 'details')
     return () => initial.forEach((image) => URL.revokeObjectURL(image.sourceUrl))
   }, [open, file, files, defaultCreatorKey])
 
-  useEffect(() => {
-    if (!open) return undefined
-    const handler = (event) => {
-      if (event.key !== 'Escape' || saving || confirming) return
-      if (phase === 'crop' && cropReturnsToDetails) setPhase('details')
-      else onClose()
-    }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [confirming, cropReturnsToDetails, onClose, open, phase, saving])
-
   const cropImageId = cropQueue[cropIndex]
   const cropImage = useMemo(() => images.find((image) => image.id === cropImageId) || null, [cropImageId, images])
 
-  function startCropQueue(ids, returnsToDetails = true) {
+  function startCropQueue(ids, returnsToDetails = true, provisionalIds = [], intent = 'recrop') {
     if (!ids.length) return
     setCropQueue(ids)
     setCropIndex(0)
     setCropReturnsToDetails(returnsToDetails)
+    setCropIntent(intent)
+    setProvisionalImageIds(provisionalIds)
     setPhase('crop')
     setError('')
   }
@@ -110,15 +107,16 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
     const next = filesToArtworkImages(nextFiles, images)
     const added = next.slice(images.length).map((image) => ({ ...image, sourceUrl: image.previewUrl }))
     const merged = [...images, ...added]
+    const addedIds = added.map((image) => image.id)
     setImages(merged)
-    startCropQueue(added.map((image) => image.id), true)
+    startCropQueue(addedIds, true, addedIds, 'new-files')
   }
 
   function recrop(id) {
-    startCropQueue([id], true)
+    startCropQueue([id], true, [], 'recrop')
   }
 
-  function duplicateAndRecrop(id) {
+  function duplicateAndRecrop(id, intentOverride = '') {
     setLimitError('')
     if (images.length >= 5) {
       setLimitError('画像は最大5枚まで追加できます')
@@ -126,16 +124,34 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
     }
     const source = images.find((image) => image.id === id)
     if (!source) return
+    // previewUrl はクロップ結果に置き換わるため、再クロップでは保持中の元画像を使う。
+    const originalSourceUrl = source.sourceUrl
+      || (source.file ? URL.createObjectURL(source.file) : source.previewUrl)
     const duplicate = {
       ...source,
       id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-duplicate`,
-      previewUrl: source.sourceUrl,
+      sourceUrl: originalSourceUrl,
+      previewUrl: originalSourceUrl,
       croppedBlob: null,
       progress: null,
       error: '',
     }
     setImages((prev) => [...prev, duplicate])
-    startCropQueue([duplicate.id], true)
+    startCropQueue(
+      [duplicate.id],
+      true,
+      [duplicate.id],
+      intentOverride || (id === images[0]?.id ? 'cover-detail' : 'duplicate'),
+    )
+  }
+
+  function duplicateCoverAndRecrop(coverImageId) {
+    const currentCoverImage = images[0]
+    if (!currentCoverImage) return
+    const resolvedCoverImageId = currentCoverImage.id === coverImageId
+      ? coverImageId
+      : currentCoverImage.id
+    duplicateAndRecrop(resolvedCoverImageId, 'cover-detail')
   }
 
   async function confirmCrop(blob) {
@@ -146,17 +162,61 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
       setCropIndex((index) => index + 1)
       return
     }
+    setCropQueue([])
+    setCropIndex(0)
+    setCropReturnsToDetails(false)
+    setCropIntent('recrop')
+    setProvisionalImageIds([])
     setPhase('details')
   }
+
+  const hasUnsavedChanges = images.length > 0
+    || Boolean(title.trim())
+    || Boolean(description.trim())
+    || selectedCreatorIds.join('|') !== defaultCreatorKey
+
+  const requestClose = useCallback(() => {
+    if (saving || confirming) return
+    if (hasUnsavedChanges && !window.confirm('編集中の内容が失われます。閉じますか？')) return
+    onClose()
+  }, [confirming, hasUnsavedChanges, onClose, saving])
+
+  const abandonCrop = useCallback(() => {
+    if (!cropReturnsToDetails) {
+      requestClose()
+      return
+    }
+    const provisionalSet = new Set(provisionalImageIds)
+    const abandonedIds = new Set(cropQueue.slice(cropIndex).filter((id) => provisionalSet.has(id)))
+    if (abandonedIds.size > 0) {
+      setImages((prev) => prev.filter((image) => !abandonedIds.has(image.id)))
+    }
+    setCropQueue([])
+    setCropIndex(0)
+    setCropReturnsToDetails(false)
+    setCropIntent('recrop')
+    setProvisionalImageIds([])
+    setPhase('details')
+  }, [cropIndex, cropQueue, cropReturnsToDetails, provisionalImageIds, requestClose])
 
   function cancelCrop() {
     if (cropIndex > 0) {
       setCropIndex((index) => index - 1)
       return
     }
-    if (cropReturnsToDetails) setPhase('details')
-    else onClose()
+    abandonCrop()
   }
+
+  useEffect(() => {
+    if (!open) return undefined
+    const handler = (event) => {
+      if (event.key !== 'Escape' || saving || confirming) return
+      if (phase === 'crop') abandonCrop()
+      else requestClose()
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [abandonCrop, confirming, open, phase, requestClose, saving])
 
   async function handleSave() {
     if (!open || images.length === 0 || saving) return
@@ -262,6 +322,12 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
 
   if (!open) return null
   const canSave = images.length > 0 && images.length <= 5 && !saving && images.every((image) => !image.error)
+  const cropTitle = cropIntent === 'cover-detail' ? 'カバー画像から切り出す' : '画像を調整'
+  const cropConfirmLabel = cropIndex < cropQueue.length - 1
+    ? '保存して次へ'
+    : cropIntent === 'cover-detail'
+      ? '追加する'
+      : '保存して作品情報へ'
 
   function toggleCreator(creatorProfileId) {
     setSelectedCreatorIds((prev) => prev.includes(creatorProfileId) ? prev.filter((id) => id !== creatorProfileId) : [...prev, creatorProfileId])
@@ -272,10 +338,10 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
       <div className="ui-app-card ui-artwork-create-card">
         <div className="ui-artwork-create-header">
           <div>
-            <div id="artwork-create-title" className="ui-screen-title" style={{ fontSize: 22, marginTop: 6 }}>{phase === 'crop' ? '画像を調整' : '作品を追加'}</div>
+            <div id="artwork-create-title" className="ui-screen-title" style={{ fontSize: 22, marginTop: 6 }}>{phase === 'crop' ? cropTitle : '作品を追加'}</div>
           </div>
           {phase === 'crop' && <div className="ui-artwork-crop-position" aria-live="polite">{cropIndex + 1} / {cropQueue.length}</div>}
-          <button onClick={onClose} disabled={saving || confirming} className="ui-modal-close" type="button">×</button>
+          <button onClick={requestClose} disabled={saving || confirming} className="ui-modal-close" type="button">×</button>
         </div>
 
         {phase === 'crop' && cropImage ? (
@@ -284,7 +350,7 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
               key={`${cropImage.id}-${cropImage.sourceUrl}`}
               sourceUrl={cropImage.sourceUrl}
               sourceType={cropImage.file.type}
-              confirmLabel={cropIndex < cropQueue.length - 1 ? '保存して次へ' : '保存して作品情報へ'}
+              confirmLabel={cropConfirmLabel}
               confirmingLabel="保存中…"
               onBusyChange={setConfirming}
               onConfirm={confirmCrop}
@@ -301,19 +367,22 @@ export default function ArtworkCreateModal({ open, file, files, exhibitionId, pr
               onAddFiles={addFiles}
               onRecrop={recrop}
               onDuplicateRecrop={duplicateAndRecrop}
+              onDuplicateCoverRecrop={duplicateCoverAndRecrop}
               disabled={saving}
               limitError={limitError}
             />
 
             <div className="ui-artwork-create-fields">
-              <div className="ui-form-label">タイトル</div>
-              <div className="ui-input-wrap"><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="作品名を入力" style={{ fontFamily: T.sans }} /></div>
-              <div className="ui-form-label">作品説明</div>
-              <div className="ui-input-wrap" data-multiline="true"><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="説明文を入力" rows={5} style={{ fontFamily: T.sans }} /></div>
-              {showCreatorPicker && <CreatorPicker creatorOptions={creatorOptions} selectedCreatorIds={selectedCreatorIds} onToggleCreator={toggleCreator} />}
-              {error && <div className="ui-alert ui-alert--error">{error}</div>}
+              <div className="ui-artwork-create-form">
+                <div className="ui-form-label">タイトル</div>
+                <div className="ui-input-wrap"><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="作品名を入力" style={{ fontFamily: T.sans }} /></div>
+                <div className="ui-form-label">作品説明</div>
+                <div className="ui-input-wrap" data-multiline="true"><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="説明文を入力" rows={4} style={{ fontFamily: T.sans }} /></div>
+                {showCreatorPicker && <CreatorPicker creatorOptions={creatorOptions} selectedCreatorIds={selectedCreatorIds} onToggleCreator={toggleCreator} />}
+                {error && <div className="ui-alert ui-alert--error">{error}</div>}
+              </div>
               <div className="ui-btn-row ui-artwork-create-actions">
-                <button onClick={onClose} disabled={saving} className="ui-btn ui-btn--ghost">閉じる</button>
+                <button onClick={requestClose} disabled={saving} className="ui-btn ui-btn--ghost">閉じる</button>
                 <button onClick={handleSave} disabled={!canSave} className="ui-btn ui-btn--accent">{saving ? '保存中…' : '保存する'}</button>
               </div>
             </div>

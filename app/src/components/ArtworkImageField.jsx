@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
+import { openImageFilePicker } from '../lib/imageFilePicker'
 
 const MAX_IMAGES = 5
 const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
-export default function ArtworkImageField({ images, galleryImageId, onGalleryImageChange, onChange, onAddFiles, onRecrop, onDuplicateRecrop, disabled = false, limitError = '' }) {
+export default function ArtworkImageField({ images, galleryImageId, onGalleryImageChange, onChange, onAddFiles, onRecrop, onDuplicateRecrop, onDuplicateCoverRecrop, disabled = false, limitError = '' }) {
   const [draggedId, setDraggedId] = useState(null)
   const [dragOverId, setDragOverId] = useState(null)
   const [openMenu, setOpenMenu] = useState(null)
+  const [showAddOptions, setShowAddOptions] = useState(false)
   const inputRef = useRef(null)
   const longPressTimerRef = useRef(null)
   const touchDragIdRef = useRef(null)
@@ -41,7 +43,16 @@ export default function ArtworkImageField({ images, galleryImageId, onGalleryIma
       window.alert(!ALLOWED_TYPES.includes(invalid.type) ? '対応していない画像形式です。' : '画像サイズは10MB以下にしてください。')
       return
     }
+    setShowAddOptions(false)
     onAddFiles(candidates)
+  }
+
+  async function selectAdditionalImages() {
+    const selected = await openImageFilePicker({
+      multiple: true,
+      fallbackInput: inputRef.current,
+    })
+    if (selected) validateAndAdd(selected)
   }
 
   function removeImage(id) {
@@ -101,6 +112,7 @@ export default function ArtworkImageField({ images, galleryImageId, onGalleryIma
   const resolvedGalleryImageId = images.some((image) => image.id === galleryImageId)
     ? galleryImageId
     : images[0]?.id
+  const coverImage = images[0]
 
   return (
     <div className="ui-multi-image-field">
@@ -189,12 +201,38 @@ export default function ArtworkImageField({ images, galleryImageId, onGalleryIma
           </article>
         ))}
 
-        {images.length < MAX_IMAGES && (
-          <button type="button" className="ui-multi-image-add-card" onClick={() => inputRef.current?.click()} disabled={disabled}>
-            <span aria-hidden="true">＋</span>
-            <span>別アングル・詳細を追加</span>
+        {images.length < MAX_IMAGES && (showAddOptions ? (
+          <div className="ui-multi-image-add-options">
+            <div className="ui-multi-image-add-options-head">
+              <strong>この作品に画像を追加</strong>
+              <button type="button" onClick={() => setShowAddOptions(false)} disabled={disabled} aria-label="追加方法を閉じる">×</button>
+            </div>
+            <button
+              type="button"
+              className="ui-multi-image-add-option"
+              disabled={disabled || images.length === 0}
+              onClick={() => {
+                setShowAddOptions(false)
+                onDuplicateCoverRecrop(coverImage.id)
+              }}
+            >
+              <strong>カバー画像を切り出して追加</strong>
+            </button>
+            <button
+              type="button"
+              className="ui-multi-image-add-option"
+              disabled={disabled}
+              onClick={() => { void selectAdditionalImages() }}
+            >
+              <strong>別の写真を追加</strong>
+            </button>
+          </div>
+        ) : (
+          <button type="button" className="ui-multi-image-add-card" onClick={() => setShowAddOptions(true)} disabled={disabled}>
+            <span className="ui-multi-image-add-icon" aria-hidden="true">＋</span>
+            <strong>画像を追加</strong>
           </button>
-        )}
+        ))}
       </div>
 
       {limitError && <p className="ui-multi-image-limit-error" role="alert">{limitError}</p>}
