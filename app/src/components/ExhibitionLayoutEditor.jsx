@@ -52,7 +52,7 @@ function placementsEqual(left, right) {
   return JSON.stringify(left) === JSON.stringify(right)
 }
 
-export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabase, onRequestAdd, onEditArtwork, onDeleteArtwork }) {
+export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabase, onRequestAdd, onEditArtwork, onDeleteArtwork, onSavedLayoutChange }) {
   const canvasRef = useRef(null)
   const canvasPressRef = useRef(null)
   const menuRef = useRef(null)
@@ -90,6 +90,7 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
       }
       const currentArtworks = artworksRef.current
       const complete = completeExhibitionLayout(currentArtworks, data || [])
+      onSavedLayoutChange?.((data || []).length > 0)
       draftRef.current = complete
       setDraft(complete)
       historyRef.current = { past: [], future: [] }
@@ -99,7 +100,7 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
     }
     load()
     return () => { active = false }
-  }, [exhibitionId, supabase])
+  }, [exhibitionId, onSavedLayoutChange, supabase])
 
   useEffect(() => {
     const node = canvasRef.current
@@ -348,6 +349,7 @@ export default function ExhibitionLayoutEditor({ exhibitionId, artworks, supabas
       return
     }
     assignDraft(resolvedDraft)
+    onSavedLayoutChange?.(rows.length > 0)
     setMessage('配置を保存しました')
   }
 
