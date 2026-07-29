@@ -58,6 +58,7 @@ export default function AllExhibitionsPage() {
         return [exhibition.title, exhibition.location, org?.name, profile?.display_name].filter(Boolean).join(' ').toLowerCase().includes(q)
       })
   }, [rows, query])
+  const hasSearchQuery = query.trim().length > 0
 
   if (loading) return (
     <div className="ui-page-shell" />
@@ -94,7 +95,9 @@ export default function AllExhibitionsPage() {
         </div>
 
         {filteredRows.length === 0 && (
-          <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>展覧会がまだありません</div>
+          <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>
+            {hasSearchQuery ? '検索条件に一致する展覧会が見つかりません' : '展覧会がまだありません'}
+          </div>
         )}
       </main>
       <BottomNav active="top" />
