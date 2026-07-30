@@ -153,7 +153,7 @@ export default function CollectionPage() {
       <main className="ui-app-main">
 
         <section style={{ marginBottom: 32 }}>
-          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>わたしのコレクション</h1>
+          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>コレクション</h1>
 
           <div className="ui-collection-tabs" role="tablist">
             {TABS.map((tab) => (
