@@ -1,14 +1,61 @@
-import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
 import ShareLinkButton from '../components/ShareLinkButton'
 import PublicManageLink from '../components/PublicManageLink'
-import ExhibitionListCard from '../components/ExhibitionListCard'
+import ExhibitionListCard, { ExhibitionCardMedia } from '../components/ExhibitionListCard'
 import { T, externalHost } from '../lib/tokens'
-import { mapExhibitionListRow } from '../lib/exhibition'
+import { exhStatus, getExhibitionThumbnailUrl, mapExhibitionListRow } from '../lib/exhibition'
+import {
+  attachDiscoveryMetadata,
+  buildSeriesPath,
+  DISCIPLINE_FALLBACKS,
+  editionDisplay,
+  getPrimaryDiscipline,
+  groupExhibitionsByYear,
+  loadDiscoveryMetadata,
+} from '../lib/discoveryData'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
+
+function SeriesCard({ series, org }) {
+  const exhibitions = series.exhibitions || []
+  const latest = exhibitions[0]
+  const years = exhibitions.map((item) => item.edition_year || String(item.start_date || '').slice(0, 4)).filter(Boolean)
+  const startYear = series.start_year || years[years.length - 1]
+  const endYear = years[0]
+  const seriesHref = buildSeriesPath({ series, org })
+
+  return (
+    <article className="ui-series-card">
+      <Link to={seriesHref} className="ui-series-card-media" aria-label={`${series.name}の歴代開催を見る`}>
+        <ExhibitionCardMedia thumbnailUrl={getExhibitionThumbnailUrl(latest)} title={series.name} />
+      </Link>
+      <div className="ui-series-card-body">
+        <div className="ui-series-card-overline">
+          <span>EXHIBITION SERIES</span>
+          {series.recurrence_label && <span>{series.recurrence_label}</span>}
+        </div>
+        <Link to={seriesHref} className="ui-series-card-title">{series.name}</Link>
+        {series.description && <p>{series.description}</p>}
+        <div className="ui-series-card-facts">
+          <span>{startYear && endYear ? `${startYear} — ${endYear}` : endYear || startYear || '開催年未設定'}</span>
+          <span>{exhibitions.length}回の記録</span>
+        </div>
+        <div className="ui-series-card-years" aria-label="直近の開催回">
+          {exhibitions.slice(0, 4).map((exhibition) => (
+            <Link key={exhibition.id} to={`/${org.slug}/exhibition/${exhibition.slug}`}>
+              <strong>{exhibition.edition_year || String(exhibition.start_date || '').slice(0, 4) || '—'}</strong>
+              <small>{editionDisplay(exhibition) || exhibition.title}</small>
+            </Link>
+          ))}
+          <Link to={seriesHref} className="ui-series-card-all">すべて見る <span aria-hidden="true">→</span></Link>
+        </div>
+      </div>
+    </article>
+  )
+}
 
 export default function OrgPage() {
   const { orgSlug } = useParams()
@@ -16,6 +63,10 @@ export default function OrgPage() {
   const legacyProfileSlug = legacyProfileSlugFromOwnerSlug(orgSlug)
   const [org, setOrg] = useState(null)
   const [exhibitions, setExhibitions] = useState([])
+  const [series, setSeries] = useState([])
+  const [selectedYear, setSelectedYear] = useState(null)
+  const [selectedDiscipline, setSelectedDiscipline] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -29,13 +80,26 @@ export default function OrgPage() {
         const { data: orgData } = await supabase.from('organizations').select('*').eq('slug', orgSlug).single()
         if (!orgData) return setLoading(false)
         setOrg(orgData)
-        const { data: exhData } = await supabase
-          .from('exhibitions')
-          .select('*, artworks!artworks_exhibition_id_fkey(image_url, order)')
-          .eq('organization_id', orgData.id)
-          .eq('visibility', 'public')
-          .order('start_date', { ascending: false })
-        setExhibitions((exhData || []).map(mapExhibitionListRow))
+        const [{ data: exhibitionRows }, { data: seriesRows }] = await Promise.all([
+          supabase
+            .from('exhibitions')
+            .select('*, artworks!artworks_exhibition_id_fkey(image_url, order)')
+            .eq('organization_id', orgData.id)
+            .eq('visibility', 'public')
+            .order('start_date', { ascending: false }),
+          supabase
+            .from('exhibition_series')
+            .select('*')
+            .eq('organization_id', orgData.id)
+            .order('start_year', { ascending: false }),
+        ])
+        const metadata = await loadDiscoveryMetadata(supabase, (exhibitionRows || []).map((item) => item.id))
+        const mapped = (exhibitionRows || []).map((item) => attachDiscoveryMetadata(mapExhibitionListRow(item), metadata))
+        setExhibitions(mapped)
+        setSeries((seriesRows || []).map((item) => ({
+          ...item,
+          exhibitions: mapped.filter((exhibition) => exhibition.series_id === item.id),
+        })).filter((item) => item.exhibitions.length > 0))
       } catch {
         /* unavailable */
       } finally {
@@ -45,9 +109,21 @@ export default function OrgPage() {
     load()
   }, [legacyProfileSlug, navigate, orgSlug])
 
-  if (loading) return (
-    <div className="ui-page-shell" />
-  )
+  const filteredExhibitions = useMemo(() => exhibitions.filter((exhibition) => {
+    if (statusFilter !== 'all' && exhStatus(exhibition) !== statusFilter) return false
+    if (selectedDiscipline !== 'all' && !exhibition.discovery?.disciplines?.some((item) => item.slug === selectedDiscipline)) return false
+    return true
+  }), [exhibitions, selectedDiscipline, statusFilter])
+
+  const yearGroups = useMemo(() => groupExhibitionsByYear(filteredExhibitions), [filteredExhibitions])
+  const visibleYearGroups = selectedYear
+    ? yearGroups.filter(([year]) => String(year) === String(selectedYear))
+    : yearGroups
+  const availableDisciplines = DISCIPLINE_FALLBACKS.filter((discipline) => (
+    exhibitions.some((exhibition) => exhibition.discovery?.disciplines?.some((item) => item.slug === discipline.slug))
+  ))
+
+  if (loading) return <div className="ui-page-shell" />
   if (!org) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <p style={{ color: T.inkMuted, fontSize: 14 }}>公開ページが見つかりません</p>
@@ -59,18 +135,14 @@ export default function OrgPage() {
   return (
     <div className="ui-page-shell">
       <Header activeTab="orgs" />
-      <main className="ui-app-main">
-        <section style={{ marginBottom: 48 }}>
-          <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{org.name}</h1>
+      <main className="ui-app-main ui-org-archive-page">
+        <section className="ui-org-archive-hero">
+          <div className="ui-kicker">ORGANIZATION ARCHIVE</div>
+          <h1 className="ui-screen-title">{org.name}</h1>
           {org.description && <p className="ui-screen-subtitle">{org.description}</p>}
           <div className="ui-public-action-row">
             <ShareLinkButton />
-            <PublicManageLink
-              ownerType="organization"
-              ownerId={org.id}
-              to={`/${org.slug}/dashboard`}
-              label="団体を管理"
-            />
+            <PublicManageLink ownerType="organization" ownerId={org.id} to={`/${org.slug}/dashboard`} label="団体を管理" />
           </div>
           {(sns.instagram || sns.x || org.homepage_url) && (
             <div className="ui-public-link-row">
@@ -80,33 +152,109 @@ export default function OrgPage() {
                 </a>
               )}
               {sns.x && (
-                <a href={sns.x} target="_blank" rel="noreferrer" className="ui-public-icon-link" aria-label="X">
-                  <span aria-hidden="true">X</span>
-                </a>
+                <a href={sns.x} target="_blank" rel="noreferrer" className="ui-public-icon-link" aria-label="X"><span aria-hidden="true">X</span></a>
               )}
               {org.homepage_url && (
                 <a href={org.homepage_url} target="_blank" rel="noreferrer" className="ui-public-text-link">
-                  <span>Web</span>
-                  <span>{externalHost(org.homepage_url)}</span>
+                  <span>Web</span><span>{externalHost(org.homepage_url)}</span>
                 </a>
               )}
             </div>
           )}
         </section>
 
-        <div className="ui-section-label">展覧会</div>
+        {series.length > 0 && (
+          <section className="ui-org-series-section">
+            <div className="ui-org-archive-heading">
+              <div>
+                <div className="ui-kicker">CONTINUING EXHIBITIONS</div>
+                <h2>継続している展覧会</h2>
+              </div>
+              <p>同じ企画の歴代開催を、ひと続きの記録として辿れます。</p>
+            </div>
+            <div className="ui-org-series-list">
+              {series.map((item) => <SeriesCard key={item.id} series={item} org={org} />)}
+            </div>
+          </section>
+        )}
 
-        <div className="ui-exhibition-list-grid">
-          {exhibitions.map((exh) => (
-            <ExhibitionListCard
-              key={exh.id}
-              exhibition={exh}
-              org={org}
-              showOrgName={false}
-              artworkCount={exh.artworkCount}
-            />
-          ))}
-        </div>
+        <section className="ui-org-timeline-section">
+          <div className="ui-org-archive-heading">
+            <div>
+              <div className="ui-kicker">EXHIBITION TIMELINE</div>
+              <h2>展覧会の記録</h2>
+            </div>
+            <p>{exhibitions.length}件の展覧会を、開催年から遡れます。</p>
+          </div>
+
+          <div className="ui-org-archive-filters">
+            <div role="group" aria-label="開催状態">
+              {[
+                ['all', 'すべて'],
+                ['live', '開催中'],
+                ['upcoming', 'これから'],
+                ['ended', '終了'],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={statusFilter === value ? 'is-active' : ''}
+                  aria-pressed={statusFilter === value}
+                  onClick={() => { setStatusFilter(value); setSelectedYear(null) }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {availableDisciplines.length > 0 && (
+              <label>
+                <span className="ui-sr-only">分野</span>
+                <select value={selectedDiscipline} onChange={(event) => { setSelectedDiscipline(event.target.value); setSelectedYear(null) }}>
+                  <option value="all">すべての分野</option>
+                  {availableDisciplines.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}
+                </select>
+              </label>
+            )}
+          </div>
+
+          {yearGroups.length > 0 ? (
+            <div className="ui-org-timeline-layout">
+              <nav className="ui-org-year-rail" aria-label="開催年">
+                <button type="button" className={selectedYear == null ? 'is-active' : ''} aria-pressed={selectedYear == null} onClick={() => setSelectedYear(null)}>すべて</button>
+                {yearGroups.map(([year, items]) => (
+                  <button key={year} type="button" className={String(selectedYear) === String(year) ? 'is-active' : ''} aria-pressed={String(selectedYear) === String(year)} onClick={() => setSelectedYear(year)}>
+                    <strong>{year}</strong><small>{items.length}</small>
+                  </button>
+                ))}
+              </nav>
+              <div className="ui-org-timeline-content">
+                {visibleYearGroups.map(([year, items]) => (
+                  <section key={year} className="ui-org-year-group">
+                    <header>
+                      <strong>{year}</strong>
+                      <span>{items.length} EXHIBITIONS</span>
+                    </header>
+                    <div className="ui-exhibition-list-grid">
+                      {items.map((exhibition) => (
+                        <ExhibitionListCard
+                          key={exhibition.id}
+                          exhibition={exhibition}
+                          org={org}
+                          showOrgName={false}
+                          artworkCount={exhibition.artworkCount}
+                          connectionReason={exhibition.series_id ? editionDisplay(exhibition) || '継続展' : getPrimaryDiscipline(exhibition)?.name || ''}
+                          connectionKind={exhibition.series_id ? 'bridge' : 'metadata'}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="ui-panel ui-discovery-empty">条件に合う展覧会はありません。</div>
+          )}
+        </section>
       </main>
       <BottomNav active="orgs" />
     </div>

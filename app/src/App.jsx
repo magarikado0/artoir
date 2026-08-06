@@ -14,6 +14,7 @@ const CreatorsPage = lazy(() => import('./pages/CreatorsPage'))
 const OrgPage = lazy(() => import('./pages/OrgPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const ExhibitionPage = lazy(() => import('./pages/ExhibitionPage'))
+const ExhibitionSeriesPage = lazy(() => import('./pages/ExhibitionSeriesPage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const AdminPage = lazy(() => import('./pages/AdminPage'))
 const DashHome = lazy(() => import('./pages/dashboard/DashHome'))
@@ -168,6 +169,8 @@ export default function App() {
             <Route path="/@:profileSlug" element={<ProfilePage />} />
             <Route path="/profile/:profileSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
             <Route path="/@:profileSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
+            <Route path="/profile/:profileSlug/series/:seriesSlug" element={<ExhibitionSeriesPage />} />
+            <Route path="/@:profileSlug/series/:seriesSlug" element={<ExhibitionSeriesPage />} />
             <Route path="/profile/:profileSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
             <Route path="/@:profileSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
             <Route path="/profile/:profileSlug/dashboard/exhibitions/new" element={<ProtectedRoute><DashExhibitionEdit /></ProtectedRoute>} />
@@ -177,6 +180,7 @@ export default function App() {
             <Route path="/profile/:profileSlug/dashboard/exhibitions/:exhibitionId/artworks" element={<ProtectedRoute><DashArtworks /></ProtectedRoute>} />
             <Route path="/@:profileSlug/dashboard/exhibitions/:exhibitionId/artworks" element={<ProtectedRoute><DashArtworks /></ProtectedRoute>} />
             <Route path="/:orgSlug/exhibition/:exhibitionSlug" element={<ExhibitionPage />} />
+            <Route path="/:orgSlug/series/:seriesSlug" element={<ExhibitionSeriesPage />} />
             <Route path="/:orgSlug/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
             <Route path="/:orgSlug/dashboard" element={<ProtectedRoute><DashHome /></ProtectedRoute>} />
             <Route path="/:orgSlug/dashboard/settings" element={<ProtectedRoute><DashSettings /></ProtectedRoute>} />

@@ -10,6 +10,7 @@ import ArtworkViewer from '../components/ArtworkViewer'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
 import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
 import ExhibitionStatusBadge from '../components/ExhibitionStatusBadge'
+import ExhibitionListCard from '../components/ExhibitionListCard'
 import { useGalleryLayout } from '../lib/useGalleryLayout'
 import { useArtworkViewerHistory } from '../lib/useArtworkViewerHistory'
 import LoadingFrames from '../components/LoadingFrames'
@@ -18,6 +19,15 @@ import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoutes'
 import { getAvailableGalleryViews, normalizeGalleryViewSettings } from '../lib/galleryViewSettings'
+import { mapExhibitionListRow } from '../lib/exhibition'
+import {
+  attachDiscoveryMetadata,
+  buildSeriesPath,
+  editionDisplay,
+  getPrimaryDiscipline,
+  loadDiscoveryMetadata,
+  rankConnectedExhibitions,
+} from '../lib/discoveryData'
 
 const Exhibition3DGalleryView = lazy(() => import('../components/Exhibition3DGalleryView'))
 
@@ -47,6 +57,24 @@ function SummaryItem({ label, value, to }) {
   )
 }
 
+function publicExhibitionPath(exhibition, org, profile) {
+  if (profile?.slug) return `${profilePath(profile.slug)}/exhibition/${exhibition.slug}`
+  if (org?.slug) return `/${org.slug}/exhibition/${exhibition.slug}`
+  return ''
+}
+
+function JourneyLink({ item, direction }) {
+  if (!item) return <span className="ui-exhibition-journey-spacer" aria-hidden="true" />
+  const href = publicExhibitionPath(item.exhibition, item.org, item.profile)
+  return (
+    <Link to={href} className={`ui-exhibition-journey-link ui-exhibition-journey-link--${direction}`}>
+      <span>{direction === 'previous' ? '← 前の開催' : '次の開催 →'}</span>
+      <strong>{editionDisplay(item.exhibition) || item.exhibition.title}</strong>
+      {editionDisplay(item.exhibition) && <small>{item.exhibition.title}</small>}
+    </Link>
+  )
+}
+
 export default function ExhibitionPage() {
   const { orgSlug: routeOrgSlug, profileSlug: routeProfileSlug, exhibitionSlug } = useParams()
   const location = useLocation()
@@ -55,6 +83,8 @@ export default function ExhibitionPage() {
   const [owner, setOwner] = useState(null)
   const [exhibition, setExhibition] = useState(null)
   const [artworks, setArtworks] = useState([])
+  const [relatedExhibitions, setRelatedExhibitions] = useState([])
+  const [series, setSeries] = useState(null)
   const [artworkLayout, setArtworkLayout] = useState([])
   const [exhibitionGalleryLayout, setExhibitionGalleryLayout] = useState(null)
   const [viewMode, setViewMode] = useState('grid')
@@ -83,15 +113,44 @@ export default function ExhibitionPage() {
           .eq('visibility', 'public')
           .maybeSingle()
         if (!exhData) return setLoading(false)
-        setExhibition(exhData)
-        setExhibitionGalleryLayout(normalizeGalleryViewSettings(exhData).defaultView)
-        const { data: awData } = await supabase
-          .from('artworks')
-          .select('*, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
-          .eq('exhibition_id', exhData.id)
-          .order('order')
+        const [{ data: awData }, { data: layoutData }, { data: relatedRows }, seriesResult] = await Promise.all([
+          supabase
+            .from('artworks')
+            .select('*, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
+            .eq('exhibition_id', exhData.id)
+            .order('order'),
+          supabase
+            .from('exhibition_artwork_layouts')
+            .select('*')
+            .eq('exhibition_id', exhData.id)
+            .order('z_index'),
+          supabase
+            .from('exhibitions')
+            .select('*, organizations(id, name, slug), profiles(id, display_name, slug), artworks!artworks_exhibition_id_fkey(image_url, order)')
+            .eq('visibility', 'public')
+            .order('start_date', { ascending: false })
+            .limit(100),
+          exhData.series_id
+            ? supabase.from('exhibition_series').select('*').eq('id', exhData.series_id).maybeSingle()
+            : Promise.resolve({ data: null }),
+        ])
+        const discoveryMetadata = await loadDiscoveryMetadata(supabase, [...(relatedRows || []).map((item) => item.id), exhData.id])
+        const enrichedExhibition = attachDiscoveryMetadata(exhData, discoveryMetadata)
+        setExhibition(enrichedExhibition)
+        setSeries(seriesResult?.data || null)
+        setExhibitionGalleryLayout(normalizeGalleryViewSettings(enrichedExhibition).defaultView)
+        setRelatedExhibitions((relatedRows || []).map((row) => {
+          const { organizations: relatedOrg, profiles: relatedProfile, ...rest } = row
+          const relatedExhibition = attachDiscoveryMetadata(mapExhibitionListRow(rest), discoveryMetadata)
+          return {
+            exhibition: relatedExhibition,
+            org: relatedOrg,
+            profile: relatedProfile,
+            artworkCount: relatedExhibition.artworkCount,
+          }
+        }))
         const exhibitionForArtwork = {
-          ...exhData,
+          ...enrichedExhibition,
           organizations: profileSlug ? null : ownerData,
           profiles: profileSlug ? ownerData : null,
         }
@@ -99,11 +158,6 @@ export default function ExhibitionPage() {
           ...artwork,
           exhibitions: exhibitionForArtwork,
         })))
-        const { data: layoutData } = await supabase
-          .from('exhibition_artwork_layouts')
-          .select('*')
-          .eq('exhibition_id', exhData.id)
-          .order('z_index')
         const nextLayout = layoutData || []
         setArtworkLayout(nextLayout)
       } catch {
@@ -162,6 +216,41 @@ export default function ExhibitionPage() {
   const activeGalleryLayout = availableGalleryViews.modes.includes(exhibitionGalleryLayout)
     ? exhibitionGalleryLayout
     : availableGalleryViews.defaultView
+  const ownerRows = relatedExhibitions.filter((item) => (
+    profileSlug ? item.profile?.id === owner?.id : item.org?.id === owner?.id
+  ))
+  const seriesRows = exhibition.series_id
+    ? ownerRows.filter((item) => item.exhibition.series_id === exhibition.series_id)
+    : []
+  const navigationRows = (seriesRows.length > 1 ? seriesRows : ownerRows)
+    .slice()
+    .sort((a, b) => {
+      const yearDiff = Number(a.exhibition.edition_year || String(a.exhibition.start_date || '').slice(0, 4) || 0)
+        - Number(b.exhibition.edition_year || String(b.exhibition.start_date || '').slice(0, 4) || 0)
+      return yearDiff || String(a.exhibition.start_date || '').localeCompare(String(b.exhibition.start_date || ''))
+    })
+  const navigationIndex = navigationRows.findIndex((item) => item.exhibition.id === exhibition.id)
+  const previousExhibition = navigationIndex > 0 ? navigationRows[navigationIndex - 1] : null
+  const nextExhibition = navigationIndex >= 0 && navigationIndex < navigationRows.length - 1 ? navigationRows[navigationIndex + 1] : null
+  const currentDiscipline = getPrimaryDiscipline(exhibition)
+  const sameDisciplineRows = relatedExhibitions
+    .filter((item) => item.exhibition.id !== exhibition.id && getPrimaryDiscipline(item.exhibition)?.slug === currentDiscipline?.slug)
+    .slice(0, 2)
+  const relatedById = new Map(relatedExhibitions.map((item) => [item.exhibition.id, item]))
+  const crossDisciplineRows = rankConnectedExhibitions(
+    exhibition,
+    relatedExhibitions.map((item) => item.exhibition),
+    { breadth: 'wide', limit: 12 },
+  )
+    .filter(({ item }) => getPrimaryDiscipline(item)?.slug && getPrimaryDiscipline(item)?.slug !== currentDiscipline?.slug)
+    .slice(0, 2)
+    .map(({ item, connection }) => ({ row: relatedById.get(item.id), connection }))
+    .filter(({ row }) => row)
+  const seriesHref = series ? buildSeriesPath({
+    series,
+    org: profileSlug ? null : owner,
+    profile: profileSlug ? owner : null,
+  }) : ''
 
   return (
     <div className="ui-page-shell">
@@ -169,6 +258,13 @@ export default function ExhibitionPage() {
       <main className="ui-app-main">
         <section>
           <div className="ui-exhibition-summary-card">
+            {series && seriesHref && (
+              <Link to={seriesHref} className="ui-exhibition-series-crumb">
+                <span>展覧会シリーズ</span>
+                <strong>{series.name}</strong>
+                {editionDisplay(exhibition) && <small>{editionDisplay(exhibition)}</small>}
+              </Link>
+            )}
             <ExhibitionStatusBadge exhibition={exhibition} className="ui-exhibition-status-eyebrow" />
             <div className="ui-exhibition-title-row">
               <h1 className="ui-screen-title">{exhibition.title}</h1>
@@ -181,6 +277,16 @@ export default function ExhibitionPage() {
               />
             </div>
             {exhibition.description && <p className="ui-screen-subtitle">{exhibition.description}</p>}
+            {(exhibition.discovery?.disciplines?.length > 0 || exhibition.discovery?.tags?.length > 0) && (
+              <div className="ui-exhibition-taxonomy" aria-label="分野と表現の特徴">
+                {(exhibition.discovery?.disciplines || []).map((discipline) => (
+                  <Link key={discipline.slug} to={`/exhibitions?discipline=${encodeURIComponent(discipline.slug)}`} className={discipline.is_primary ? 'is-primary' : ''}>
+                    {discipline.name}
+                  </Link>
+                ))}
+                {(exhibition.discovery?.tags || []).slice(0, 6).map((tag) => <span key={tag.slug}>{tag.name}</span>)}
+              </div>
+            )}
             <div className="ui-public-action-row">
               <ShareLinkButton />
               <PublicManageLink
@@ -242,6 +348,63 @@ export default function ExhibitionPage() {
             </div>
           )}
         </section>
+        {(previousExhibition || nextExhibition || sameDisciplineRows.length > 0 || crossDisciplineRows.length > 0) && (
+          <section className="ui-exhibition-journey">
+            <div className="ui-exhibition-journey-heading">
+              <div>
+                <div className="ui-kicker">CONTINUE EXPLORING</div>
+                <h2>次に辿る</h2>
+              </div>
+              <p>時間を遡るか、表現の共通点から別の展覧会へ進めます。</p>
+            </div>
+
+            {(previousExhibition || nextExhibition) && (
+              <div className="ui-exhibition-journey-timeline">
+                <JourneyLink item={previousExhibition} direction="previous" />
+                <div className="ui-exhibition-journey-current">
+                  <span>{series ? series.name : profileSlug ? 'この作家の展覧会' : 'この団体の展覧会'}</span>
+                  {series && seriesHref ? <Link to={seriesHref}>{seriesRows.length}回の記録を見る</Link> : <Link to={ownerBase}>年表を見る</Link>}
+                </div>
+                <JourneyLink item={nextExhibition} direction="next" />
+              </div>
+            )}
+
+            {(sameDisciplineRows.length > 0 || crossDisciplineRows.length > 0) && (
+              <div className="ui-exhibition-journey-columns">
+                {sameDisciplineRows.length > 0 && (
+                  <div>
+                    <h3>{currentDiscipline?.name || '同じ分野'}をさらに辿る</h3>
+                    <div className="ui-exhibition-list-grid">
+                      {sameDisciplineRows.map((row) => (
+                        <ExhibitionListCard
+                          key={row.exhibition.id}
+                          {...row}
+                          connectionReason={`${currentDiscipline?.name || '同じ表現'}でつながる`}
+                          connectionKind="near"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {crossDisciplineRows.length > 0 && (
+                  <div>
+                    <h3>別の分野へひらく</h3>
+                    <div className="ui-exhibition-list-grid">
+                      {crossDisciplineRows.map(({ row, connection }) => (
+                        <ExhibitionListCard
+                          key={row.exhibition.id}
+                          {...row}
+                          connectionReason={connection?.reason || '表現の共通点から辿る'}
+                          connectionKind="bridge"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        )}
         {viewMode === '3d' && viewableArtworks.length > 0 && (
           <Suspense fallback={null}>
             <Exhibition3DGalleryView

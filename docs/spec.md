@@ -1,6 +1,6 @@
 # Artoir — 実装仕様・インフラ
 
-> 最終更新: 2026-07-05(ドキュメント統合。旧 `ops/infra.md` を本ファイルに吸収)
+> 最終更新: 2026-08-05(展覧会の分野探索・年次シリーズを反映)
 
 ## 技術スタック
 
@@ -34,7 +34,17 @@
 - `add-artwork-image-dimensions.sql` — artworks に image_width / image_height を追加(段組レイアウト用)
 - `add-exhibition-artwork-layouts.sql` — 展覧会ごとの自由配置(正規化座標・RLS)
 - `add-exhibition-gallery-view-settings.sql` — 公開ページに表示する作品レイアウトと初期表示
+- `add-exhibition-discovery-series.sql` — 芸術分野・表現タグ・展覧会シリーズと開催回メタデータ
 - `fix-artwork-creators-personal-exhibitions.sql` — 個人展覧会の作者紐付けRLS判定を修正
+
+`add-exhibition-discovery-series.sql` の適用手順:
+
+1. 対象の Supabase プロジェクトで SQL Editor を開く
+2. `docs/sql/add-exhibition-discovery-series.sql` の全内容を貼り付けて実行する(再実行可能)
+3. `art_disciplines` / `art_expression_tags` / `exhibition_series` / 2つの関連テーブルと、`exhibitions` の追加列が作成されたことを確認する
+4. SQL 適用後にアプリをデプロイする。既存展覧会は未分類・単発のまま維持され、管理画面から順次設定できる
+
+SQL 未適用の環境では、公開一覧・展覧会ページはタイトル・説明・会場から分野と表現タグを推定して基本的な探索表示を維持する。管理画面は分類・シリーズ欄を無効化して理由を表示し、従来の展覧会基本情報だけを読み書きする。シリーズページと確定済み分類の保存は SQL 適用後に有効になる。
 
 ## データ構造
 
@@ -45,14 +55,20 @@ auth.users(認証)
 profiles
   ├── artworks(プロフィール直下の作品)
   ├── exhibitions(個人の展覧会)
+  ├── exhibition_series(個人の継続展)
   ├── favorites(保存)
   └── organization_members
         └── organizations
+              ├── exhibition_series(団体の継続展)
               └── exhibitions
                     ├── artworks
                           └── artwork_creators
                                 └── profiles
                     └── exhibition_artwork_layouts
+
+exhibitions
+  ├── exhibition_disciplines ── art_disciplines
+  └── exhibition_expression_tags ── art_expression_tags
 ```
 
 ### profiles
@@ -106,10 +122,42 @@ profiles
 | visibility | string(`public` / `private` / `draft` / `unlisted`) |
 | gallery_view_modes | text[](`curated` / `wall` / `grid` のうち公開する表示) |
 | gallery_default_view | string(公開ページの初期表示) |
+| series_id | UUID(nullable、exhibition_series.id) |
+| edition_year / edition_number | integer(nullable、開催年 / 回次) |
+| edition_label | text(nullable、記念展などの特別名称) |
+| is_series_milestone | boolean(節目の開催回) |
+| participant_count | integer(nullable、参加作家数) |
 
 `organization_id` XOR `profile_id`(CHECK 制約)。料金系フィールド(fee_type / fee_detail)は存在しない。
 
 公開ページと公開一覧に表示するのは `visibility = 'public'` の展覧会のみ。管理画面では所有者が全状態を確認・編集できる。
+
+### 展覧会の分野・表現タグ
+
+- `art_disciplines`: 固定の主分野マスタ(`slug / name / sort_order`)。初期値は書・文字、絵画・ドローイング、写真、版画、彫刻・立体、工芸、デザイン・イラスト、映像・デジタル、複合表現
+- `exhibition_disciplines`: `exhibition_id / discipline_id / is_primary / sort_order`。主分野は1件、副分野は最大2件。主分野を0番、副分野を1・2番に固定する
+- `art_expression_tags`: 固定の表現語彙(`slug / name / tag_type / sort_order`)。`tag_type` は `medium`(素材・技法) / `theme`(主題) / `visual`(視覚的特徴)
+- `exhibition_expression_tags`: `exhibition_id / tag_id`。管理画面では各 tag_type を最大3件まで選択する
+
+マスタの `slug` は公開側の検索・分野間接続で使う固定キー。表示名を文字列として展覧会へ複製しない。
+フォーム用の固定定義・正規化は `app/src/lib/discovery.js`、公開側の取得・推定・接続順位は `app/src/lib/discoveryData.js` に置く。
+
+### exhibition_series
+
+毎年・隔年・年2回・不定期など、同じ企画の開催回を束ねる任意のシリーズ。
+
+| カラム | 型 |
+|--------|-----|
+| id | UUID (PK) |
+| organization_id / profile_id | UUID(所有者、XOR) |
+| slug | string(owner 内で unique) |
+| name | string |
+| description | text |
+| recurrence_label | text(毎年、隔年など) |
+| start_year | integer(nullable) |
+| created_at / updated_at | timestamptz |
+
+各開催回は従来どおり独立した `exhibitions` 行・公開URL・作品群を持ち、`series_id` で任意に所属する。シリーズと開催回の所有者は必ず一致させる。`edition_year` と `edition_number` は別データとして扱い、回次はシリーズ内で重複不可。シリーズを削除・解除した場合も展覧会自体は残し、シリーズ所属・回次・特別名称・節目フラグを外す。
 
 ### artworks
 
@@ -164,17 +212,22 @@ image_width / image_height は Cloudinary アップロード応答の width/heig
 - 団体の owner はメンバーを管理できる
 - artwork_creators は展覧会に対して正当なプロフィールのみ参照できる(団体展は団体メンバー、個人展は所有プロフィール)
 - favorites は本人のみ読み書き可
+- 芸術分野・表現タグのマスタは公開読取のみ。展覧会との関連は公開展なら閲覧可、追加・更新・削除は展覧会の管理者のみ
+- シリーズは公開展を1件以上含む場合だけ一般公開し、空シリーズ・非公開回だけのシリーズは所有者のみ閲覧・管理できる
 
 ## URL設計
 
 ```
-/                                            # トップ: 全展覧会一覧(検索付き)
+/                                            # 未ログイン向けランディング(ログイン済みは /exhibitions へ)
+/exhibitions                                 # 展覧会探索(検索・分野・表現・開催年)
 /orgs                                        # 団体一覧
 /creators                                    # 作家一覧(検索付き)
 /{org-slug}                                  # 団体ページ
 /{org-slug}/exhibition/{exhibition-slug}     # 団体の展覧会ページ
+/{org-slug}/series/{series-slug}             # 団体の展覧会シリーズ
 /profile/{profile-slug}                      # プロフィールページ(/@{slug} でも可)
 /profile/{profile-slug}/exhibition/{slug}    # 個人の展覧会ページ
+/profile/{profile-slug}/series/{slug}        # 個人の展覧会シリーズ(/@{slug}/series/... でも可)
 /collection                                  # お気に入り一覧(要ログイン)
 /login                                       # ログイン
 /account                                     # アカウント(プロフィール・所属団体)
@@ -195,18 +248,19 @@ image_width / image_height は Cloudinary アップロード応答の width/heig
 
 ### 公開側
 
-- **トップ(展覧会一覧)**: 全展覧会をカードで新しい順に表示、タイトル・会場・主体名で絞り込み検索
-- **団体一覧 / 団体ページ**: 名前・説明・SNS/HPリンク・展覧会一覧(サムネイル・会期・場所・開催状況バッジ)
+- **トップ(展覧会探索)**: 「開催中・これから」、開催状態フィルタ、検索、9つの主分野、分野間の接続レール、「近い表現 / 意外な表現」、開催年索引、全公開展を表示。検索対象はタイトル・説明・会場・主体名・分野・表現タグ。異分野カードには「墨と余白でつながる」など接続理由を表示する
+- **団体一覧 / 団体ページ**: 名前・説明・SNS/HPリンク、公開中の継続シリーズ、開催年レール、開催状態・分野フィルタ、年別の展覧会アーカイブ
 - **作家一覧**: 作家(プロフィール)をカードで一覧表示、検索付き
 - **プロフィールページ**: 表示名・bio・アバター・SNS/HP・作品・所属団体・個人の展覧会
-- **展覧会ページ**: タイトル・会期(日付+時刻)・場所・説明・開催状況バッジ、作品ギャラリー(PCの保存済み自由配置 / 自動ウォール / グリッド)、作品モーダル(画像・タイトル・説明・表示ONの作者)、シェアボタン、主体ページへの戻り導線
+- **展覧会ページ**: タイトル・会期(日付+時刻)・場所・説明・分野・表現タグ・開催状況バッジ、作品ギャラリー(PCの保存済み自由配置 / 自動ウォール / グリッド)、作品モーダル(画像・タイトル・説明・表示ONの作者)、シェアボタン、主体ページへの戻り導線。作品末尾の「次に辿る」から同シリーズ/同主体の前後回、同分野、共通表現を持つ別分野へ進める
+- **展覧会シリーズページ**: シリーズ概要・最新回・年/回次の時間レール・歴代開催を表示。初期表示は最新3回、節目、初回を優先し、全件展開できる。2回を選ぶ比較は代表作品・作品数・参加作家数・会場を並べ、末尾から共通表現を持つ別分野へ進める。団体・個人の双方に対応
 - **お気に入り**: 作品・展覧会・団体・プロフィールをブックマーク保存(長押し対応)、`/collection` で一覧
 - ナビゲーション: ヘッダー + ボトムナビ(展覧会 / 団体 / 作家 / コレクション※ログイン時のみ / アカウント)
 
 ### 管理側
 
 - **アカウント**: プロフィール設定・編集、所属団体一覧、団体作成、ログアウト
-- **ダッシュボード(団体・個人共通の構成)**: 展覧会一覧(開催状況バッジ)、展覧会の作成・編集・削除、作品のアップロード・編集・並べ替え・削除、作者の紐づけと表示切り替え。作品管理画面は自由配置キャンバスを主画面とする。キャンバス内ツールバーでUndo / Redo・初期配置・保存を行う。空白部分のコンテキストメニューから作品を追加し、作品上のメニューから編集・削除・重なり順を操作する(PC右クリック、モバイル長押し、キーボードメニュー)。作品ゼロ時のみキャンバス中央に追加ボタンを表示する。従来ウォールの並び替えは折りたたみ式の作品トレイで行う
+- **ダッシュボード(団体・個人共通の構成)**: 展覧会一覧(開催状況バッジ)、展覧会の作成・編集・削除、作品のアップロード・編集・並べ替え・削除、作者の紐づけと表示切り替え。展覧会編集では主分野1件、副分野最大2件、素材・技法/主題/視覚タグを各最大3件設定できる。単発、新規シリーズ作成、既存シリーズ追加を選び、周期・開催年・回次・特別名称・節目・参加作家数を保存する。作品管理画面は自由配置キャンバスを主画面とする。キャンバス内ツールバーでUndo / Redo・初期配置・保存を行う。空白部分のコンテキストメニューから作品を追加し、作品上のメニューから編集・削除・重なり順を操作する(PC右クリック、モバイル長押し、キーボードメニュー)。作品ゼロ時のみキャンバス中央に追加ボタンを表示する。従来ウォールの並び替えは折りたたみ式の作品トレイで行う
 - **団体のみ**: 団体設定、メンバー管理(owner が追加・削除・ロール変更)
 
 ### 画像アップロード

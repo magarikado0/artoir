@@ -12,6 +12,7 @@
     "demo:record-gallery": "node --experimental-strip-types scripts/record-gallery-demo.ts",
     "demo:record-gallery-mobile": "node --experimental-strip-types scripts/record-gallery-mobile-demo.ts",
     "demo:record-flow": "node scripts/demo/record-flow.mjs",
+    "test:discovery": "node scripts/test-discovery.mjs",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "npm run build && wrangler dev",
@@ -27,11 +28,11 @@
     "react-dom": "^19.2.4",
     "react-easy-crop": "^5.5.7",
     "react-image-crop": "^11.0.10",
-    "react-router-dom": "^7.14.0",
+    "react-router-dom": "^7.11.0",
     "three": "^0.185.1"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.33.1",
+    "@cloudflare/vite-plugin": "^1.51.0",
     "@eslint/js": "^9.39.4",
     "@tailwindcss/vite": "^4.2.2",
     "@types/react": "^19.2.14",
@@ -44,6 +45,6 @@
     "playwright": "^1.61.1",
     "tailwindcss": "^4.2.2",
     "vite": "^8.0.1",
-    "wrangler": "^4.84.1"
+    "wrangler": "^4.119.0"
   }
 }
