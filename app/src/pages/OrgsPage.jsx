@@ -38,7 +38,7 @@ export default function OrgsPage() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return orgs
-    return orgs.filter((o) => [o.name, o.description].filter(Boolean).join(' ').toLowerCase().includes(q))
+    return orgs.filter((o) => String(o.name || '').toLowerCase().includes(q))
   }, [orgs, query])
 
   if (loading) return (
@@ -74,7 +74,6 @@ export default function OrgsPage() {
                   <div className="ui-org-name-row">
                     <span className="ui-org-name">{o.name}</span>
                   </div>
-                  {o.description && <div className="ui-org-description">{o.description}</div>}
                 </div>
                 <div className="ui-org-count">
                   <span>{pad2(o.exh_count ?? 0)}</span>

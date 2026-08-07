@@ -10,7 +10,6 @@ import { exhStatus, mapExhibitionListRow } from '../lib/exhibition'
 import { isProfileWorksExhibition } from '../lib/profileWorks'
 import {
   attachDiscoveryMetadata,
-  DISCIPLINE_BRIDGES,
   DISCIPLINE_FALLBACKS,
   getExhibitionYear,
   getPrimaryDiscipline,
@@ -35,56 +34,11 @@ async function fetchExhibitionRows() {
   return data || []
 }
 
-function SectionHeading({ eyebrow, title, description, action }) {
+function SectionHeading({ title, action }) {
   return (
     <div className="ui-discovery-section-head">
-      <div>
-        {eyebrow && <div className="ui-kicker">{eyebrow}</div>}
-        <h2>{title}</h2>
-        {description && <p>{description}</p>}
-      </div>
+      <h2>{title}</h2>
       {action}
-    </div>
-  )
-}
-
-function ConnectionRail({ selectedSlug, disciplines, onSelect }) {
-  const selected = disciplines.find((item) => item.slug === selectedSlug) || disciplines[0]
-  const bridges = (DISCIPLINE_BRIDGES[selected?.slug] || [])
-    .map((bridge) => ({
-      ...bridge,
-      discipline: disciplines.find((item) => item.slug === bridge.to),
-    }))
-    .filter((bridge) => bridge.discipline)
-    .slice(0, 4)
-
-  if (!selected) return null
-
-  return (
-    <div className="ui-connection-rail" aria-label={`${selected.name}と別分野のつながり`}>
-      <button type="button" className="ui-connection-origin" onClick={() => onSelect(selected.slug)}>
-        <span>起点</span>
-        <strong>{selected.name}</strong>
-      </button>
-      <div className="ui-connection-paths">
-        {bridges.length > 0 ? bridges.map((bridge) => {
-          const reasonNames = bridge.via
-            .map((slug) => ({ ink: '墨', line: '線', 'negative-space': '余白', text: '文字', paper: '紙', light: '光', figure: '人物', nature: '自然', ceramic: '素材', abstraction: '抽象', geometric: '形' })[slug])
-            .filter(Boolean)
-            .slice(0, 2)
-          return (
-            <div className="ui-connection-path" key={bridge.to}>
-              <span className="ui-connection-line" aria-hidden="true" />
-              <span className="ui-connection-reason">{reasonNames.join('・')}</span>
-              <button type="button" onClick={() => onSelect(bridge.discipline.slug)}>
-                {bridge.discipline.name}
-              </button>
-            </div>
-          )
-        }) : (
-          <div className="ui-connection-empty">この分野からつながる展覧会を準備しています</div>
-        )}
-      </div>
     </div>
   )
 }
@@ -152,12 +106,6 @@ export default function AllExhibitionsPage() {
   const years = useMemo(() => [...new Set(rows.map(({ exhibition }) => getExhibitionYear(exhibition)).filter(Boolean))]
     .sort((a, b) => b - a), [rows])
 
-  const countsByStatus = useMemo(() => rows.reduce((counts, { exhibition }) => {
-    const status = exhStatus(exhibition)
-    counts[status] = (counts[status] || 0) + 1
-    return counts
-  }, { all: rows.length, live: 0, upcoming: 0, ended: 0 }), [rows])
-
   const filteredRows = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
     return rows.filter(({ exhibition, org, profile }) => {
@@ -184,6 +132,15 @@ export default function AllExhibitionsPage() {
       return statusDiff || String(a.exhibition.start_date || '').localeCompare(String(b.exhibition.start_date || ''))
     })
     .slice(0, 6), [rows])
+
+  const recentRows = useMemo(() => {
+    const currentIds = new Set(currentRows.map(({ exhibition }) => exhibition.id))
+    return [...rows]
+      .filter(({ exhibition }) => !currentIds.has(exhibition.id))
+      .sort((a, b) => String(b.exhibition.created_at || b.exhibition.start_date || '')
+        .localeCompare(String(a.exhibition.created_at || a.exhibition.start_date || '')))
+      .slice(0, 6)
+  }, [currentRows, rows])
 
   const selectedDisciplineInfo = disciplines.find((item) => item.slug === selectedDiscipline) || disciplines[0]
   const connectedRows = useMemo(() => {
@@ -214,9 +171,7 @@ export default function AllExhibitionsPage() {
       <Header activeTab="top" />
       <main className="ui-app-main ui-discovery-page">
         <section className="ui-discovery-intro">
-          <div className="ui-kicker">ARTOIR ARCHIVE</div>
           <h1 className="ui-screen-title">展覧会を辿る</h1>
-          <p className="ui-screen-subtitle">開催中の展示から、団体の記録、分野を越えた表現まで。</p>
         </section>
 
         <div className="ui-toolbar-grid ui-discovery-toolbar">
@@ -249,7 +204,6 @@ export default function AllExhibitionsPage() {
               onClick={() => setStatusFilter(option.value)}
             >
               <span>{option.label}</span>
-              <small>{countsByStatus[option.value]}</small>
             </button>
           ))}
         </div>
@@ -257,9 +211,7 @@ export default function AllExhibitionsPage() {
         {hasSearchContext ? (
           <section className="ui-discovery-section" aria-live="polite">
             <SectionHeading
-              eyebrow="ARCHIVE SEARCH"
               title={yearFilter ? `${yearFilter}年の展覧会` : '検索結果'}
-              description={`${filteredRows.length}件の展覧会が見つかりました。`}
               action={hasSearchContext ? (
                 <button type="button" className="ui-text-action" onClick={() => { setQuery(''); setYearFilter(null); setStatusFilter('all') }}>
                   条件をクリア
@@ -272,26 +224,31 @@ export default function AllExhibitionsPage() {
               ))}
             </div>
             {filteredRows.length === 0 && (
-              <div className="ui-panel ui-discovery-empty">条件に合う展覧会はありません。別の年や分野から辿ってみてください。</div>
+              <div className="ui-panel ui-discovery-empty">展覧会はありません</div>
             )}
           </section>
         ) : (
           <>
             {currentRows.length > 0 && (
               <section className="ui-discovery-section">
-                <SectionHeading eyebrow="NOW / NEXT" title="開催中・これから" description="いま足を運べる展覧会と、まもなく始まる展示です。" />
+                <SectionHeading title="開催中・これから" />
                 <div className="ui-exhibition-list-grid">
                   {currentRows.map((row) => <ExhibitionListCard key={row.exhibition.id} {...row} />)}
                 </div>
               </section>
             )}
 
+            {recentRows.length > 0 && (
+              <section className="ui-discovery-section">
+                <SectionHeading title="新しく追加された記録" />
+                <div className="ui-exhibition-list-grid">
+                  {recentRows.map((row) => <ExhibitionListCard key={row.exhibition.id} {...row} />)}
+                </div>
+              </section>
+            )}
+
             <section className="ui-discovery-section">
-              <SectionHeading
-                eyebrow="DISCIPLINES"
-                title="分野から辿る"
-                description="ひとつの分野を入口に、素材や線、余白を介して別の表現へ渡れます。"
-              />
+              <SectionHeading title="分野から辿る" />
               <div className="ui-discipline-index" role="list" aria-label="芸術分野">
                 {disciplines.map((discipline) => (
                   <button
@@ -303,61 +260,46 @@ export default function AllExhibitionsPage() {
                     onClick={() => setSelectedDiscipline(discipline.slug)}
                   >
                     <span>{discipline.name}</span>
-                    <small>{discipline.count}</small>
                   </button>
                 ))}
               </div>
 
-              <ConnectionRail selectedSlug={selectedDiscipline} disciplines={disciplines} onSelect={setSelectedDiscipline} />
-
               <div className="ui-discovery-connected-head">
-                <div>
-                  <div className="ui-kicker">CONNECTED EXHIBITIONS</div>
-                  <h3>{selectedDisciplineInfo?.name}からひらく</h3>
-                </div>
+                <h3>{selectedDisciplineInfo?.name}</h3>
                 <div className="ui-discovery-breadth" role="group" aria-label="関連性の幅">
                   <button type="button" className={breadth === 'near' ? 'is-active' : ''} aria-pressed={breadth === 'near'} onClick={() => setBreadth('near')}>近い表現</button>
                   <button type="button" className={breadth === 'wide' ? 'is-active' : ''} aria-pressed={breadth === 'wide'} onClick={() => setBreadth('wide')}>意外な表現</button>
                 </div>
               </div>
               <div className="ui-exhibition-list-grid">
-                {connectedRows.map(({ row, reason, kind }) => (
-                  <ExhibitionListCard key={row.exhibition.id} {...row} connectionReason={reason} connectionKind={kind} />
+                {connectedRows.map(({ row }) => (
+                  <ExhibitionListCard key={row.exhibition.id} {...row} />
                 ))}
               </div>
               {connectedRows.length === 0 && (
-                <div className="ui-panel ui-discovery-empty">この分野の展覧会はまだありません。登録されると、表現のつながりがここに現れます。</div>
+                <div className="ui-panel ui-discovery-empty">展覧会はありません</div>
               )}
             </section>
 
             {years.length > 0 && (
               <section className="ui-discovery-section">
-                <SectionHeading eyebrow="BY YEAR" title="時間から辿る" description="新着順に埋もれた展覧会を、開催された年から探します。" />
+                <SectionHeading title="時間から辿る" />
                 <div className="ui-year-index">
-                  {years.slice(0, 6).map((year) => {
-                    const count = rows.filter(({ exhibition }) => getExhibitionYear(exhibition) === year).length
-                    return (
-                      <button type="button" key={year} onClick={() => setYearFilter(year)}>
-                        <strong>{year}</strong>
-                        <span>{count} 展覧会</span>
-                        <i aria-hidden="true">→</i>
-                      </button>
-                    )
-                  })}
+                  {years.slice(0, 6).map((year) => (
+                    <button type="button" key={year} onClick={() => setYearFilter(year)}>
+                      <strong>{year}</strong>
+                      <i aria-hidden="true">→</i>
+                    </button>
+                  ))}
                 </div>
               </section>
             )}
 
             <section className="ui-discovery-section">
-              <SectionHeading eyebrow="ALL EXHIBITIONS" title="すべての展覧会" description={`${rows.length}件の公開アーカイブ`} />
+              <SectionHeading title="すべての展覧会" />
               <div className="ui-exhibition-list-grid">
                 {rows.map((row) => (
-                  <ExhibitionListCard
-                    key={row.exhibition.id}
-                    {...row}
-                    connectionReason={row.exhibition.discovery?.tags?.length ? `${row.exhibition.discovery.tags.slice(0, 2).map((tag) => tag.name).join('・')}` : ''}
-                    connectionKind="metadata"
-                  />
+                  <ExhibitionListCard key={row.exhibition.id} {...row} />
                 ))}
               </div>
               {rows.length === 0 && (

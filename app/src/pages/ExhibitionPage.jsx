@@ -244,7 +244,7 @@ export default function ExhibitionPage() {
   )
     .filter(({ item }) => getPrimaryDiscipline(item)?.slug && getPrimaryDiscipline(item)?.slug !== currentDiscipline?.slug)
     .slice(0, 2)
-    .map(({ item, connection }) => ({ row: relatedById.get(item.id), connection }))
+    .map(({ item }) => ({ row: relatedById.get(item.id) }))
     .filter(({ row }) => row)
   const seriesHref = series ? buildSeriesPath({
     series,
@@ -260,9 +260,7 @@ export default function ExhibitionPage() {
           <div className="ui-exhibition-summary-card">
             {series && seriesHref && (
               <Link to={seriesHref} className="ui-exhibition-series-crumb">
-                <span>展覧会シリーズ</span>
                 <strong>{series.name}</strong>
-                {editionDisplay(exhibition) && <small>{editionDisplay(exhibition)}</small>}
               </Link>
             )}
             <ExhibitionStatusBadge exhibition={exhibition} className="ui-exhibition-status-eyebrow" />
@@ -276,7 +274,6 @@ export default function ExhibitionPage() {
                 className="ui-exhibition-title-fav"
               />
             </div>
-            {exhibition.description && <p className="ui-screen-subtitle">{exhibition.description}</p>}
             {(exhibition.discovery?.disciplines?.length > 0 || exhibition.discovery?.tags?.length > 0) && (
               <div className="ui-exhibition-taxonomy" aria-label="分野と表現の特徴">
                 {(exhibition.discovery?.disciplines || []).map((discipline) => (
@@ -351,11 +348,7 @@ export default function ExhibitionPage() {
         {(previousExhibition || nextExhibition || sameDisciplineRows.length > 0 || crossDisciplineRows.length > 0) && (
           <section className="ui-exhibition-journey">
             <div className="ui-exhibition-journey-heading">
-              <div>
-                <div className="ui-kicker">CONTINUE EXPLORING</div>
-                <h2>次に辿る</h2>
-              </div>
-              <p>時間を遡るか、表現の共通点から別の展覧会へ進めます。</p>
+              <h2>次に辿る</h2>
             </div>
 
             {(previousExhibition || nextExhibition) && (
@@ -379,8 +372,6 @@ export default function ExhibitionPage() {
                         <ExhibitionListCard
                           key={row.exhibition.id}
                           {...row}
-                          connectionReason={`${currentDiscipline?.name || '同じ表現'}でつながる`}
-                          connectionKind="near"
                         />
                       ))}
                     </div>
@@ -390,12 +381,10 @@ export default function ExhibitionPage() {
                   <div>
                     <h3>別の分野へひらく</h3>
                     <div className="ui-exhibition-list-grid">
-                      {crossDisciplineRows.map(({ row, connection }) => (
+                      {crossDisciplineRows.map(({ row }) => (
                         <ExhibitionListCard
                           key={row.exhibition.id}
                           {...row}
-                          connectionReason={connection?.reason || '表現の共通点から辿る'}
-                          connectionKind="bridge"
                         />
                       ))}
                     </div>

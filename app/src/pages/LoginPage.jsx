@@ -207,11 +207,6 @@ export default function LoginPage() {
   const formBody = (
     <>
       <div className="ui-screen-title" style={{ marginTop: 8 }}>{mode === 'login' ? 'ログイン' : '新規登録'}</div>
-      <div className="ui-screen-subtitle" style={{ fontFamily: T.serifBody }}>
-        {mode === 'login'
-          ? 'アカウントへログインします。'
-          : 'メールとパスワードでアカウントを作成します。登録後、プロフィール設定に進めます。'}
-      </div>
 
       <button
         type="button"

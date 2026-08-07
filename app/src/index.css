@@ -118,11 +118,6 @@
   letter-spacing: -0.025em;
 }
 
-.ui-discovery-intro .ui-screen-subtitle {
-  margin-top: 12px;
-  color: #4A413A;
-}
-
 .ui-discovery-toolbar {
   margin-bottom: 14px;
 }
@@ -205,12 +200,6 @@
   background: #BE553D;
 }
 
-.ui-discovery-statuses small {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 10px;
-  color: #A39A90;
-}
-
 .ui-discovery-section {
   margin-top: clamp(58px, 8vw, 92px);
 }
@@ -224,20 +213,12 @@
 }
 
 .ui-discovery-section-head h2 {
-  margin-top: 7px;
+  margin: 0;
   font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
-  font-size: clamp(25px, 3vw, 34px);
+  font-size: clamp(30px, 3.7vw, 44px);
   font-weight: 500;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-}
-
-.ui-discovery-section-head p {
-  max-width: 56ch;
-  margin-top: 8px;
-  color: #8A8178;
-  font-size: 13px;
-  line-height: 1.75;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
 }
 
 .ui-text-action {
@@ -295,16 +276,6 @@
   bottom: -1px;
   width: 3px;
   background: #BE553D;
-}
-
-.ui-discipline-index small {
-  color: #A39A90;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 10px;
-}
-
-.ui-discipline-index button.is-active small {
-  color: #D8CFC2;
 }
 
 .ui-connection-rail {
@@ -424,9 +395,9 @@
 }
 
 .ui-discovery-connected-head h3 {
-  margin-top: 6px;
+  margin: 0;
   font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 500;
 }
 
@@ -460,39 +431,6 @@
   background: #BE553D;
 }
 
-.ui-exhibition-connection {
-  min-height: 18px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #7C2E22;
-  font-size: 10px;
-  letter-spacing: 0.04em;
-}
-
-.ui-exhibition-connection > span {
-  flex: 0 0 auto;
-  width: 16px;
-  height: 1px;
-  background: #BE553D;
-}
-
-.ui-exhibition-connection--near {
-  color: #6E655D;
-}
-
-.ui-exhibition-connection--near > span {
-  background: #8A8178;
-}
-
-.ui-exhibition-connection--metadata {
-  color: #8A8178;
-}
-
-.ui-exhibition-connection--metadata > span {
-  background: #B8923A;
-}
-
 .ui-year-index {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -503,9 +441,8 @@
   min-height: 118px;
   display: grid;
   grid-template-columns: 1fr auto;
-  grid-template-rows: 1fr auto;
-  align-items: end;
-  gap: 8px;
+  align-items: center;
+  gap: 18px;
   border: 0;
   border-right: 1px solid #CFC4B6;
   border-bottom: 1px solid #CFC4B6;
@@ -527,22 +464,15 @@
 
 .ui-year-index strong {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: clamp(27px, 3vw, 40px);
+  font-size: clamp(32px, 4vw, 48px);
   font-weight: 400;
   letter-spacing: -0.04em;
 }
 
-.ui-year-index span {
-  color: #8A8178;
-  font-size: 11px;
-}
-
 .ui-year-index i {
-  grid-column: 2;
-  grid-row: 1 / -1;
-  align-self: center;
   color: #BE553D;
   font-style: normal;
+  font-size: 18px;
 }
 
 .ui-discovery-empty {
@@ -579,19 +509,11 @@
 }
 
 .ui-org-archive-heading h2 {
-  margin-top: 7px;
+  margin-top: 0;
   font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
   font-size: clamp(25px, 3vw, 34px);
   font-weight: 500;
   line-height: 1.25;
-}
-
-.ui-org-archive-heading > p {
-  max-width: 40ch;
-  color: #8A8178;
-  font-size: 12px;
-  line-height: 1.7;
-  text-align: right;
 }
 
 .ui-org-series-list {
@@ -627,22 +549,9 @@
   padding: 24px 26px 22px;
 }
 
-.ui-series-card-overline {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  color: #8A8178;
-  font-size: 9px;
-  letter-spacing: 0.16em;
-}
-
-.ui-series-card-overline span:last-child {
-  color: #8A6A1F;
-}
-
 .ui-series-card-title {
   width: fit-content;
-  margin-top: 12px;
+  margin-top: 0;
   color: #1F1B17;
   font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
   font-size: clamp(22px, 3vw, 31px);
@@ -653,24 +562,6 @@
 
 .ui-series-card-title:hover {
   color: #7C2E22;
-}
-
-.ui-series-card-body > p {
-  max-width: 58ch;
-  margin-top: 8px;
-  color: #6E655D;
-  font-size: 12px;
-  line-height: 1.75;
-}
-
-.ui-series-card-facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-  margin-top: 15px;
-  color: #8A8178;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 10px;
 }
 
 .ui-series-card-years {
@@ -696,14 +587,6 @@
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 14px;
   font-weight: 500;
-}
-
-.ui-series-card-years small {
-  overflow: hidden;
-  color: #8A8178;
-  font-size: 9px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .ui-series-card-years .ui-series-card-all {
@@ -803,10 +686,6 @@
   font-weight: 500;
 }
 
-.ui-org-year-rail small {
-  font-size: 9px;
-}
-
 .ui-org-year-group + .ui-org-year-group {
   margin-top: 52px;
 }
@@ -834,12 +713,6 @@
   letter-spacing: -0.04em;
 }
 
-.ui-org-year-group > header span {
-  color: #8A8178;
-  font-size: 9px;
-  letter-spacing: 0.14em;
-}
-
 /* 展覧会ページから時間方向・異分野方向へ進む導線。 */
 .ui-exhibition-series-crumb {
   width: fit-content;
@@ -853,22 +726,10 @@
   text-decoration: none;
 }
 
-.ui-exhibition-series-crumb > span {
-  color: #8A8178;
-  font-size: 9px;
-  letter-spacing: 0.13em;
-}
-
 .ui-exhibition-series-crumb strong {
   font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
   font-size: 13px;
   font-weight: 500;
-}
-
-.ui-exhibition-series-crumb small {
-  color: #7C2E22;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 10px;
 }
 
 .ui-exhibition-taxonomy {
@@ -921,18 +782,10 @@
 }
 
 .ui-exhibition-journey-heading h2 {
-  margin-top: 7px;
+  margin-top: 0;
   font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
   font-size: clamp(27px, 3.4vw, 38px);
   font-weight: 500;
-}
-
-.ui-exhibition-journey-heading > p {
-  max-width: 42ch;
-  color: #8A8178;
-  font-size: 12px;
-  line-height: 1.7;
-  text-align: right;
 }
 
 .ui-exhibition-journey-timeline {
@@ -1077,13 +930,6 @@
   color: #7C2E22;
 }
 
-.ui-series-eyebrow {
-  margin-top: 24px;
-  color: #8A8178;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-}
-
 .ui-series-title-row {
   display: flex;
   align-items: flex-start;
@@ -1095,12 +941,6 @@
 .ui-series-title-row .ui-series-title {
   font-size: clamp(38px, 6vw, 68px);
   letter-spacing: -0.025em;
-}
-
-.ui-series-description {
-  color: #4A413A;
-  font-family: 'Noto Serif JP', serif;
-  line-height: 1.9;
 }
 
 .ui-series-overview {
@@ -1138,23 +978,10 @@
   margin-bottom: 20px;
 }
 
-.ui-series-section-heading .ui-section-label {
-  margin: 0 0 7px;
-  color: #8A8178;
-}
-
 .ui-series-section-title {
   font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
   font-size: clamp(25px, 3vw, 34px);
   font-weight: 500;
-}
-
-.ui-series-section-copy {
-  max-width: 55ch;
-  margin-top: 8px;
-  color: #8A8178;
-  font-size: 12px;
-  line-height: 1.7;
 }
 
 .ui-series-section-heading--with-action {
@@ -1523,28 +1350,14 @@
   gap: 14px;
 }
 
-.ui-series-related-kind {
-  width: fit-content;
-  margin-bottom: 6px;
-  color: #7C2E22;
-  font-size: 9px;
-  letter-spacing: 0.08em;
-}
-
 .ui-series-empty {
   max-width: 680px;
   margin: 48px auto;
   text-align: center;
 }
 
-.ui-series-empty-eyebrow {
-  color: #8A8178;
-  font-size: 9px;
-  letter-spacing: 0.16em;
-}
-
 .ui-series-empty-title {
-  margin-top: 10px;
+  margin-top: 0;
   font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
   font-size: 26px;
   font-weight: 500;
@@ -1740,10 +1553,6 @@
     gap: 9px;
   }
 
-  .ui-org-archive-heading > p {
-    text-align: left;
-  }
-
   .ui-series-card {
     grid-template-columns: 1fr;
   }
@@ -1817,10 +1626,6 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 8px;
-  }
-
-  .ui-exhibition-journey-heading > p {
-    text-align: left;
   }
 
   .ui-exhibition-journey-timeline {
@@ -2412,14 +2217,6 @@ a {
   color: #1F1B17;
 }
 
-.ui-screen-subtitle {
-  margin-top: 10px;
-  font-size: 14px;
-  line-height: 1.8;
-  color: #8A8178;
-  max-width: 60ch;
-}
-
 .ui-section-label {
   margin: 40px 0 16px;
   font-family: 'Noto Sans JP', -apple-system, sans-serif;
@@ -2787,11 +2584,6 @@ a {
   color: #8A8178;
   font-size: 13px;
   line-height: 1.5;
-}
-
-.ui-dashboard-list-head .ui-screen-subtitle {
-  max-width: 720px;
-  margin: 8px 0 0;
 }
 
 .ui-dashboard-mobile-main {
@@ -3436,15 +3228,6 @@ a {
   line-height: 1.1;
 }
 
-.ui-exhibition-summary-card .ui-screen-subtitle {
-  margin-top: 18px;
-  font-family: 'Noto Serif JP', serif;
-  font-size: 15px;
-  line-height: 1.9;
-  color: #4A413A;
-  max-width: 62ch;
-}
-
 .ui-exhibition-summary-grid {
   margin-top: 36px;
   padding-top: 28px;
@@ -3574,16 +3357,6 @@ a {
   flex-wrap: wrap;
 }
 
-.ui-org-description {
-  margin-top: 4px;
-  color: #8A8178;
-  font-size: 13px;
-  line-height: 1.6;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .ui-org-count {
   text-align: right;
 }
@@ -3636,19 +3409,6 @@ a {
   color: #8A8178;
   font-size: 13px;
   flex-shrink: 0;
-}
-
-.ui-creator-bio {
-  margin-top: 4px;
-  color: #8A8178;
-  font-size: 13px;
-  line-height: 1.6;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 
 /* 団体一覧の各行のお気に入りボタン */
@@ -5152,11 +4912,6 @@ a {
   color: #FBF8F3;
 }
 
-.ui-auth-brand-panel .ui-screen-subtitle {
-  font-size: 13px;
-  color: rgba(251, 248, 243, 0.7);
-}
-
 .ui-auth-mark {
   width: 40px;
   height: 40px;
@@ -6555,10 +6310,6 @@ a.ui-settings-member-link:hover {
     padding: 0 14px;
     flex-shrink: 0;
     font-size: 12px;
-  }
-
-  .ui-dashboard-list-head .ui-screen-subtitle {
-    display: none;
   }
 
   .ui-settings-page {

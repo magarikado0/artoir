@@ -60,7 +60,7 @@ export function ExhibitionCardMedia({ thumbnailUrl, title }) {
   )
 }
 
-export default function ExhibitionListCard({ exhibition: exh, org, profile, showOrgName = true, artworkCount, connectionReason = '', connectionKind = '' }) {
+export default function ExhibitionListCard({ exhibition: exh, org, profile, showOrgName = true, artworkCount }) {
   const thumbnailUrl = getExhibitionThumbnailUrl(exh)
   const exhibitionHref = profile?.slug ? profileExhibitionPath(profile.slug, exh.slug) : `/${org?.slug || ''}/exhibition/${exh.slug}`
   const ownerName = org?.name || profile?.display_name
@@ -74,12 +74,6 @@ export default function ExhibitionListCard({ exhibition: exh, org, profile, show
         <ExhibitionCardMedia thumbnailUrl={thumbnailUrl} title={exh.title} />
       </div>
       <div className="ui-exhibition-list-card-body">
-        {connectionReason && (
-          <div className={`ui-exhibition-connection ui-exhibition-connection--${connectionKind || 'near'}`}>
-            <span aria-hidden="true" />
-            {connectionReason}
-          </div>
-        )}
         {showOrgName && ownerName && (
           <div className="ui-exhibition-list-card-meta">
             <span className="ui-exhibition-list-card-tag">{ownerName}</span>

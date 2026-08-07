@@ -1078,7 +1078,6 @@ export default function DashExhibitionEdit() {
         onChange={setDescription}
         multiline
         placeholder="展覧会の説明文を入力..."
-        help="公開ページのヒーロー下に表示されます（最大 400 文字）。"
       />
 
       <DashSectionLabel>芸術分野と表現</DashSectionLabel>
@@ -1394,7 +1393,6 @@ export default function DashExhibitionEdit() {
           <>
             <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
               <h1 className="ui-screen-title" style={{ marginTop: 8 }}>新しい展覧会</h1>
-              <p className="ui-screen-subtitle">基本情報を入れると、公開ページが作成されます。</p>
             </div>
             {formContent}
           </>
@@ -1409,7 +1407,6 @@ export default function DashExhibitionEdit() {
         <>
           <div className="ui-hero-screen-heading" style={{ marginBottom: 14 }}>
             <h1 className="ui-screen-title" style={{ marginTop: 6 }}>新しい展覧会</h1>
-            <p className="ui-screen-subtitle">下の項目を入力すると、公開ページが作成されます。</p>
           </div>
           {formContent}
         </>

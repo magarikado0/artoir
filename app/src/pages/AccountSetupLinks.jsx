@@ -211,10 +211,6 @@ export default function AccountSetupLinks() {
   const pageHeader = (
     <div className="ui-hero-screen-heading" style={{ marginBottom: isDesktop ? 14 : 0 }}>
       <h1 className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>SNSリンクを登録</h1>
-      <p className="ui-screen-subtitle">
-        {org?.name ? `${org.name}の公開ページに表示されるSNSやウェブサイトのリンクを登録できます。` : '公開ページに表示されるSNSやウェブサイトのリンクを登録できます。'}
-        あとから設定画面で変更・追加できます。
-      </p>
     </div>
   )
 

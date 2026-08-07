@@ -25,30 +25,23 @@ import { profilePath } from '../lib/profileRoutes'
 function LoggedOut({ isDesktop }) {
   const navigate = useNavigate()
   const benefits = [
-    ['01', 'プロフィールを設定する', '表示名とIDを決めて、artoirを始める。'],
-    ['02', '団体を作成する', '部・サークル・研究室の展示活動をまとめる。'],
-    ['03', '作品を管理する', '作品画像・作者プロフィール・説明文を整理する。'],
+    'プロフィールを設定する',
+    '団体を作成する',
+    '作品を管理する',
   ]
 
   const content = (
     <>
       <div className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>アカウント</div>
-      <div className="ui-screen-subtitle" style={{ fontFamily: isDesktop ? T.serifBody : undefined, marginBottom: isDesktop ? 22 : undefined }}>
-        ログインすると、プロフィールと団体の展覧会を管理できます。
-      </div>
       <button onClick={() => navigate('/login')} className="ui-btn ui-btn--primary ui-btn-block" style={{ marginTop: isDesktop ? 0 : 22, justifyContent: 'space-between' }}>
         <span>ログイン / 新規登録</span>
         <span aria-hidden="true">→</span>
       </button>
       <div className="ui-account-benefits" style={{ marginTop: isDesktop ? undefined : 32 }}>
         <div className="ui-section-label" style={{ margin: '0 0 8px', paddingBottom: 8, borderBottom: `1px solid ${T.lineSoft}` }}>ログインでできること</div>
-        {benefits.map(([n, title, desc]) => (
-          <div key={n} className="ui-account-row" style={{ display: 'grid', gridTemplateColumns: '32px 1fr', gap: 10 }}>
-            <div style={{ fontSize: 12, color: isDesktop ? T.inkMuted : T.accent }}>{n}</div>
-            <div>
-              <div style={{ fontFamily: T.serif, fontSize: 15, color: T.ink }}>{title}</div>
-              <div style={{ marginTop: 4, fontSize: 12, color: T.inkSoft, lineHeight: 1.7 }}>{desc}</div>
-            </div>
+        {benefits.map((title) => (
+          <div key={title} className="ui-account-row">
+            <div style={{ fontFamily: T.serif, fontSize: 15, color: T.ink }}>{title}</div>
           </div>
         ))}
       </div>
@@ -70,7 +63,6 @@ function ProfileSummary({ profile }) {
       </div>
       <div className="ui-screen-title" style={{ fontSize: 28 }}>{profile.display_name}</div>
       <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
-      {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 10 }}>{profile.bio}</p>}
     </section>
   )
 }
@@ -163,7 +155,7 @@ function AccountArtworkCard({ artwork, onOpen, onEdit }) {
   )
 }
 
-function OrganizationSelector({ orgs, onSelect, isDesktop }) {
+function OrganizationSelector({ orgs, onSelect }) {
   return (
     <section className="ui-account-section">
       <div className="ui-account-section-head">
@@ -190,12 +182,6 @@ function OrganizationSelector({ orgs, onSelect, isDesktop }) {
                   <div className="ui-org-name-row">
                     <span className="ui-org-name">{org.name}</span>
                   </div>
-                  {org.description && (
-                    <div className="ui-org-description">
-                      {org.description.slice(0, isDesktop ? 120 : 50)}
-                      {org.description.length > (isDesktop ? 120 : 50) ? '…' : ''}
-                    </div>
-                  )}
                 </div>
                 <div className="ui-account-org-pick-go" aria-hidden="true">→</div>
               </button>
@@ -475,7 +461,7 @@ export default function AccountPage() {
           <div className="ui-alert ui-alert--error" style={{ marginBottom: 16 }}>{loadError}</div>
         )}
 
-        <OrganizationSelector orgs={orgs} onSelect={handleSelectOrg} isDesktop={isDesktop} />
+        <OrganizationSelector orgs={orgs} onSelect={handleSelectOrg} />
 
         <section className="ui-account-section">
           <div className="ui-account-section-head">

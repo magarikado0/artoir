@@ -24,7 +24,7 @@ export default function CreatorsPage() {
       try {
         const { data } = await supabase
           .from('profiles')
-          .select('id, slug, display_name, bio')
+          .select('id, slug, display_name')
           .order('display_name')
         // slug が無いと公開ページに飛べないため除外。
         setCreators((data || []).filter((p) => p.slug))
@@ -37,13 +37,13 @@ export default function CreatorsPage() {
     load()
   }, [])
 
-  // user名（display_name）・ID（slug）・プロフィールメッセージ（bio）を対象に検索。
+  // user名（display_name）・ID（slug）を対象に検索。
   // 入力が空のときは候補を一切出さない（検索したときだけ結果を表示）。
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return []
     return creators.filter((c) =>
-      [c.display_name, c.slug, c.bio].filter(Boolean).join(' ').toLowerCase().includes(q),
+      [c.display_name, c.slug].filter(Boolean).join(' ').toLowerCase().includes(q),
     )
   }, [creators, query])
 
@@ -60,7 +60,7 @@ export default function CreatorsPage() {
             className="ui-search-input"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="名前・ID・プロフィールで検索"
+            placeholder="名前・IDで検索"
             aria-label="作家を検索"
           />
         </div>
@@ -72,7 +72,6 @@ export default function CreatorsPage() {
                 <span className="ui-creator-name">{c.display_name || c.slug}</span>
                 <span className="ui-creator-handle">@{c.slug}</span>
               </div>
-              {c.bio && <div className="ui-creator-bio">{c.bio}</div>}
               {session?.user?.id !== c.id && (
                 <FavoriteButton
                   targetType="profile"

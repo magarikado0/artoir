@@ -123,7 +123,6 @@ export default function ProfilePage() {
             )}
           </div>
           <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
-          {profile.bio && <p className="ui-screen-subtitle" style={{ marginTop: 16 }}>{profile.bio}</p>}
           <div className="ui-public-action-row">
             <ShareLinkButton />
             <PublicManageLink

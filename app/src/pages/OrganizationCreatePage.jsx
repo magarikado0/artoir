@@ -99,7 +99,6 @@ export default function OrganizationCreatePage() {
       <div style={{ maxWidth: isDesktop ? 760 : undefined, margin: isDesktop ? '0 auto' : undefined }}>
         <div className="ui-hero-screen-heading" style={{ marginBottom: isDesktop ? 14 : 0 }}>
           <h1 className="ui-screen-title" style={{ marginTop: isDesktop ? 8 : 6 }}>団体を作成</h1>
-          <p className="ui-screen-subtitle">展示活動をまとめる団体ページを作成します。</p>
         </div>
 
         <form onSubmit={handleSave}>
@@ -113,7 +112,7 @@ export default function OrganizationCreatePage() {
               mono
               help="英数字・ハイフン・アンダースコアが使えます。"
             />
-            <DashField label="説明文" value={description} onChange={setDescription} placeholder="団体の説明文を入力..." multiline help="団体ページに表示されます。" />
+            <DashField label="説明文" value={description} onChange={setDescription} placeholder="団体の説明文を入力..." multiline />
 
             {error && (
               <div className="ui-alert ui-alert--error" style={{ marginBottom: 16 }}>

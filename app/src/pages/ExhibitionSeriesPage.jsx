@@ -253,7 +253,6 @@ function SeriesEditionCard({ exhibition, owner, previous, next, latest = false }
 function PageMessage({ owner, title, children }) {
   return (
     <div className="ui-series-empty ui-panel" role="status">
-      <p className="ui-series-empty-eyebrow">EXHIBITION SERIES</p>
       <h1 className="ui-series-empty-title">{title}</h1>
       {children && <p className="ui-series-empty-copy">{children}</p>}
       {owner && <Link className="ui-series-empty-link" to={owner.path}>{owner.name}へ戻る</Link>}
@@ -455,12 +454,10 @@ export default function ExhibitionSeriesPage() {
             <span aria-hidden="true">←</span>
             <span>{page.owner.name}</span>
           </Link>
-          <p className="ui-series-eyebrow">EXHIBITION SERIES</p>
           <div className="ui-series-title-row">
             <h1 className="ui-screen-title ui-series-title">{page.series.name}</h1>
             <ShareLinkButton />
           </div>
-          {page.series.description && <p className="ui-screen-subtitle ui-series-description">{page.series.description}</p>}
           <dl className="ui-series-overview">
             {seriesSpan && (
               <div className="ui-series-overview-item">
@@ -484,7 +481,6 @@ export default function ExhibitionSeriesPage() {
         {latest ? (
           <section className="ui-series-latest" aria-labelledby="series-latest-title">
             <div className="ui-series-section-heading">
-              <p className="ui-section-label">現在地</p>
               <h2 id="series-latest-title" className="ui-series-section-title">最新の開催</h2>
             </div>
             <SeriesEditionCard
@@ -503,9 +499,7 @@ export default function ExhibitionSeriesPage() {
         {chronological.length > 0 && (
           <nav className="ui-series-timeline" aria-labelledby="series-timeline-title">
             <div className="ui-series-section-heading">
-              <p className="ui-section-label">TIME RAIL</p>
               <h2 id="series-timeline-title" className="ui-series-section-title">時間のレール</h2>
-              <p className="ui-series-section-copy">年または回次を選んで、その開催へ移動できます。</p>
             </div>
             <ol className="ui-series-timeline-list">
               {chronological.map((exhibition) => {
@@ -536,11 +530,7 @@ export default function ExhibitionSeriesPage() {
           <section className="ui-series-archive" aria-labelledby="series-archive-title">
             <div className="ui-series-section-heading ui-series-section-heading--with-action">
               <div>
-                <p className="ui-section-label">ARCHIVE</p>
                 <h2 id="series-archive-title" className="ui-series-section-title">歴代の開催</h2>
-                {!showAll && page.exhibitions.length > featured.length && (
-                  <p className="ui-series-section-copy">最近の3回、節目の回、最初の回を表示しています。</p>
-                )}
               </div>
               {page.exhibitions.length > featured.length && (
                 <button
@@ -573,9 +563,7 @@ export default function ExhibitionSeriesPage() {
         {page.exhibitions.length > 1 && compareLeft && compareRight && compareLeft.id !== compareRight.id && (
           <section className="ui-series-compare" aria-labelledby="series-compare-title">
             <div className="ui-series-section-heading">
-              <p className="ui-section-label">COMPARE EDITIONS</p>
               <h2 id="series-compare-title" className="ui-series-section-title">開催回を見比べる</h2>
-              <p className="ui-series-section-copy">二つの開催回を選び、代表作品や規模の変化を並べて見られます。</p>
             </div>
             <div className="ui-series-compare-controls">
               <label>
@@ -620,9 +608,7 @@ export default function ExhibitionSeriesPage() {
         {page.related.length > 0 && (
           <section className="ui-series-related" aria-labelledby="series-related-title">
             <div className="ui-series-section-heading">
-              <p className="ui-section-label">ACROSS FIELDS</p>
               <h2 id="series-related-title" className="ui-series-section-title">表現から辿る</h2>
-              <p className="ui-series-section-copy">時間を横に渡り、このシリーズと表現がつながる展覧会へ。</p>
               {expressionTerms.length > 0 && (
                 <ul className="ui-series-related-terms" aria-label="このシリーズに多い表現">
                   {expressionTerms.slice(0, 6).map((term) => <li key={term}>{term}</li>)}
@@ -630,16 +616,13 @@ export default function ExhibitionSeriesPage() {
               )}
             </div>
             <div className="ui-series-related-grid">
-              {page.related.map(({ exhibition, owner, connectionReason, connectionKind, crossesDiscipline }) => (
+              {page.related.map(({ exhibition, owner, crossesDiscipline }) => (
                 <article key={exhibition.id} className={`ui-series-related-item${crossesDiscipline ? ' is-cross-discipline' : ''}`}>
-                  {crossesDiscipline && <p className="ui-series-related-kind">別分野へひらく</p>}
                   <ExhibitionListCard
                     exhibition={exhibition}
                     org={owner.type === 'organization' ? owner.record : undefined}
                     profile={owner.type === 'profile' ? owner.record : undefined}
                     artworkCount={exhibition.artworkCount}
-                    connectionReason={connectionReason}
-                    connectionKind={connectionKind}
                   />
                 </article>
               ))}

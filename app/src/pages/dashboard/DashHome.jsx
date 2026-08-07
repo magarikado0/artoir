@@ -68,7 +68,6 @@ export default function DashHome() {
   const profileSlug = routeProfileSlug || legacyProfileSlugFromOwnerSlug(routeOrgSlug)
   const orgSlug = profileSlug ? undefined : routeOrgSlug
   const dashboardBase = profileSlug ? profilePath(profileSlug) : `/${orgSlug}`
-  const [owner, setOwner] = useState(null)
   const [forbidden, setForbidden] = useState(false)
   const [loadError, setLoadError] = useState('')
   const [exhibitions, setExhibitions] = useState([])
@@ -89,7 +88,6 @@ export default function DashHome() {
           setForbidden(true)
           return
         }
-        setOwner(ownerData)
         const { data: exhData } = await supabase
           .from('exhibitions')
           .select('*, artworks!artworks_exhibition_id_fkey(image_url, order)')
@@ -142,16 +140,11 @@ export default function DashHome() {
     }
   }
 
-  const ownerDescription = owner?.description || owner?.bio
-
   return (
     <DashShell orgSlug={orgSlug} profileSlug={profileSlug}>
       <div className="ui-dashboard-list-head">
         <div className="ui-dashboard-list-head-copy">
           <div className="ui-dashboard-list-count">{exhibitions.length}件の展覧会</div>
-          {ownerDescription && (
-            <p className="ui-screen-subtitle">{ownerDescription.split('。')[0]}</p>
-          )}
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <button onClick={() => navigate(`${dashboardBase}/dashboard/exhibitions/new`)} className="ui-pill-action ui-pill-action--accent">

@@ -13,7 +13,6 @@ import {
   buildSeriesPath,
   DISCIPLINE_FALLBACKS,
   editionDisplay,
-  getPrimaryDiscipline,
   groupExhibitionsByYear,
   loadDiscoveryMetadata,
 } from '../lib/discoveryData'
@@ -22,9 +21,6 @@ import { legacyProfileSlugFromOwnerSlug, profilePath } from '../lib/profileRoute
 function SeriesCard({ series, org }) {
   const exhibitions = series.exhibitions || []
   const latest = exhibitions[0]
-  const years = exhibitions.map((item) => item.edition_year || String(item.start_date || '').slice(0, 4)).filter(Boolean)
-  const startYear = series.start_year || years[years.length - 1]
-  const endYear = years[0]
   const seriesHref = buildSeriesPath({ series, org })
 
   return (
@@ -33,21 +29,11 @@ function SeriesCard({ series, org }) {
         <ExhibitionCardMedia thumbnailUrl={getExhibitionThumbnailUrl(latest)} title={series.name} />
       </Link>
       <div className="ui-series-card-body">
-        <div className="ui-series-card-overline">
-          <span>EXHIBITION SERIES</span>
-          {series.recurrence_label && <span>{series.recurrence_label}</span>}
-        </div>
         <Link to={seriesHref} className="ui-series-card-title">{series.name}</Link>
-        {series.description && <p>{series.description}</p>}
-        <div className="ui-series-card-facts">
-          <span>{startYear && endYear ? `${startYear} — ${endYear}` : endYear || startYear || '開催年未設定'}</span>
-          <span>{exhibitions.length}回の記録</span>
-        </div>
         <div className="ui-series-card-years" aria-label="直近の開催回">
           {exhibitions.slice(0, 4).map((exhibition) => (
-            <Link key={exhibition.id} to={`/${org.slug}/exhibition/${exhibition.slug}`}>
+            <Link key={exhibition.id} to={`/${org.slug}/exhibition/${exhibition.slug}`} aria-label={editionDisplay(exhibition) || exhibition.title}>
               <strong>{exhibition.edition_year || String(exhibition.start_date || '').slice(0, 4) || '—'}</strong>
-              <small>{editionDisplay(exhibition) || exhibition.title}</small>
             </Link>
           ))}
           <Link to={seriesHref} className="ui-series-card-all">すべて見る <span aria-hidden="true">→</span></Link>
@@ -137,9 +123,7 @@ export default function OrgPage() {
       <Header activeTab="orgs" />
       <main className="ui-app-main ui-org-archive-page">
         <section className="ui-org-archive-hero">
-          <div className="ui-kicker">ORGANIZATION ARCHIVE</div>
           <h1 className="ui-screen-title">{org.name}</h1>
-          {org.description && <p className="ui-screen-subtitle">{org.description}</p>}
           <div className="ui-public-action-row">
             <ShareLinkButton />
             <PublicManageLink ownerType="organization" ownerId={org.id} to={`/${org.slug}/dashboard`} label="団体を管理" />
@@ -166,11 +150,7 @@ export default function OrgPage() {
         {series.length > 0 && (
           <section className="ui-org-series-section">
             <div className="ui-org-archive-heading">
-              <div>
-                <div className="ui-kicker">CONTINUING EXHIBITIONS</div>
-                <h2>継続している展覧会</h2>
-              </div>
-              <p>同じ企画の歴代開催を、ひと続きの記録として辿れます。</p>
+              <h2>継続している展覧会</h2>
             </div>
             <div className="ui-org-series-list">
               {series.map((item) => <SeriesCard key={item.id} series={item} org={org} />)}
@@ -180,11 +160,7 @@ export default function OrgPage() {
 
         <section className="ui-org-timeline-section">
           <div className="ui-org-archive-heading">
-            <div>
-              <div className="ui-kicker">EXHIBITION TIMELINE</div>
-              <h2>展覧会の記録</h2>
-            </div>
-            <p>{exhibitions.length}件の展覧会を、開催年から遡れます。</p>
+            <h2>展覧会の記録</h2>
           </div>
 
           <div className="ui-org-archive-filters">
@@ -221,9 +197,9 @@ export default function OrgPage() {
             <div className="ui-org-timeline-layout">
               <nav className="ui-org-year-rail" aria-label="開催年">
                 <button type="button" className={selectedYear == null ? 'is-active' : ''} aria-pressed={selectedYear == null} onClick={() => setSelectedYear(null)}>すべて</button>
-                {yearGroups.map(([year, items]) => (
+                {yearGroups.map(([year]) => (
                   <button key={year} type="button" className={String(selectedYear) === String(year) ? 'is-active' : ''} aria-pressed={String(selectedYear) === String(year)} onClick={() => setSelectedYear(year)}>
-                    <strong>{year}</strong><small>{items.length}</small>
+                    <strong>{year}</strong>
                   </button>
                 ))}
               </nav>
@@ -232,7 +208,6 @@ export default function OrgPage() {
                   <section key={year} className="ui-org-year-group">
                     <header>
                       <strong>{year}</strong>
-                      <span>{items.length} EXHIBITIONS</span>
                     </header>
                     <div className="ui-exhibition-list-grid">
                       {items.map((exhibition) => (
@@ -242,8 +217,6 @@ export default function OrgPage() {
                           org={org}
                           showOrgName={false}
                           artworkCount={exhibition.artworkCount}
-                          connectionReason={exhibition.series_id ? editionDisplay(exhibition) || '継続展' : getPrimaryDiscipline(exhibition)?.name || ''}
-                          connectionKind={exhibition.series_id ? 'bridge' : 'metadata'}
                         />
                       ))}
                     </div>
