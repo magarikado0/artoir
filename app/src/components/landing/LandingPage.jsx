@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { BrandLockup } from '../BrandMark'
 import { Icon } from '../Header'
 import FrameIntro from './FrameIntro'
+import PhilosophySection from './PhilosophySection'
 import HorizontalFeatureSection from './HorizontalFeatureSection'
 import FinalCTA from './FinalCTA'
 import { LANDING_LINKS } from './landingConfig'
@@ -46,6 +47,7 @@ export default function LandingPage() {
 
       {introMode === 'skipped' && (
         <main className={styles.mainContent}>
+          <PhilosophySection />
           <HorizontalFeatureSection />
           <FinalCTA />
         </main>

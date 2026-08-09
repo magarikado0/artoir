@@ -265,6 +265,137 @@
   position: relative;
 }
 
+.philosophySection {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.78fr);
+  gap: clamp(48px, 8vw, 128px);
+  align-items: stretch;
+  padding: clamp(116px, 12vw, 172px) clamp(24px, 7vw, 104px) clamp(72px, 9vw, 132px);
+  border-bottom: 1px solid rgba(31, 27, 23, 0.11);
+}
+
+.philosophyStatement {
+  align-self: center;
+  max-width: 900px;
+}
+
+.philosophyTitle {
+  margin: 0;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: clamp(40px, 6.4vw, 94px);
+  font-weight: 400;
+  line-height: 1.28;
+  letter-spacing: -0.045em;
+}
+
+.philosophyLead {
+  max-width: 38em;
+  margin: clamp(34px, 5vw, 64px) 0 0;
+  color: #4A413A;
+  font-size: clamp(15px, 1.45vw, 19px);
+  line-height: 2.05;
+  letter-spacing: 0.045em;
+}
+
+.philosophyActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  margin-top: clamp(38px, 5vw, 62px);
+}
+
+.philosophyPrimaryAction,
+.philosophyTextAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  color: inherit;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.philosophyPrimaryAction {
+  gap: 18px;
+  min-width: 174px;
+  padding: 0 20px;
+  border: 1px solid #1F1B17;
+  background: #1F1B17;
+  color: #FBF8F3;
+  transition: gap 180ms ease, background-color 180ms ease;
+}
+
+.philosophyPrimaryAction:hover {
+  gap: 24px;
+  background: #4A413A;
+}
+
+.philosophyTextAction {
+  padding: 0 4px;
+  border-bottom: 1px solid rgba(31, 27, 23, 0.42);
+}
+
+.philosophyPrimaryAction:focus-visible,
+.philosophyTextAction:focus-visible {
+  outline: 2px solid #BE553D;
+  outline-offset: 4px;
+}
+
+.philosophyAside {
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: clamp(24px, 4vw, 48px);
+  padding-left: clamp(24px, 4vw, 52px);
+  border-left: 1px solid rgba(31, 27, 23, 0.16);
+}
+
+.philosophyVertical {
+  align-self: start;
+  margin: 0;
+  padding-top: 4px;
+  color: #8A8178;
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  line-height: 1.8;
+  writing-mode: vertical-rl;
+}
+
+.philosophyPrinciples {
+  align-self: end;
+  display: grid;
+}
+
+.philosophyPrinciple {
+  padding: clamp(22px, 3vw, 34px) 0;
+  border-top: 1px solid rgba(31, 27, 23, 0.14);
+}
+
+.philosophyPrinciple:last-child {
+  border-bottom: 1px solid rgba(31, 27, 23, 0.14);
+}
+
+.philosophyPrinciple h2,
+.philosophyPrinciple p {
+  margin: 0;
+}
+
+.philosophyPrinciple h2 {
+  font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
+  font-size: clamp(18px, 1.8vw, 25px);
+  font-weight: 500;
+}
+
+.philosophyPrinciple p {
+  margin-top: 11px;
+  color: #6A6058;
+  font-size: 12px;
+  line-height: 1.85;
+}
+
 .landingLoading {
   min-height: 100svh;
   display: grid;
@@ -495,6 +626,14 @@
 }
 
 @media (max-width: 900px) {
+  .philosophySection {
+    grid-template-columns: 1fr;
+  }
+
+  .philosophyAside {
+    min-height: 380px;
+  }
+
   .videoWindowSection {
     padding-top: 86px;
   }
@@ -529,6 +668,40 @@
 
   .intro {
     padding-top: 78px;
+  }
+
+  .philosophySection {
+    gap: 54px;
+    padding: 104px 20px 72px;
+  }
+
+  .philosophyTitle {
+    font-size: clamp(35px, 10.8vw, 52px);
+    line-height: 1.38;
+  }
+
+  .philosophyLead {
+    line-height: 1.9;
+  }
+
+  .philosophyActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .philosophyTextAction {
+    align-self: center;
+  }
+
+  .philosophyAside {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    padding: 0;
+    border-left: 0;
+  }
+
+  .philosophyVertical {
+    writing-mode: horizontal-tb;
   }
 
   .frameButton {
