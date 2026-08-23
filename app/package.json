@@ -9,6 +9,7 @@
     "demo:record-exhibition": "node --experimental-strip-types scripts/record-exhibition-demo.ts",
     "demo:record-gallery": "node --experimental-strip-types scripts/record-gallery-demo.ts",
     "demo:record-flow": "node scripts/demo/record-flow.mjs",
+    "test:archive": "node scripts/test-archive.mjs",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "npm run build && wrangler dev",

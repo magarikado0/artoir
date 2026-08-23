@@ -1,6 +1,7 @@
 export function exhStatus(exh) {
-  const today = new Date().toISOString().slice(0, 10)
-  if (!exh.start_date) return 'ended'
+  const now = new Date()
+  const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-')
+  if (!exh.start_date) return 'unknown'
   if (exh.start_date > today) return 'upcoming'
   if (!exh.end_date || exh.end_date >= today) return 'live'
   return 'ended'
