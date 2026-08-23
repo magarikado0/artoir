@@ -14,7 +14,7 @@ export const LANDING_MEDIA = {
   },
   createExhibition: {
     videoSrc: '/videos/create-exhibition-v2.mp4',
-    mobileVideoSrc: null,
+    mobileVideoSrc: '/videos/create-exhibition-mobile.mp4',
     posterSrc: '/images/create-exhibition-poster.png',
     mobilePosterSrc: '/images/create-exhibition-poster-mobile.png',
   },

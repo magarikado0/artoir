@@ -1,16 +1,18 @@
-import { chromium, type Locator, type Page } from 'playwright'
+import { chromium, type Locator, type Page, type Video } from 'playwright'
 import { mkdir, copyFile } from 'node:fs/promises'
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
+import { demoData } from '../demo/demo-data.ts'
 
 const baseURL = process.env.DEMO_BASE_URL || 'http://localhost:5173'
-const viewport = { width: 390, height: 488 }
+const viewport = { width: 400, height: 500 }
 const outputDir = resolve('artifacts/demo')
 const rawVideo = resolve(outputDir, 'artoir-organization-mobile-demo.webm')
 const finalVideo = resolve('public/videos/create-organization-mobile.mp4')
 const profileDir = resolve(process.env.DEMO_USER_DATA_DIR || '.playwright-demo-profile')
 const typeDelay = Number(process.env.DEMO_TYPE_DELAY || 32)
 const existingOrgSlug = process.env.DEMO_EXISTING_ORG_SLUG || ''
+let fallbackOrgSlug = existingOrgSlug
 
 await mkdir(outputDir, { recursive: true })
 
@@ -104,7 +106,7 @@ class DemoFinger {
     return { box, tipX, tipY }
   }
 
-  async tap(locator: Locator, after = 500, placement: 'center' | 'icon' = 'center') {
+  async tap(locator: Locator, after = 500, placement: 'center' | 'icon' = 'center', performClick = true) {
     const { tipX, tipY } = await this.moveTo(locator, 460, placement)
     await this.page.evaluate(({ x, y, element }) => {
       const finger = document.querySelector<HTMLElement>('#demo-finger')!
@@ -119,7 +121,7 @@ class DemoFinger {
       ring.classList.add('demo-tap')
     }, { x: tipX, y: tipY, element: await locator.elementHandle() })
     await this.page.waitForTimeout(190)
-    await locator.click()
+    if (performClick) await locator.click()
     await locator.evaluate((element) => element.classList.remove('demo-target-pressed')).catch(() => {})
     await this.page.waitForTimeout(after)
   }
@@ -148,13 +150,6 @@ class DemoFinger {
   }
 }
 
-async function firstVisible(locators: Locator[]) {
-  for (const locator of locators) {
-    if (await locator.count() && await locator.first().isVisible()) return locator.first()
-  }
-  return null
-}
-
 async function ensureSignedIn() {
   const authContext = await chromium.launchPersistentContext(profileDir, {
     headless: false,
@@ -166,12 +161,24 @@ async function ensureSignedIn() {
     const authPage = authContext.pages()[0] || await authContext.newPage()
     await authPage.goto(`${baseURL}/account`, { waitUntil: 'networkidle' })
     const createOrganization = authPage.locator('a[href="/account/organizations/new"]')
-    if (await createOrganization.count() && await createOrganization.isVisible()) return
+    if (!(await createOrganization.count() && await createOrganization.isVisible())) {
+      console.log('録画専用Chromeでログインしてください。ログイン完了後、自動で録画を開始します。')
+      const login = authPage.getByRole('button', { name: 'ログイン / 新規登録', exact: true })
+      if (await login.count() && await login.isVisible()) {
+        await login.click()
+        await authPage.waitForURL(/\/login/, { timeout: 15000 })
+      }
+      await authPage.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 300000 })
+      await authPage.goto(`${baseURL}/account`, { waitUntil: 'networkidle' })
+      await createOrganization.waitFor({ state: 'visible', timeout: 300000 })
+    }
 
-    console.log('録画専用Chromeでログインしてください。ログイン完了後、自動で録画を開始します。')
-    const login = authPage.getByRole('button', { name: 'ログイン / 新規登録', exact: true })
-    if (await login.count() && await login.isVisible()) await login.click()
-    await createOrganization.waitFor({ state: 'visible', timeout: 300000 })
+    const organizationRows = authPage.locator('.ui-account-org-pick-btn')
+    const organizationCount = await organizationRows.count()
+    if (!organizationCount) throw new Error('録画に使用できる既存団体がありません')
+    await organizationRows.first().click()
+    await authPage.waitForURL(/\/[^/]+\/dashboard(?:\/|$)/, { timeout: 15000 })
+    fallbackOrgSlug = new URL(authPage.url()).pathname.split('/')[1]
   } finally {
     await authContext.close()
   }
@@ -187,69 +194,29 @@ const context = await chromium.launchPersistentContext(profileDir, {
   args: ['--hide-scrollbars', '--disable-blink-features=AutomationControlled'],
 })
 
-let recordedPath = ''
+let recordedVideo: Video | null = null
 try {
   const page = context.pages()[0] || await context.newPage()
-  const video = page.video()
-  await page.goto(`${baseURL}/exhibitions`, { waitUntil: 'networkidle' })
+  recordedVideo = page.video()
+  await page.goto(`${baseURL}/account/organizations/new`, { waitUntil: 'networkidle' })
   if (page.url().includes('/login')) throw new Error(`Demo profile is not signed in: ${page.url()}`)
 
   const finger = new DemoFinger(page)
   await finger.init()
   await page.waitForTimeout(140)
 
-  const account = await firstVisible([
-    page.getByRole('link', { name: 'アカウント', exact: true }),
-    page.getByRole('button', { name: 'アカウント', exact: true }),
-    page.getByText('アカウント', { exact: true }),
-  ])
-  if (!account) throw new Error('「アカウント」が見つかりません')
-  await Promise.all([
-    page.waitForURL(/\/(?:account|profile\/[^/?]+)(?:\?.*)?$/, { timeout: 15000 }),
-    finger.tap(account, 650, 'icon'),
-  ])
-  await finger.init()
-
-  if (!/\/account(?:\?.*)?$/.test(page.url())) {
-    await page.getByRole('link', { name: '管理', exact: true }).waitFor({ state: 'visible', timeout: 20000 })
-    const manage = await firstVisible([
-      page.getByRole('link', { name: '管理', exact: true }),
-      page.getByText('管理', { exact: true }),
-    ])
-    if (!manage) throw new Error('「管理」が見つかりません')
-    await Promise.all([
-      page.waitForURL(/\/account(?:\?.*)?$/, { timeout: 15000 }),
-      finger.tap(manage, 650),
-    ])
-    await finger.init()
-  }
-
-  await page.getByRole('link', { name: /団体を作成/ }).waitFor({ state: 'visible', timeout: 20000 })
-
-  const createOrganization = await firstVisible([
-    page.getByRole('link', { name: /団体を作成/ }),
-    page.getByRole('button', { name: /団体を作成/ }),
-    page.getByText('団体を作成', { exact: true }),
-  ])
-  if (!createOrganization) throw new Error('「団体を作成」が見つかりません')
-  await Promise.all([
-    page.waitForURL(/\/account\/organizations\/new/, { timeout: 15000 }),
-    finger.tap(createOrganization, 500),
-  ])
-  await finger.init()
-
   const name = page.getByPlaceholder('例: Artoir.同好会')
   const slug = page.getByPlaceholder('例: artoir_academy')
   const description = page.getByPlaceholder('団体の説明文を入力...')
   await name.waitFor({ state: 'visible' })
-  await finger.fill(name, 'Artoir同好会')
-  await finger.fill(slug, 'rotor_net')
-  await finger.fill(description, '展覧会と作品登録をまとめるための団体です。')
+  await finger.fill(name, demoData.organizationName)
+  await finger.fill(slug, demoData.organizationId)
+  await finger.fill(description, demoData.description)
 
   const create = page.getByRole('button', { name: '作成する', exact: true })
-  if (existingOrgSlug) {
-    await finger.tap(create, 120)
-    await page.goto(`${baseURL}/account/organizations/${existingOrgSlug}/links`, { waitUntil: 'networkidle' })
+  if (fallbackOrgSlug) {
+    await finger.tap(create, 120, 'center', false)
+    await page.goto(`${baseURL}/account/organizations/${fallbackOrgSlug}/links`, { waitUntil: 'networkidle' })
     await page.waitForTimeout(580)
   } else {
     await Promise.all([
@@ -263,9 +230,9 @@ try {
   const x = page.locator('.ui-form-field').filter({ hasText: 'X (TWITTER)' }).getByPlaceholder('username')
   const website = page.getByPlaceholder('https://example.com')
   await instagram.waitFor({ state: 'visible' })
-  await finger.fill(instagram, 'artier_net')
-  await finger.fill(x, 'artoir')
-  await finger.fill(website, 'https://artoir.net')
+  await finger.fill(instagram, demoData.instagram)
+  await finger.fill(x, demoData.x)
+  await finger.fill(website, demoData.website)
 
   const save = page.getByRole('button', { name: '保存して次へ', exact: true })
   await Promise.all([
@@ -274,17 +241,18 @@ try {
   ])
   await finger.init()
   await page.waitForTimeout(1800)
-  if (video) recordedPath = await video.path()
 } finally {
   await context.close()
 }
 
-if (!recordedPath) throw new Error('Playwright did not produce a video')
+if (!recordedVideo) throw new Error('Playwright did not produce a video')
+const recordedPath = await recordedVideo.path()
 await copyFile(recordedPath, rawVideo)
 const ffmpeg = spawnSync('ffmpeg', [
   '-y',
   '-ss', '0.65',
   '-i', rawVideo,
+  '-t', '15.8',
   '-vf', 'fps=30,scale=1080:1350:flags=lanczos,format=yuv420p',
   '-c:v', 'libx264',
   '-profile:v', 'high',
