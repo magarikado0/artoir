@@ -73,7 +73,23 @@ create policy "Owners can update exhibition layouts"
         where om.organization_id = e.organization_id and om.profile_id = auth.uid()
       )
     )
-  ));
+  ))
+  with check (
+    exists (
+      select 1 from public.exhibitions e
+      where e.id = exhibition_id and (
+        e.profile_id = auth.uid()
+        or exists (
+          select 1 from public.organization_members om
+          where om.organization_id = e.organization_id and om.profile_id = auth.uid()
+        )
+      )
+    )
+    and exists (
+      select 1 from public.artworks a
+      where a.id = artwork_id and a.exhibition_id = exhibition_id
+    )
+  );
 
 drop policy if exists "Owners can delete exhibition layouts" on public.exhibition_artwork_layouts;
 create policy "Owners can delete exhibition layouts"
