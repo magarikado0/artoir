@@ -304,8 +304,7 @@
 }
 
 .windowVideo,
-.windowPoster,
-.finalVideo {
+.windowPoster {
   position: absolute;
   inset: 0;
   display: block;
@@ -565,8 +564,7 @@
     transform: translateX(0);
   }
 
-  .windowVideo,
-  .finalVideo {
+  .windowVideo {
     will-change: auto;
   }
 }
