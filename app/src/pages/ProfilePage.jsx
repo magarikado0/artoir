@@ -9,13 +9,15 @@ import PublicManageLink from '../components/PublicManageLink'
 import FavoriteButton from '../components/FavoriteButton'
 import ArtworkViewer from '../components/ArtworkViewer'
 import ExhibitionArtworkGallery from '../components/ExhibitionArtworkGallery'
-import ExhibitionListCard from '../components/ExhibitionListCard'
+import ArchiveExhibitionRow from '../components/ArchiveExhibitionRow'
+import ArchiveLoading from '../components/ArchiveLoading'
 import GalleryLayoutToggle from '../components/GalleryLayoutToggle'
 import { useGalleryLayout } from '../lib/useGalleryLayout'
 import { useArtworkViewerHistory } from '../lib/useArtworkViewerHistory'
 import { T, externalHost } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
 import { mapExhibitionListRow } from '../lib/exhibition'
+import { groupExhibitionsByYear } from '../lib/discoveryData'
 
 const Exhibition3DGalleryView = lazy(() => import('../components/Exhibition3DGalleryView'))
 
@@ -25,10 +27,13 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState(null)
   const [organizations, setOrganizations] = useState([])
   const [exhibitions, setExhibitions] = useState([])
+  const [participatingExhibitions, setParticipatingExhibitions] = useState([])
+  const [archiveWorkCount, setArchiveWorkCount] = useState(0)
   const [artworks, setArtworks] = useState([])
   const [galleryLayout, setGalleryLayout] = useGalleryLayout()
   const [viewMode, setViewMode] = useState('grid')
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const gallery3dButtonRef = useRef(null)
 
   useEffect(() => {
@@ -38,7 +43,7 @@ export default function ProfilePage() {
         const { data: profileData } = await supabase.from('profiles').select('*').eq('slug', profileSlug).maybeSingle()
         if (!profileData) return setLoading(false)
         setProfile(profileData)
-        const [{ data: works }, { data: exhibitionRows }, { data: membershipRows }] = await Promise.all([
+        const [{ data: works }, { data: exhibitionRows }, { data: membershipRows }, { data: creatorLinks }] = await Promise.all([
           supabase
             .from('artworks')
             .select('id, title, description, image_url, image_width, image_height, cover_image_id, gallery_image_id, profile_id, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
@@ -54,6 +59,11 @@ export default function ProfilePage() {
             .from('organization_members')
             .select('role, organizations(id, name, slug)')
             .eq('profile_id', profileData.id),
+          supabase
+            .from('artwork_creators')
+            .select('artwork_id, artworks!inner(exhibition_id)')
+            .eq('profile_id', profileData.id)
+            .eq('is_visible', true),
         ])
         setArtworks((works || []).map((artwork) => attachNormalizedCreators({
           ...artwork,
@@ -67,9 +77,34 @@ export default function ProfilePage() {
           },
         })).filter((artwork) => artwork?.image_url))
         setExhibitions((exhibitionRows || []).map(mapExhibitionListRow))
-        setOrganizations((membershipRows || []).map((row) => row.organizations).filter((org) => org?.slug))
+        const participatingIds = [...new Set((creatorLinks || []).map((row) => row.artworks?.exhibition_id).filter(Boolean))]
+        let participatingRows = []
+        if (participatingIds.length > 0) {
+          const { data } = await supabase
+            .from('exhibitions')
+            .select('*, organizations(id, name, slug), profiles(id, display_name, slug), artworks!artworks_exhibition_id_fkey(image_url, order)')
+            .in('id', participatingIds)
+            .eq('visibility', 'public')
+            .order('start_date', { ascending: false })
+          participatingRows = (data || []).map((row) => {
+            const { organizations: org, profiles: ownerProfile, ...exhibition } = row
+            return { exhibition: mapExhibitionListRow(exhibition), org, profile: ownerProfile }
+          })
+        }
+        setParticipatingExhibitions(participatingRows)
+        const publicParticipatingIds = new Set(participatingRows.map((row) => row.exhibition.id))
+        setArchiveWorkCount(new Set([
+          ...(works || []).map((artwork) => artwork.id),
+          ...(creatorLinks || []).filter((row) => publicParticipatingIds.has(row.artworks?.exhibition_id)).map((row) => row.artwork_id),
+        ]).size)
+        const relatedOrganizations = participatingRows.map((row) => row.org).filter((relatedOrg) => relatedOrg?.slug)
+        const organizationMap = new Map([
+          ...(membershipRows || []).map((row) => row.organizations),
+          ...relatedOrganizations,
+        ].filter((relatedOrg) => relatedOrg?.id).map((relatedOrg) => [relatedOrg.id, relatedOrg]))
+        setOrganizations([...organizationMap.values()])
       } catch {
-        /* unavailable */
+        setLoadError(true)
       } finally {
         setLoading(false)
       }
@@ -89,8 +124,10 @@ export default function ProfilePage() {
     window.requestAnimationFrame(() => gallery3dButtonRef.current?.focus())
   }
 
-  if (loading) return (
-    <div className="ui-page-shell" />
+  if (loading) return <ArchiveLoading />
+
+  if (loadError) return (
+    <div className="ui-page-shell"><Header activeTab="creators" /><main className="ui-app-main"><div className="ui-archive-empty" role="alert"><strong>作家の記録を読み込めませんでした</strong><span>接続を確認して、ページを再読み込みしてください。</span></div></main></div>
   )
 
   if (!profile) return (
@@ -103,12 +140,23 @@ export default function ProfilePage() {
   // 自分のプロフィール = ログイン中ユーザー自身。ナビ表示や自己ブックマーク抑止に使う。
   const isOwnProfile = Boolean(session?.user?.id && session.user.id === profile.id)
   const navTab = isOwnProfile ? 'account' : 'creators'
+  const exhibitionRows = new Map()
+  for (const exhibition of exhibitions) {
+    exhibitionRows.set(exhibition.id, { exhibition, profile, org: null })
+  }
+  for (const row of participatingExhibitions) {
+    if (!exhibitionRows.has(row.exhibition.id)) exhibitionRows.set(row.exhibition.id, row)
+  }
+  const archiveRows = [...exhibitionRows.values()]
+  const rowById = new Map(archiveRows.map((row) => [row.exhibition.id, row]))
+  const exhibitionYearGroups = groupExhibitionsByYear(archiveRows.map((row) => row.exhibition))
 
   return (
     <div className="ui-page-shell">
       <Header activeTab={navTab} />
       <main className="ui-app-main">
-        <section style={{ marginBottom: 48 }}>
+        <section className="ui-archive-profile-hero">
+          <span className="ui-archive-eyebrow">Artist archive</span>
           <div className="ui-profile-name-row">
             <h1 className="ui-screen-title" style={{ marginTop: 8 }}>{profile.display_name}</h1>
             {/* 自分のプロフィールは自分をブックマークできないよう非表示。 */}
@@ -123,6 +171,11 @@ export default function ProfilePage() {
             )}
           </div>
           <div style={{ marginTop: 6, fontSize: 13, color: T.inkMuted }}>@{profile.slug}</div>
+          <div className="ui-archive-profile-stats">
+            <span>{archiveRows.length}件の展覧会</span>
+            <span>{archiveWorkCount}作品</span>
+          </div>
+          {profile.bio && <p className="ui-archive-profile-description">{profile.bio}</p>}
           <div className="ui-public-action-row">
             <ShareLinkButton />
             <PublicManageLink
@@ -154,7 +207,7 @@ export default function ProfilePage() {
           )}
           {organizations.length > 0 && (
             <div className="ui-profile-org-block">
-              <div className="ui-profile-org-label">所属団体</div>
+              <div className="ui-profile-org-label">関わった団体</div>
               <div className="ui-profile-org-list">
                 {organizations.map((org) => (
                   <Link key={org.id || org.slug} to={`/${org.slug}`} className="ui-profile-org-link">
@@ -166,18 +219,20 @@ export default function ProfilePage() {
           )}
         </section>
 
-        {exhibitions.length > 0 && (
-          <section style={{ marginBottom: 64 }}>
-            <div className="ui-section-label">個人展覧会</div>
-            <div className="ui-exhibition-list-grid">
-              {exhibitions.map((exhibition) => (
-                <ExhibitionListCard
-                  key={exhibition.id}
-                  exhibition={exhibition}
-                  profile={profile}
-                  showOrgName={false}
-                  artworkCount={exhibition.artworkCount}
-                />
+        {exhibitionYearGroups.length > 0 && (
+          <section className="ui-profile-archive-section">
+            <div className="ui-org-archive-heading"><h2>展覧会の記録</h2></div>
+            <div className="ui-archive-timeline">
+              {exhibitionYearGroups.map(([year, yearExhibitions]) => (
+                <section key={year} className="ui-archive-year-group">
+                  <header><h2>{year}</h2><span>{yearExhibitions.length}件</span></header>
+                  <div className="ui-archive-year-records">
+                    {yearExhibitions.map((exhibition) => {
+                      const row = rowById.get(exhibition.id)
+                      return <ArchiveExhibitionRow key={exhibition.id} {...row} creators={[]} />
+                    })}
+                  </div>
+                </section>
               ))}
             </div>
           </section>
