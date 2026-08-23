@@ -13,6 +13,7 @@
     "demo:record-gallery-mobile": "node --experimental-strip-types scripts/record-gallery-mobile-demo.ts",
     "demo:record-flow": "node scripts/demo/record-flow.mjs",
     "test:discovery": "node scripts/test-discovery.mjs",
+    "test:archive": "node scripts/test-archive.mjs",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "npm run build && wrangler dev",

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import Header, { Icon } from '../components/Header'
+import Header from '../components/Header'
 import BottomNav from '../components/BottomNav'
-import { T } from '../lib/tokens'
+import ArchiveExhibitionRow from '../components/ArchiveExhibitionRow'
+import ArchiveLoading from '../components/ArchiveLoading'
 import { useAuth } from '../lib/auth'
-import ExhibitionListCard from '../components/ExhibitionListCard'
 import { exhStatus, mapExhibitionListRow } from '../lib/exhibition'
 import { isProfileWorksExhibition } from '../lib/profileWorks'
 import {
@@ -13,51 +13,54 @@ import {
   DISCIPLINE_FALLBACKS,
   getExhibitionYear,
   getPrimaryDiscipline,
+  groupExhibitionsByYear,
   loadDiscoveryMetadata,
-  rankConnectedExhibitions,
 } from '../lib/discoveryData'
+import {
+  exhibitionSearchText,
+  normalizeArchiveText,
+  uniqueProfilesFromArtworks,
+  updateArchiveParams,
+} from '../lib/archive'
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'すべて' },
   { value: 'live', label: '開催中' },
   { value: 'upcoming', label: 'これから' },
-  { value: 'ended', label: '過去の展示' },
+  { value: 'ended', label: '終了' },
 ]
 
 async function fetchExhibitionRows() {
   const { data, error } = await supabase
     .from('exhibitions')
-    .select('*, organizations(id, name, slug), profiles(id, display_name, slug), artworks!artworks_exhibition_id_fkey(image_url, order)')
+    .select('*, organizations(id, name, slug), profiles(id, display_name, slug), artworks!artworks_exhibition_id_fkey(id, image_url, order, artwork_creators(profile_id, is_visible, profiles(id, display_name, slug)))')
     .eq('visibility', 'public')
     .order('start_date', { ascending: false })
   if (error) throw error
   return data || []
 }
 
-function SectionHeading({ title, action }) {
-  return (
-    <div className="ui-discovery-section-head">
-      <h2>{title}</h2>
-      {action}
-    </div>
-  )
-}
-
 export default function AllExhibitionsPage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [yearFilter, setYearFilter] = useState(null)
-  const [selectedDiscipline, setSelectedDiscipline] = useState('calligraphy')
-  const [breadth, setBreadth] = useState('near')
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const requestedDiscipline = searchParams.get('discipline')
+  const [loadError, setLoadError] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
   const { session } = useAuth()
 
+  const query = searchParams.get('q') || ''
+  const statusFilter = STATUS_OPTIONS.some((item) => item.value === searchParams.get('status'))
+    ? searchParams.get('status')
+    : 'all'
+  const requestedYear = Number(searchParams.get('year'))
+  const yearFilter = Number.isInteger(requestedYear) && requestedYear > 0 ? requestedYear : null
+  const disciplineFilter = searchParams.get('discipline') || ''
+
+  function updateParams(updates, { replace = true } = {}) {
+    setSearchParams((current) => updateArchiveParams(current, updates), { replace })
+  }
+
   useEffect(() => {
-    document.title = '展覧会を辿る | Artoir'
+    document.title = '展覧会アーカイブ | Artoir'
     return () => { document.title = 'Artoir' }
   }, [])
 
@@ -66,248 +69,146 @@ export default function AllExhibitionsPage() {
       if (!supabase) return setLoading(false)
       try {
         const data = await fetchExhibitionRows()
-        const visible = (data || []).filter((exh) => !isProfileWorksExhibition(exh))
-        const metadata = await loadDiscoveryMetadata(supabase, visible.map((exh) => exh.id))
-        const mapped = visible.map((exh) => {
-          const { organizations: org, profiles: profile, ...rest } = exh
-          const exhibition = attachDiscoveryMetadata(mapExhibitionListRow(rest), metadata)
-          return { exhibition, org, profile, artworkCount: exhibition.artworkCount }
-        })
-        setRows(mapped)
-        const available = DISCIPLINE_FALLBACKS.find((discipline) => (
-          mapped.some(({ exhibition }) => getPrimaryDiscipline(exhibition)?.slug === discipline.slug)
-        ))
-        const requested = DISCIPLINE_FALLBACKS.find((discipline) => discipline.slug === requestedDiscipline)
-        if (requested || available) setSelectedDiscipline((requested || available).slug)
+        const visible = data.filter((exhibition) => !isProfileWorksExhibition(exhibition))
+        const metadata = await loadDiscoveryMetadata(supabase, visible.map((exhibition) => exhibition.id))
+        setRows(visible.map((exhibition) => {
+          const { organizations: org, profiles: profile, ...rest } = exhibition
+          const mapped = attachDiscoveryMetadata(mapExhibitionListRow(rest), metadata)
+          return {
+            exhibition: mapped,
+            org,
+            profile,
+            creators: uniqueProfilesFromArtworks(mapped.artworks),
+          }
+        }))
       } catch {
-        /* 公開一覧は接続不良時も空状態として表示する。 */
+        setLoadError(true)
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [requestedDiscipline])
+  }, [])
 
-  const disciplineCounts = useMemo(() => {
-    const counts = new Map(DISCIPLINE_FALLBACKS.map((item) => [item.slug, 0]))
-    for (const { exhibition } of rows) {
-      for (const discipline of exhibition.discovery?.disciplines || []) {
-        counts.set(discipline.slug, (counts.get(discipline.slug) || 0) + 1)
-      }
-    }
-    return counts
-  }, [rows])
-
-  const disciplines = useMemo(() => DISCIPLINE_FALLBACKS.map((item) => ({
-    ...item,
-    count: disciplineCounts.get(item.slug) || 0,
-  })), [disciplineCounts])
-
-  const years = useMemo(() => [...new Set(rows.map(({ exhibition }) => getExhibitionYear(exhibition)).filter(Boolean))]
-    .sort((a, b) => b - a), [rows])
+  const years = useMemo(() => [...new Set(rows
+    .map(({ exhibition }) => getExhibitionYear(exhibition))
+    .filter(Boolean))].sort((a, b) => b - a), [rows])
 
   const filteredRows = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase()
-    return rows.filter(({ exhibition, org, profile }) => {
-      if (statusFilter !== 'all' && exhStatus(exhibition) !== statusFilter) return false
-      if (yearFilter && getExhibitionYear(exhibition) !== yearFilter) return false
-      if (!normalizedQuery) return true
-      const searchable = [
-        exhibition.title,
-        exhibition.description,
-        exhibition.location,
-        org?.name,
-        profile?.display_name,
-        ...(exhibition.discovery?.disciplines || []).map((item) => item.name),
-        ...(exhibition.discovery?.tags || []).map((item) => item.name),
-      ].filter(Boolean).join(' ').toLowerCase()
-      return searchable.includes(normalizedQuery)
+    const normalizedQuery = normalizeArchiveText(query)
+    return rows.filter((row) => {
+      if (statusFilter !== 'all' && exhStatus(row.exhibition) !== statusFilter) return false
+      if (yearFilter && getExhibitionYear(row.exhibition) !== yearFilter) return false
+      if (disciplineFilter && getPrimaryDiscipline(row.exhibition)?.slug !== disciplineFilter) return false
+      return !normalizedQuery || exhibitionSearchText(row).includes(normalizedQuery)
     })
-  }, [rows, query, statusFilter, yearFilter])
+  }, [disciplineFilter, query, rows, statusFilter, yearFilter])
 
-  const currentRows = useMemo(() => rows
-    .filter(({ exhibition }) => ['live', 'upcoming'].includes(exhStatus(exhibition)))
-    .sort((a, b) => {
-      const statusDiff = ['live', 'upcoming'].indexOf(exhStatus(a.exhibition)) - ['live', 'upcoming'].indexOf(exhStatus(b.exhibition))
-      return statusDiff || String(a.exhibition.start_date || '').localeCompare(String(b.exhibition.start_date || ''))
-    })
-    .slice(0, 6), [rows])
+  const yearGroups = useMemo(() => {
+    const rowById = new Map(filteredRows.map((row) => [row.exhibition.id, row]))
+    return groupExhibitionsByYear(filteredRows.map((row) => row.exhibition))
+      .map(([year, exhibitions]) => [year, exhibitions.map((exhibition) => rowById.get(exhibition.id))])
+  }, [filteredRows])
 
-  const recentRows = useMemo(() => {
-    const currentIds = new Set(currentRows.map(({ exhibition }) => exhibition.id))
-    return [...rows]
-      .filter(({ exhibition }) => !currentIds.has(exhibition.id))
-      .sort((a, b) => String(b.exhibition.created_at || b.exhibition.start_date || '')
-        .localeCompare(String(a.exhibition.created_at || a.exhibition.start_date || '')))
-      .slice(0, 6)
-  }, [currentRows, rows])
+  const discipline = DISCIPLINE_FALLBACKS.find((item) => item.slug === disciplineFilter)
+  const hasFilters = Boolean(query.trim() || yearFilter || discipline || statusFilter !== 'all')
 
-  const selectedDisciplineInfo = disciplines.find((item) => item.slug === selectedDiscipline) || disciplines[0]
-  const connectedRows = useMemo(() => {
-    const sameField = rows.filter(({ exhibition }) => getPrimaryDiscipline(exhibition)?.slug === selectedDiscipline)
-    const seedRow = sameField[0] || rows[0]
-    if (!seedRow) return []
-    const same = sameField.slice(0, 2).map((row) => ({ row, reason: `${selectedDisciplineInfo?.name || '同じ分野'}をさらに辿る`, kind: 'near' }))
-    const ranked = rankConnectedExhibitions(
-      seedRow.exhibition,
-      rows.filter((row) => !same.some((entry) => entry.row.exhibition.id === row.exhibition.id)).map((row) => row.exhibition),
-      { breadth: breadth === 'wide' ? 'wide' : 'balanced', limit: 8 },
-    )
-    const byId = new Map(rows.map((row) => [row.exhibition.id, row]))
-    const cross = ranked
-      .filter(({ item }) => breadth === 'wide' || getPrimaryDiscipline(item)?.slug !== selectedDiscipline)
-      .slice(0, Math.max(2, 4 - same.length))
-      .map(({ item, connection }) => ({ row: byId.get(item.id), reason: connection?.reason, kind: connection?.kind }))
-      .filter(({ row }) => row)
-    return [...same, ...cross].slice(0, 4)
-  }, [breadth, rows, selectedDiscipline, selectedDisciplineInfo?.name])
-
-  const hasSearchContext = Boolean(query.trim() || yearFilter || statusFilter !== 'all')
-
-  if (loading) return <div className="ui-page-shell" />
+  if (loading) return <ArchiveLoading />
 
   return (
     <div className="ui-page-shell">
       <Header activeTab="top" />
-      <main className="ui-app-main ui-discovery-page">
-        <section className="ui-discovery-intro">
-          <h1 className="ui-screen-title">展覧会を辿る</h1>
-        </section>
+      <main className="ui-app-main ui-archive-page">
+        <header className="ui-archive-masthead">
+          <div>
+            <span className="ui-archive-eyebrow">Exhibition archive</span>
+            <h1>展覧会アーカイブ</h1>
+            <p>展覧会、作家、団体、年代から記録を辿れます。</p>
+          </div>
+          <Link
+            to={session ? '/account' : '/login'}
+            state={session ? undefined : { from: '/account' }}
+            className="ui-archive-publish-link"
+          >
+            展覧会を公開する <span aria-hidden="true">↗</span>
+          </Link>
+        </header>
 
-        <div className="ui-toolbar-grid ui-discovery-toolbar">
-          <label className="ui-discovery-search">
-            <span className="ui-sr-only">展覧会を検索</span>
-            <Icon name="list" size={17} />
+        <section className="ui-archive-search-panel" aria-label="展覧会を検索・絞り込み">
+          <label className="ui-archive-search">
+            <span className="ui-sr-only">展覧会、作家、団体、場所を検索</span>
+            <span aria-hidden="true">⌕</span>
             <input
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="展覧会、団体、作家、場所を検索"
+              onChange={(event) => updateParams({ q: event.target.value })}
+              placeholder="展覧会、作家、団体、場所を検索"
             />
           </label>
-          <button
-            type="button"
-            onClick={() => navigate(session ? '/account' : '/login', session ? undefined : { state: { from: '/account' } })}
-            className="ui-pill-action ui-pill-action--accent"
-          >
-            <Icon name="plus" size={16} />
-            <span>展覧会を作成</span>
-          </button>
-        </div>
 
-        <div className="ui-discovery-statuses" role="group" aria-label="開催状態で絞り込む">
-          {STATUS_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={statusFilter === option.value ? 'is-active' : ''}
-              aria-pressed={statusFilter === option.value}
-              onClick={() => setStatusFilter(option.value)}
-            >
-              <span>{option.label}</span>
-            </button>
-          ))}
-        </div>
+          <div className="ui-archive-filter-row" role="group" aria-label="開催状態">
+            {STATUS_OPTIONS.map((option) => (
+              <button
+                type="button"
+                key={option.value}
+                className={statusFilter === option.value ? 'is-active' : ''}
+                aria-pressed={statusFilter === option.value}
+                onClick={() => updateParams({ status: option.value }, { replace: false })}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
 
-        {hasSearchContext ? (
-          <section className="ui-discovery-section" aria-live="polite">
-            <SectionHeading
-              title={yearFilter ? `${yearFilter}年の展覧会` : '検索結果'}
-              action={hasSearchContext ? (
-                <button type="button" className="ui-text-action" onClick={() => { setQuery(''); setYearFilter(null); setStatusFilter('all') }}>
-                  条件をクリア
-                </button>
-              ) : null}
-            />
-            <div className="ui-exhibition-list-grid">
-              {filteredRows.map((row) => (
-                <ExhibitionListCard key={row.exhibition.id} {...row} />
+          {years.length > 0 && (
+            <nav className="ui-archive-year-nav" aria-label="開催年から絞り込む">
+              <button type="button" className={yearFilter == null ? 'is-active' : ''} aria-pressed={yearFilter == null} onClick={() => updateParams({ year: null }, { replace: false })}>全年</button>
+              {years.map((year) => (
+                <button type="button" key={year} className={yearFilter === year ? 'is-active' : ''} aria-pressed={yearFilter === year} onClick={() => updateParams({ year }, { replace: false })}>{year}</button>
+              ))}
+            </nav>
+          )}
+
+          {hasFilters && (
+            <div className="ui-archive-active-filters" aria-label="適用中の条件">
+              {query.trim() && <button type="button" onClick={() => updateParams({ q: null })}>「{query.trim()}」 ×</button>}
+              {yearFilter && <button type="button" onClick={() => updateParams({ year: null })}>{yearFilter} ×</button>}
+              {statusFilter !== 'all' && <button type="button" onClick={() => updateParams({ status: null })}>{STATUS_OPTIONS.find((item) => item.value === statusFilter)?.label} ×</button>}
+              {discipline && <button type="button" onClick={() => updateParams({ discipline: null })}>{discipline.name} ×</button>}
+              <button type="button" className="ui-archive-clear" onClick={() => setSearchParams({}, { replace: true })}>すべて解除</button>
+            </div>
+          )}
+        </section>
+
+        <section className="ui-archive-results">
+          <header className="ui-archive-results-head">
+            <h2>{hasFilters ? '検索結果' : 'すべての記録'}</h2>
+            <span aria-live="polite">{filteredRows.length}件</span>
+          </header>
+
+          {loadError ? (
+            <div className="ui-archive-empty" role="alert">
+              <strong>記録を読み込めませんでした</strong>
+              <span>接続を確認して、ページを再読み込みしてください。</span>
+            </div>
+          ) : yearGroups.length > 0 ? (
+            <div className="ui-archive-timeline">
+              {yearGroups.map(([year, items]) => (
+                <section key={year} className="ui-archive-year-group">
+                  <header><h2>{year}</h2><span>{items.length}件</span></header>
+                  <div className="ui-archive-year-records">
+                    {items.map((row) => <ArchiveExhibitionRow key={row.exhibition.id} {...row} />)}
+                  </div>
+                </section>
               ))}
             </div>
-            {filteredRows.length === 0 && (
-              <div className="ui-panel ui-discovery-empty">展覧会はありません</div>
-            )}
-          </section>
-        ) : (
-          <>
-            {currentRows.length > 0 && (
-              <section className="ui-discovery-section">
-                <SectionHeading title="開催中・これから" />
-                <div className="ui-exhibition-list-grid">
-                  {currentRows.map((row) => <ExhibitionListCard key={row.exhibition.id} {...row} />)}
-                </div>
-              </section>
-            )}
-
-            {recentRows.length > 0 && (
-              <section className="ui-discovery-section">
-                <SectionHeading title="新しく追加された記録" />
-                <div className="ui-exhibition-list-grid">
-                  {recentRows.map((row) => <ExhibitionListCard key={row.exhibition.id} {...row} />)}
-                </div>
-              </section>
-            )}
-
-            <section className="ui-discovery-section">
-              <SectionHeading title="分野から辿る" />
-              <div className="ui-discipline-index" role="list" aria-label="芸術分野">
-                {disciplines.map((discipline) => (
-                  <button
-                    type="button"
-                    role="listitem"
-                    key={discipline.slug}
-                    className={selectedDiscipline === discipline.slug ? 'is-active' : ''}
-                    aria-pressed={selectedDiscipline === discipline.slug}
-                    onClick={() => setSelectedDiscipline(discipline.slug)}
-                  >
-                    <span>{discipline.name}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="ui-discovery-connected-head">
-                <h3>{selectedDisciplineInfo?.name}</h3>
-                <div className="ui-discovery-breadth" role="group" aria-label="関連性の幅">
-                  <button type="button" className={breadth === 'near' ? 'is-active' : ''} aria-pressed={breadth === 'near'} onClick={() => setBreadth('near')}>近い表現</button>
-                  <button type="button" className={breadth === 'wide' ? 'is-active' : ''} aria-pressed={breadth === 'wide'} onClick={() => setBreadth('wide')}>意外な表現</button>
-                </div>
-              </div>
-              <div className="ui-exhibition-list-grid">
-                {connectedRows.map(({ row }) => (
-                  <ExhibitionListCard key={row.exhibition.id} {...row} />
-                ))}
-              </div>
-              {connectedRows.length === 0 && (
-                <div className="ui-panel ui-discovery-empty">展覧会はありません</div>
-              )}
-            </section>
-
-            {years.length > 0 && (
-              <section className="ui-discovery-section">
-                <SectionHeading title="時間から辿る" />
-                <div className="ui-year-index">
-                  {years.slice(0, 6).map((year) => (
-                    <button type="button" key={year} onClick={() => setYearFilter(year)}>
-                      <strong>{year}</strong>
-                      <i aria-hidden="true">→</i>
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <section className="ui-discovery-section">
-              <SectionHeading title="すべての展覧会" />
-              <div className="ui-exhibition-list-grid">
-                {rows.map((row) => (
-                  <ExhibitionListCard key={row.exhibition.id} {...row} />
-                ))}
-              </div>
-              {rows.length === 0 && (
-                <div className="ui-panel" style={{ textAlign: 'center', color: T.inkMuted, fontSize: 13 }}>公開中の展覧会がまだありません</div>
-              )}
-            </section>
-          </>
-        )}
+          ) : (
+            <div className="ui-archive-empty">
+              <strong>条件に合う展覧会はありません</strong>
+              <span>検索語を短くするか、年・開催状態を解除してください。</span>
+              {hasFilters && <button type="button" onClick={() => setSearchParams({}, { replace: true })}>条件をすべて解除</button>}
+            </div>
+          )}
+        </section>
       </main>
       <BottomNav active="top" />
     </div>
