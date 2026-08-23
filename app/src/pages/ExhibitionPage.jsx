@@ -14,6 +14,7 @@ import ExhibitionListCard from '../components/ExhibitionListCard'
 import { useGalleryLayout } from '../lib/useGalleryLayout'
 import { useArtworkViewerHistory } from '../lib/useArtworkViewerHistory'
 import LoadingFrames from '../components/LoadingFrames'
+import ArchiveLoading from '../components/ArchiveLoading'
 import { useDelayedLoading } from '../lib/useDelayedLoading'
 import { T, fmtDateDot, fmtTime } from '../lib/tokens'
 import { attachNormalizedCreators } from '../lib/profile'
@@ -24,10 +25,10 @@ import {
   attachDiscoveryMetadata,
   buildSeriesPath,
   editionDisplay,
-  getPrimaryDiscipline,
+  getExhibitionYear,
   loadDiscoveryMetadata,
-  rankConnectedExhibitions,
 } from '../lib/discoveryData'
+import { uniqueProfilesFromArtworks } from '../lib/archive'
 
 const Exhibition3DGalleryView = lazy(() => import('../components/Exhibition3DGalleryView'))
 
@@ -52,6 +53,18 @@ function SummaryItem({ label, value, to }) {
       <div className="ui-exhibition-summary-label">{label}</div>
       <div className="ui-exhibition-summary-value">
         {to ? <Link to={to} className="ui-exhibition-summary-link">{value}</Link> : value}
+      </div>
+    </div>
+  )
+}
+
+function SummaryLinks({ label, profiles }) {
+  if (!profiles?.length) return null
+  return (
+    <div className="ui-exhibition-summary-item">
+      <div className="ui-exhibition-summary-label">{label}</div>
+      <div className="ui-exhibition-summary-value ui-exhibition-creator-links">
+        {profiles.map((profile) => <Link key={profile.id} to={profilePath(profile.slug)}>{profile.display_name || profile.slug}</Link>)}
       </div>
     </div>
   )
@@ -91,6 +104,7 @@ export default function ExhibitionPage() {
   const [, setGalleryLayout] = useGalleryLayout()
   const supportsCuratedLayout = useSupportsCuratedLayout()
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const gallery3dButtonRef = useRef(null)
   const isExhibitionListNavigation = Boolean(location.state?.showExhibitionPageLoading)
   const showLoader = useDelayedLoading(isExhibitionListNavigation && loading)
@@ -116,7 +130,7 @@ export default function ExhibitionPage() {
         const [{ data: awData }, { data: layoutData }, { data: relatedRows }, seriesResult] = await Promise.all([
           supabase
             .from('artworks')
-            .select('*, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, profiles(id, slug, display_name))')
+            .select('*, artwork_images:artwork_images!artwork_images_artwork_id_fkey(*), artwork_creators(profile_id, display_order, is_visible, profiles(id, slug, display_name))')
             .eq('exhibition_id', exhData.id)
             .order('order'),
           supabase
@@ -126,7 +140,7 @@ export default function ExhibitionPage() {
             .order('z_index'),
           supabase
             .from('exhibitions')
-            .select('*, organizations(id, name, slug), profiles(id, display_name, slug), artworks!artworks_exhibition_id_fkey(image_url, order)')
+            .select('*, organizations(id, name, slug), profiles(id, display_name, slug), artworks!artworks_exhibition_id_fkey(id, image_url, order, artwork_creators(profile_id, is_visible, profiles(id, slug, display_name)))')
             .eq('visibility', 'public')
             .order('start_date', { ascending: false })
             .limit(100),
@@ -146,7 +160,7 @@ export default function ExhibitionPage() {
             exhibition: relatedExhibition,
             org: relatedOrg,
             profile: relatedProfile,
-            artworkCount: relatedExhibition.artworkCount,
+            creators: uniqueProfilesFromArtworks(relatedExhibition.artworks),
           }
         }))
         const exhibitionForArtwork = {
@@ -156,12 +170,13 @@ export default function ExhibitionPage() {
         }
         setArtworks((awData || []).map((artwork) => attachNormalizedCreators({
           ...artwork,
+          artwork_creators: (artwork.artwork_creators || []).filter((creator) => creator.is_visible === true),
           exhibitions: exhibitionForArtwork,
         })))
         const nextLayout = layoutData || []
         setArtworkLayout(nextLayout)
       } catch {
-        /* unavailable */
+        setLoadError(true)
       } finally {
         setLoading(false)
       }
@@ -192,7 +207,10 @@ export default function ExhibitionPage() {
       <LoadingFrames />
     </div>
   )
-  if (loading) return <div className="ui-page-shell" />
+  if (loading) return <ArchiveLoading rows={2} />
+  if (loadError) return (
+    <div className="ui-page-shell"><Header activeTab="top" /><main className="ui-app-main"><div className="ui-archive-empty" role="alert"><strong>展覧会を読み込めませんでした</strong><span>接続を確認して、ページを再読み込みしてください。</span></div></main></div>
+  )
   if (!exhibition) return (
     <div className="ui-page-shell" style={{ display: 'grid', placeItems: 'center' }}>
       <p style={{ color: T.inkMuted, fontSize: 13 }}>展覧会が見つかりません</p>
@@ -232,20 +250,23 @@ export default function ExhibitionPage() {
   const navigationIndex = navigationRows.findIndex((item) => item.exhibition.id === exhibition.id)
   const previousExhibition = navigationIndex > 0 ? navigationRows[navigationIndex - 1] : null
   const nextExhibition = navigationIndex >= 0 && navigationIndex < navigationRows.length - 1 ? navigationRows[navigationIndex + 1] : null
-  const currentDiscipline = getPrimaryDiscipline(exhibition)
-  const sameDisciplineRows = relatedExhibitions
-    .filter((item) => item.exhibition.id !== exhibition.id && getPrimaryDiscipline(item.exhibition)?.slug === currentDiscipline?.slug)
-    .slice(0, 2)
-  const relatedById = new Map(relatedExhibitions.map((item) => [item.exhibition.id, item]))
-  const crossDisciplineRows = rankConnectedExhibitions(
-    exhibition,
-    relatedExhibitions.map((item) => item.exhibition),
-    { breadth: 'wide', limit: 12 },
-  )
-    .filter(({ item }) => getPrimaryDiscipline(item)?.slug && getPrimaryDiscipline(item)?.slug !== currentDiscipline?.slug)
-    .slice(0, 2)
-    .map(({ item }) => ({ row: relatedById.get(item.id) }))
-    .filter(({ row }) => row)
+  const visibleCreators = (() => {
+    const byId = new Map()
+    for (const artwork of artworks) {
+      for (const creator of artwork.creators || []) {
+        if (creator.profile?.id) byId.set(creator.profile.id, creator.profile)
+      }
+    }
+    return [...byId.values()]
+  })()
+  const creatorIds = new Set(visibleCreators.map((creator) => creator.id))
+  const sameArtistRows = relatedExhibitions
+    .filter((item) => item.exhibition.id !== exhibition.id && item.creators?.some((creator) => creatorIds.has(creator.id)))
+    .slice(0, 3)
+  const exhibitionYear = getExhibitionYear(exhibition)
+  const sameYearRows = relatedExhibitions
+    .filter((item) => item.exhibition.id !== exhibition.id && getExhibitionYear(item.exhibition) === exhibitionYear && !sameArtistRows.some((row) => row.exhibition.id === item.exhibition.id))
+    .slice(0, 3)
   const seriesHref = series ? buildSeriesPath({
     series,
     org: profileSlug ? null : owner,
@@ -297,9 +318,23 @@ export default function ExhibitionPage() {
               <SummaryItem label="会期" value={dateText} />
               <SummaryItem label="会場" value={exhibition.location} />
               <SummaryItem label={hostLabel} value={owner?.display_name || owner?.name || ''} to={ownerBase} />
+              <SummaryLinks label="参加作家" profiles={visibleCreators} />
             </div>
           </div>
         </section>
+
+        <nav className="ui-exhibition-archive-path" aria-label="アーカイブ内を辿る">
+          <Link to={ownerBase}><span>{hostLabel}</span><strong>{owner?.display_name || owner?.name}</strong></Link>
+          {visibleCreators.slice(0, 3).map((creator) => <Link key={creator.id} to={profilePath(creator.slug)}><span>作家</span><strong>{creator.display_name || creator.slug}</strong></Link>)}
+          {exhibitionYear && <Link to={`/exhibitions?year=${exhibitionYear}`}><span>開催年</span><strong>{exhibitionYear}年の記録</strong></Link>}
+        </nav>
+
+        {exhibition.description && (
+          <section className="ui-exhibition-about">
+            <div className="ui-section-label">展覧会について</div>
+            <p>{exhibition.description}</p>
+          </section>
+        )}
 
         <section style={{ marginTop: 64 }}>
           <div className="ui-exhibition-artworks-head">
@@ -345,7 +380,7 @@ export default function ExhibitionPage() {
             </div>
           )}
         </section>
-        {(previousExhibition || nextExhibition || sameDisciplineRows.length > 0 || crossDisciplineRows.length > 0) && (
+        {(previousExhibition || nextExhibition || sameArtistRows.length > 0 || sameYearRows.length > 0) && (
           <section className="ui-exhibition-journey">
             <div className="ui-exhibition-journey-heading">
               <h2>次に辿る</h2>
@@ -362,13 +397,13 @@ export default function ExhibitionPage() {
               </div>
             )}
 
-            {(sameDisciplineRows.length > 0 || crossDisciplineRows.length > 0) && (
+            {(sameArtistRows.length > 0 || sameYearRows.length > 0) && (
               <div className="ui-exhibition-journey-columns">
-                {sameDisciplineRows.length > 0 && (
+                {sameArtistRows.length > 0 && (
                   <div>
-                    <h3>{currentDiscipline?.name || '同じ分野'}をさらに辿る</h3>
+                    <h3>同じ作家の展覧会</h3>
                     <div className="ui-exhibition-list-grid">
-                      {sameDisciplineRows.map((row) => (
+                      {sameArtistRows.map((row) => (
                         <ExhibitionListCard
                           key={row.exhibition.id}
                           {...row}
@@ -377,11 +412,11 @@ export default function ExhibitionPage() {
                     </div>
                   </div>
                 )}
-                {crossDisciplineRows.length > 0 && (
+                {sameYearRows.length > 0 && (
                   <div>
-                    <h3>別の分野へひらく</h3>
+                    <h3>{exhibitionYear}年の展覧会</h3>
                     <div className="ui-exhibition-list-grid">
-                      {crossDisciplineRows.map(({ row }) => (
+                      {sameYearRows.map((row) => (
                         <ExhibitionListCard
                           key={row.exhibition.id}
                           {...row}
