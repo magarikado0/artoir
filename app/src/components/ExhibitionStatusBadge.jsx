@@ -5,12 +5,14 @@ const SHAPE = {
   live: <circle cx="6" cy="6" r="4" fill="currentColor" />,
   upcoming: <path d="M4 3l5 3-5 3z" fill="currentColor" />,
   ended: <rect x="2.5" y="2.5" width="7" height="7" rx="1" fill="currentColor" />,
+  unknown: <path d="M2 6h8" fill="none" stroke="currentColor" strokeWidth="1.5" />,
 }
 
 const LABEL = {
   live: '開催中',
   upcoming: '開催予定',
   ended: '終了',
+  unknown: '会期未設定',
 }
 
 /**
