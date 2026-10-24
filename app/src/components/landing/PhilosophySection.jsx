@@ -9,7 +9,7 @@ const MotionSection = motion.section
 
 // できることを具体的に。読点の代わりに改行で区切る
 const PRINCIPLES = [
-  ['団体ページに', '展覧会と作品をまとめて公開'],
+  ['団体ページに展覧会と', '作品をまとめて公開'],
   ['作品を3D空間に並べて', '歩くように鑑賞'],
   ['個人のプロフィールにも', '作品を掲載できる'],
 ]
@@ -63,12 +63,17 @@ export default function PhilosophySection() {
         </MotionDiv>
       </section>
 
-      <MotionSection className={styles.philosophyPrinciplesBand} aria-label="Artoirが大切にすること" {...fadeUp(0.2)}>
-        <h2 className={styles.philosophyKicker}>作品を展覧会の記憶とともに。</h2>
+      <MotionSection className={styles.philosophyPrinciplesBand} aria-label="Artoirでできること" {...fadeUp(0.2)}>
+        <h2 className={styles.philosophyKicker}>Artoirでできること</h2>
         <div className={styles.philosophyPrinciples}>
-          {PRINCIPLES.map(([first, second]) => (
-            <article key={first} className={styles.philosophyPrinciple}>
-              <h3>{first}<br />{second}</h3>
+          {PRINCIPLES.map((lines, index) => (
+            <article key={lines[0]} className={styles.philosophyPrinciple}>
+              <span className={styles.principleNumber} aria-hidden="true">{index + 1}</span>
+              <h3>
+                {lines.map((line) => (
+                  <span key={line} className={styles.principleLine}>{line}</span>
+                ))}
+              </h3>
             </article>
           ))}
         </div>
