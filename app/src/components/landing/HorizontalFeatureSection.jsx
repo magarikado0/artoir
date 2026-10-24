@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference'
 import { LANDING_MEDIA } from './landingConfig'
 import styles from './landing.module.css'
@@ -31,15 +31,17 @@ const WINDOWS = [
 ]
 
 function VideoWindow({ item, prefersReducedMotion }) {
+  const videoRef = useRef(null)
   const [hasVideoError, setHasVideoError] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [isMobileVideo, setIsMobileVideo] = useState(() => (
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 720px)').matches
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches
   ))
-  const isStaticImage = item.mediaType === 'image'
   const videoSrc = isMobileVideo && item.mobileVideoSrc ? item.mobileVideoSrc : item.videoSrc
+  const showVideo = !hasVideoError && !prefersReducedMotion
 
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 720px)')
+    const media = window.matchMedia('(max-width: 900px)')
     const handleChange = () => {
       setIsMobileVideo(media.matches)
       setHasVideoError(false)
@@ -49,24 +51,40 @@ function VideoWindow({ item, prefersReducedMotion }) {
     return () => media.removeEventListener('change', handleChange)
   }, [])
 
+  // 画面内にある間だけ再生する
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !showVideo) return undefined
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        video.play().catch(() => {})
+      } else {
+        video.pause()
+      }
+    }, { threshold: 0.25 })
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [showVideo, videoSrc])
+
   return (
     <article
-      className={`${styles.videoWindow} ${isStaticImage ? styles.staticImageWindow : ''}`}
+      className={`${styles.videoWindow} ${isPlaying ? styles.videoWindowPlaying : ''}`}
       tabIndex={0}
       aria-label={`${item.label}: ${item.title}`}
     >
-      {!isStaticImage && !hasVideoError && !prefersReducedMotion && (
+      {showVideo && (
         <video
+          ref={videoRef}
           key={videoSrc}
           className={styles.windowVideo}
           src={videoSrc}
           poster={item.posterSrc}
-          autoPlay
           muted
           loop
           playsInline
           preload="metadata"
           aria-hidden="true"
+          onPlaying={() => setIsPlaying(true)}
           onError={() => setHasVideoError(true)}
         />
       )}
@@ -75,7 +93,7 @@ function VideoWindow({ item, prefersReducedMotion }) {
           <source media="(max-width: 900px)" srcSet={item.mobilePosterSrc} />
         )}
         <img
-          className={`${styles.windowPoster} ${isStaticImage ? styles.staticWindowImage : ''}`}
+          className={styles.windowPoster}
           src={item.posterSrc}
           alt=""
           loading="lazy"
@@ -86,7 +104,7 @@ function VideoWindow({ item, prefersReducedMotion }) {
           }}
         />
       </picture>
-      {!isStaticImage && <div className={styles.windowFallback} aria-hidden="true" />}
+      <div className={styles.windowFallback} aria-hidden="true" />
       <div className={styles.windowOverlay}>
         <strong>{item.title}</strong>
       </div>

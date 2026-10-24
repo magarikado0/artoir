@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandLockup } from '../BrandMark'
 import { Icon } from '../Header'
-import FrameIntro from './FrameIntro'
 import PhilosophySection from './PhilosophySection'
 import HorizontalFeatureSection from './HorizontalFeatureSection'
 import FinalCTA from './FinalCTA'
@@ -10,16 +9,10 @@ import { LANDING_LINKS } from './landingConfig'
 import styles from './landing.module.css'
 
 export default function LandingPage() {
-  const [introMode, setIntroMode] = useState('full')
-
   useEffect(() => {
     document.title = 'Artoir | あなたの作品を、展覧会に。'
     return () => { document.title = 'Artoir' }
   }, [])
-
-  function handleIntroComplete() {
-    setIntroMode('skipped')
-  }
 
   return (
     <div className={styles.landingPage}>
@@ -43,15 +36,11 @@ export default function LandingPage() {
         </nav>
       </header>
 
-      {introMode === 'full' && <FrameIntro onComplete={handleIntroComplete} />}
-
-      {introMode === 'skipped' && (
-        <main className={styles.mainContent}>
-          <PhilosophySection />
-          <HorizontalFeatureSection />
-          <FinalCTA />
-        </main>
-      )}
+      <main className={styles.mainContent}>
+        <PhilosophySection />
+        <HorizontalFeatureSection />
+        <FinalCTA />
+      </main>
     </div>
   )
 }

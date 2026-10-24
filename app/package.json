@@ -12,6 +12,8 @@
     "demo:record-gallery": "node --experimental-strip-types scripts/record-gallery-demo.ts",
     "demo:record-gallery-mobile": "node --experimental-strip-types scripts/record-gallery-mobile-demo.ts",
     "demo:record-flow": "node scripts/demo/record-flow.mjs",
+    "demo:capture-hero": "node --experimental-strip-types scripts/capture-hero-3d.ts",
+    "demo:record-profile": "node --experimental-strip-types scripts/record-profile-demo.ts",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "npm run build && wrangler dev",

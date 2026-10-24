@@ -4,8 +4,8 @@ import useReducedMotionPreference from '../../hooks/useReducedMotionPreference'
 import { LANDING_LINKS } from './landingConfig'
 import styles from './landing.module.css'
 
-const MotionSection = motion.section
 const MotionDiv = motion.div
+const MotionSection = motion.section
 
 const PRINCIPLES = [
   {
@@ -24,57 +24,55 @@ const PRINCIPLES = [
 
 export default function PhilosophySection() {
   const prefersReducedMotion = useReducedMotionPreference()
-  const revealTransition = prefersReducedMotion
-    ? { duration: 0.2 }
-    : { duration: 0.9, ease: [0.22, 1, 0.36, 1] }
+  const fadeUp = (delay) => ({
+    initial: prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 24 },
+    animate: { opacity: 1, y: 0 },
+    transition: prefersReducedMotion ? { duration: 0.2 } : { delay, duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+  })
 
   return (
-    <MotionSection
-      className={styles.philosophySection}
-      aria-labelledby="philosophy-title"
-      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.965, filter: 'blur(18px)' }}
-      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-      transition={revealTransition}
-      style={{ transformOrigin: '50% 32%' }}
-    >
-      <MotionDiv
-        className={styles.philosophyStatement}
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 44 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? { duration: 0.2 } : { delay: 0.16, duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <h1 id="philosophy-title" className={styles.philosophyTitle}>
-          展覧会は終わっても、<br />
-          作品との出会いは残せる。
-        </h1>
-        <p className={styles.philosophyLead}>
-          Artoirは、展覧会ごとに作品をまとめ、ひとつの記憶として公開できる場所です。
-          作品が映える静かな空間をつくり、過去の展示を未来の鑑賞へつなぎます。
-        </p>
+    <>
+      <section className={styles.philosophySection} aria-labelledby="philosophy-title">
+        <img
+          className={styles.philosophyBackdrop}
+          src="/images/lp-hero-3d.webp"
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          fetchPriority="high"
+        />
+        <MotionDiv className={styles.philosophyStatement} {...fadeUp(0)}>
+          <h1 id="philosophy-title" className={styles.philosophyTitle}>
+            <span className={styles.phrase}>展覧会は</span>
+            <span className={styles.phrase}>終わっても、</span>
+            <br />
+            <span className={styles.phrase}>作品との</span>
+            <span className={styles.phrase}>出会いは</span>
+            <span className={styles.phrase}>残せる。</span>
+          </h1>
+          <p className={styles.philosophyLead}>
+            Artoirは、展覧会ごとに作品をまとめ、ひとつの記憶として公開できる場所です。
+            作品が映える静かな空間をつくり、過去の展示を未来の鑑賞へつなぎます。
+          </p>
 
-        <div className={styles.philosophyActions}>
-          <Link to={LANDING_LINKS.viewExhibitions} className={styles.philosophyPrimaryAction}>
-            展覧会を見る
-            <span aria-hidden="true">→</span>
-          </Link>
-          <Link
-            to={LANDING_LINKS.createExhibition}
-            state={{ from: LANDING_LINKS.createAfterLogin }}
-            className={styles.philosophyTextAction}
-          >
-            展示をつくる
-          </Link>
-        </div>
-      </MotionDiv>
+          <div className={styles.philosophyActions}>
+            <Link to={LANDING_LINKS.viewExhibitions} className="ui-btn ui-btn--primary">
+              展覧会を見る
+              <span aria-hidden="true">→</span>
+            </Link>
+            <Link
+              to={LANDING_LINKS.createExhibition}
+              state={{ from: LANDING_LINKS.createAfterLogin }}
+              className="ui-btn ui-btn--ghost"
+            >
+              展示をつくる
+            </Link>
+          </div>
+        </MotionDiv>
+      </section>
 
-      <motion.aside
-        className={styles.philosophyAside}
-        aria-label="Artoirが大切にすること"
-        initial={prefersReducedMotion ? false : { opacity: 0, x: 34 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={prefersReducedMotion ? { duration: 0.2 } : { delay: 0.34, duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <p className={styles.philosophyVertical}>作品を、展覧会の記憶とともに。</p>
+      <MotionSection className={styles.philosophyPrinciplesBand} aria-label="Artoirが大切にすること" {...fadeUp(0.2)}>
+        <p className={styles.philosophyKicker}>作品を、展覧会の記憶とともに。</p>
         <div className={styles.philosophyPrinciples}>
           {PRINCIPLES.map((principle) => (
             <article key={principle.title} className={styles.philosophyPrinciple}>
@@ -83,7 +81,7 @@ export default function PhilosophySection() {
             </article>
           ))}
         </div>
-      </motion.aside>
-    </MotionSection>
+      </MotionSection>
+    </>
   )
 }

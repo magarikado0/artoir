@@ -57,325 +57,116 @@
   background: #1F1B17;
 }
 
-.intro {
-  min-height: 100svh;
-  padding: 92px 20px 36px;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  align-items: center;
-  overflow: hidden;
-}
-
-.introInstruction {
-  min-height: 1.6em;
-  text-align: center;
-  color: #4A413A;
-  font-size: clamp(13px, 1.8vw, 16px);
-  letter-spacing: 0.05em;
-}
-
-.wall {
-  position: relative;
-  min-height: min(70svh, 720px);
-  display: grid;
-  place-items: center;
-  perspective: 1200px;
-}
-
-.wall::before {
-  content: '';
-  position: absolute;
-  inset: 2% 8% 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 50% 36%, rgba(255, 252, 241, 0.72), rgba(255, 250, 235, 0.18) 38%, transparent 72%);
-  filter: blur(2px);
-}
-
-.frameButton {
-  position: relative;
-  isolation: isolate;
-  width: min(64vw, 520px);
-  aspect-ratio: 4 / 3;
-  padding: clamp(19px, 3vw, 30px);
-  border: 1px solid rgba(15, 12, 9, 0.84);
-  border-radius: 3px;
-  background:
-    repeating-linear-gradient(94deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(4deg, rgba(8, 6, 4, 0.15) 0 1px, transparent 1px 11px),
-    linear-gradient(135deg, #171411 0%, #3a2a20 20%, #201914 46%, #57402d 70%, #17120f 100%);
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 240, 213, 0.09),
-    inset 0 0 0 7px rgba(7, 5, 4, 0.32),
-    0 2px 2px rgba(255,255,255,0.12);
-  cursor: grab;
-  touch-action: none;
-  transform-origin: 50% 48%;
-}
-
-.frameButton::before {
-  content: '';
-  position: absolute;
-  inset: 7px;
-  z-index: -1;
-  border: 1px solid rgba(205, 167, 101, 0.36);
-  box-shadow:
-    inset 0 0 0 2px rgba(0,0,0,0.38),
-    0 0 14px rgba(0,0,0,0.2);
-  pointer-events: none;
-}
-
-.frameButton::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    linear-gradient(115deg, rgba(255,255,255,0.16), transparent 14% 74%, rgba(255,255,255,0.04)),
-    linear-gradient(180deg, rgba(0,0,0,0.05), transparent 20%, rgba(0,0,0,0.24));
-  mix-blend-mode: screen;
-  opacity: 0.72;
-}
-
-.frameButton:active {
-  cursor: grabbing;
-}
-
-.frameButton:disabled {
-  cursor: default;
-}
-
-.frameInner {
-  position: relative;
-  z-index: 1;
-  display: block;
-  width: 100%;
-  height: 100%;
-  padding: clamp(8px, 1.25vw, 13px);
-  border: 1px solid #755831;
-  border-radius: 1px;
-  background:
-    linear-gradient(90deg, #8a682f, #d4b66d 12%, #8f6b30 49%, #e0c77e 72%, #795822),
-    #aa8546;
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 235, 175, 0.42),
-    inset 0 0 8px rgba(41, 27, 10, 0.58),
-    0 0 0 2px rgba(7, 5, 3, 0.58);
-}
-
-.frameMat {
-  position: relative;
-  display: grid;
-  width: 100%;
-  height: 100%;
-  padding: clamp(24px, 4.2vw, 48px);
-  place-items: center;
-  background:
-    repeating-linear-gradient(8deg, rgba(72, 58, 38, 0.018) 0 1px, transparent 1px 4px),
-    linear-gradient(145deg, #fbf8ee, #eee7d9 62%, #f8f3e8);
-  box-shadow:
-    inset 0 0 0 1px rgba(67, 52, 34, 0.28),
-    inset 8px 9px 14px rgba(78, 63, 42, 0.08),
-    0 0 0 1px rgba(255,255,255,0.62);
-}
-
-.frameMat::after {
-  content: '';
-  position: absolute;
-  inset: clamp(24px, 4.2vw, 48px);
-  pointer-events: none;
-  border: 1px solid rgba(55, 42, 28, 0.2);
-  box-shadow:
-    3px 3px 5px rgba(45, 34, 22, 0.18),
-    -1px -1px 0 rgba(255,255,255,0.9);
-}
-
-.frameArt {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  background:
-    radial-gradient(circle at 24% 28%, rgba(255,255,255,0.26), transparent 30%),
-    linear-gradient(140deg, rgba(190, 85, 61, 0.22), transparent 38%),
-    linear-gradient(35deg, rgba(31, 27, 23, 0.22), transparent 48%),
-    #ded4c6;
-  box-shadow:
-    inset 7px 8px 13px rgba(25, 19, 14, 0.28),
-    inset -2px -2px 4px rgba(255,255,255,0.52);
-}
-
-.frameArt::before {
-  content: '';
-  position: absolute;
-  z-index: 3;
-  inset: -25% -55%;
-  pointer-events: none;
-  background: linear-gradient(108deg, transparent 38%, rgba(255,255,255,0.04) 44%, rgba(255,255,255,0.34) 49%, rgba(255,255,255,0.06) 54%, transparent 60%);
-  transform: translateX(-34%);
-  animation: frameGlassGlint 4.8s cubic-bezier(.22,1,.36,1) 0.6s both;
-}
-
-.frameArt::after {
-  content: '';
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  pointer-events: none;
-  border: 1px solid rgba(255,255,255,0.38);
-  background: linear-gradient(145deg, rgba(255,255,255,0.1), transparent 32% 76%, rgba(29,22,16,0.08));
-}
-
-@keyframes frameGlassGlint {
-  0%, 18% { transform: translateX(-34%); opacity: 0; }
-  30% { opacity: 0.9; }
-  68%, 100% { transform: translateX(34%); opacity: 0; }
-}
-
-.frameLogo {
-  position: relative;
-  z-index: 4;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  padding: clamp(10px, 1.8vw, 18px) clamp(14px, 2.6vw, 28px);
-  border-radius: 8px;
-  background: rgba(251, 248, 243, 0.72);
-  box-shadow: 0 18px 42px rgba(31, 27, 23, 0.08);
-}
-
-.frameLogo :global(.ui-brand-lockup-mark) {
-  width: clamp(32px, 5vw, 54px);
-  height: clamp(32px, 5vw, 54px);
-}
-
-.frameLogo :global(.ui-brand-mark-lockup) {
-  width: clamp(28px, 4.4vw, 48px);
-  height: clamp(28px, 4.4vw, 48px);
-}
-
-.frameLogo :global(.ui-brand-lockup-word) {
-  font-size: clamp(30px, 5vw, 58px);
-}
-
 .mainContent {
   position: relative;
 }
 
 .philosophySection {
-  min-height: 100svh;
+  position: relative;
+  min-height: min(88svh, 860px);
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.78fr);
-  gap: clamp(48px, 8vw, 128px);
-  align-items: stretch;
-  padding: clamp(116px, 12vw, 172px) clamp(24px, 7vw, 104px) clamp(72px, 9vw, 132px);
-  border-bottom: 1px solid rgba(31, 27, 23, 0.11);
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  padding: clamp(112px, 10vw, 140px) clamp(24px, 7vw, 104px) clamp(72px, 8vw, 112px);
+}
+
+/* 3D 展示室のスクショ。右側に置き、左端と上下を紙色に溶かす */
+.philosophyBackdrop {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  z-index: -2;
+  width: 64%;
+  height: auto;
+  transform: translateY(-46%);
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.35) 22%, #000 42%),
+    linear-gradient(180deg, transparent 0%, #000 14%, #000 82%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.35) 22%, #000 42%),
+    linear-gradient(180deg, transparent 0%, #000 14%, #000 82%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.philosophySection::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, #F3EEE5 0%, rgba(243, 238, 229, 0) 20%, rgba(243, 238, 229, 0) 76%, #F3EEE5 100%);
 }
 
 .philosophyStatement {
-  align-self: center;
-  max-width: 900px;
+  max-width: 600px;
 }
 
 .philosophyTitle {
   margin: 0;
   font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
-  font-size: clamp(40px, 6.4vw, 94px);
+  font-size: clamp(34px, 3.9vw, 58px);
   font-weight: 400;
-  line-height: 1.28;
-  letter-spacing: -0.045em;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  word-break: keep-all;
+  line-break: strict;
+}
+
+.phrase {
+  display: inline-block;
 }
 
 .philosophyLead {
-  max-width: 38em;
-  margin: clamp(34px, 5vw, 64px) 0 0;
+  max-width: 33em;
+  margin: clamp(28px, 4vw, 48px) 0 0;
   color: #4A413A;
-  font-size: clamp(15px, 1.45vw, 19px);
-  line-height: 2.05;
-  letter-spacing: 0.045em;
+  font-size: clamp(15px, 1.25vw, 17px);
+  line-height: 2;
+  letter-spacing: 0.04em;
+  text-wrap: pretty;
 }
 
 .philosophyActions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 24px;
-  margin-top: clamp(38px, 5vw, 62px);
+  gap: 10px;
+  margin-top: clamp(32px, 4vw, 48px);
 }
 
-.philosophyPrimaryAction,
-.philosophyTextAction {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px;
-  color: inherit;
-  font-size: 13px;
-  text-decoration: none;
+.philosophyActions :global(.ui-btn) {
+  min-width: 160px;
 }
 
-.philosophyPrimaryAction {
-  gap: 18px;
-  min-width: 174px;
-  padding: 0 20px;
-  border: 1px solid #1F1B17;
-  background: #1F1B17;
-  color: #FBF8F3;
-  transition: gap 180ms ease, background-color 180ms ease;
-}
-
-.philosophyPrimaryAction:hover {
-  gap: 24px;
-  background: #4A413A;
-}
-
-.philosophyTextAction {
-  padding: 0 4px;
-  border-bottom: 1px solid rgba(31, 27, 23, 0.42);
-}
-
-.philosophyPrimaryAction:focus-visible,
-.philosophyTextAction:focus-visible {
-  outline: 2px solid #BE553D;
-  outline-offset: 4px;
-}
-
-.philosophyAside {
-  align-self: stretch;
+.philosophyPrinciplesBand {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: clamp(24px, 4vw, 48px);
-  padding-left: clamp(24px, 4vw, 52px);
-  border-left: 1px solid rgba(31, 27, 23, 0.16);
+  gap: 24px;
+  padding: clamp(40px, 5vw, 64px) clamp(24px, 7vw, 104px) clamp(56px, 7vw, 96px);
+  border-bottom: 1px solid rgba(31, 27, 23, 0.11);
 }
 
-.philosophyVertical {
-  align-self: start;
+.philosophyKicker {
   margin: 0;
-  padding-top: 4px;
   color: #8A8178;
   font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
   font-size: 13px;
   letter-spacing: 0.16em;
   line-height: 1.8;
-  writing-mode: vertical-rl;
 }
 
 .philosophyPrinciples {
-  align-self: end;
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 56px);
 }
 
 .philosophyPrinciple {
-  padding: clamp(22px, 3vw, 34px) 0;
-  border-top: 1px solid rgba(31, 27, 23, 0.14);
-}
-
-.philosophyPrinciple:last-child {
-  border-bottom: 1px solid rgba(31, 27, 23, 0.14);
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(31, 27, 23, 0.18);
 }
 
 .philosophyPrinciple h2,
@@ -385,42 +176,33 @@
 
 .philosophyPrinciple h2 {
   font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
-  font-size: clamp(18px, 1.8vw, 25px);
+  font-size: clamp(17px, 1.5vw, 21px);
   font-weight: 500;
+  line-height: 1.5;
+  word-break: keep-all;
 }
 
 .philosophyPrinciple p {
-  margin-top: 11px;
   color: #6A6058;
-  font-size: 12px;
-  line-height: 1.85;
-}
-
-.landingLoading {
-  min-height: 100svh;
-  display: grid;
-  place-items: center;
-  padding: 96px 24px 32px;
+  font-size: 13px;
+  line-height: 1.8;
 }
 
 .videoWindowSection {
-  min-height: calc(100svh + 56px);
-  padding: clamp(58px, 6vw, 78px) clamp(18px, 4vw, 52px) clamp(16px, 2vw, 28px);
+  padding: clamp(56px, 6vw, 88px) clamp(18px, 4vw, 52px) clamp(56px, 6vw, 88px);
 }
 
 .videoWindowGrid {
   width: min(100%, 1480px);
-  min-height: calc(100svh - 64px - clamp(58px, 6vw, 86px));
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: minmax(230px, 1fr);
   gap: clamp(12px, 1.5vw, 20px);
 }
 
 .videoWindow {
   position: relative;
-  min-height: 0;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border: 1px solid rgba(31, 27, 23, 0.13);
   border-radius: 8px;
@@ -461,15 +243,6 @@
   z-index: 1;
 }
 
-.staticImageWindow {
-  background: #fff;
-}
-
-.staticWindowImage {
-  object-fit: cover;
-  object-position: center;
-}
-
 .windowFallback {
   position: absolute;
   inset: 0;
@@ -489,12 +262,22 @@
   line-height: 1.15;
 }
 
+.videoWindow::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  z-index: 3;
+  background: linear-gradient(180deg, rgba(31, 27, 23, 0), rgba(31, 27, 23, 0.55));
+  pointer-events: none;
+}
+
 .windowOverlay {
   position: absolute;
   left: clamp(14px, 1.8vw, 26px);
   right: clamp(14px, 1.8vw, 26px);
   bottom: clamp(14px, 1.8vw, 24px);
-  z-index: 3;
+  z-index: 4;
   display: grid;
   gap: 5px;
   color: #FBF8F3;
@@ -523,11 +306,10 @@
 
 .finalCta {
   position: relative;
-  min-height: 100svh;
   display: grid;
   align-items: end;
   overflow: hidden;
-  padding: 112px clamp(22px, 8vw, 96px) clamp(44px, 6vw, 78px);
+  padding: clamp(64px, 8vw, 104px) clamp(22px, 8vw, 96px) clamp(56px, 7vw, 88px);
   color: #FBF8F3;
   background: #1F1B17;
 }
@@ -626,28 +408,62 @@
 }
 
 @media (max-width: 900px) {
+  /* タブレット以下: 3D 展示室を見出しの背景いっぱいに敷き、暗く落として白文字を重ねる */
   .philosophySection {
+    min-height: min(92svh, 760px);
+    align-items: end;
+    padding: 112px clamp(20px, 6vw, 56px) clamp(40px, 7vw, 64px);
+    color: #FBF8F3;
+  }
+
+  .philosophyBackdrop {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: none;
+    object-fit: cover;
+    object-position: 60% 50%;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .philosophySection::before {
+    background: linear-gradient(180deg, rgba(31, 27, 23, 0.12) 0%, rgba(31, 27, 23, 0.45) 38%, rgba(31, 27, 23, 0.86) 68%, #1F1B17 100%);
+  }
+
+  .philosophyTitle,
+  .philosophyLead {
+    text-shadow: 0 1px 18px rgba(31, 27, 23, 0.45);
+  }
+
+  .philosophyLead {
+    color: rgba(251, 248, 243, 0.86);
+  }
+
+  .philosophyActions :global(.ui-btn--primary) {
+    border-color: #FBF8F3;
+    background: #FBF8F3;
+    color: #1F1B17;
+  }
+
+  .philosophyActions :global(.ui-btn--ghost) {
+    border-color: rgba(251, 248, 243, 0.5);
+    background: rgba(251, 248, 243, 0.08);
+    color: #FBF8F3;
+  }
+
+  .philosophyPrinciples {
     grid-template-columns: 1fr;
+    gap: 0;
   }
 
-  .philosophyAside {
-    min-height: 380px;
-  }
-
-  .videoWindowSection {
-    padding-top: 86px;
-  }
-
-  .videoWindowGrid {
-    min-height: 0;
-    grid-template-columns: 1fr;
-    grid-auto-rows: auto;
+  .philosophyPrinciple {
+    padding: 18px 0;
   }
 
   .videoWindow {
     aspect-ratio: 4 / 5;
   }
-
 }
 
 @media (max-width: 620px) {
@@ -658,76 +474,111 @@
   }
 
   .headerNav {
-    gap: 4px;
+    gap: 6px;
   }
 
   .headerNav a {
     min-height: 36px;
-    padding: 0 8px;
+    padding: 0 10px;
   }
 
-  .intro {
-    padding-top: 78px;
+  /* 「展覧会を見る」はアイコンだけにする(読み上げ用の文字は残す) */
+  .headerNav a:first-child span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
+  /* スマホ: 横長の 3D 展示室を幅いっぱいに見せ、その下端に見出しを重ねて暗い地へつなぐ */
   .philosophySection {
-    gap: 54px;
-    padding: 104px 20px 72px;
+    --hero-image-height: 60vw;
+    min-height: 0;
+    align-items: start;
+    padding: calc(58px + var(--hero-image-height) - 72px) 20px 40px;
+    background: #1F1B17;
+  }
+
+  .philosophyBackdrop {
+    top: 58px;
+    bottom: auto;
+    height: var(--hero-image-height);
+    object-position: 50% 50%;
+  }
+
+  .philosophySection::before {
+    top: 58px;
+    bottom: auto;
+    height: calc(var(--hero-image-height) + 1px);
+    background: linear-gradient(180deg, rgba(31, 27, 23, 0) 30%, rgba(31, 27, 23, 0.62) 70%, #1F1B17 100%);
   }
 
   .philosophyTitle {
-    font-size: clamp(35px, 10.8vw, 52px);
-    line-height: 1.38;
+    font-size: clamp(27px, 7.6vw, 34px);
+    line-height: 1.6;
+    letter-spacing: 0.04em;
   }
 
   .philosophyLead {
-    line-height: 1.9;
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 1.95;
   }
 
   .philosophyActions {
-    align-items: stretch;
     flex-direction: column;
+    align-items: stretch;
+    margin-top: 28px;
   }
 
-  .philosophyTextAction {
-    align-self: center;
+  .philosophyPrinciplesBand {
+    padding: 40px 20px 48px;
   }
 
-  .philosophyAside {
-    min-height: 0;
-    grid-template-columns: 1fr;
-    padding: 0;
-    border-left: 0;
+  /* 動画は横スワイプのカルーセルにする(次のカードを少し覗かせる) */
+  .videoWindowSection {
+    padding: 40px 0 32px;
   }
 
-  .philosophyVertical {
-    writing-mode: horizontal-tb;
+  .videoWindowGrid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 4px 20px 16px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 20px;
+    scrollbar-width: none;
   }
 
-  .frameButton {
-    width: min(86vw, 420px);
+  .videoWindowGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .videoWindow {
+    flex: 0 0 80%;
+    scroll-snap-align: start;
+    box-shadow: 0 10px 28px rgba(31, 27, 23, 0.1);
   }
 
   .finalTitle {
-    font-size: clamp(30px, 10.4vw, 52px);
+    font-size: clamp(24px, 7vw, 36px);
+    word-break: keep-all;
   }
 
   .finalBrandLine :global(.ui-brand-lockup-word) {
-    font-size: clamp(44px, 14.8vw, 74px);
+    font-size: clamp(40px, 13vw, 64px);
   }
 
   .finalBrandLine :global(.ui-brand-lockup-mark) {
-    width: clamp(34px, 12vw, 60px);
-    height: clamp(34px, 12vw, 60px);
+    width: clamp(32px, 10.5vw, 52px);
+    height: clamp(32px, 10.5vw, 52px);
   }
 
   .finalBrandLine :global(.ui-brand-mark-lockup) {
-    width: clamp(29px, 10.4vw, 52px);
-    height: clamp(29px, 10.4vw, 52px);
-  }
-
-  .videoWindowSection {
-    padding-inline: 14px;
+    width: clamp(28px, 9vw, 46px);
+    height: clamp(28px, 9vw, 46px);
   }
 
   .finalActions {
@@ -737,12 +588,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .frameArt::before {
-    animation: none;
-    opacity: 0.14;
-    transform: translateX(0);
-  }
-
   .windowVideo {
     will-change: auto;
   }
