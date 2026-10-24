@@ -7,19 +7,11 @@ import styles from './landing.module.css'
 const MotionDiv = motion.div
 const MotionSection = motion.section
 
+// できることを具体的に。読点の代わりに改行で区切る
 const PRINCIPLES = [
-  {
-    title: 'みんなの展示を、ひとつの場所に。',
-    body: '団体・展覧会・作品をまとめて、すぐに公開。',
-  },
-  {
-    title: '会場の空気まで、オンラインへ。',
-    body: '作品を3D空間に並べて、歩くように鑑賞。',
-  },
-  {
-    title: 'ひとりの作品にも、ひとつの展示室を。',
-    body: '作家プロフィールから、作品をまとめて発信。',
-  },
+  ['団体ページに', '展覧会と作品をまとめて公開'],
+  ['作品を3D空間に並べて', '歩くように鑑賞'],
+  ['個人のプロフィールにも', '作品を掲載できる'],
 ]
 
 export default function PhilosophySection() {
@@ -51,8 +43,8 @@ export default function PhilosophySection() {
             <span className={styles.phrase}>残せる。</span>
           </h1>
           <p className={styles.philosophyLead}>
-            Artoirは、展覧会ごとに作品をまとめ、ひとつの記憶として公開できる場所です。
-            作品が映える静かな空間をつくり、過去の展示を未来の鑑賞へつなぎます。
+            Artoirは展覧会ごとに作品をまとめて公開できる場所です。
+            作品が映える静かな空間で過去の展示を未来の鑑賞へつなぎます。
           </p>
 
           <div className={styles.philosophyActions}>
@@ -72,12 +64,11 @@ export default function PhilosophySection() {
       </section>
 
       <MotionSection className={styles.philosophyPrinciplesBand} aria-label="Artoirが大切にすること" {...fadeUp(0.2)}>
-        <p className={styles.philosophyKicker}>作品を、展覧会の記憶とともに。</p>
+        <h2 className={styles.philosophyKicker}>作品を展覧会の記憶とともに。</h2>
         <div className={styles.philosophyPrinciples}>
-          {PRINCIPLES.map((principle) => (
-            <article key={principle.title} className={styles.philosophyPrinciple}>
-              <h2>{principle.title}</h2>
-              <p>{principle.body}</p>
+          {PRINCIPLES.map(([first, second]) => (
+            <article key={first} className={styles.philosophyPrinciple}>
+              <h3>{first}<br />{second}</h3>
             </article>
           ))}
         </div>

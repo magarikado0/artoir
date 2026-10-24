@@ -4,9 +4,9 @@ import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 import { DemoCursor } from './demo-cursor.ts'
 
-// 公開プロフィールを操作する様子を録画する(ログイン不要)
+// 公開ページ(既定: Artoir同好会「maruとサンカク」)で作品ビューアを回す様子を録画する(ログイン不要)
 // 先頭(ウォール表示・最上部)で始まり同じ状態で終わるので、LP でループ再生しても自然につながる
-const profileUrl = process.env.DEMO_PROFILE_URL || 'https://artoir.net/profile/callignao_'
+const pageUrl = process.env.DEMO_PAGE_URL || 'https://artoir.net/rtoir_net/exhibition/maru'
 const outputDir = resolve('artifacts/demo')
 
 const variants = [
@@ -123,7 +123,7 @@ try {
     const page = await context.newPage()
     page.setDefaultTimeout(20000)
     const recordingStart = Date.now()
-    await page.goto(profileUrl, { waitUntil: 'networkidle' })
+    await page.goto(pageUrl, { waitUntil: 'networkidle' })
     await page.addStyleTag({ content: 'html{scrollbar-width:none}::-webkit-scrollbar{display:none}' })
     await page.waitForFunction(() => [...document.images].every((img) => img.complete))
     const pointer = variant.isMobile ? new DemoFinger(page) : new DemoCursor(page)
@@ -137,10 +137,11 @@ try {
     await pointer.demoClick(main.getByRole('button', { name: 'グリッド', exact: true }))
     await page.waitForTimeout(700)
 
-    // 2. 少し下へ流して作品を開く
-    await smoothScrollTo(page, variant.isMobile ? 360 : 260, 900)
+    // 2. 作品一覧の先頭が見えるまで下げ、1 つ目の作品を開く
+    const artwork = main.getByRole('button', { name: /の詳細を見る$/ }).first()
+    const artworkTop = await artwork.evaluate((node) => node.getBoundingClientRect().top + window.scrollY)
+    await smoothScrollTo(page, Math.max(0, artworkTop - (variant.isMobile ? 140 : 180)), 800)
     await page.waitForTimeout(250)
-    const artwork = main.getByRole('button', { name: '火星人の詳細を見る' })
     await pointer.demoClick(artwork)
     await page.waitForTimeout(1200)
 

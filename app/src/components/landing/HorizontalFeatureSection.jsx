@@ -114,15 +114,51 @@ function VideoWindow({ item, prefersReducedMotion }) {
 
 export default function HorizontalFeatureSection() {
   const prefersReducedMotion = useReducedMotionPreference()
+  const gridRef = useRef(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  // スマホの横スワイプ時、いま見えているカードをドットに反映する
+  const handleScroll = () => {
+    const grid = gridRef.current
+    if (!grid) return
+    const cards = [...grid.children]
+    const left = grid.scrollLeft
+    let nearest = 0
+    cards.forEach((card, index) => {
+      if (Math.abs(card.offsetLeft - grid.offsetLeft - left) < Math.abs(cards[nearest].offsetLeft - grid.offsetLeft - left)) {
+        nearest = index
+      }
+    })
+    setActiveIndex(nearest)
+  }
+
+  const scrollToCard = (index) => {
+    const grid = gridRef.current
+    const card = grid?.children[index]
+    if (!card) return
+    grid.scrollTo({ left: card.offsetLeft - grid.offsetLeft - 20, behavior: prefersReducedMotion ? 'auto' : 'smooth' })
+  }
 
   return (
     <section
       className={styles.videoWindowSection}
       aria-label="Artoir の動画デモ"
     >
-      <div className={styles.videoWindowGrid}>
+      <div ref={gridRef} className={styles.videoWindowGrid} onScroll={handleScroll}>
         {WINDOWS.map((item) => (
           <VideoWindow key={item.key} item={item} prefersReducedMotion={prefersReducedMotion} />
+        ))}
+      </div>
+      <div className={styles.videoDots}>
+        {WINDOWS.map((item, index) => (
+          <button
+            key={item.key}
+            type="button"
+            className={index === activeIndex ? styles.videoDotActive : styles.videoDot}
+            aria-label={`${item.title}の動画を表示`}
+            aria-current={index === activeIndex}
+            onClick={() => scrollToCard(index)}
+          />
         ))}
       </div>
     </section>

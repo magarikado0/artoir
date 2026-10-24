@@ -10,7 +10,7 @@ import styles from './landing.module.css'
 
 export default function LandingPage() {
   useEffect(() => {
-    document.title = 'Artoir | あなたの作品を、展覧会に。'
+    document.title = 'Artoir | あなたの作品を展覧会に。'
     return () => { document.title = 'Artoir' }
   }, [])
 

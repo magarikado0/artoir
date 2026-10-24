@@ -63,7 +63,7 @@
 
 .philosophySection {
   position: relative;
-  min-height: min(88svh, 860px);
+  min-height: min(80svh, 760px);
   display: grid;
   align-items: center;
   overflow: hidden;
@@ -141,51 +141,44 @@
 
 .philosophyPrinciplesBand {
   display: grid;
-  gap: 24px;
-  padding: clamp(40px, 5vw, 64px) clamp(24px, 7vw, 104px) clamp(56px, 7vw, 96px);
-  border-bottom: 1px solid rgba(31, 27, 23, 0.11);
+  gap: clamp(28px, 3.5vw, 44px);
+  padding: clamp(56px, 7vw, 104px) clamp(24px, 7vw, 104px);
+  background: #E8E0D3;
 }
 
 .philosophyKicker {
   margin: 0;
-  color: #8A8178;
+  color: #1F1B17;
   font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
-  font-size: 13px;
-  letter-spacing: 0.16em;
-  line-height: 1.8;
+  font-size: clamp(22px, 2.4vw, 32px);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  word-break: keep-all;
 }
 
 .philosophyPrinciples {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(24px, 4vw, 56px);
+  gap: clamp(14px, 1.6vw, 24px);
 }
 
 .philosophyPrinciple {
   display: grid;
   align-content: start;
-  gap: 8px;
-  padding-top: 22px;
-  border-top: 1px solid rgba(31, 27, 23, 0.18);
+  gap: 12px;
+  padding: clamp(26px, 2.6vw, 38px);
+  border-radius: 8px;
+  background: #FBF8F3;
 }
 
-.philosophyPrinciple h2,
-.philosophyPrinciple p {
+.philosophyPrinciple h3 {
   margin: 0;
-}
-
-.philosophyPrinciple h2 {
   font-family: 'Shippori Mincho', 'Noto Serif JP', Georgia, serif;
-  font-size: clamp(17px, 1.5vw, 21px);
+  font-size: clamp(18px, 1.6vw, 24px);
   font-weight: 500;
-  line-height: 1.5;
+  line-height: 1.55;
   word-break: keep-all;
-}
-
-.philosophyPrinciple p {
-  color: #6A6058;
-  font-size: 13px;
-  line-height: 1.8;
 }
 
 .videoWindowSection {
@@ -198,6 +191,27 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(12px, 1.5vw, 20px);
+}
+
+.videoDots {
+  display: none;
+}
+
+.videoDot,
+.videoDotActive {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(31, 27, 23, 0.2);
+  cursor: pointer;
+  transition: width 200ms ease, background-color 200ms ease;
+}
+
+.videoDotActive {
+  width: 22px;
+  background: #1F1B17;
 }
 
 .videoWindow {
@@ -454,11 +468,7 @@
 
   .philosophyPrinciples {
     grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .philosophyPrinciple {
-    padding: 18px 0;
+    gap: 12px;
   }
 
   .videoWindow {
@@ -556,8 +566,15 @@
     display: none;
   }
 
+  .videoDots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 4px;
+  }
+
   .videoWindow {
-    flex: 0 0 80%;
+    flex: 0 0 66%;
     scroll-snap-align: start;
     box-shadow: 0 10px 28px rgba(31, 27, 23, 0.1);
   }
